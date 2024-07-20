@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Strangers Game - Personnages</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+    .title {
+      font-size: 48px;
+      margin-bottom: 20px;
+      padding-top: 50px;
+      text-shadow: 2px 2px 4px #000000;
+    }
+    .character-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin: 20px;
+    }
+    .character {
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 1.5s;
+    }
+    .character.unlocked {
+      background-color: rgba(255, 69, 0, 1); /* Couleur verte pour les personnages débloqués */
+    }
+    .character:hover {
+      transform: scale(1.05);
+    }
+    .stats {
+      display: none;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #000;
+      padding: 20px;
+      border-radius: 10px;
+      position: fixed;
+      bottom: -100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+    .stats.show {
+      display: block;
+      animation: slideUp 0.5s forwards;
+    }
+    .stats.hide {
+      animation: slideDown 0.5s forwards;
+    }
+    @keyframes slideUp {
+      from { bottom: -100%; }
+      to { bottom: 20px; }
+    }
+    @keyframes slideDown {
+      from { bottom: 20px; }
+      to { bottom: -100%; }
+    }
+    .back-button, .improvement-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .back-button:hover, .improvement-button:hover {
+      background-color: #45a049;
+    }
+    .improvement-button {
+      position: relative;
+      margin-left: 10px;
+    }
+    .clignotant {
+      animation: clignotement 1s infinite;
+    }
+    @keyframes clignotement {
+      0% { background-color: #FF0000; }
+      50% { background-color: #FF6347; }
+      100% { background-color: #FF0000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Personnages</div>
+  <div class="character-container">
+    <!-- Les personnages seront injectés ici via JavaScript -->
+  </div>
+  <div class="stats">
+    <!-- Les statistiques seront affichées ici -->
+  </div>
+  <a href="index.html" class="back-button">Retour</a>
+  <a href="amelioration.html" class="improvement-button" id="improvementButton">Amélioration</a>
+
+  <script>
+    // Données des personnages
+    const characters = [
+      { name: "Willy", pv: 11007, attaque: 458, defense: 86, spe: "Il fait 2 attaques !" },
+      { name: "Cocobi", pv: 10647, attaque: 430, defense: 120, spe: "Réduit les PV de l'adversaire a hauteur de 11% de ses pv maximums" },
+      { name: "Oiseau", pv: 9500, attaque: 530, defense: 73, spe: "Inflige des dégâts élevés et gagne 15 de défense pour 2 tours." },
+      { name: "Gros Nounours", pv: 12800, attaque: 420, defense: 73, spe: "Attaque avec 544 de dégâts supplémentaires et ignore la défense de l'adversaire." },
+      { name: "Baleine", pv: 10800, attaque: 420, defense: 112, spe: "Perd 25 de défense et gagne 1200 PV" },
+      { name: "Doudou", pv: 14000, attaque: 330, defense: 90, spe: "Régénère des PV (10% ou 20%)" },
+      { name: "Coeur", pv: 9900, attaque: 464, defense: 103, spe: "Inflige des dégâts et absorbe 20% des PV" },
+      { name: "Diva", pv: 10570, attaque: 456, defense: 98, spe: "Réduit l'attaque de l'adversaire de 25% pendant 3 tours" },
+      { name: "Poulpy", pv: 11200, attaque: 450, defense: 95, spe: "Inflige 200% de dégâts à son adversaire, en ignorant 50% de sa défense et en la réduisant de 20% pour les deux prochains tours." },
+      { name: "Colorina", pv: 9800, attaque: 410, defense: 85, spe: "Colorina attaque son adversaire avec 90% de sa puissance, et diminue de 15% la défense de l'adversaire pendant 2 tours" }
+    ];
+
+    const characterContainer = document.querySelector('.character-container');
+    const statsElement = document.querySelector('.stats');
+    const improvementButton = document.getElementById('improvementButton');
+
+    // Fonction pour afficher les statistiques mises à jour en fonction du niveau
+    const displayCharacterStats = (character) => {
+      const userData = getUserData();
+      const isUnlocked = userData[character.name] === 1;
+
+      if (isUnlocked) {
+        const level = userData[`${character.name}_Level`] || 1;
+        const currentPV = Math.round(character.pv * (1 + (level - 1) * 0.08));
+        const currentAttaque = Math.round(character.attaque * (1 + (level - 1) * 0.08));
+        const currentDefense = character.defense;
+
+        // Afficher les statistiques normalement
+        statsElement.innerHTML = `
+          <strong>${character.name}</strong><br>
+          Niveau: ${level}<br>
+          PV: ${currentPV}<br>
+          Attaque: ${currentAttaque}<br>
+          Défense: ${currentDefense}<br>
+          Spéciale: ${character.spe}
+        `;
+      } else {
+        // Afficher "(personnage non débloqué)" pour le niveau, et les autres statistiques normalement
+        statsElement.innerHTML = `
+          <strong>${character.name}</strong><br>
+          Niveau: (personnage non débloqué)<br>
+          PV: ${character.pv}<br>
+          Attaque: ${character.attaque}<br>
+          Défense: ${character.defense}<br>
+          Spéciale: ${character.spe}
+        `;
+      }
+
+      // Afficher la boîte de statistiques
+      statsElement.classList.remove('hide');
+      statsElement.classList.add('show');
+    };
+
+    // Générer les éléments des personnages
+    characters.forEach(character => {
+      const charElement = document.createElement('div');
+      charElement.className = 'character';
+      if (getUserData()[character.name] === 1) {
+        charElement.classList.add('unlocked'); // Ajouter la classe "unlocked" aux personnages débloqués
+      }
+      charElement.textContent = character.name;
+
+      charElement.addEventListener('click', () => {
+        displayCharacterStats(character); // Afficher les stats mises à jour lors du clic sur un personnage
+      });
+
+      characterContainer.appendChild(charElement);
+    });
+
+    // Fonction pour masquer la boîte de statistiques
+    const hideStats = () => {
+      statsElement.classList.remove('show');
+      statsElement.classList.add('hide');
+    };
+
+    // Ajouter l'événement de glissement vers le bas
+    let startY, currentBottom;
+    const maxHeight = 100; // La hauteur maximale à laquelle la boîte arrête de suivre le doigt
+
+    statsElement.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      currentBottom = parseInt(window.getComputedStyle(statsElement).bottom, 10);
+      statsElement.style.transition = 'none'; // Désactiver la transition pour le glissement
+    });
+
+    statsElement.addEventListener('touchmove', (e) => {
+      const touchY = e.touches[0].clientY;
+      const deltaY = startY - touchY;
+      if (deltaY < 0) { // Se déplacer seulement vers le bas
+        const newBottom = Math.min(currentBottom + deltaY, maxHeight);
+        statsElement.style.bottom = `${newBottom}px`;
+      }
+    });
+
+    statsElement.addEventListener('touchend', () => {
+      if (parseInt(statsElement.style.bottom, 10) < maxHeight / 2) {
+        statsElement.style.transition = 'bottom 0.3s ease-out'; // Réactiver la transition vers le bas
+        statsElement.style.bottom = '20px'; // Redéfinir la position initiale si suffisamment tirée vers le bas
+        hideStats();
+      } else {
+        statsElement.style.bottom = '20px'; // Redéfinir la position initiale si pas assez glissée
+      }
+    });
+
+    // Empêcher le défilement de la page lors d'un glissement sur la boîte de statistiques
+    statsElement.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Fonction pour obtenir les données utilisateur de localStorage
+    function getUserData() {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      return userData || {}; // Retourne un objet vide si les données ne sont pas définies
+    }
+
+    // Vérifier si les données utilisateur existent, sinon initialiser avec les valeurs par défaut
+    if (!localStorage.getItem('userData')) {
+      localStorage.setItem('userData', JSON.stringify({
+        nbr_perso: 2,
+        victoires: 0,
+        defaites: 0,
+        trophees: 0,
+        argent: 0,
+        VICTOIRE: false,
+        version: 1.02,
+        xp_du_jour: 0,
+        Willy: 1,
+        Willy_XP: 0,
+        Willy_Level: 1,
+        Willy_gain: false,
+        Cocobi: 1,
+        Cocobi_XP: 0,
+        Cocobi_Level: 1,
+        Oiseau: 0,
+        Oiseau_XP: 0,
+        Oiseau_Level: 1,
+        Gros_Nounours: 0,
+        Gros_Nounours_XP: 0,
+        Gros_Nounours_Level: 1,
+        Baleine: 0,
+        Baleine_XP: 0,
+        Baleine_Level: 1,
+        Doudou: 0,
+        Doudou_XP: 0,
+        Doudou_Level: 1,
+        Coeur: 0,
+        Coeur_XP: 0,
+        Coeur_Level: 1,
+        Diva: 0,
+        Diva_XP: 0,
+        Diva_Level: 1,
+        Poulpy: 0,
+        Poulpy_XP: 0,
+        Poulpy_Level: 1,
+        Colorina: 0,
+        Colorina_XP: 0,
+        Colorina_Level: 1,
+        Double_XP: 5,
+        Double_XP_acheté: 0,
+        pseudo: '', // Initialisation du pseudo vide
+        lastDoubleXPCheck: 0, // Initialisation de la date de dernière vérification de Double XP
+      }));
+    }
+
+    // Fonction pour sauvegarder les données utilisateur dans localStorage
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    // Fonction pour ajuster aléatoirement les personnages
+    function adjustCharacters(nbr_perso) {
+      const userData = getUserData();
+      const characters = [
+        'Willy', 'Cocobi', 'Oiseau', 'Gros_Nounours', 'Baleine', 'Doudou',
+        'Coeur', 'Diva', 'Poulpy', 'Colorina'
+      ];
+
+      // Filtrer les personnages déjà à 1
+      const charactersAlreadyOne = characters.filter(char => userData[char] === 1);
+
+      // Si le nombre de personnages à 1 est déjà égal à nbr_perso, pas besoin d'ajuster
+      if (charactersAlreadyOne.length === nbr_perso) {
+        return;
+      }
+
+      // Tant que le nombre de personnages à 1 n'est pas égal à nbr_perso, ajuster aléatoirement
+      while (charactersAlreadyOne.length < nbr_perso) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        const character = characters[randomIndex];
+
+        // Vérifier si le personnage sélectionné est déjà à 1, si oui, continuer la boucle
+        if (userData[character] === 1) {
+          continue;
+        }
+
+        // Mettre ce personnage à 1
+        userData[character] = 1;
+
+        // Mettre à jour nom_first à true si nécessaire
+        if (!userData[`${character}_first`]) {
+          userData[`${character}_first`] = true;
+        }
+
+        // Initialiser les statistiques de niveau et XP pour ce personnage
+        userData[`${character}_Level`] = 1;
+        userData[`${character}_XP`] = 0;
+
+        // Ajouter ce personnage à la liste des personnages à 1
+        charactersAlreadyOne.push(character);
+      }
+
+      // Sauvegarder les données mises à jour dans localStorage
+      saveUserData(userData);
+    }
+
+    // Appeler la fonction pour ajuster les personnages au chargement de la page ou au besoin
+    adjustCharacters(getUserData().nbr_perso);
+
+    // Vérifier si un personnage peut être amélioré et activer le clignotement si nécessaire
+    function checkForImprovement() {
+      const userData = getUserData();
+      let improvementPossible = false;
+
+      characters.forEach(character => {
+        const level = userData[`${character.name}_Level`] || 1;
+        const xp = userData[`${character.name}_XP`] || 0;
+        const requiredXP = level * 100; // Par exemple, l'XP nécessaire pour le prochain niveau
+
+        if (xp >= requiredXP) {
+          improvementPossible = true;
+        }
+      });
+
+      if (improvementPossible) {
+        improvementButton.classList.add('clignotant');
+      } else {
+        improvementButton.classList.remove('clignotant');
+      }
+    }
+
+    // Vérifier l'amélioration possible au chargement de la page
+    checkForImprovement();
+  </script>
+</body>
+</html>

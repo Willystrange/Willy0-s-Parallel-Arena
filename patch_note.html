@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patch Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #444;
+            cursor: pointer;
+            margin: 0;
+        }
+        .note-list {
+            margin: 20px 0;
+            padding: 0;
+            list-style-type: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .note-list.open {
+            max-height: 1000px;
+        }
+        .note-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 5px solid #007bff;
+        }
+        .back-button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="version-102">Note de mise à jour - Version 1.02</h1>
+        <ul id="notes-102" class="note-list">
+            <li><strong>Ajouts :</strong>
+                <ul>
+                    <li>Ajout d'une boutique d'objets avec deux offres : 
+                        <ul>
+                            <li><strong>Double XP x3</strong> : double l'XP pour les trois prochaines parties, coût : 30 points.</li>
+                            <li><strong>Double XP MAX</strong> : double l'XP pour les cinq prochaines parties, coût : 45 points.</li>
+                        </ul>
+                    </li>
+                    <li>Ajout de l'affichage des paliers de récompenses avec les trophées dans la section <strong>Mes stats</strong>, sous <strong>Nombre de trophées</strong>.</li>
+                    <li>Ajout d'un événement quotidien, <strong>Double XP</strong> : double la quantité d'XP gagnée pendant les cinq premières parties de la journée (après 9 heures).</li>
+                    <li>Ajout d'un système de points, gagnés à chaque partie. Ces points peuvent être utilisés pour améliorer un personnage ou acheter des objets dans la boutique.</li>
+                </ul>
+            </li>
+            <li><strong>Modifications :</strong>
+                <ul>
+                    <li>Refonte du système d'amélioration des personnages : il est désormais nécessaire d'aller dans <strong>Personnages</strong>, puis <strong>Amélioration</strong>. Le bouton <strong>Amélioration</strong> clignote en rouge lorsque suffisamment d'XP est disponible. Lorsqu'il y a assez de points et d'XP, un indicateur rouge apparaît à côté du personnage concerné.</li>
+                    <li>Les améliorations des personnages nécessitent désormais des points en plus de l'argent : 25 points supplémentaires par niveau par rapport à la version précédente.</li>
+                    <li>Refonte du système d’XP : l’XP est maintenant calculé en fonction du niveau et des PV restants du personnage si le joueur gagne la partie. Si le joueur perd, l'XP est déterminé uniquement par le niveau (l'XP diminue avec l'augmentation du niveau).</li>
+                </ul>
+            </li>
+            <li><strong>Corrections et améliorations :</strong>
+                <ul>
+                    <li>Corrections de bugs mineurs.</li>
+                    <li>Amélioration des performances du jeu.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h1 id="version-1018">Note de mise à jour - Version 1.018</h1>
+        <ul id="notes-1018" class="note-list">
+            <li>Ajout de la capacité spéciale de <strong>Colorina</strong>.</li>
+            <li>Affichage de la capacité spéciale de <strong>Colorina</strong> dans la catégorie <strong>Personnages</strong>.</li>
+            <li>Refonte complète du système de feedback.</li>
+            <li>Correction d’un bug affectant la capacité spéciale de <strong>Oiseau</strong>.</li>
+        </ul>
+
+        <h1 id="version-1015">Note de mise à jour - Version 1.015</h1>
+        <ul id="notes-1015" class="note-list">
+            <li>Correction d’un bug permettant d’obtenir de l’expérience illimitée en rechargeant la page.</li>
+            <li>Ajout des capacités spéciales de tous les personnages dans la section <strong>Personnages</strong>, à l'exception de <strong>Colorina</strong>.</li>
+        </ul>
+
+        <h1 id="version-101">Note de mise à jour - Version 1.01</h1>
+        <ul id="notes-101" class="note-list">
+            <li>Changement du nom du jeu : il s’appelle désormais <strong>Willy0’s Parallel Arena</strong>.</li>
+            <li>Ajout de plusieurs nouvelles capacités spéciales, incluant celles de <strong>Oiseau</strong>, <strong>Gros Nounours</strong>, <strong>Coeur</strong>, et <strong>Poulpy</strong>.</li>
+            <li>Affichage de la version du jeu dans <strong>Mes Stats</strong>, à côté du bouton de suppression.</li>
+            <li>Introduction d'une couleur distincte pour les personnages débloqués dans la section <strong>Personnages</strong>.</li>
+            <li>Affichage des statistiques de chaque personnage selon son niveau (les personnages non débloqués afficheront les statistiques du niveau 1).</li>
+            <li>Optimisation de l’affichage des statistiques des personnages dans la section <strong>Personnages</strong> (faites glisser vers le bas pour masquer les statistiques).</li>
+            <li>Implémentation d’un système de mise à niveau de la sauvegarde pour éviter toute perte de données.</li>
+            <li>En combat, lorsqu’un personnage utilise sa capacité spéciale, ses effets seront rappelés dans le chat (⚠️ fonction encore en développement).</li>
+            <li>Correction d’un bug où Willy attaquait deux fois, entraînant également deux attaques de l’adversaire.</li>
+            <li>Ajout d’une section <strong>Contacter le Développeur</strong> pour permettre aux utilisateurs d’envoyer des retours directs au développeur.</li>
+            <li>Inclusion de divers petits ajouts et optimisations.</li>
+            <li>Nous attendons vos retours avec impatience en espérant que le jeu vous plaise !</li>
+        </ul>
+        <a href="index.html" class="back-button">Retour</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const versions = document.querySelectorAll('h1');
+
+            versions.forEach(version => {
+                version.addEventListener('click', function() {
+                    const notesId = `notes-${this.id.split('-').pop()}`;
+                    const notes = document.getElementById(notesId);
+
+                    if (!notes) {
+                        console.error(`Élément avec l'id ${notesId} non trouvé.`);
+                        return;
+                    }
+
+                    if (notes.classList.contains('open')) {
+                        notes.classList.remove('open');
+                    } else {
+                        document.querySelectorAll('.note-list.open').forEach(openList => {
+                            openList.classList.remove('open');
+                        });
+                        notes.classList.add('open');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

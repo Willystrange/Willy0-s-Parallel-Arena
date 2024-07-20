@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading Page</title>
+<style>
+  body {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .loading-container {
+    text-align: center;
+    color: white;
+  }
+
+  .loader {
+    width: 50px;
+    height: 50px;
+    border: 2px solid white;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+</head>
+<body>
+<div class="loading-container">
+  <div class="loader"></div>
+  <div class="loading-text" id="loadingText">Mise à jour en cours...</div>
+</div>
+
+<script>
+  // Phrases de chargement à afficher
+  const loadingPhrases = [
+    "Mise à jour en cours...",
+    "Ne quittez pas...",
+    "Cela peut prendre plusieurs secondes...",
+    "Chargement en cours...",
+    "Veuillez patienter...",
+    "Nous préparons votre contenu...",
+    "Optimisation des données...",
+    "Chargement des ressources...",
+    "Analyse des informations...",
+  ];
+
+  const loadingTextElement = document.getElementById('loadingText');
+
+  function updateLoadingText() {
+    const randomIndex = Math.floor(Math.random() * loadingPhrases.length);
+    loadingTextElement.textContent = loadingPhrases[randomIndex];
+  }
+
+  // Mettre à jour le texte de chargement toutes les 3 secondes (3000 ms)
+  setInterval(updateLoadingText, 3000);
+
+  // Redirection vers index.html après 10 secondes (10000 ms)
+  setTimeout(function() {
+    window.location.href = "index.html";
+  }, 10000);
+
+  function getUserData() {
+    // Fonction pour récupérer les données utilisateur depuis le localStorage (à adapter selon votre besoin)
+    return JSON.parse(localStorage.getItem('userData')) || {};
+  }
+
+  function saveUserData(userData) {
+    // Fonction pour sauvegarder les données utilisateur dans le localStorage (à adapter selon votre besoin)
+    localStorage.setItem('userData', JSON.stringify(userData));
+  }
+
+  function mise_a_jour() {
+    const userData = getUserData();
+
+    // Définition des valeurs par défaut
+    const defaultUserData = {
+      nbr_perso: 2,
+      victoires: 0,
+      defaites: 0,
+      trophees: 0,
+      argent: 0,
+      VICTOIRE: false,
+      version: 1.02,
+      xp_du_jour: 0,
+      Willy: 1,
+      Willy_XP: 0,
+      Willy_Level: 1,
+      Cocobi: 1,
+      Cocobi_XP: 0,
+      Cocobi_Level: 1,
+      Oiseau: 0,
+      Oiseau_XP: 0,
+      Oiseau_Level: 1,
+      Gros_Nounours: 0,
+      Gros_Nounours_XP: 0,
+      Gros_Nounours_Level: 1,
+      Baleine: 0,
+      Baleine_XP: 0,
+      Baleine_Level: 1,
+      Doudou: 0,
+      Doudou_XP: 0,
+      Doudou_Level: 1,
+      Coeur: 0,
+      Coeur_XP: 0,
+      Coeur_Level: 1,
+      Diva: 0,
+      Diva_XP: 0,
+      Diva_Level: 1,
+      Poulpy: 0,
+      Poulpy_XP: 0,
+      Poulpy_Level: 1,
+      Colorina: 0,
+      Colorina_XP: 0,
+      Colorina_Level: 1,
+      Double_XP: 5,
+      Double_XP_acheté: 0,
+      lastDoubleXPCheck: 0,
+    };
+
+    // Vérification et initialisation des valeurs manquantes ou incorrectes
+    for (const key in defaultUserData) {
+      if (!userData.hasOwnProperty(key)) {
+        userData[key] = defaultUserData[key];
+      }
+    }
+
+    // Assure que la version dans userData est toujours la dernière version du jeu
+    userData.version = 1.02;
+
+    // Sauvegarder les données mises à jour dans localStorage
+    saveUserData(userData);
+  }
+
+  // Appel de la fonction mise_a_jour au chargement de la page
+  
+  mise_a_jour();
+</script>
+</body>
+</html>

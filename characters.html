@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Sélection de personnage</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background: url('background2.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      font-size: 36px;
+      margin-top: 50px;
+      text-shadow: 2px 2px 4px #000000;
+    }
+    .character-button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #ff4500;
+      color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s, transform 0.3s;
+      width: 150px;
+      height: 50px;
+      line-height: 30px; /* Ajuster pour centrer verticalement le texte */
+      position: relative;
+    }
+    .character-button:hover {
+      background-color: #e03e00;
+      transform: scale(1.05);
+    }
+    .character-button.disabled {
+      background-color: #a9a9a9;
+      cursor: not-allowed;
+    }
+    .character-button.shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+    .unlock-message {
+      color: #ff4500;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    .unlock-message.show {
+      display: block;
+      animation: slideIn 0.5s;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stats {
+      margin: 20px auto;
+      padding: 10px;
+      width: 200px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 1s ease-out, opacity 1s ease-out;
+    }
+    .stats.show {
+      opacity: 1;
+      max-height: 220px; /* Ajuster en fonction du contenu */
+    }
+    .choose-button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      background-color: #32cd32;
+      color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .choose-button:hover {
+      background-color: #28a428;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h2>Choisissez un personnage</h2>
+  <div id="character-list">
+    <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Récupérer les données utilisateur depuis localStorage
+      const userData = getUserData();
+      console.log(userData); // Utilisez userData pour afficher ou manipuler les détails spécifiques à l'utilisateur
+
+      // Liste des personnages avec leurs caractéristiques de base
+      const characters = [
+        { name: "Willy", pv: 11007, attaque: 458, defense: 86, spe: 0.5, argent: 0, pv_max: 11007, attaque_originale: 458, defense_originale: 86 },
+        { name: "Cocobi", pv: 10647, attaque: 430, defense: 120, spe: 0.5, argent: 0, pv_max: 10647, attaque_originale: 430, defense_originale: 120 },
+        { name: "Oiseau", pv: 9500, attaque: 530, defense: 73, spe: 0.5, argent: 0, pv_max: 9500, attaque_originale: 530, defense_originale: 73 },
+        { name: "Gros Nounours", pv: 12800, attaque: 420, defense: 73, spe: 0.5, argent: 0, pv_max: 12800, attaque_originale: 420, defense_originale: 73 },
+        { name: "Baleine", pv: 10800, attaque: 420, defense: 112, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 420, defense_originale: 112 },
+        { name: "Doudou", pv: 14000, attaque: 330, defense: 90, spe: 0, argent: 0, pv_max: 14000, attaque_originale: 330, defense_originale: 90 },
+        { name: "Coeur", pv: 9900, attaque: 464, defense: 103, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 464, defense_originale: 103 },
+        { name: "Diva", pv: 10570, attaque: 456, defense: 98, spe: 0.5, argent: 0, pv_max: 10570, attaque_originale: 456, defense_originale: 98 },
+        { name: "Poulpy", pv: 11200, attaque: 450, defense: 95, spe: 0.5, argent: 0, pv_max: 11200, attaque_originale: 450, defense_originale: 95 },
+        { name: "Colorina", pv: 9800, attaque: 410, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 410, defense_originale: 85 }
+      ];
+
+      const characterList = document.getElementById("character-list");
+      let playerCharacter = null;
+
+      // Pour chaque personnage, créer un bouton dynamiquement
+      characters.forEach((character, index) => {
+        const button = document.createElement("button");
+        button.classList.add("character-button");
+        button.textContent = character.name;
+
+        // Vérifier si le personnage est débloqué ou non
+        if (userData[character.name] === 1) {
+          button.style.backgroundColor = "#ff4500"; // Mettre en orange
+          button.onclick = function() {
+            playerCharacter = character;
+            displayStats(button, playerCharacter);
+            checkAndAskForUsername(); // Vérifier et demander le pseudo après avoir choisi un personnage
+          };
+        } else {
+          button.classList.add("disabled"); // Mettre en gris
+          button.onclick = function() {
+            button.classList.add("shake");
+            setTimeout(() => button.classList.remove("shake"), 500);
+
+            let unlockMessage = button.nextElementSibling;
+            if (!unlockMessage || !unlockMessage.classList.contains('unlock-message')) {
+              unlockMessage = document.createElement('div');
+              unlockMessage.classList.add('unlock-message');
+              unlockMessage.textContent = "Ce personnage n'est pas encore débloqué !";
+              button.parentNode.insertBefore(unlockMessage, button.nextSibling);
+            }
+            unlockMessage.classList.add('show');
+          };
+        }
+
+        characterList.appendChild(button);
+      });
+
+      // Fonction pour afficher les statistiques du personnage sélectionné
+      function displayStats(button, character) {
+        // Supprimer tout élément de statistiques existant
+        const existingStats = document.querySelectorAll('.stats');
+        existingStats.forEach(stats => stats.remove());
+
+        // Créer un nouvel élément de statistiques
+        const statsDiv = document.createElement('div');
+        statsDiv.classList.add('stats');
+
+        // Calculer les statistiques basées sur le niveau actuel du personnage
+        const levelKey = character.name + '_Level';
+        const currentLevel = userData[levelKey];
+        const increasedPV = Math.round(character.pv * (1 + 0.08 * (currentLevel - 1)));
+        const increasedAttaque = Math.round(character.attaque * (1 + 0.08 * (currentLevel - 1)));
+        const increasedDefense = Math.round(character.defense * (1 + 0.08 * (currentLevel - 1)));
+        const increasedattaque_originale = Math.round(character.attaque_originale * (1 + 0.08 * (currentLevel - 1)));
+        const increaseddefense_originale = Math.round(character.defense_originale * (1 + 0.08 * (currentLevel - 1)));
+
+        statsDiv.innerHTML = `
+          <h3>${character.name} (Niveau ${currentLevel})</h3>
+          <p>PV: ${increasedPV}</p>
+          <p>Attaque: ${increasedAttaque}</p>
+          <p>Défense: ${increasedDefense}</p>
+
+          <button class="choose-button" onclick="chooseCharacter('${character.name}', ${increasedPV}, ${increasedAttaque}, ${increasedDefense},
+${character.spe}, ${character.argent}, ${character.pv_max}, ${increasedattaque_originale}, ${increaseddefense_originale})">Choisir</button>`;
+
+        // Insérer l'élément de statistiques après le bouton cliqué
+        button.parentNode.insertBefore(statsDiv, button.nextSibling);
+
+        // Déclencher un reflow pour la transition CSS
+        statsDiv.offsetHeight; // Ceci est pour recharger la page et appliquer la transition
+
+        // Ajouter la classe show pour déclencher l'animation
+        statsDiv.classList.add('show');
+      }
+
+      // Vérifier et demander le pseudo si nécessaire
+      function checkAndAskForUsername() {
+        let pseudo = userData.pseudo;
+        if (!pseudo) {
+          pseudo = prompt("Veuillez entrer votre pseudo:");
+          if (pseudo) {
+            userData.pseudo = pseudo;
+            localStorage.setItem('userData', JSON.stringify(userData));
+          }
+        }
+      }
+      window.chooseCharacter = function(name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale) {
+        sessionStorage.setItem('playerCharacter', JSON.stringify({ name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale }));
+
+        // Sélection aléatoire d'un adversaire parmi les autres personnages
+        const remainingCharacters = characters.filter(character => character.name !== name);
+        const randomIndex = Math.floor(Math.random() * remainingCharacters.length);
+        const opponentCharacter = remainingCharacters[randomIndex];
+
+        sessionStorage.setItem('opponentCharacter', JSON.stringify(opponentCharacter));
+
+        // Redirection vers combat.html après avoir stocké les données du personnage et de l'adversaire
+        window.location.href = 'combat.html';
+      };
+
+      // Fonction pour récupérer les données utilisateur depuis localStorage
+      function getUserData() {
+        let userData = localStorage.getItem('userData');
+        if (!userData) {
+          // Initialiser les données utilisateur si elles n'existent pas encore
+          userData = {
+            nbr_perso: 2,
+            victoires: 0,
+            defaites: 0,
+            trophees: 0,
+            argent: 0,
+            VICTOIRE: false,
+            version: 1.018,
+            xp_du_jour: 0,
+            Willy: 1,
+            Willy_XP: 0,
+            Willy_Level: 1,
+            Willy_gain: false,
+            Cocobi: 1,
+            Cocobi_XP: 0,
+            Cocobi_Level: 1,
+            Oiseau: 0,
+            Oiseau_XP: 0,
+            Oiseau_Level: 1,
+            Gros_Nounours: 0,
+            Gros_Nounours_XP: 0,
+            Gros_Nounours_Level: 1,
+            Baleine: 0,
+            Baleine_XP: 0,
+            Baleine_Level: 1,
+            Doudou: 0,
+            Doudou_XP: 0,
+            Doudou_Level: 1,
+            Coeur: 0,
+            Coeur_XP: 0,
+            Coeur_Level: 1,
+            Diva: 0,
+            Diva_XP: 0,
+            Diva_Level: 1,
+            Poulpy: 0,
+            Poulpy_XP: 0,
+            Poulpy_Level: 1,
+            Colorina: 0,
+            Colorina_XP: 0,
+            Colorina_Level: 1,
+          };
+          localStorage.setItem('userData', JSON.stringify(userData));
+        } else {
+          userData = JSON.parse(userData);
+        }
+        return userData;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Données Utilisateur</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #f2f2f2;
+      color: #333333;
+      margin: 0;
+      padding: 20px;
+    }
+    .title {
+      font-size: 32px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .return-link {
+      font-size: 16px;
+      color: #1e90ff;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .data-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+    .data-item {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .delete-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #ff4c4c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .delete-button:hover {
+      background-color: #ff0000;
+    }
+    #version-container {
+      float: right;
+      margin-top: 10px;
+    }
+    #rewards-container {
+      margin-top: 20px;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+      font-size: 16px;
+      text-align: left;
+    }
+    #rewards-container.show {
+      max-height: 1000px; /* Une valeur suffisante pour afficher tout le contenu */
+      opacity: 1;
+    }
+    .achieved {
+      color: green;
+    }
+    .next {
+      font-weight: bold;
+    }
+    .clickable {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">
+    <a class="return-link" onclick="goBack()">&lt; retour</a>
+    <span>Mes Statistiques</span>
+  </div>
+  <div class="data-container">
+    <div class="data-item"><strong>Pseudo:</strong> <span id="pseudo"></span></div>
+    <div class="data-item">
+      <strong><span id="trophees-label" class="clickable" onclick="toggleRewards()">Nombre de trophées:</span></strong> 
+      <span id="trophees"></span>
+    </div>
+    <div id="rewards-container">
+      <!-- Les paliers de récompenses seront affichés ici -->
+    </div>
+    <div class="data-item"><strong>Victoires:</strong> <span id="victoires"></span></div>
+    <div class="data-item"><strong>Défaites:</strong> <span id="defaites"></span></div>
+    <button class="delete-button" onclick="supprimerDonnees()">Supprimer les données</button>
+    <div id="version-container"></div>
+  </div>
+
+  <script>
+    // Fonction pour obtenir les données utilisateur depuis localStorage
+    function getUserData() {
+      return JSON.parse(localStorage.getItem('userData'));
+    }
+
+    // Fonction pour sauvegarder les données utilisateur dans localStorage
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    // Fonction pour afficher les données utilisateur dans la page
+    function afficherDonneesUtilisateur() {
+      let userData = getUserData();
+      document.getElementById('pseudo').textContent = userData.pseudo;
+      document.getElementById('trophees').textContent = userData.trophees;
+      document.getElementById('victoires').textContent = userData.victoires;
+      document.getElementById('defaites').textContent = userData.defaites;
+    }
+
+    // Fonction pour afficher la version de sauvegarde
+    function afficherVersion() {
+      const userData = getUserData();
+      if (userData.version) {
+        const versionContainer = document.getElementById('version-container');
+        const versionLink = document.createElement('a');
+        versionLink.textContent = `v.${userData.version}`;
+        versionLink.href = 'patch_note.html'; // Lien vers la page des patch notes
+        versionContainer.appendChild(versionLink);
+      }
+    }
+
+    // Fonction pour revenir en arrière dans l'historique du navigateur
+    function goBack() {
+      window.history.back();
+    }
+
+    // Fonction pour supprimer les données utilisateur
+    function supprimerDonnees() {
+      if (confirm("Voulez-vous vraiment supprimer vos données ?")) {
+        if (confirm("Êtes-vous sûr de vouloir supprimer définitivement vos données ?")) {
+          localStorage.removeItem('userData');
+          alert("Vos données ont été supprimées.");
+          // Recharger la page pour mettre à jour l'affichage
+          location.reload();
+        }
+      }
+    }
+
+    // Fonction pour afficher ou cacher les paliers de récompenses
+    function toggleRewards() {
+      const rewardsContainer = document.getElementById('rewards-container');
+      const isDisplayed = rewardsContainer.classList.contains('show');
+
+      if (isDisplayed) {
+        // Si les paliers sont déjà affichés, les cacher avec animation
+        rewardsContainer.classList.remove('show');
+      } else {
+        // Si les paliers sont cachés, les afficher avec animation
+        const trophées = parseInt(document.getElementById('trophees').textContent, 10);
+        const paliers = [50, 150, 250, 400, 550, 750, 1000, 1300];
+        let rewardsHtml = '<strong>Paliers de récompenses:</strong><ul>';
+
+        let nextPalier = null;
+
+        paliers.forEach(palier => {
+          if (trophées >= palier) {
+            rewardsHtml += `<li class="achieved">À ${palier} trophées : 1 nouveau personnage</li>`;
+          } else {
+            if (nextPalier === null) nextPalier = palier;
+            rewardsHtml += `<li class="next">À ${palier} trophées : 1 nouveau personnage</li>`;
+          }
+        });
+
+        rewardsHtml += '</ul>';
+        rewardsContainer.innerHTML = rewardsHtml;
+        rewardsContainer.classList.add('show');
+
+        // Faire défiler vers le prochain palier
+        if (nextPalier !== null) {
+          const nextPalierElement = Array.from(rewardsContainer.querySelectorAll('li')).find(li => li.textContent.includes(nextPalier));
+          if (nextPalierElement) {
+            nextPalierElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+    }
+
+    // Appeler la fonction pour afficher les données utilisateur lorsque la page est chargée
+    document.addEventListener('DOMContentLoaded', function() {
+      afficherDonneesUtilisateur();
+      afficherVersion();
+    });
+  </script>
+</body>
+</html>

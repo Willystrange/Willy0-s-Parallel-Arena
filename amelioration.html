@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Amélioration des Personnages</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .title {
+      font-size: 28px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .return-link {
+      font-size: 16px;
+      color: #1e90ff;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .data-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+    .character {
+      position: relative;
+      cursor: pointer;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: #f0f8ff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .character-info {
+      display: none;
+      font-size: 16px;
+      color: #555;
+    }
+    .level-up-indicator {
+      position: absolute;
+      left: -15px;
+      top: 10px;
+      width: 12px;
+      height: 12px;
+      background-color: red;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+    .level-up-button {
+      display: block;
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: #1e90ff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .level-up-button:hover {
+      background-color: #1c86ee;
+    }
+    .cost-info {
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">
+    <a class="return-link" onclick="goBack()">&lt; retour</a>
+    <span>Amélioration des Personnages</span>
+  </div>
+  <div class="data-container">
+    <div id="characters-unlocked"></div>
+  </div>
+
+  <script>
+    // Fonction pour obtenir les données utilisateur depuis localStorage
+    function getUserData() {
+      return JSON.parse(localStorage.getItem('userData')) || { points: 0 };
+    }
+
+    // Fonction pour sauvegarder les données utilisateur dans localStorage
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    // Fonction pour calculer l'XP nécessaire pour passer au niveau suivant
+    function xpPourNiveauSuivant(level) {
+      return level * 100;
+    }
+
+    // Fonction pour calculer le coût en points pour monter de niveau
+    function coutPourNiveauSuivant(level) {
+      return level * 25; // Par exemple, chaque niveau coûte 25 points de plus que le précédent
+    }
+
+    // Fonction pour afficher les données utilisateur dans la page
+    function afficherDonneesUtilisateur() {
+      let userData = getUserData();
+      let points = userData.argent || 0;
+
+      const characters = [
+        'Willy', 'Cocobi', 'Oiseau', 'Gros_Nounours', 'Baleine',
+        'Doudou', 'Coeur', 'Diva', 'Poulpy', 'Colorina'
+      ];
+
+      let charactersUnlocked = '';
+
+      characters.forEach(character => {
+        if (userData[character] === 1) {
+          const level = userData[character + '_Level'];
+          const xp = userData[character + '_XP'];
+          const xpNeeded = xpPourNiveauSuivant(level);
+          const cost = coutPourNiveauSuivant(level);
+          const canLevelUp = xp >= xpNeeded && points >= cost;
+
+          charactersUnlocked += `<div class="character" onclick="toggleCharacterInfo('${character}')">
+                                    ${canLevelUp ? '<div class="level-up-indicator"></div>' : ''}
+                                    <strong>${character}</strong>
+                                    <div id="${character}-info" class="character-info">
+                                      Niveau: ${level}<br>
+                                      Points d'XP: ${xp} / ${xpNeeded}<br>
+                                      Points disponibles: ${points}<br>
+                                      <div class="cost-info">Coût pour monter au niveau suivant: ${cost} points</div>
+                                      ${canLevelUp ? `<button class="level-up-button" onclick="levelUp('${character}'); event.stopPropagation();">Monter de niveau</button>` : ''}
+                                    </div>
+                                  </div>`;
+        }
+      });
+
+      document.getElementById('characters-unlocked').innerHTML = charactersUnlocked;
+    }
+
+    // Fonction pour afficher ou masquer les informations d'un personnage
+    function toggleCharacterInfo(character) {
+      const infoDiv = document.getElementById(character + '-info');
+      if (infoDiv.style.display === 'none' || infoDiv.style.display === '') {
+        infoDiv.style.display = 'block';
+      } else {
+        infoDiv.style.display = 'none';
+      }
+    }
+
+    // Fonction pour monter de niveau
+    function levelUp(character) {
+      let userData = getUserData();
+      const level = userData[character + '_Level'];
+      const xp = userData[character + '_XP'];
+      const xpNeeded = xpPourNiveauSuivant(level);
+      const cost = coutPourNiveauSuivant(level);
+      const points = userData.argent || 0;
+
+      if (xp >= xpNeeded && points >= cost) {
+        userData[character + '_Level'] += 1;
+        userData[character + '_XP'] -= xpNeeded;
+        userData.argent-= cost;
+        saveUserData(userData);
+        afficherDonneesUtilisateur(); // Mettre à jour l'affichage
+      }
+    }
+
+    // Fonction pour revenir en arrière dans l'historique du navigateur
+    function goBack() {
+      window.history.back();
+    }
+
+    // Appeler la fonction pour afficher les données utilisateur lorsque la page est chargée
+    document.addEventListener('DOMContentLoaded', function() {
+      afficherDonneesUtilisateur();
+    });
+
+  </script>
+</body>
+</html>

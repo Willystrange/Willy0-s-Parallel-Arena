@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Combat</title>
+   
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0px;
+      width: 100%;
+      height: 100px;
+      background-color: #d1d1d6;
+      z-index: 1000;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 1000;
+      width: 100%;
+      padding: 10px;
+    }
+    .header-info {
+      padding-left: 10px; /* Ajuster la marge pour déplacer les informations du joueur */
+    }
+    #opponent-header {
+      padding-right: 30px; /* Ajuster la marge pour déplacer les informations de l'adversaire */
+    }
+    .combat-container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10px;
+    }
+    .combat-actions {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      background-color: white;
+      padding: 10px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      user-scalable: no;
+    }
+    .combat-actions button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #ff4500;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.3s, transform 0.3s;
+      transform: scale(1.0);
+      touch-action: manipulation; /* Empêche le zoom sur double tap */
+    }
+    .combat-actions button:hover {
+      background-color: #e03e00;
+      transform: scale(1.0);
+      user-scalable: no;
+    }
+    #combat-log {
+      margin-top: 5px;
+      padding: 5px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      max-width: 340px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      height: 300px; /* Augmenter la hauteur */
+      overflow-y: scroll;
+    }
+    .header-info h3, .header-info p {
+      margin: 0;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar"></div>
+  <div class="header-container">
+    <div id="player-header" class="header-info">
+      <h3 id="player-name"></h3>
+      <p id="player-pv"></p>
+      <p id="player-money"></p>
+      <p id="player-attack"></p>
+      <p id="player-defense"></p>
+
+    </div>
+    <div id="opponent-header" class="header-info">
+      <h3 id="opponent-name"></h3>
+      <p id="opponent-pv"></p>
+      <p id="opponent-attack"></p>
+      <p id="opponent-defense"></p>
+    </div>
+  </div>
+
+  <div class="combat-container">
+    <div id="player-info" class="character-info">
+      <!-- Contenu du joueur -->
+    </div>
+
+    <div id="opponent-info" class="character-info">
+      <!-- Contenu de l'adversaire -->
+    </div>
+    <div id="combat-log"></div>
+  </div>
+
+  <div class="combat-actions">
+    <button id="attack-button" onclick="attack()">Attaquer</button>
+    <button id="special-button" onclick="useSpecial()">Capacité spéciale</button>
+  </div>
+
+  <script src="localStorage.js"></script>
+
+  <script>
+    // Récupérer les statistiques du personnage choisi depuis sessionStorage
+    let playerCharacter = sessionStorage.getItem('playerCharacter');
+    if (playerCharacter) {
+      playerCharacter = JSON.parse(playerCharacter);
+
+      // Ajouter les nouvelles variables et initialisations
+      playerCharacter.perte_att = 0;
+      playerCharacter.Oiseaudefense = 0;
+      playerCharacter.perte_defense_colorina = 0;
+
+
+
+    } else {
+      // Rediriger vers index.html si les statistiques du personnage ne sont pas trouvées
+      window.location.href = 'index.html';
+    }
+
+    // Récupérer les statistiques de l'adversaire depuis sessionStorage
+    let opponentCharacter = sessionStorage.getItem('opponentCharacter');
+    if (opponentCharacter) {
+      opponentCharacter = JSON.parse(opponentCharacter);
+      
+      opponentCharacter.perte_att = 0;
+      opponentCharacter.Oiseaudefense = 0;
+      opponentCharacter.perte_defense_colorina = 0;
+    } else {
+      // Rediriger vers index.html si les statistiques de l'adversaire ne sont pas trouvées
+      window.location.href = 'index.html';
+    }
+    // Empêcher le retour en arrière vers la page précédente
+    history.replaceState(null, null, window.location.href);
+
+    // Initialiser spe (capacité spéciale)
+    let spe = playerCharacter.spe;
+
+    // Mettre à jour l'interface utilisateur avec les statistiques du joueur
+    document.getElementById('player-name').textContent = `${playerCharacter.name}`;
+    document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
+    document.getElementById('player-money').textContent = `Argent: ${playerCharacter.argent}`;
+
+    // Mettre à jour l'interface utilisateur avec les statistiques de l'adversaire
+    document.getElementById('opponent-name').textContent = `${opponentCharacter.name}`;
+    document.getElementById('opponent-pv').textContent = `PV: ${opponentCharacter.pv}`;
+
+    // Récupérer la capacité spéciale du joueur depuis sessionStorage
+    let specialAbility = spe;
+
+    // Mettre à jour le bouton de capacité spéciale
+    updateSpecialButton();
+
+    function updateSpecialButton() {
+      const specialButton = document.getElementById('special-button');
+
+      if (specialAbility >= 1) {
+        specialButton.style.backgroundColor = 'red';
+        specialButton.textContent = 'Capacité spéciale';        
+      } else {
+        specialButton.style.backgroundColor = 'blue';
+        specialButton.textContent = `${specialAbility.toFixed(1)} / 1`;
+
+      }
+    }
+    function adversairepasser_tour() {
+      if (opponentCharacter.perte_att > 0) {
+        opponentCharacter.perte_att -= 1;
+      } else if (opponentCharacter.perte_att <= 0) {
+        opponentCharacter.attaque = opponentCharacter.attaque_originale;
+        console.log(`${opponentCharacter.name} a récupéré son attaque originale.`);
+        }
+      if (opponentCharacter.Oiseaudefense > 0) {
+        opponentCharacter.Oiseaudefense -= 1;
+      } else if (opponentCharacter.Oiseaudefense <= 0) {
+        opponentCharacter.defense = opponentCharacter.defense - 15;
+        console.log(`${opponentCharacter.name} a récupéré sa défense originale.`);
+      }
+      if (opponentCharacter.perte_defense_colorina > 0) {
+        opponentCharacter.perte_defense_colorina -= 1;
+      } else if (opponentCharacter.perte_defense_colorina <= 0) {
+        opponentCharacter.defense = opponentCharacter.defense_originale;
+        console.log(`${opponentCharacter.name} a récupéré sa défense originale.`);
+      }
+    }
+
+    function joueurpasser_tour() {
+      if (playerCharacter.perte_att > 0) {
+        playerCharacter.perte_att -= 1;
+      } else if (playerCharacter.perte_att <= 0) {
+          playerCharacter.attaque = playerCharacter.attaque_originale;
+        console.log(`${playerCharacter.name} a récupéré son attaque originale.`);
+      }
+      if (playerCharacter.Oiseaudefense > 0) {
+        playerCharacter.Oiseaudefense -= 1;
+      } else if (playerCharacter.Oiseaudefense <= 0) {
+        playerCharacter.defense = playerCharacter.defense - 15;
+        console.log(`${playerCharacter.name} a récupéré sa défense originale.`);
+      }
+      if (playerCharacter.perte_defense_colorina > 0) {
+        playerCharacter.perte_defense_colorina -= 1;
+      } else if (playerCharacter.perte_defense_colorina <= 0) {
+        playerCharacter.defense = playerCharacter.defense_originale;
+        console.log(`${playerCharacter.name} a récupéré sa défense originale.`);
+      }     
+    }
+      
+    
+        
+      
+      
+
+    function useSpecial() {
+      if (specialAbility >= 1) {
+        // Décrémente la quantité de la capacité spéciale utilisée
+        playerCharacter.spe -= 1;
+        specialAbility -= 1;
+
+        // Affiche l'effet de la capacité spéciale du joueur
+        let specialLogMessage = "";
+
+        switch (playerCharacter.name) {
+          case "Diva":
+            opponentCharacter.attaque *= 0.75;
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! L'attaque de ${opponentCharacter.name} est réduite à ${opponentCharacter.attaque.toFixed(2)} pour les 3 prochains tours.`;
+            opponentCharacter.perte_att += 3;
+            break;
+          case "Willy":
+            playerCharacter.spe -= 0.25;
+            specialAbility -= 0.25;
+            const opponentDefenseModifiee = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+            const opponentDefensee = Math.round(opponentCharacter.defense * opponentDefenseModifiee);
+            opponentCharacter.pv += opponentDefensee - playerCharacter.attaque;
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il fait 2 attaques !\n\n ${playerCharacter.name} attaque ${opponentCharacter.name} et inflige ${playerCharacter.attaque - opponentDefensee} points de dégâts.`;
+            attack(); // Deuxième attaque
+            break;
+          case "Baleine":
+            if (playerCharacter.defense < 29) {
+              specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
+              attack(); // Attaque normale
+            } else {
+              specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 25 de défense et gagne 1200 PV !";
+              playerCharacter.defense -= 25;
+              playerCharacter.pv += 1200;
+              attack(); // Attaque normale après la capacité spéciale
+            }
+            break;
+          case "Doudou":
+            let regeneratedAmount;
+            if (Math.random() < 0.1) {
+              regeneratedAmount = Math.ceil(playerCharacter.pv * 0.20);
+              specialLogMessage = `${playerCharacter.name} régénère ${regeneratedAmount} PV (20%).`;
+            } else {
+              regeneratedAmount = Math.ceil(playerCharacter.pv * 0.1);
+              specialLogMessage = `${playerCharacter.name} régénère ${regeneratedAmount} PV (10%).`;
+            }
+            playerCharacter.pv += regeneratedAmount;
+            if (playerCharacter.pv > playerCharacter.pv_max) {
+              playerCharacter.pv = playerCharacter.pv_max;
+            }
+            attack();
+            break;
+          case "Cocobi":
+            // Calculer la réduction des PV de l'adversaire
+            const reductionAmount = Math.ceil(opponentCharacter.pv_max * 0.11);
+            opponentCharacter.pv -= reductionAmount;
+
+            // Vérifier si les PV de l'adversaire ne sont pas inférieurs à zéro
+            if (opponentCharacter.pv < 0) {
+              opponentCharacter.pv = 0;
+            }
+
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! ${opponentCharacter.name} perd ${reductionAmount} PV.`;
+            break;
+          case "Coeur":
+            const specialDamage = Math.round(playerCharacter.attaque * 1.5);
+            const absorbedHealth = Math.round(specialDamage * 0.2); // 20% des dégâts infligés
+            opponentCharacter.pv -= specialDamage;
+            playerCharacter.pv += absorbedHealth;
+
+            // Assurez-vous que les PV de l'adversaire et du joueur ne dépassent pas les limites
+            if (opponentCharacter.pv < 0) opponentCharacter.pv = 0;
+            if (playerCharacter.pv > playerCharacter.pv_max) playerCharacter.pv = playerCharacter.pv_max;
+
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${specialDamage} points de dégâts et absorbe ${absorbedHealth} PV.`;
+            break;
+          case "Gros Nounours":
+            const Damage = 544 + playerCharacter.attaque;
+            opponentCharacter.pv -= Damage;
+
+            // Ignorer le bouclier de l'adversaire
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${Damage} points de dégâts à ${opponentCharacter.name}, ignorant le bouclier.`;
+            break;
+          case "Poulpy":
+            // Infliger des dégâts à l'adversaire
+            const poulpyDamage = Math.round(playerCharacter.attaque * 2);
+            // Ignorer 50% de la défense de l'adversaire
+            const effectiveDefense = opponentCharacter.defense * 0.5;
+            const netDamage = Math.max(0, poulpyDamage - effectiveDefense);
+            opponentCharacter.pv -= netDamage;
+            // Réduire la défense de l'adversaire pour les deux prochains tours
+            opponentCharacter.defense *= 0.8;
+            opponentCharacter.perte_att += 2;
+
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${netDamage} points de dégâts à ${opponentCharacter.name}, ignore 50% de sa défense et réduit sa défense de 20% pour les 2 prochains tours.`;
+            break;
+          case "Oiseau":
+            const DamageOiseau = playerCharacter.attaque * 2.5;
+            playerCharacter.defense += 15; // Augmentation de la défense
+            specialLogMessage = `Oiseau utilise sa capacité spéciale ! Il inflige ${DamageOiseau} points de dégâts et gagne 15 de défense pour les 2 prochains tours.`;
+            const opponentDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+            const opponentDefense = Math.round(opponentCharacter.defense * opponentDefenseModifier);
+            opponentCharacter.pv += opponentDefense - DamageOiseau;
+
+            playerCharacter.Oiseaudefense += 2; // Durée de l'effet de la capacité spéciale
+            break;
+          case "Colorina":
+            // Infliger 90% de l'attaque en dégâts
+            const colorinaDamage = Math.round(playerCharacter.attaque * 0.9);
+            opponentCharacter.pv -= colorinaDamage;
+
+            // Réduire la défense de l'adversaire de 15% pour les 2 prochains tours
+            opponentCharacter.defense *= 0.85;
+            opponentCharacter.perte_defense_colorina += 2;
+
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${colorinaDamage} points de dégâts et réduit la défense de ${opponentCharacter.name} de 15% pour les 2 prochains tours.`;
+            break;
+          default:
+            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
+            // Ajouter ici le traitement pour d'autres personnages si nécessaire
+        }
+
+        // Met à jour l'affichage des PV du joueur
+        document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
+
+        // Met à jour le bouton après l'utilisation
+        updateSpecialButton();
+
+        // Ajoute une entrée dans le journal de combat
+        const combatLog = document.getElementById('combat-log');
+        const specialLogEntry = document.createElement('p');
+        specialLogEntry.textContent = specialLogMessage;
+        combatLog.appendChild(specialLogEntry);
+
+        scrollToBottom();
+      }
+    }
+
+    function opponentTurn() {
+      // Décider aléatoirement si l'adversaire attaque ou utilise sa capacité spéciale
+      const useSpecialMove = Math.random() < 0.5 && opponentCharacter.spe >= 1;
+
+      if (useSpecialMove) {
+        // Utiliser la capacité spéciale de l'adversaire
+        if (opponentCharacter.spe >= 1) {
+            opponentUseSpecial();
+        } else {
+            opponentAttack()
+        }
+       
+      } else {
+        // Attaquer
+        opponentAttack();
+      }
+    }
+
+    function opponentUseSpecial() {
+      opponentCharacter.spe -= 1;
+
+      // Affiche l'effet de la capacité spéciale de l'adversaire
+      let specialLogMessage = "";
+
+      switch (opponentCharacter.name) {
+        case "Diva":
+          playerCharacter.attaque *= 0.75;
+          specialLogMessage = `Diva adverse utilise sa capacité spéciale ! Votre attaque est réduite à ${playerCharacter.attaque} pour les 3 prochains tours.`;
+          playerCharacter.perte_att += 3;
+          break;
+        case "Willy":
+          opponentCharacter.spe -= 0.25;
+          
+          const playerDefenseModifiee = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+          const playerDefensee = Math.round(playerCharacter.defense * playerDefenseModifiee);
+          playerCharacter.pv += playerDefensee - opponentCharacter.attaque;
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il fait 2 attaques !\n\n ${opponentCharacter.name} attaque ${playerCharacter.name} et inflige ${opponentCharacter.attaque - playerDefensee} points de dégâts.`;
+          opponentAttack(); // Deuxième attaque
+          break;
+        case "Baleine":
+          if (opponentCharacter.defense < 29) {
+            specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
+            attack(); // Attaque normale
+          } else {
+            specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 25 de défense et gagne 1200 PV !";
+            opponentCharacter.defense -= 25;
+            opponentCharacter.pv += 1200;
+            attack(); // Attaque normale après la capacité spéciale
+          }
+          break;
+        case "Doudou":
+          let regeneratedAmount;
+          if (Math.random() < 0.1) {
+            regeneratedAmount = Math.ceil(opponentCharacter.pv * 0.25);
+            specialLogMessage = `Doudou adverse régénère ${regeneratedAmount} PV (25%).`;
+          } else {
+            regeneratedAmount = Math.ceil(opponentCharacter.pv * 0.15);
+            specialLogMessage = `Doudou adverse régénère ${regeneratedAmount} PV (15%).`;
+          }
+          opponentCharacter.pv += regeneratedAmount;
+          opponentAttack();
+          break;
+        case "Cocobi":
+          // Calculer la réduction des PV du joueur
+          const reductionAmount = Math.ceil(playerCharacter.pv_max * 0.11);
+          playerCharacter.pv -= reductionAmount;
+          // Vérifier si les PV du joueur ne sont pas inférieurs à zéro
+          if (playerCharacter.pv < 0) {
+            playerCharacter.pv = 0;
+          }
+
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Vous perdez ${reductionAmount} PV.`;
+
+          break;
+        case "Coeur":
+          const Damage = Math.round(opponentCharacter.attaque * 1.5);
+          const absorbedHealth = Math.round(Damage * 0.2); // 20% des dégâts infligés
+          playerCharacter.pv -= Damage;
+          opponentCharacter.pv += absorbedHealth;
+
+          // Assurez-vous que les PV de l'adversaire et du joueur ne dépassent pas les limites
+          if (playerCharacter.pv < 0) {
+            playerCharacter.pv = 0;
+          }
+          if (opponentCharacter.pv > opponentCharacter.pv_max) {
+            opponentCharacter.pv = opponentCharacter.pv_max;
+          }
+
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${Damage} points de dégâts et absorbe ${absorbedHealth} PV.`;
+          break;
+        case "Gros Nounours":
+          const Damagee = 544 + opponentCharacter.attaque;
+          playerCharacter.pv -= Damagee;
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${Damagee} points de dégâts, ignorant le bouclier.`;
+          break;
+        case "Poulpy":
+          const DamagePoulpy = Math.round(opponentCharacter.attaque * 2);
+          const ignoredDefense = Math.round(playerCharacter.defense * 0.5);
+          playerCharacter.pv -= DamagePoulpy;
+          playerCharacter.defense -= ignoredDefense;
+          playerCharacter.perte_att += 2;
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${DamagePoulpy} points de dégâts à ${playerCharacter.name}, ignore ${ignoredDefense} de sa défense, et réduit la défense de ${playerCharacter.name} pour les deux prochains tours.`;
+          break;
+        case "Oiseau":
+          const OiseauDamage = 
+            opponentCharacter.attaque * 2.5;
+          opponentCharacter.defense += 15; // Augmentation de la défense
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${OiseauDamage} points de dégâts et gagne 15 de défense pour les 2 prochains tours.`;
+          opponentCharacter.Oiseaudefense += 2; // Durée de l'effet de la capacité spéciale
+          opponentAttack();
+          opponentCharacter.attaque = opponentCharacter.attaque / 2.5;
+          break;
+        case "Colorina":
+          // Infliger 90% de l'attaque en dégâts
+          const colorinaDamage = Math.round(opponentCharacter.attaque * 0.9);
+         
+          playerCharacter.pv -= colorinaDamage;
+
+          // Réduire la défense de l'adversaire de 15% pour les 2 prochains tours
+          playerCharacter.defense = playerCharacter.defense * 0.85;
+          playerCharacter.perte_defense_colorina += 2;
+
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Elle inflige ${colorinaDamage} points de dégâts et réduit la défense de ${playerCharacter.name} de 15% pour les 2 prochains tours.`;
+          break;
+        default:
+          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
+          // Ajouter ici le traitement pour d'autres personnages adverses si nécessaire
+      }
+
+      // Met à jour l'affichage des PV du joueur
+      document.getElementById('opponent-pv').textContent = `PV: ${opponentCharacter.pv}`;
+
+      // Ajoute une entrée dans le journal de combat
+      const combatLog = document.getElementById('combat-log');
+      const specialLogEntry = document.createElement('p');
+      specialLogEntry.textContent = specialLogMessage;
+      combatLog.appendChild(specialLogEntry);
+
+      scrollToBottom();
+      adversairepasser_tour();
+      joueurpasser_tour();
+    }
+
+    function opponentAttack() {
+      // Augmenter spe de 0.25 à chaque attaque
+      if (opponentCharacter.name === "Doudou" || opponentCharacter.name === "Diva") {
+        opponentCharacter.spe += 0.20;
+      } else if (opponentCharacter.name === "Cocobi") {
+        opponentCharacter.spe += 0.15;
+      } else {
+        opponentCharacter.spe += 0.25;
+      }
+      // Calculer une défense aléatoire entre 85% et 115% de la défense originale du joueur
+      const playerDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+      const opponentDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+
+      const playerDefense = Math.round(playerCharacter.defense * playerDefenseModifier);
+      const opponentDefense = Math.round(opponentCharacter.defense * opponentDefenseModifier);
+
+      const playerDamage = Math.max(0, playerCharacter.attaque - opponentDefense);
+      const opponentDamage = Math.max(0, opponentCharacter.attaque - playerDefense);
+
+      const combatLog = document.getElementById('combat-log');
+
+      // Simulation de l'attaque de l'adversaire
+      const opponentLogEntry = document.createElement('p');
+      opponentLogEntry.textContent = `${opponentCharacter.name} attaque et inflige ${opponentDamage} points de dégâts.`;
+      combatLog.appendChild(opponentLogEntry);
+
+      // Mettre à jour les PV du joueur
+      let currentPlayerPV = playerCharacter.pv - opponentDamage;
+      if (currentPlayerPV < 0) {
+        currentPlayerPV = 0;
+      }
+      document.getElementById('player-pv').textContent = `PV: ${currentPlayerPV}`;
+      playerCharacter.pv = currentPlayerPV;
+
+      // Vérifier si le joueur est vaincu
+      if (currentPlayerPV === 0) {
+        let userData = getUserData();
+        userData.defaites += 1;
+        let perteTrophees = Math.min(20, Math.floor(userData.trophees / 2));
+        userData.trophees = Math.max(0, userData.trophees - perteTrophees);
+        let character = playerCharacter.name;
+        let niveau = Number(userData[character + "_Level"]) * 0.1;
+        let gain_XP = 10 * (1 / (1 + niveau));
+        gain_XP = Math.round(gain_XP); // Arrondir au nombre entier le plus proche
+        let gain_argent = gain_XP / 5;
+        if (userData.Double_XP > 0) {
+          gain_XP *= 2;
+          userData.Double_XP -= 1;
+        } else if (userData.Double_XP_acheté > 0) {
+          userData.Double_XP_acheté -= 1;
+          gain_XP *= 2;
+        }
+        
+        if (playerCharacter.name === "Willy") {
+          userData.Willy_XP += gain_XP;
+        } else if (playerCharacter.name === "Cocobi") {
+          userData.Cocobi_XP += gain_XP;
+        } else if (playerCharacter.name === "Oiseau") {
+          userData.Diva_XP += gain_XP;
+        } else if (playerCharacter.name === "Gros_Nounours") {
+          userData.Gros_Nounours_XP += gain_XP;
+        } else if (playerCharacter.name === "Baleine") {
+          userData.Baleine_XP += gain_XP;
+        } else if (playerCharacter.name === "Doudou") {
+          userData.Doudou_XP += gain_XP;
+        } else if (playerCharacter.name === "Coeur") {
+          userData.Coeur_XP += gain_XP;
+        } else if (playerCharacter.name === "Diva") {
+          userData.Diva_XP += gain_XP;
+        } else if (playerCharacter.name === "Poulpy") {
+          userData.Poulpy_XP += gain_XP;
+        } else if (playerCharacter.name === "Colorina") {
+          userData.Colorina_XP += gain_XP;
+        }
+        userData.argent += gain_argent;
+
+        
+        combatLog.innerHTML += `<p>${opponentCharacter.name} vous à vaincu ! Vous perdez ${perteTrophees} trophées</p>`;
+        combatLog.innerHTML +=
+`<p>Vous avez gagné ${gain_XP} XP et vous avez reçu ${gain_argent} points</p>`;
+        document.getElementById('attack-button').disabled = true;
+
+
+        // Rediriger vers index.html après la fin du combat
+        setTimeout(() => {
+          sessionStorage.removeItem('playerCharacter');
+          sessionStorage.removeItem('opponentCharacter');
+          window.location.href = 'index.html';
+        }, 2000); // 2 secondes de délai avant redirection
+        saveUserData(userData);
+      }
+
+      scrollToBottom();
+    }
+
+    function attack() {
+      // Augmenter spe de 0.25 à chaque attaque
+      if (playerCharacter.name === "Doudou" || playerCharacter.name === "Diva") {
+        specialAbility = Math.min(1, specialAbility + 0.20);
+      } else if (playerCharacter.name === "Cocobi") {
+        specialAbility = Math.min(1, specialAbility + 0.15);
+      } else {
+        specialAbility = Math.min(1, specialAbility + 0.25);
+      }
+      updateSpecialButton();
+
+      // Mettre à jour specialAbility (pour le bouton de capacité spéciale)
+      spe = specialAbility;
+      specialAbility = spe;
+
+      // Calculer une défense aléatoire entre 85% et 115% de la défense originale de l'adversaire
+      const playerDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+      const opponentDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
+
+      const playerDefense = Math.round(playerCharacter.defense * playerDefenseModifier);
+      const opponentDefense = Math.round(opponentCharacter.defense * opponentDefenseModifier);
+
+      const playerDamage = Math.max(0, playerCharacter.attaque - opponentDefense);
+      const opponentDamage = Math.max(0, opponentCharacter.attaque - playerDefense);
+
+      const combatLog = document.getElementById('combat-log');
+
+      // Simulation de l'attaque du joueur
+      const playerLogEntry = document.createElement('p');
+      playerLogEntry.textContent = `Vous attaquez et infligez ${playerDamage} points de dégâts à ${opponentCharacter.name}.`;
+      combatLog.appendChild(playerLogEntry);
+
+      // Mettre à jour les PV de l'adversaire
+      let currentOpponentPV = opponentCharacter.pv - playerDamage;
+      if (currentOpponentPV < 0) {
+        currentOpponentPV = 0;
+      }
+      document.getElementById('opponent-pv').textContent = `PV: ${currentOpponentPV}`;
+      opponentCharacter.pv = currentOpponentPV;
+
+      // Vérifier si l'adversaire est vaincu
+      if (currentOpponentPV === 0) {
+        let userData = getUserData();
+        userData.victoires += 1;
+        userData.trophees += 10;
+
+        let character = playerCharacter.name;
+        let niveau = Number(userData[character + "_Level"]) * 0.1;
+        let joueur_pv = playerCharacter.pv;
+        let joueur_pv_base = playerCharacter.pv_max;
+
+        let gain_XP = (2 * (joueur_pv / joueur_pv_base) * 100) * (1 / (1 + niveau));
+        gain_XP = Math.round(gain_XP); // Arrondir au nombre entier le plus proche
+        let gain_argent = gain_XP / 5;
+        if (userData.Double_XP > 0) {
+          gain_XP *= 2;
+          userData.Double_XP -= 1;
+        } else if (userData.Double_XP_acheté > 0) {
+          userData.Double_XP_acheté -= 1;
+          gain_XP *= 2;
+        }
+        
+        if (playerCharacter.name === "Willy") {
+          userData.Willy_XP += gain_XP;
+        } else if (playerCharacter.name === "Cocobi") {
+          userData.Cocobi_XP += gain_XP;
+        } else if (playerCharacter.name === "Oiseau") {
+          userData.Oiseau_XP += gain_XP;
+        } else if (playerCharacter.name === "Gros_Nounours") {
+          userData.Gros_Nounours_XP += gain_XP;
+        } else if (playerCharacter.name === "Baleine") {
+          userData.Baleine_XP += gain_XP;
+        } else if (playerCharacter.name === "Doudou") {
+          userData.Doudou_XP += gain_XP;
+        } else if (playerCharacter.name === "Coeur") {
+          userData.Coeur_XP += gain_XP;
+        } else if (playerCharacter.name === "Diva") {
+          userData.Diva_XP += gain_XP;
+        } else if (playerCharacter.name === "Poulpy") {
+          userData.Poulpy_XP += gain_XP;
+        } else if (playerCharacter.name === "Colorina") {
+          userData.Colorina_XP += (gain_XP);
+        }
+        userData.argent += gain_argent;
+
+        combatLog.innerHTML += `<p>${opponentCharacter.name} a été vaincu ! Vous gagnez 10 trophées.</p>`;
+        combatLog.innerHTML += `<p>Vous avez gagné ${gain_XP} XP et vous avez reçu ${gain_argent} points</p>`;
+
+                document.getElementById('attack-button').disabled = true;
+
+        // Vérifier le déblocage des personnages
+          checkAndDisplayCharacterUnlock(userData);
+        
+
+        // Rediriger vers index.html après la fin du combat
+        setTimeout(() => {
+          sessionStorage.removeItem('playerCharacter');
+          sessionStorage.removeItem('opponentCharacter');
+          window.location.href = 'index.html';
+        }, 2000); // 2 secondes de délai avant redirection
+        saveUserData(userData);
+      } else {
+        // Tour de l'adversaire
+        opponentTurn();
+      }
+
+      // Mettre à jour le bouton de capacité spéciale après chaque attaque
+      adversairepasser_tour();
+      joueurpasser_tour();
+      updateSpecialButton();
+
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      const combatLog = document.getElementById('combat-log');
+      combatLog.scrollTop = combatLog.scrollHeight;
+    }
+    // Fonction pour vérifier et afficher le déblocage d'un nouveau personnage
+    function checkAndDisplayCharacterUnlock(userData) {
+      let message = "";
+
+      if (userData.trophees >= 50 && userData.nbr_perso < 3) {
+        userData.nbr_perso = 3;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 150 && userData.nbr_perso < 4) {
+        userData.nbr_perso = 4;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 250 && userData.nbr_perso < 5) {
+        userData.nbr_perso = 5;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 400 && userData.nbr_perso < 6) {
+        userData.nbr_perso = 6;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 550 && userData.nbr_perso < 7) {
+        userData.nbr_perso = 7;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 750 && userData.nbr_perso < 8) {
+        userData.nbr_perso = 8;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 1000 && userData.nbr_perso < 9) {
+        userData.nbr_perso = 9;
+        message = "Vous avez débloqué un nouveau personnage !";
+      } else if (userData.trophees >= 1300 && userData.nbr_perso < 10) {
+        userData.nbr_perso = 10;
+        message = "Vous avez débloqué un nouveau personnage !";
+      }
+
+      // Afficher le message dans le journal de combat si un nouveau personnage a été débloqué
+      if (message !== "") {
+        const combatLog = document.getElementById('combat-log');
+        const unlockLogEntry = document.createElement('p');
+        unlockLogEntry.textContent = message;
+        combatLog.appendChild(unlockLogEntry);
+        scrollToBottom(); // Assure le défilement jusqu'au bas du journal
+      }
+    }
+  </script>
+</body>
+</html>

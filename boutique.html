@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique de Jeux</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+        }
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: #555;
+            border-radius: 3px;
+        }
+        .header .balance {
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .category-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            z-index: 1;
+        }
+        .arrow-left {
+            left: 0;
+        }
+        .arrow-right {
+            right: 0;
+        }
+        .category {
+            width: 100%;
+            overflow-x: scroll;
+            display: flex;
+            justify-content: start;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+        .bonus-item {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+            margin: 0 20px;
+            flex-shrink: 0;
+            width: 150px;
+        }
+        .bonus-item img {
+            max-width: 80%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .bonus-item h2 {
+            margin: 10px 0;
+            color: #333;
+        }
+        .bonus-item p {
+            font-size: 18px;
+            color: #555;
+        }
+        .bonus-item button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .bonus-item button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html">Retour</a>
+        <div class="balance" id="balance">Solde : 0</div>
+    </div>
+    <div class="content">
+        <h1>Bienvenue dans la Boutique de Jeux</h1>
+        <h2>Catégorie XP</h2>
+        <div class="category-wrapper">
+            <div class="arrow arrow-left" id="left-arrow">&lt;</div>
+            <div class="category" id="category-xp">
+                <div class="bonus-item">
+                    <img src="XP_2.png" alt="Double XP Bonus">
+                    <h2>Double XP x3</h2>
+                    <p>Profitez du double XP lors de vos 3 prochains combats !</p>
+                    <p>Prix : 30 Points</p>
+                    <button class="buyButton" data-price="30" data-quantity="3">Acheter</button>
+                    <p class="error-message"></p>
+                </div>
+                <div class="bonus-item">
+                    <img src="XP_max.png" alt="Double XP MAX">
+                    <h2>Double XP MAX</h2>
+                    <p>Obtenez le double XP pour les 5 prochains combats !</p>
+                    <p>Prix : 45 Points</p>
+                    <button class="buyButton" data-price="45" data-quantity="5">Acheter</button>
+                    <p class="error-message"></p>
+                </div>
+            </div>
+            <div class="arrow arrow-right" id="right-arrow">&gt;</div>
+        </div>
+    </div>
+
+    <script>
+        // Exemple de données utilisateur
+        function getUserData() {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            return userData || { argent: 0, Double_XP_acheté: 0 }; // Retourne un objet avec des valeurs par défaut
+        }
+
+        function saveUserData(data) {
+            localStorage.setItem('userData', JSON.stringify(data));
+        }
+
+        // Mettre à jour le solde affiché
+        const userData = getUserData();
+        document.getElementById('balance').textContent = `Solde : ${userData.argent}`;
+
+        document.querySelectorAll('.buyButton').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const prix = parseInt(event.target.dataset.price);
+                const quantity = parseInt(event.target.dataset.quantity);
+                const errorMessage = event.target.nextElementSibling;
+
+                if (userData.argent >= prix) {
+                    userData.argent -= prix;
+                    userData.Double_XP_acheté += quantity;
+                    saveUserData(userData);
+                    document.getElementById('balance').textContent = `Solde : ${userData.argent}`;
+                    errorMessage.textContent = ''; // Effacer le message d'erreur
+                } else {
+                    errorMessage.textContent = 'Solde insuffisant !';
+                }
+            });
+        });
+
+        // Gestion des flèches
+        const category = document.getElementById('category-xp');
+        const leftArrow = document.getElementById('left-arrow');
+        const rightArrow = document.getElementById('right-arrow');
+
+        function updateArrows() {
+            if (category.scrollLeft === 0) {
+                leftArrow.style.display = 'none';
+            } else {
+                leftArrow.style.display = 'flex';
+            }
+
+            if (category.scrollWidth - category.clientWidth === category.scrollLeft) {
+                rightArrow.style.display = 'none';
+            } else {
+                rightArrow.style.display = 'flex';
+            }
+        }
+
+        leftArrow.addEventListener('click', () => {
+            category.scrollBy({ left: -250, behavior: 'smooth' });
+        });
+
+        rightArrow.addEventListener('click', () => {
+            category.scrollBy({ left: 250, behavior: 'smooth' });
+        });
+
+        category.addEventListener('scroll', updateArrows);
+        window.addEventListener('resize', updateArrows);
+
+        // Initial check
+        updateArrows();
+    </script>
+</body>
+</html>
