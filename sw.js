@@ -5,6 +5,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/',
         '/index.html',
+        '/menu_principal.html',
         '/amelioration.html',
         '/boutique.html',
         '/characters.html',
