@@ -14,9 +14,7 @@ self.addEventListener('install', (event) => {
         '/patch_note.html',
         '/perso_stats.html',
         '/userdata.html',
-        '/localStorage.js',
-        '/path/to/style.css',
-        '/path/to/script.js'
+        '/localStorage.js'
       ]);
     })
   );

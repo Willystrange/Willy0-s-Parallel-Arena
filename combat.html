@@ -564,7 +564,7 @@
         let niveau = Number(userData[character + "_Level"]) * 0.1;
         let gain_XP = 10 * (1 / (1 + niveau));
         gain_XP = Math.round(gain_XP); // Arrondir au nombre entier le plus proche
-        let gain_argent = gain_XP / 5;
+        let gain_argent = Math.round(gain_XP / 5);
         if (userData.Double_XP > 0) {
           gain_XP *= 2;
           userData.Double_XP -= 1;
@@ -668,7 +668,7 @@
 
         let gain_XP = (2 * (joueur_pv / joueur_pv_base) * 100) * (1 / (1 + niveau));
         gain_XP = Math.round(gain_XP); // Arrondir au nombre entier le plus proche
-        let gain_argent = gain_XP / 5;
+        let gain_argent = Math.round(gain_XP / 5);
         if (userData.Double_XP > 0) {
           gain_XP *= 2;
           userData.Double_XP -= 1;

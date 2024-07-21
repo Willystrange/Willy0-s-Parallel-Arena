@@ -92,7 +92,7 @@
       trophees: 0,
       argent: 0,
       VICTOIRE: false,
-      version: 1.02,
+      version: 1.021,
       xp_du_jour: 0,
       Willy: 1,
       Willy_XP: 0,
@@ -133,11 +133,14 @@
     for (const key in defaultUserData) {
       if (!userData.hasOwnProperty(key)) {
         userData[key] = defaultUserData[key];
+      } else {
+        userData.argent = Math.round(userData.argent);
       }
+        
     }
 
     // Assure que la version dans userData est toujours la dernière version du jeu
-    userData.version = 1.02;
+    userData.version = 1.021;
 
     // Sauvegarder les données mises à jour dans localStorage
     saveUserData(userData);
