@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Paramètres</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .button {
+      display: block;
+      padding: 15px;
+      font-size: 18px;
+      color: #fff;
+      background-color: #ff4500;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      margin: 10px 0;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .button:hover {
+      background-color: #e03e00;
+      transform: scale(1.02);
+    }
+    .theme-switch-container {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      color: #333;
+    }
+    .theme-switch-container span {
+      margin-right: 10px;
+    }
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      border-radius: 50%;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(15px);
+    }
+    /* Mode sombre */
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    .dark-mode .container {
+      background-color: #1e1e1e;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .dark-mode .button {
+      background-color: #ff6600;
+    }
+    .dark-mode .button:hover {
+      background-color: #e04d00;
+    }
+    /* Style du bouton retour */
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 18px;
+      color: #ff4500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .back-button:hover {
+      color: #e03e00;
+    }
+  </style>
+</head>
+<body>
+  <a class="back-button" href="menu_principal.html">&lt; Retour</a>
+  <div class="container">
+    <h1>Paramètres</h1>
+    <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
+    <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
+    <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
+    <div class="theme-switch-container">
+      <span>Mode sombre</span>
+      <label class="theme-switch">
+        <input type="checkbox" id="themeSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="localStorage.js"></script>
+
+  <script>
+    const secretKey = 'votre_cle_secrete_ici';
+
+    function gofeedback() {
+      window.location.href = "feed-back.html";
+    }
+
+    function showImportOptions() {
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.txt';
+
+      fileInput.onchange = function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var importedData = decrypt(e.target.result);
+          try {
+            var userData = JSON.parse(importedData);
+            saveUserData(userData);
+            alert('Sauvegarde importée avec succès !');
+            location.reload();
+          } catch (error) {
+            alert('Erreur lors de l\'importation de la sauvegarde.');
+          }
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    }
+
+    function downloadBackup() {
+      var userData = getUserData();
+      var encryptedData = encrypt(JSON.stringify(userData));
+      var blob = new Blob([encryptedData], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'Willy0_s_Parallel_Arena_backup.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function encrypt(data) {
+      return CryptoJS.AES.encrypt(data, secretKey).toString();
+    }
+
+    function decrypt(data) {
+      var bytes = CryptoJS.AES.decrypt(data, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    }
+
+    function getUserData() {
+      return JSON.parse(localStorage.getItem('userData')) || {};
+    }
+
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    function toggleTheme() {
+      var isDarkMode = document.getElementById('themeSwitch').checked;
+      var userData = getUserData();
+      userData.theme = isDarkMode;  // Mettez à jour le thème dans userData
+      saveUserData(userData);
+
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      document.body.classList.toggle('light-mode', !isDarkMode);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      var userData = getUserData();
+      var savedTheme = userData.theme !== undefined ? userData.theme : false; // Par défaut clair si non défini
+      document.body.classList.add(savedTheme ? 'dark-mode' : 'light-mode');
+      document.getElementById('themeSwitch').checked = savedTheme;
+    });
+
+    document.getElementById('themeSwitch').addEventListener('change', toggleTheme);
+  </script>
+</body>
+</html>

@@ -6,6 +6,7 @@ self.addEventListener('install', (event) => {
         '/',
         '/index.html',
         '/menu_principal.html',
+        '/parametres.html',
         '/amelioration.html',
         '/boutique.html',
         '/characters.html',
@@ -15,7 +16,8 @@ self.addEventListener('install', (event) => {
         '/patch_note.html',
         '/perso_stats.html',
         '/userdata.html',
-        '/localStorage.js'
+        '/localStorage.js',
+        '/settings-icon.heic',
       ]);
     })
   );

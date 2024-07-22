@@ -1,5 +1,5 @@
 // Définir la version du jeu
-const game_version = 1.021;
+const game_version = 1.023;
 
 // Fonction pour ajuster aléatoirement les personnages
 function adjustCharacters(nbr_perso) {
@@ -37,12 +37,6 @@ function adjustCharacters(nbr_perso) {
 
     // Ajouter ce personnage à la liste des personnages à 1
     charactersAlreadyOne.push(character);
-
-    // Ajouter de l'XP au personnage (à implémenter selon votre logique)
-    // Exemple : userData[`${character}_XP`] += 100;
-
-    // Si vous avez besoin de mettre à jour d'autres propriétés liées au personnage, faites-le ici
-
   }
 
   // Sauvegarder les données mises à jour dans localStorage
@@ -58,7 +52,7 @@ if (!localStorage.getItem('userData')) {
     trophees: 0,
     argent: 0,
     VICTOIRE: false,
-    version: 1.021,
+    version: 1.023,
     xp_du_jour: 0,
     Willy: 1,
     Willy_XP: 0,
@@ -93,12 +87,14 @@ if (!localStorage.getItem('userData')) {
     Double_XP: 5,
     Double_XP_acheté: 0,
     lastDoubleXPCheck: 0,
+    theme: false // Défaut clair
   }));
 }
 
 // Fonction pour obtenir les données utilisateur de localStorage
 function getUserData() {
   const userData = JSON.parse(localStorage.getItem('userData'));
+  
   return userData || {}; // Retourne un objet vide si les données ne sont pas définies
 }
 
@@ -106,6 +102,8 @@ function getUserData() {
 function saveUserData(userData) {
   localStorage.setItem('userData', JSON.stringify(userData));
 }
+
+// Fonction pour basculer entre les thèmes
 
 // Appeler la fonction pour ajuster les personnages au chargement de la page ou au besoin
 const userData = getUserData();

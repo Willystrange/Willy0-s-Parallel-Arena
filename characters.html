@@ -101,6 +101,53 @@
       background-color: #28a428;
       transform: scale(1.05);
     }
+    /* Styles pour le thème sombre */
+    .dark-theme {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .dark-theme .character-button {
+      background-color: #444444; /* Plus foncé que l'original */
+      color: #ffffff;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark-theme .character-button:hover {
+      background-color: #666666; /* Plus foncé que l'original */
+    }
+
+    .dark-theme .choose-button {
+      background-color: #2e8b57; /* Version plus foncée du vert */
+      color: #ffffff;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark-theme .choose-button:hover {
+      background-color: #1e6f3f; /* Plus foncé que l'original */
+    }
+
+    .dark-theme .stats {
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #ffffff;
+      border: 1px solid #666666; /* Bordure gris pour les stats */
+    }
+
+    .dark-theme .stats::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .dark-theme .stats::-webkit-scrollbar-track {
+      background: #333333; /* Couleur de l'arrière-plan du défilement */
+    }
+
+    .dark-theme .stats::-webkit-scrollbar-thumb {
+      background: #666666; /* Couleur du curseur de défilement */
+    }
+
+    .dark-theme .stats::-webkit-scrollbar-thumb:hover {
+      background: #888888; /* Couleur du curseur de défilement au survol */
+    }
   </style>
 </head>
 <body>
@@ -191,7 +238,7 @@
           <p>Défense: ${increasedDefense}</p>
 
           <button class="choose-button" onclick="chooseCharacter('${character.name}', ${increasedPV}, ${increasedAttaque}, ${increasedDefense},
-${character.spe}, ${character.argent}, ${character.pv_max}, ${increasedattaque_originale}, ${increaseddefense_originale})">Choisir</button>`;
+  ${character.spe}, ${character.argent}, ${character.pv_max}, ${increasedattaque_originale}, ${increaseddefense_originale})">Choisir</button>`;
 
         // Insérer l'élément de statistiques après le bouton cliqué
         button.parentNode.insertBefore(statsDiv, button.nextSibling);
@@ -278,6 +325,12 @@ ${character.spe}, ${character.argent}, ${character.pv_max}, ${increasedattaque_o
         } else {
           userData = JSON.parse(userData);
         }
+
+        // Appliquer le thème sombre si nécessaire
+        if (userData.theme) {
+          document.body.classList.add('dark-theme');
+        }
+
         return userData;
       }
     });

@@ -10,7 +10,7 @@
     body {
       text-align: center;
       font-family: 'Arial', sans-serif;
-      background: url('background.jpg') no-repeat center center fixed;
+      
       background-size: cover;
       color: #ffffff;
       margin: 0;
@@ -98,6 +98,58 @@
       50% { background-color: #FF6347; }
       100% { background-color: #FF0000; }
     }
+    .dark-theme {
+      background-color: #000000; /* Fond noir */
+      color: #e0e0e0; /* Texte en gris clair */
+    }
+
+    .dark-theme .title {
+      color: #ffffff; /* Texte en blanc pour le titre */
+      text-shadow: 2px 2px 4px #000000; /* Ombre du texte pour le titre */
+    }
+
+    .dark-theme .character {
+      background-color: #333333; /* Fond gris foncé pour les personnages non débloqués */
+      color: #e0e0e0; /* Texte en gris clair */
+      border: 1px solid #444444; /* Bordure légèrement plus claire pour les personnages non débloqués */
+    }
+
+    .dark-theme .character.unlocked {
+      background-color: #000000; /* Fond noir pour les personnages débloqués */
+      color: #ffffff; /* Texte en blanc pour les personnages débloqués */
+      border: 1px solid #444444; /* Bordure légèrement plus claire pour les personnages débloqués */
+    }
+
+    .dark-theme .character:hover {
+      transform: scale(1.05); /* Effet de zoom lors du survol */
+    }
+
+    .dark-theme .stats {
+      background-color: rgba(0, 0, 0, 0.9); /* Fond très sombre pour les statistiques */
+      color: #e0e0e0; /* Texte en gris clair */
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Ombre légère pour le contraste */
+    }
+
+    .dark-theme .back-button, .dark-theme .improvement-button {
+      background-color: #222222; /* Fond gris foncé pour les boutons */
+      color: #e0e0e0; /* Texte en gris clair */
+      border: 1px solid #444444; /* Bordure légèrement plus claire pour les boutons */
+    }
+
+    .dark-theme .back-button:hover, .dark-theme .improvement-button:hover {
+      background-color: #444444; /* Fond gris légèrement plus clair au survol */
+    }
+
+    .dark-theme .clignotant {
+      animation: clignotement-dark 1s infinite; /* Animation de clignotement pour le thème sombre */
+    }
+
+    @keyframes clignotement-dark {
+      0% { background-color: #ff5555; }
+      50% { background-color: #ff4444; }
+      100% { background-color: #ff5555; }
+    }
+
   </style>
 </head>
 <body>
@@ -226,6 +278,9 @@
     // Fonction pour obtenir les données utilisateur de localStorage
     function getUserData() {
       const userData = JSON.parse(localStorage.getItem('userData'));
+      if (userData.theme) {
+        document.body.classList.add('dark-theme');
+      }
       return userData || {}; // Retourne un objet vide si les données ne sont pas définies
     }
 
@@ -238,7 +293,7 @@
         trophees: 0,
         argent: 0,
         VICTOIRE: false,
-        version: 1.021,
+        version: 1.023,
         xp_du_jour: 0,
         Willy: 1,
         Willy_XP: 0,
@@ -275,6 +330,7 @@
         Double_XP_acheté: 0,
         pseudo: '', // Initialisation du pseudo vide
         lastDoubleXPCheck: 0, // Initialisation de la date de dernière vérification de Double XP
+        theme: false, // Initialisation du thème par défaut
       }));
     }
 

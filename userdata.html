@@ -82,6 +82,64 @@
     .clickable {
       cursor: pointer;
     }
+    /* Styles pour le mode sombre */
+    .dark-theme {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-theme .title {
+        color: #e0e0e0;
+    }
+
+    .dark-theme .return-link {
+        color: #1e90ff;
+    }
+
+    .dark-theme .data-container {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark-theme .data-item {
+        color: #e0e0e0;
+    }
+
+    .dark-theme .delete-button {
+        background-color: #ff4c4c;
+        color: white;
+    }
+
+    .dark-theme .delete-button:hover {
+        background-color: #ff0000;
+    }
+
+    .dark-theme #rewards-container {
+        background-color: #1c1c1c;
+        color: #e0e0e0;
+    }
+
+    .dark-theme .achieved {
+        color: #4caf50;
+    }
+
+    .dark-theme .next {
+        font-weight: bold;
+    }
+
+    .dark-theme .clickable {
+        cursor: pointer;
+        color: #ffffff;
+    }
+    .dark-theme .delete-button {
+        background-color: #b71c1c; /* Couleur de fond sombre pour le bouton */
+        color: #e0e0e0; /* Couleur du texte en mode sombre */
+    }
+
+    .dark-theme .delete-button:hover {
+        background-color: #d32f2f; /* Couleur de fond sombre pour le survol */
+    }
   </style>
 </head>
 <body>
@@ -107,7 +165,11 @@
   <script>
     // Fonction pour obtenir les données utilisateur depuis localStorage
     function getUserData() {
-      return JSON.parse(localStorage.getItem('userData'));
+      userData = JSON.parse(localStorage.getItem('userData'));
+      if (userData.theme) {
+        document.body.classList.add('dark-theme');
+        }
+        return userData;
     }
 
     // Fonction pour sauvegarder les données utilisateur dans localStorage

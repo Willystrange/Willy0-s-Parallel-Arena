@@ -88,6 +88,69 @@
       font-size: 14px;
       color: #888;
     }
+    /* Styles pour le mode sombre */
+    .dark-theme {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-theme .title {
+        color: #e0e0e0;
+    }
+
+    .dark-theme .return-link {
+        color: #1e90ff;
+    }
+
+    .dark-theme .data-container {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark-theme .character {
+        background-color: #1c1c1c;
+        color: #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .dark-theme .character-info {
+        color: #e0e0e0;
+    }
+
+    .dark-theme .level-up-indicator {
+        background-color: #ff5722;
+    }
+
+    .dark-theme .level-up-button {
+        background-color: #1e90ff;
+        color: #fff;
+    }
+
+    .dark-theme .level-up-button:hover {
+        background-color: #0056b3;
+    }
+
+    .dark-theme .cost-info {
+        color: #bbb;
+    }
+
+    /* Styles pour le défilement */
+    .dark-theme .data-container::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    .dark-theme .data-container::-webkit-scrollbar-track {
+        background: #333;
+    }
+
+    .dark-theme .data-container::-webkit-scrollbar-thumb {
+        background: #555;
+    }
+
+    .dark-theme .data-container::-webkit-scrollbar-thumb:hover {
+        background: #777;
+    }
   </style>
 </head>
 <body>
@@ -102,8 +165,12 @@
   <script>
     // Fonction pour obtenir les données utilisateur depuis localStorage
     function getUserData() {
-      return JSON.parse(localStorage.getItem('userData')) || { points: 0 };
-    }
+      userData = JSON.parse(localStorage.getItem('userData'));
+      if (userData.theme) {
+        document.body.classList.add('dark-theme');
+        return userData;
+      }
+      }
 
     // Fonction pour sauvegarder les données utilisateur dans localStorage
     function saveUserData(userData) {

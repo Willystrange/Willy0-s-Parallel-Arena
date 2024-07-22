@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Boutique de Jeux</title>
     <style>
         body {
@@ -111,6 +113,74 @@
             color: red;
             font-weight: bold;
         }
+        /* Styles pour le mode sombre */
+        .dark-theme {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-theme .header {
+            background-color: #1c1c1c;
+            color: #e0e0e0;
+        }
+
+        .dark-theme .header a {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        .dark-theme .arrow {
+            color: #e0e0e0;
+            background-color: #333;
+        }
+
+        .dark-theme .bonus-item {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-theme .bonus-item h2 {
+            color: #e0e0e0;
+        }
+
+        .dark-theme .bonus-item p {
+            color: #b0b0b0;
+        }
+
+        .dark-theme .bonus-item button {
+            background-color: #0056b3;
+            color: #fff;
+        }
+
+        .dark-theme .bonus-item button:hover {
+            background-color: #003d7a;
+        }
+
+        .dark-theme .error-message {
+            color: #ff4d4d;
+        }
+
+        .dark-theme .category {
+            background-color: #1e1e1e;
+        }
+
+        /* Styles pour le défilement */
+        .dark-theme .category::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .dark-theme .category::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        .dark-theme .category::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+
+        .dark-theme .category::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
     </style>
 </head>
 <body>
@@ -149,8 +219,13 @@
         // Exemple de données utilisateur
         function getUserData() {
             const userData = JSON.parse(localStorage.getItem('userData'));
+            if (userData.theme) {
+                document.body.classList.add('dark-theme');
+            }
             return userData || { argent: 0, Double_XP_acheté: 0 }; // Retourne un objet avec des valeurs par défaut
+            
         }
+        
 
         function saveUserData(data) {
             localStorage.setItem('userData', JSON.stringify(data));

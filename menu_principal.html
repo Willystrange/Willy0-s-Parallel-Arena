@@ -14,30 +14,51 @@
       color: #ffffff;
       margin: 0;
       padding: 0;
+      overflow-x: hidden; /* Empêche le défilement horizontal */
     }
-    .title {
+    .dark-theme {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    .dark-theme .play-button,
+    .dark-theme .view-data-button,
+    .dark-theme .char-button,
+    .dark-theme .shop-button {
+      background-color: #333333;
+      color: #ffffff;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark-theme .play-button:hover,
+    .dark-theme .view-data-button:hover,
+    .dark-theme .char-button:hover,
+    .dark-theme .shop-button:hover {
+      background-color: #555555;
+    }
+    .title, .title2 {
       font-size: 48px;
-      margin-bottom: 10px;
+      margin: 0; /* Enlève les marges par défaut */
       padding-top: 10px;
       text-shadow: 2px 2px 4px #000000;
     }
+
     .title2 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      padding-top: 10px;
-      text-shadow: 2px 2px 4px #000000;
+      margin-bottom: 20px; /* Ajoute l'espacement sous le titre secondaire */
     }
+
     .button-container {
       margin-top: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+
     .play-button-container {
       position: relative;
       width: 200px;
-      margin-bottom: 10px; /* Espacement entre les boutons */
+      margin-bottom: 10px;
     }
+
     .play-button {
       padding: 15px 30px;
       font-size: 22px;
@@ -48,13 +69,15 @@
       border-radius: 5px;
       box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
       transition: background-color 0.3s, transform 0.3s;
-      width: 100%; /* Largeur du bouton */
+      width: 100%;
       text-align: center;
     }
+
     .play-button:hover {
       background-color: #e03e00;
       transform: scale(1.05);
     }
+
     .double-xp {
       position: absolute;
       top: -10px;
@@ -67,8 +90,9 @@
       transform: rotate(15deg);
       border-radius: 3px;
       box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-      display: none; /* Par défaut, ne pas afficher */
+      display: none;
     }
+
     .view-data-button, .char-button, .shop-button {
       padding: 15px 30px;
       font-size: 22px;
@@ -79,49 +103,28 @@
       border-radius: 5px;
       box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
       transition: background-color 0.3s, transform 0.3s;
-      margin-bottom: 10px; /* Espacement entre les boutons */
-      width: 200px; /* Largeur des boutons */
+      margin-bottom: 10px;
+      width: 200px;
       text-align: center;
     }
+
     .view-data-button:hover, .char-button:hover, .shop-button:hover {
       background-color: #e03e00;
       transform: scale(1.05);
     }
-    .backup-button {
-      padding: 5px 10px;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      background-color: #4CAF50;
-      color: #ffffff;
-      border-radius: 3px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-      transition: background-color 0.3s, transform 0.3s;
-      position: fixed;
-      bottom: 10px;
+
+    .settings-icon {
+      position: absolute;
+      top: 10px;
       left: 10px;
-    }
-    .backup-button:hover {
-      background-color: #45a049;
-    }
-    .contact-button {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      padding: 5px 10px;
-      font-size: 14px;
       cursor: pointer;
-      border: none;
-      background-color: #007bff; /* Couleur bleue */
-      color: #ffffff;
-      border-radius: 3px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-      transition: background-color 0.3s, transform 0.3s;
     }
-    .contact-button:hover {
-      background-color: #0056b3; /* Changement de couleur au survol */
+
+    .settings-icon img {
+      width: 50px;
+      height: 50px;
     }
-    /* Style pour la boîte de dialogue */
+
     .dialog-overlay {
       display: none;
       position: fixed;
@@ -134,17 +137,20 @@
       align-items: center;
       z-index: 1000;
     }
+
     .dialog {
       background: #ffffff;
       padding: 20px;
       border-radius: 8px;
       text-align: center;
     }
+
     .dialog select {
       padding: 10px;
       font-size: 16px;
       margin: 10px 0;
     }
+
     .dialog button {
       padding: 10px 20px;
       font-size: 16px;
@@ -155,17 +161,21 @@
       border-radius: 5px;
       margin: 5px;
     }
+
     .dialog button:hover {
       background-color: #0056b3;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  
-
 </head>
 <body>
   <div class="title">Willy0's</div>
   <div class="title2">Parallel Arena</div>
+
+  <!-- Icône des paramètres -->
+  <div class="settings-icon" onclick="goToSettings()">
+    <img src="settings-icon.heic" alt="Paramètres">
+  </div>
+
   <div class="button-container">
     <div class="play-button-container">
       <span class="double-xp">Double XP !</span>
@@ -178,15 +188,11 @@
 
   <script src="localStorage.js"></script> <!-- Lien vers votre script de gestion de localStorage -->
 
-  <button class="backup-button" onclick="showImportOrSaveOptions()">Importer/Sauvegarder</button>
-  <button class="contact-button" onclick="gofeedback()">Contactez le développeur</button>
-
   <script>
-    const secretKey = 'votre_cle_secrete_ici'; // Clé de cryptage/décryptage
-
-    function gofeedback() {
-      window.location.href = "feed-back.html";
+    function goToSettings() {
+      window.location.href = "parametres.html";
     }
+
     function startGame() {
       window.location.href = "characters.html"; // Redirection vers la page de sélection des personnages
     }
@@ -201,75 +207,6 @@
 
     function viewShop() {
       window.location.href = "boutique.html"; // Redirection vers la boutique
-    }
-
-    function showImportOrSaveOptions() {
-      var choice = prompt("Que souhaitez-vous faire ?\n\n1. Importer une sauvegarde\n2. Sauvegarder les données actuelles\n\nEntrez 1, 2 ou Annuler pour quitter.");
-
-      if (choice === "1") {
-        importBackup();
-      } else if (choice === "2") {
-        downloadBackup();
-      } else {
-        // L'utilisateur a annulé l'action ou entré une valeur incorrecte
-        return;
-      }
-    }
-
-    function downloadBackup() {
-      var userData = getUserData();
-      var encryptedData = encrypt(JSON.stringify(userData)); // Cryptage des données utilisateur
-
-      var blob = new Blob([encryptedData], { type: 'text/plain' });
-      var url = URL.createObjectURL(blob);
-
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'Willy0_s_Parallel_Arena_backup.txt';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function importBackup() {
-      var fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = '.txt'; // Spécifie le type de fichier attendu
-
-      fileInput.onchange = function(event) {
-        var file = event.target.files[0];
-        if (!file) return;
-
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var importedData = decrypt(e.target.result); // Décrypte les données importées
-
-          try {
-            var userData = JSON.parse(importedData);
-            saveUserData(userData);
-            alert('Sauvegarde importée avec succès !');
-            location.reload(); // Recharge la page après importation
-          } catch (error) {
-            alert('Erreur lors de l\'importation de la sauvegarde.');
-          }
-        };
-
-        reader.readAsText(file);
-      };
-
-      fileInput.click();
-    }
-
-    // Fonction de cryptage utilisant AES
-    function encrypt(data) {
-      return CryptoJS.AES.encrypt(data, secretKey).toString();
-    }
-
-    // Fonction de décryptage utilisant AES
-    function decrypt(data) {
-      var bytes = CryptoJS.AES.decrypt(data, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8);
     }
 
     // Fonction pour obtenir les données utilisateur de localStorage
@@ -318,9 +255,13 @@
       if (userData.Double_XP > 0) {
         document.querySelector('.double-xp').style.display = 'block';
       }
-    });
 
+      // Vérification du thème
+      if (userData.theme === true) {
+        document.body.classList.add('dark-theme');
+      }
+    });
   </script>
-  
+
 </body>
 </html>

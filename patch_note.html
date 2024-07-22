@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Patch Notes</title>
-    <link rel="icon" href="icon.png" type="image/png"> <!-- Ajout du logo du jeu -->
+    <link rel="icon" href="icon.png" type="image/png">
     <style>
+        /* Styles pour le mode clair (déjà défini) */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -57,12 +60,44 @@
         .back-button:hover {
             background-color: #0056b3;
         }
+
+        /* Styles pour le mode sombre */
+        .dark-theme body {
+            background-color: #333;
+            color: #ddd;
+        }
+        .dark-theme .container {
+            background: #444;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .dark-theme h1 {
+            color: #ddd;
+        }
+        .dark-theme .note-list li {
+            background: #555;
+            border-left: 5px solid #1e90ff;
+        }
+        .dark-theme .back-button {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+        .dark-theme .back-button:hover {
+            background-color: #0056b3;
+        }
     </style>
-    
 </head>
-  
 <body>
     <div class="container">
+        <h1 id="version-1023">Note de mise à jour - Version 1.023</h1>
+        <ul id="notes-1023" class="note-list">
+            <li><strong>Modifications :</strong>
+                <ul>
+                    <li>Suppression des boutons « Importer/Sauvegarder » et « Contacter le développeur » sur la page d’accueil.</li>
+                    <li>Ajout d’une page « Paramètres » comprenant les boutons « Sauvegarder », « Importer » et « Contacter le développeur ». La page offre également la possibilité de mettre le jeu en mode sombre ou clair (clair par défaut). Cette fonctionnalité est en bêta et peut ne pas fonctionner correctement ou avoir un affichage peu pratique, rendant la lecture difficile.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h1 id="version-1021">Note de mise à jour - Version 1.021</h1>
         <ul id="notes-1021" class="note-list">
             <li><strong>Correctif :</strong>
@@ -116,17 +151,18 @@
             <li>Correction d’un bug affectant la capacité spéciale de <strong>Oiseau</strong>.</li>
         </ul>
 
-        <h1 id="version-1015">Note de mise à jour - Version 1.015</h1>
-        <ul id="notes-1015" class="note-list">
-            <li>Correction d’un bug permettant d’obtenir de l’expérience illimitée en rechargeant la page.</li>
-            <li>Ajout des capacités spéciales de tous les personnages dans la section <strong>Personnages</strong>, à l'exception de <strong>Colorina</strong>.</li>
-        </ul>
-
         <a href="menu_principal.html" class="back-button">Retour</a>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+      function getUserData() {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        if (userData && userData.theme) {
+          document.body.classList.add('dark-theme');
+        }
+        return userData;
+      }
+      getUserData();
+      document.addEventListener('DOMContentLoaded', function() {
             const versions = document.querySelectorAll('h1');
 
             versions.forEach(version => {

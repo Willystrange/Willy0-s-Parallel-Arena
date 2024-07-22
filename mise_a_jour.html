@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Loading Page</title>
 <style>
   body {
@@ -92,7 +94,7 @@
       trophees: 0,
       argent: 0,
       VICTOIRE: false,
-      version: 1.021,
+      version: 1.023,
       xp_du_jour: 0,
       Willy: 1,
       Willy_XP: 0,
@@ -127,27 +129,24 @@
       Double_XP: 5,
       Double_XP_acheté: 0,
       lastDoubleXPCheck: 0,
+      theme: false
     };
 
     // Vérification et initialisation des valeurs manquantes ou incorrectes
     for (const key in defaultUserData) {
       if (!userData.hasOwnProperty(key)) {
         userData[key] = defaultUserData[key];
-      } else {
-        userData.argent = Math.round(userData.argent);
       }
-        
     }
 
     // Assure que la version dans userData est toujours la dernière version du jeu
-    userData.version = 1.021;
+    userData.version = 1.023;
 
     // Sauvegarder les données mises à jour dans localStorage
     saveUserData(userData);
   }
 
   // Appel de la fonction mise_a_jour au chargement de la page
-  
   mise_a_jour();
 </script>
 </body>
