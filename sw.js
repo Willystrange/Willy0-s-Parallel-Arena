@@ -18,6 +18,9 @@ self.addEventListener('install', (event) => {
         '/userdata.html',
         '/localStorage.js',
         '/settings-icon.heic',
+        '/icon.png',
+        '/XP_2.png',
+        'XP_MAX.png',
       ]);
     })
   );

@@ -233,7 +233,8 @@
 
         // Mettre à jour le solde affiché
         const userData = getUserData();
-        document.getElementById('balance').textContent = `Solde : ${userData.argent}`;
+        const argent = Math.round(userData.argent);
+        document.getElementById('balance').textContent = `Solde : ${argent}`;
 
         document.querySelectorAll('.buyButton').forEach(button => {
             button.addEventListener('click', (event) => {

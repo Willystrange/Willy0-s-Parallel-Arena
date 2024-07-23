@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             background-color: #e9ecef;
+            color: #343a40;
         }
         .container {
             width: 80%;
@@ -22,7 +23,6 @@
         }
         h1 {
             text-align: center;
-            color: #343a40;
             margin-bottom: 20px;
         }
         .form-group {
@@ -32,7 +32,6 @@
             display: block;
             font-weight: bold;
             margin-bottom: 8px;
-            color: #495057;
         }
         .form-group input[type="text"], .form-group textarea, .form-group select {
             width: 100%;
@@ -94,8 +93,59 @@
             display: inline-block;
             width: 20%;
         }
+        /* Styles pour le mode sombre */
+        .dark-theme {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .dark-theme .container {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .dark-theme h1 {
+            color: #e0e0e0;
+        }
+        .dark-theme .form-group label {
+            color: #b0b0b0;
+        }
+        .dark-theme .form-group input[type="text"], 
+        .dark-theme .form-group textarea, 
+        .dark-theme .form-group select {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+        .dark-theme .form-group button {
+            background-color: #555;
+            color: #e0e0e0;
+        }
+        .dark-theme .form-group button:hover {
+            background-color: #666;
+        }
+        .dark-theme .rating label {
+            color: #444;
+        }
+        .dark-theme .rating input:checked ~ label {
+            color: #f39c12;
+        }
+        .dark-theme .rating label:hover,
+        .dark-theme .rating label:hover ~ label {
+            color: #f39c12;
+        }
     </style>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            getUserData(); // Applique le thème sombre si nécessaire lors du chargement de la page
+        });
+
+        function getUserData() {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            if (userData && userData.theme === true) {
+                document.body.classList.add('dark-theme');
+            }
+        }
+
         function submitForm(event) {
             event.preventDefault(); // Empêche l'envoi du formulaire
 
@@ -117,7 +167,7 @@ Remarques : ${comments}`
         }
 
         function goBack() {
-            window.location.href = "index.html"; // Redirige vers index.html
+            window.location.href = "menu_principal.html"; // Redirige vers index.html
         }
     </script>
 </head>

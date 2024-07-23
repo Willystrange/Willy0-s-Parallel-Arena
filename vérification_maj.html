@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Vérification de mise à jour</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .button {
+      display: block;
+      padding: 15px;
+      font-size: 18px;
+      color: #fff;
+      background-color: #ff4500;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      margin: 10px 0;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .button:hover {
+      background-color: #e03e00;
+      transform: scale(1.02);
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 18px;
+      color: #ff4500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .back-button:hover {
+      color: #e03e00;
+    }
+
+    /* Styles pour le mode sombre */
+    .dark-theme {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-theme .container {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
+
+    .dark-theme h1 {
+        color: #e0e0e0;
+    }
+
+    .dark-theme .button {
+        background-color: #555;
+        color: #e0e0e0;
+    }
+
+    .dark-theme .button:hover {
+        background-color: #666;
+    }
+
+    .dark-theme .back-button {
+        color: #ff4500;
+    }
+
+    .dark-theme .back-button:hover {
+        color: #e03e00;
+    }
+  </style>
+</head>
+<body>
+  <a class="back-button" href="menu_principal.html">&lt; Retour</a>
+  <div class="container">
+    <h1>Vérification de mise à jour</h1>
+    <div id="updateMessage"></div>
+    <a id="updateButton" class="button" href="#" style="display: none;">Mettre à jour</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        getUserData(); // Applique le thème sombre si nécessaire lors du chargement de la page
+        checkForUpdate(); // Vérifie les mises à jour lors du chargement de la page
+    });
+
+    function getUserData() {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        if (userData && userData.theme === true) {
+            document.body.classList.add('dark-theme');
+        }
+    }
+
+    const jsonUrl = 'https://willystrange.github.io/Maj-tests/lasted-update.json';
+    const updateFileUrl = 'https://willystrange.github.io/Maj-tests/update.html';
+
+    async function checkForUpdate() {
+        try {
+            // Récupérer les données du fichier JSON
+            const response = await fetch(jsonUrl);
+            if (!response.ok) {
+                throw new Error('Erreur de réseau');
+            }
+            const data = await response.json();
+
+            // Vérifier la structure des données
+            console.log('Données reçues:', data);
+
+            const latestVersion = data.latestVersion;
+            const updateSize = data.taille_maj;
+            console.log('Version la plus récente:', latestVersion);
+            console.log('Taille de la mise à jour:', updateSize);
+
+            const userData = JSON.parse(localStorage.getItem('userData')) || {};
+            const userVersion = userData.version || '0.0.0'; // Valeur par défaut si aucune version n'est définie
+
+            // Comparer les versions
+            if (latestVersion !== userVersion) {
+                if (updateSize === 'G') {
+                    document.getElementById('updateMessage').textContent = 'La mise à jour nécessite de re-télécharger l’application.';
+                    document.getElementById('updateButton').style.display = 'none';
+                    setTimeout(() => {
+                        window.location.href = 'https://willy0-s-parallel-area.vercel.app/';
+                    }, 3000); // Redirection après 3 secondes
+                } else if (updateSize === 'P') {
+                    document.getElementById('updateMessage').textContent = 'Une nouvelle version est disponible !';
+                    document.getElementById('updateButton').style.display = 'block';
+                } else {
+                    console.error('Valeur inconnue pour taille_maj:', updateSize);
+                    document.getElementById('updateMessage').textContent = 'Erreur de mise à jour.';
+                }
+            } else {
+                document.getElementById('updateMessage').textContent = 'Vous utilisez déjà la dernière version.';
+                document.getElementById('updateButton').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Erreur lors de la vérification des mises à jour:', error);
+            document.getElementById('updateMessage').textContent = 'Impossible de vérifier les mises à jour.';
+        }
+    }
+
+    // Fonction pour gérer le clic sur le bouton de mise à jour
+    document.getElementById('updateButton').addEventListener('click', () => {
+        fetch(updateFileUrl)
+            .then(response => response.text())
+            .then(htmlContent => {
+                document.open();
+                document.write(htmlContent);
+                document.close();
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'application de la mise à jour:', error);
+            });
+    });
+  </script>
+</body>
+</html>

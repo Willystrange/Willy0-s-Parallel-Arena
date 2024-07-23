@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>Paramètres</title>
   <style>
     body {
@@ -96,7 +97,7 @@
       background-color: #2196F3;
     }
     input:checked + .slider:before {
-      transform: translateX(15px);
+      transform: translateX(16px);
     }
     /* Mode sombre */
     .dark-mode {
@@ -130,6 +131,7 @@
       color: #e03e00;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
   <a class="back-button" href="menu_principal.html">&lt; Retour</a>
@@ -138,6 +140,7 @@
     <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
     <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
     <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
+    <a class="button" href="vérification_maj.html">Vérifier si une mise à jour est disponible</a>
     <div class="theme-switch-container">
       <span>Mode sombre</span>
       <label class="theme-switch">
@@ -145,9 +148,9 @@
         <span class="slider"></span>
       </label>
     </div>
+    <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="localStorage.js"></script>
 
   <script>
@@ -168,14 +171,14 @@
 
         var reader = new FileReader();
         reader.onload = function(e) {
-          var importedData = decrypt(e.target.result);
           try {
+            var importedData = decrypt(e.target.result);
             var userData = JSON.parse(importedData);
             saveUserData(userData);
             alert('Sauvegarde importée avec succès !');
             location.reload();
           } catch (error) {
-            alert('Erreur lors de l\'importation de la sauvegarde.');
+            alert('Erreur lors de l\'importation de la sauvegarde. Les données sont peut-être corrompues ou la clé est incorrecte.');
           }
         };
         reader.readAsText(file);
@@ -184,27 +187,55 @@
     }
 
     function downloadBackup() {
-      var userData = getUserData();
-      var encryptedData = encrypt(JSON.stringify(userData));
-      var blob = new Blob([encryptedData], { type: 'text/plain' });
-      var url = URL.createObjectURL(blob);
+      try {
+        var userData = getUserData();
+        var encryptedData = encrypt(JSON.stringify(userData));
+        var blob = new Blob([encryptedData], { type: 'text/plain' });
+        var url = URL.createObjectURL(blob);
 
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'Willy0_s_Parallel_Arena_backup.txt';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+        var downloadLinkContainer = document.getElementById('downloadLinkContainer');
+        downloadLinkContainer.innerHTML = ''; // Clear previous link if any
+
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'Willy0_s_Parallel_Arena_backup.txt';
+        a.textContent = 'Télécharger la sauvegarde';
+        a.style.display = 'block';
+        a.style.marginTop = '10px';
+        a.style.padding = '10px';
+        a.style.fontSize = '18px';
+        a.style.color = '#fff';
+        a.style.backgroundColor = '#ff4500';
+        a.style.borderRadius = '5px';
+        a.style.textDecoration = 'none';
+
+        downloadLinkContainer.appendChild(a);
+
+        alert('Sauvegarde effectuée avec succès ! Cliquez sur le lien pour télécharger le fichier.');
+      } catch (error) {
+        alert('Erreur lors de la sauvegarde des données.');
+      }
     }
 
     function encrypt(data) {
-      return CryptoJS.AES.encrypt(data, secretKey).toString();
+      try {
+        return CryptoJS.AES.encrypt(data, secretKey).toString();
+      } catch (error) {
+        console.error('Erreur de cryptage:', error);
+        alert('Erreur de cryptage des données.');
+        return '';
+      }
     }
 
     function decrypt(data) {
-      var bytes = CryptoJS.AES.decrypt(data, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8);
+      try {
+        var bytes = CryptoJS.AES.decrypt(data, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8);
+      } catch (error) {
+        console.error('Erreur de décryptage:', error);
+        alert('Erreur de décryptage des données.');
+        return '';
+      }
     }
 
     function getUserData() {

@@ -1,5 +1,5 @@
 // Définir la version du jeu
-const game_version = 1.023;
+const game_version = '1.1.0';
 
 // Fonction pour ajuster aléatoirement les personnages
 function adjustCharacters(nbr_perso) {
@@ -52,7 +52,7 @@ if (!localStorage.getItem('userData')) {
     trophees: 0,
     argent: 0,
     VICTOIRE: false,
-    version: 1.023,
+    version: '1.1.0',
     xp_du_jour: 0,
     Willy: 1,
     Willy_XP: 0,

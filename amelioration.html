@@ -190,7 +190,7 @@
     // Fonction pour afficher les données utilisateur dans la page
     function afficherDonneesUtilisateur() {
       let userData = getUserData();
-      let points = userData.argent || 0;
+      let points = Math.round(userData.argent) || 0;
 
       const characters = [
         'Willy', 'Cocobi', 'Oiseau', 'Gros_Nounours', 'Baleine',
