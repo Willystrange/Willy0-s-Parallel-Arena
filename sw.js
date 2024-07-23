@@ -20,7 +20,8 @@ self.addEventListener('install', (event) => {
         '/settings-icon.heic',
         '/icon.png',
         '/XP_2.png',
-        'XP_MAX.png',
+        '/XP_MAX.png',
+        '/verification_maj.html',
       ]);
     })
   );
