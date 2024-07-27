@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Boost d'Amélioration de Gros Nounours</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .title {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .info {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .button-container {
+      margin-bottom: 20px;
+    }
+    .boost-button {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px 20px;
+      background-color: #32cd32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .boost-button:hover {
+      background-color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Choix du Boost d'Amélioration de Gros Nounours</div>
+  <div class="info">
+    Sélectionnez un boost pour Gros Nounours. Le personnage recevra un boost supplémentaire dans la statistique choisie :
+  </div>
+  <div class="button-container">
+    <button class="boost-button" onclick="setBoost(1)">PV</button>
+    <button class="boost-button" onclick="setBoost(2)">Attaque</button>
+    <button class="boost-button" onclick="setBoost(3)">Défense</button>
+  </div>
+
+  <script>
+    function getUserData() {
+      let userData = JSON.parse(localStorage.getItem('userData'));
+      if (!userData) {
+        userData = {};
+      }
+      return userData;
+    }
+
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    function setBoost(boostType) {
+      let userData = getUserData();
+      userData.Gros_Nounours_boost = boostType;
+      saveUserData(userData);
+      alert('Boost d\'amélioration de Gros Nounours mis à jour !');
+      // Redirection vers amelioration.html après l'alerte
+      window.location.href = '../amelioration.html';
+    }
+  </script>
+</body>
+</html>

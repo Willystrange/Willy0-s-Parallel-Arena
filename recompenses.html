@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Récompenses</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: background-image 0.5s ease, color 0.5s ease;
+    }
+
+    .container {
+      margin: 20px;
+    }
+
+    .reward-title {
+      font-size: 32px;
+      margin: 20px 0;
+    }
+
+    .reward-item {
+      font-size: 24px;
+      margin: 15px 0;
+    }
+
+    .button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s, transform 0.3s, color 0.3s;
+      margin: 5px;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Styles pour la rareté légendaire */
+    .background-1 {
+      background: radial-gradient(circle, #ffd700, #ffcc33, #f5c842);
+      color: #333;
+    }
+
+    .background-1 .button {
+      background-color: #333;
+      color: #ffd700;
+    }
+
+    .background-1 .button:hover {
+      background-color: #555;
+    }
+
+    /* Styles pour la rareté épique */
+    .background-2 {
+      background: radial-gradient(circle, #4b0082, #6a0dad, #8a2be2);
+      color: #fff;
+    }
+
+    .background-2 .button {
+      background-color: #8a2be2;
+      color: #fff;
+    }
+
+    .background-2 .button:hover {
+      background-color: #6a0dad;
+    }
+
+    /* Styles pour la rareté rare */
+    .background-3 {
+      background: radial-gradient(circle, #00bfff, #00ced1, #00fa9a);
+      color: #fff;
+    }
+
+    .background-3 .button {
+      background-color: #00fa9a;
+      color: #fff;
+    }
+
+    .background-3 .button:hover {
+      background-color: #00ced1;
+    }
+
+    /* Styles pour la rareté inhabituelle */
+    .background-4 {
+      background: radial-gradient(circle, #ffd700, #ffa500, #ff6347);
+      color: #333;
+    }
+
+    .background-4 .button {
+      background-color: #ff6347;
+      color: #fff;
+    }
+
+    .background-4 .button:hover {
+      background-color: #ffa500;
+    }
+
+    /* Styles pour le mode sombre */
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .reward-title,
+    .dark-mode .reward-item {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .button {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .button:hover {
+      background-color: #555;
+    }
+
+    .dark-mode .background-1 {
+      background: radial-gradient(circle, #f5c842, #ffcc33, #ffd700);
+    }
+
+    .dark-mode .background-2 {
+      background: radial-gradient(circle, #8a2be2, #6a0dad, #4b0082);
+    }
+
+    .dark-mode .background-3 {
+      background: radial-gradient(circle, #00fa9a, #00ced1, #00bfff);
+    }
+
+    .dark-mode .background-4 {
+      background: radial-gradient(circle, #ff6347, #ffa500, #ffd700);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="reward-title">Vous avez reçu une récompense !</div>
+    <div id="reward-display" class="reward-item"></div>
+    <button class="button" onclick="goToMainMenu()">Retour au menu principal</button>
+  </div>
+
+  <script>
+    const characters = {
+      'Doudou': 1,
+      'Coeur': 1,
+      'Gros_Nounours': 2,
+      'Baleine': 2,
+      'Poulpy': 2,
+      'Willy': 3,
+      'Oiseau': 3,
+      'Colorina': 3,
+      'Cocobi': 4,
+      'Diva': 4
+    };
+
+    const rarityProbabilities = {
+      1: 0.02, // Légendaire
+      2: 0.03, // Épique
+      3: 0.07, // Rare
+      4: 0.12 // Inhabituel
+    };
+    const rarityProbabilitiesXP = {
+      1: 0.05,
+      2: 0.15,
+      3: 0.2,
+      4: 0.6,
+    }
+    const xpRanges = {
+      1: [100, 200], // Légendaire
+      2: [50, 100],  // Épique
+      3: [20, 50],   // Rare
+      4: [0, 20]     // Inhabituel
+    };
+
+    function getUserData() {
+      return JSON.parse(localStorage.getItem('userData')) || {};
+    }
+
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomXP() {
+      const rarityRand = Math.random();
+      let cumulativeProb = 0;
+      let selectedRarity = null;
+
+      for (const [rarityLevel, probability] of Object.entries(rarityProbabilitiesXP)) {
+        cumulativeProb += probability;
+        if (rarityRand < cumulativeProb) {
+          selectedRarity = parseInt(rarityLevel);
+          break;
+        }
+      }
+
+      if (selectedRarity && xpRanges[selectedRarity]) {
+        const [min, max] = xpRanges[selectedRarity];
+        return getRandomInt(min, max);
+      } else {
+        console.error('Rareté invalide ou plage d\'XP non définie pour la rareté:', selectedRarity);
+        return 0;
+      }
+    }
+
+    function getRandomMAXMoney() {
+      const minMAXMoney = 50;
+      const maxMAXMoney = 120;
+      return getRandomInt(minMAXMoney, maxMAXMoney);
+    }
+
+    function getRandomMoney() {
+      const minMoney = 1;
+      const maxMoney = 30;
+      return getRandomInt(minMoney, maxMoney);
+    }
+
+    function applyBackgroundForRarity(rarity) {
+      document.body.classList.remove('background-1', 'background-2', 'background-3', 'background-4');
+      document.body.classList.add(`background-${rarity}`);
+    }
+
+    function generateAndStoreReward(userData) {
+      let rewards = [];
+      const forceCharacter = userData.perso_recompense > 0;
+
+      if (forceCharacter) {
+        userData.perso_recompense -= 1;
+        let characterObtained = false;
+
+        while (!characterObtained) {
+          const rarityRand = Math.random();
+          let cumulativeProb = 0;
+          let selectedRarity = null;
+
+          for (const [rarityLevel, probability] of Object.entries(rarityProbabilities)) {
+            cumulativeProb += probability;
+            if (rarityRand < cumulativeProb) {
+              selectedRarity = parseInt(rarityLevel);
+              break;
+            }
+          }
+
+          const availableCharacters = Object.keys(characters).filter(char => userData[char] !== 1 && characters[char] === selectedRarity);
+          if (availableCharacters.length > 0) {
+            const reward = availableCharacters[getRandomInt(0, availableCharacters.length - 1)];
+            userData[reward] = 1;
+            rewards.push(reward);
+            saveUserData(userData);
+            applyBackgroundForRarity(selectedRarity);
+            characterObtained = true;
+          }
+        }
+      } else {
+        userData.recompense -= 1;
+        saveUserData(userData);
+        let random = Math.random();
+
+        const chanceCharacter = 0.19;
+        const chanceDoubleXP = 0.18;
+        const chanceHealthPotion = 0.21;
+        const chanceAmulet = 0.14;
+        const chanceXP = 0.28;
+        const chanceMoney = 0.15;
+        const chanceMAXMoney = 0.03;
+
+        if (random < chanceCharacter) {
+          const rarityRand = Math.random();
+          let cumulativeProb = 0;
+          let selectedRarity = null;
+
+          for (const [rarityLevel, probability] of Object.entries(rarityProbabilities)) {
+            cumulativeProb += probability;
+            if (rarityRand < cumulativeProb) {
+              selectedRarity = parseInt(rarityLevel);
+              break;
+            }
+          }
+
+          const availableCharacters = Object.keys(characters).filter(char => userData[char] !== 1 && characters[char] === selectedRarity);
+          if (availableCharacters.length > 0) {
+            const reward = availableCharacters[getRandomInt(0, availableCharacters.length - 1)];
+            userData[reward] = 1;
+            rewards.push(reward);
+            applyBackgroundForRarity(selectedRarity);
+          } else {
+            rewards = rewards.concat(generateAndStoreReward(userData));
+          }
+        } else if (random < chanceCharacter + chanceDoubleXP) {
+          let doubleXPAmount = getRandomInt(1, 5);
+          userData.DOUBLE_XP_acheté = (userData.DOUBLE_XP_acheté || 0) + doubleXPAmount;
+          rewards.push(`DOUBLE XP : +${doubleXPAmount}`);
+        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion) {
+          userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + 1;
+          rewards.push("Potion de Santé");
+        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet) {
+          userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
+          rewards.push("Amulette de Régénération");
+        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet + chanceXP) {
+          const acquiredCharacters = Object.keys(characters).filter(char => userData[char] === 1);
+          if (acquiredCharacters.length > 0) {
+            const character = acquiredCharacters[getRandomInt(0, acquiredCharacters.length - 1)];
+            const xpAmount = getRandomXP();
+            userData[character + '_XP'] = (userData[character + '_XP'] || 0) + xpAmount;
+            rewards.push(`${character} XP : +${xpAmount}`);
+          } else {
+            rewards = rewards.concat(generateAndStoreReward(userData));
+          }
+        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet + chanceXP + chanceMoney) {
+          const moneyAmount = getRandomMoney();
+          userData.argent = (userData.argent || 0) + moneyAmount;
+          rewards.push(`Points : +${moneyAmount}`);
+        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet + chanceMoney + chanceMAXMoney) {
+          const maxmoneyamont = getRandomMAXMoney();
+          userData.argent = (userData.argent || 0) + maxmoneyamont;
+          rewards.push(`Points : +${maxmoneyamont}`);
+        }
+      }
+
+      saveUserData(userData);
+      return rewards;
+    }
+
+    function applyDarkMode() {
+      const userData = getUserData();
+      if (userData.theme) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    }
+
+    function displayReward() {
+      const userData = getUserData();
+      let rewards = JSON.parse(localStorage.getItem('currentReward'));
+
+      if (!rewards) {
+        if (!userData) {
+          document.getElementById('reward-display').innerText = "Aucune donnée utilisateur trouvée.";
+          return;
+        }
+
+        if (userData.recompense <= 0 && userData.perdo_recompense <= 0) {
+          window.location.href = 'menu_principal.html';
+        } else {
+          rewards = generateAndStoreReward(userData);
+          localStorage.setItem('currentReward', JSON.stringify(rewards));
+        }
+      }
+
+      const rewardDisplay = document.getElementById('reward-display');
+      rewardDisplay.innerHTML = rewards.map(reward => `<div class="reward-item">Récompense : ${reward}</div>`).join('');
+    }
+
+    function goToMainMenu() {
+      localStorage.removeItem('currentReward'); // Effacer la récompense stockée lors du retour au menu
+      window.location.href = 'menu_principal.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      applyDarkMode();
+      displayReward();      
+    });
+  </script>
+</body>
+</html>
+
+

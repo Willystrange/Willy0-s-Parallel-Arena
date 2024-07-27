@@ -88,6 +88,20 @@
       font-size: 14px;
       color: #888;
     }
+    .boost-button {
+      display: block;
+      margin-top: 5px;
+      padding: 8px 15px;
+      background-color: #32cd32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .boost-button:hover {
+      background-color: #28a745;
+    }
     /* Styles pour le mode sombre */
     .dark-theme {
         background-color: #121212;
@@ -163,34 +177,57 @@
   </div>
 
   <script>
-    // Fonction pour obtenir les données utilisateur depuis localStorage
+    let currentlyOpenedCharacter = null;
+
+    function toggleCharacterInfo(character, event) {
+      event.stopPropagation();
+      let userData = getUserData();
+      const level = userData[character + '_Level'];
+      const boost = userData[character + '_boost'] || 0;
+
+      if (level >= 5 && boost === 0) {
+        window.location.href = `/${character}.html`;
+      } else {
+        const infoDiv = document.getElementById(character + '-info');
+        if (currentlyOpenedCharacter && currentlyOpenedCharacter !== character) {
+          document.getElementById(currentlyOpenedCharacter + '-info').style.display = 'none';
+        }
+        if (infoDiv.style.display === 'none' || infoDiv.style.display === '') {
+          infoDiv.style.display = 'block';
+          currentlyOpenedCharacter = character;
+        } else {
+          currentlyOpenedCharacter = null;
+          infoDiv.style.display = 'none';
+        }
+      }
+    }
+
     function getUserData() {
-      userData = JSON.parse(localStorage.getItem('userData'));
+      let userData = JSON.parse(localStorage.getItem('userData'));
+      if (!userData) {
+        userData = {};
+      }
       if (userData.theme) {
         document.body.classList.add('dark-theme');
-        return userData;
       }
-      }
+      return userData;
+    }
 
-    // Fonction pour sauvegarder les données utilisateur dans localStorage
     function saveUserData(userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
     }
 
-    // Fonction pour calculer l'XP nécessaire pour passer au niveau suivant
     function xpPourNiveauSuivant(level) {
-      return level * 100;
+      return level * level * 20;
     }
 
-    // Fonction pour calculer le coût en points pour monter de niveau
     function coutPourNiveauSuivant(level) {
-      return level * 25; // Par exemple, chaque niveau coûte 25 points de plus que le précédent
+      return level * 25;
     }
 
-    // Fonction pour afficher les données utilisateur dans la page
     function afficherDonneesUtilisateur() {
       let userData = getUserData();
-      let points = Math.round(userData.argent) || 0;
+      let points = Math.round(userData.argent || 0);
 
       const characters = [
         'Willy', 'Cocobi', 'Oiseau', 'Gros_Nounours', 'Baleine',
@@ -207,35 +244,27 @@
           const cost = coutPourNiveauSuivant(level);
           const canLevelUp = xp >= xpNeeded && points >= cost;
 
-          charactersUnlocked += `<div class="character" onclick="toggleCharacterInfo('${character}')">
-                                    ${canLevelUp ? '<div class="level-up-indicator"></div>' : ''}
-                                    <strong>${character}</strong>
-                                    <div id="${character}-info" class="character-info">
-                                      Niveau: ${level}<br>
-                                      Points d'XP: ${xp} / ${xpNeeded}<br>
-                                      Points disponibles: ${points}<br>
-                                      <div class="cost-info">Coût pour monter au niveau suivant: ${cost} points</div>
-                                      ${canLevelUp ? `<button class="level-up-button" onclick="levelUp('${character}'); event.stopPropagation();">Monter de niveau</button>` : ''}
-                                    </div>
-                                  </div>`;
+          let characterHTML = `<div class="character" onclick="toggleCharacterInfo('${character}', event)">
+                                 ${level < 11 && canLevelUp ? '<div class="level-up-indicator"></div>' : ''}
+                                 <strong>${character}</strong>
+                                 <div id="${character}-info" class="character-info">
+                                   Niveau: ${level}${level >= 11 ? ' (Niveau Maximum atteint !)' : ''}<br>
+                                   ${level < 11 ? `Points d'XP: ${xp} / ${xpNeeded}<br>` : ''}
+                                   ${level < 11 ? `Points disponibles: ${points}<br>` : ''}
+                                   ${level < 11 ? `<div class="cost-info">Coût pour monter au niveau suivant: ${cost} points</div>` : ''}
+                                   ${canLevelUp && level < 11 ? `<button class="level-up-button" onclick="levelUp('${character}', event)">Monter de niveau</button>` : ''}
+                                 </div>
+                               </div>`;
+
+          charactersUnlocked += characterHTML;
         }
       });
 
       document.getElementById('characters-unlocked').innerHTML = charactersUnlocked;
     }
 
-    // Fonction pour afficher ou masquer les informations d'un personnage
-    function toggleCharacterInfo(character) {
-      const infoDiv = document.getElementById(character + '-info');
-      if (infoDiv.style.display === 'none' || infoDiv.style.display === '') {
-        infoDiv.style.display = 'block';
-      } else {
-        infoDiv.style.display = 'none';
-      }
-    }
-
-    // Fonction pour monter de niveau
-    function levelUp(character) {
+    function levelUp(character, event) {
+      event.stopPropagation();
       let userData = getUserData();
       const level = userData[character + '_Level'];
       const xp = userData[character + '_XP'];
@@ -243,25 +272,22 @@
       const cost = coutPourNiveauSuivant(level);
       const points = userData.argent || 0;
 
-      if (xp >= xpNeeded && points >= cost) {
+      if (level < 11 && xp >= xpNeeded && points >= cost) {
         userData[character + '_Level'] += 1;
         userData[character + '_XP'] -= xpNeeded;
-        userData.argent-= cost;
+        userData.argent -= cost;
         saveUserData(userData);
-        afficherDonneesUtilisateur(); // Mettre à jour l'affichage
+        afficherDonneesUtilisateur();
       }
     }
 
-    // Fonction pour revenir en arrière dans l'historique du navigateur
     function goBack() {
-      window.history.back();
+      window.location.href = 'menu_principal.html';
     }
 
-    // Appeler la fonction pour afficher les données utilisateur lorsque la page est chargée
     document.addEventListener('DOMContentLoaded', function() {
       afficherDonneesUtilisateur();
     });
-
   </script>
 </body>
 </html>

@@ -150,11 +150,11 @@
             // Comparer les versions
             if (latestVersion !== userVersion) {
                 if (updateSize === 'G') {
-                    document.getElementById('updateMessage').textContent = 'La mise à jour nécessite de re-télécharger l’application.';
+                    document.getElementById('updateMessage').textContent = 'La mise à jour nécessite de re-télécharger l’application. Pensez à sauvegarder vos données !';
                     document.getElementById('updateButton').style.display = 'none';
                     setTimeout(() => {
                         window.location.href = 'https://willy0-s-parallel-area.vercel.app/';
-                    }, 3000); // Redirection après 3 secondes
+                    }, 4000); // Redirection après 4 secondes
                 } else if (updateSize === 'P') {
                     document.getElementById('updateMessage').textContent = 'Une nouvelle version est disponible !';
                     document.getElementById('updateButton').style.display = 'block';

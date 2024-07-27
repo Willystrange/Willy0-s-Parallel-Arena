@@ -103,34 +103,47 @@
     }
     /* Styles pour le thème sombre */
     .dark-theme {
-      background: #000000;
-      color: #ffffff;
+      background: #121212;
+      color: #e0e0e0;
+    }
+
+    .dark-theme h2 {
+      color: #e0e0e0;
+      text-shadow: 2px 2px 4px #000000;
     }
 
     .dark-theme .character-button {
-      background-color: #444444; /* Plus foncé que l'original */
-      color: #ffffff;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+      background-color: #333333; /* Couleur de base pour les boutons en mode sombre */
+      color: #e0e0e0;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     }
 
     .dark-theme .character-button:hover {
-      background-color: #666666; /* Plus foncé que l'original */
+      background-color: #555555; /* Couleur plus claire pour le survol */
+    }
+
+    .dark-theme .character-button.disabled {
+      background-color: #666666; /* Gris pour les boutons désactivés */
+    }
+
+    .dark-theme .unlock-message {
+      color: #ffb74d; /* Orange atténué pour les messages de déblocage */
     }
 
     .dark-theme .choose-button {
-      background-color: #2e8b57; /* Version plus foncée du vert */
-      color: #ffffff;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+      background-color: #4caf50; /* Une couleur verte atténuée */
+      color: #e0e0e0;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     }
 
     .dark-theme .choose-button:hover {
-      background-color: #1e6f3f; /* Plus foncé que l'original */
+      background-color: #388e3c; /* Plus foncé pour le survol */
     }
 
     .dark-theme .stats {
-      background-color: rgba(0, 0, 0, 0.7);
-      color: #ffffff;
-      border: 1px solid #666666; /* Bordure gris pour les stats */
+      background-color: rgba(33, 33, 33, 0.9);
+      color: #e0e0e0;
+      border: 1px solid #555555; /* Bordure pour les stats */
     }
 
     .dark-theme .stats::-webkit-scrollbar {
@@ -138,15 +151,15 @@
     }
 
     .dark-theme .stats::-webkit-scrollbar-track {
-      background: #333333; /* Couleur de l'arrière-plan du défilement */
+      background: #1c1c1c; /* Couleur de l'arrière-plan du défilement */
     }
 
     .dark-theme .stats::-webkit-scrollbar-thumb {
-      background: #666666; /* Couleur du curseur de défilement */
+      background: #555555; /* Couleur du curseur de défilement */
     }
 
     .dark-theme .stats::-webkit-scrollbar-thumb:hover {
-      background: #888888; /* Couleur du curseur de défilement au survol */
+      background: #777777; /* Couleur du curseur de défilement au survol */
     }
   </style>
 </head>
@@ -163,16 +176,16 @@
 
       // Liste des personnages avec leurs caractéristiques de base
       const characters = [
-        { name: "Willy", pv: 11007, attaque: 458, defense: 86, spe: 0.5, argent: 0, pv_max: 11007, attaque_originale: 458, defense_originale: 86 },
-        { name: "Cocobi", pv: 10647, attaque: 430, defense: 120, spe: 0.5, argent: 0, pv_max: 10647, attaque_originale: 430, defense_originale: 120 },
-        { name: "Oiseau", pv: 9500, attaque: 530, defense: 73, spe: 0.5, argent: 0, pv_max: 9500, attaque_originale: 530, defense_originale: 73 },
-        { name: "Gros Nounours", pv: 12800, attaque: 420, defense: 73, spe: 0.5, argent: 0, pv_max: 12800, attaque_originale: 420, defense_originale: 73 },
-        { name: "Baleine", pv: 10800, attaque: 420, defense: 112, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 420, defense_originale: 112 },
-        { name: "Doudou", pv: 14000, attaque: 330, defense: 90, spe: 0, argent: 0, pv_max: 14000, attaque_originale: 330, defense_originale: 90 },
-        { name: "Coeur", pv: 9900, attaque: 464, defense: 103, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 464, defense_originale: 103 },
-        { name: "Diva", pv: 10570, attaque: 456, defense: 98, spe: 0.5, argent: 0, pv_max: 10570, attaque_originale: 456, defense_originale: 98 },
-        { name: "Poulpy", pv: 11200, attaque: 450, defense: 95, spe: 0.5, argent: 0, pv_max: 11200, attaque_originale: 450, defense_originale: 95 },
-        { name: "Colorina", pv: 9800, attaque: 410, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 410, defense_originale: 85 }
+        { name: "Willy", pv: 11200, attaque: 470, defense: 80, spe: 0.5, argent: 0, pv_max: 11200, attaque_originale: 470, defense_originale: 80 },
+        { name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115 },
+        { name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85 },
+        { name: "Gros Nounours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68 },
+        { name: "Baleine", pv: 10500, attaque: 430, defense: 115, spe: 0.5, argent: 0, pv_max: 10500, attaque_originale: 430, defense_originale: 115 },
+        { name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: 0, argent: 0, pv_max: 13800, attaque_originale: 350, defense_originale: 80 },
+        { name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: 0.5, argent: 0, pv_max: 10000, attaque_originale: 450, defense_originale: 100 },
+        { name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 10700, attaque_originale: 440, defense_originale: 100 },
+        { name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 11500, attaque_originale: 440, defense_originale: 100 },
+        { name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: 0.5, argent: 0, pv_max: 9600, attaque_originale: 420, defense_originale: 80 }
       ];
 
       const characterList = document.getElementById("character-list");
@@ -225,11 +238,24 @@
         // Calculer les statistiques basées sur le niveau actuel du personnage
         const levelKey = character.name + '_Level';
         const currentLevel = userData[levelKey];
-        const increasedPV = Math.round(character.pv * (1 + 0.08 * (currentLevel - 1)));
-        const increasedAttaque = Math.round(character.attaque * (1 + 0.08 * (currentLevel - 1)));
-        const increasedDefense = Math.round(character.defense * (1 + 0.08 * (currentLevel - 1)));
-        const increasedattaque_originale = Math.round(character.attaque_originale * (1 + 0.08 * (currentLevel - 1)));
-        const increaseddefense_originale = Math.round(character.defense_originale * (1 + 0.08 * (currentLevel - 1)));
+        let increasedPV = Math.round(character.pv * (1 + 0.08 * (currentLevel - 1)));
+        let increasedAttaque = Math.round(character.attaque * (1 + 0.08 * (currentLevel - 1)));
+        let increasedDefense = Math.round(character.defense * (1 + 0.08 * (currentLevel - 1)));
+        let increasedattaque_originale = Math.round(character.attaque_originale * (1 + 0.08 * (currentLevel - 1)));
+        let increaseddefense_originale = Math.round(character.defense_originale * (1 + 0.08 * (currentLevel - 1)));
+
+        if (currentLevel >= 5) {
+          const boostType = Math.floor(Math.random() * 3) + 1;
+          if (boostType === 1) {
+            increasedAttaque = Math.round(increasedAttaque * 1.02);
+            increasedattaque_originale = increasedAttaque;
+          } else if (boostType === 2) {
+            increasedDefense = Math.round(increasedDefense * 1.02);
+            increaseddefense_originale = increasedDefense;
+          } else if (boostType === 3) {
+            increasedPV = Math.round(increasedPV * 1.02);
+          }
+        }
 
         statsDiv.innerHTML = `
           <h3>${character.name} (Niveau ${currentLevel})</h3>
@@ -261,6 +287,7 @@
           }
         }
       }
+
       window.chooseCharacter = function(name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale) {
         sessionStorage.setItem('playerCharacter', JSON.stringify({ name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale }));
 
@@ -269,15 +296,42 @@
         const randomIndex = Math.floor(Math.random() * remainingCharacters.length);
         const opponentCharacter = remainingCharacters[randomIndex];
 
-        sessionStorage.setItem('opponentCharacter', JSON.stringify(opponentCharacter));
+        // Déterminer le niveau de l'adversaire aléatoirement entre (player level - 1) et (player level + 2)
+        const levelKey = name + '_Level';
+        const playerLevel = userData[levelKey];
+        const minOpponentLevel = Math.max(1, playerLevel - 1); // Le niveau de l'adversaire ne peut pas être inférieur à 1
+        const maxOpponentLevel = playerLevel + 1;
+        const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel + 1)) + minOpponentLevel;
 
-        // Redirection vers combat.html après avoir stocké les données du personnage et de l'adversaire
+        // Calculer les statistiques de l'adversaire basées sur son niveau
+        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + 0.08 * (opponentLevel - 1)));
+        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + 0.08 * (opponentLevel - 1)));
+        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + 0.08 * (opponentLevel - 1)));
+        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + 0.08 * (opponentLevel - 1)));
+        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + 0.08 * (opponentLevel - 1)));
+
+        if (opponentLevel >= 5) {
+          const boostType = Math.floor(Math.random() * 3) + 1;
+          if (boostType === 1) {
+            increasedOpponentAttaque = Math.round(increasedOpponentAttaque * 1.02);
+            increasedattaque_originale = increasedOpponentAttaque;
+          } else if (boostType === 2) {
+            increasedOpponentDefense = Math.round(increasedOpponentDefense * 1.02);
+            increaseddefense_originale = increasedOpponentDefense;
+          } else if (boostType === 3) {
+            increasedOpponentPV = Math.round(increasedOpponentPV * 1.02);
+          }
+        }
+
+        sessionStorage.setItem('opponentCharacter', JSON.stringify({ name: opponentCharacter.name, pv: increasedOpponentPV, attaque: increasedOpponentAttaque, defense: increasedOpponentDefense, spe: opponentCharacter.spe, argent: opponentCharacter.argent, pv_max: opponentCharacter.pv_max, attaque_originale: increasedattaque_originale, defense_originale: increaseddefense_originale }));
+
+        // Redirection vers la page de combat
         window.location.href = 'combat.html';
-      };
+      }
 
-      // Fonction pour récupérer les données utilisateur depuis localStorage
+    // Fonction pour récupérer les données utilisateur depuis localStorage
       function getUserData() {
-        let userData = localStorage.getItem('userData');
+      let userData = localStorage.getItem('userData');
         if (!userData) {
           // Initialiser les données utilisateur si elles n'existent pas encore
           userData = {
@@ -287,39 +341,56 @@
             trophees: 0,
             argent: 0,
             VICTOIRE: false,
-            version: "1.1.0",
+            version: '2.0.0',
+            recompense: 0,
+            perso_recompense: 0,
             xp_du_jour: 0,
             Willy: 1,
             Willy_XP: 0,
             Willy_Level: 1,
-            Willy_gain: false,
+            Willy_boost: 0,
             Cocobi: 1,
             Cocobi_XP: 0,
             Cocobi_Level: 1,
+            Cocobi_boost: 0,
             Oiseau: 0,
             Oiseau_XP: 0,
             Oiseau_Level: 1,
+            Oiseau_boost: 0,
             Gros_Nounours: 0,
             Gros_Nounours_XP: 0,
             Gros_Nounours_Level: 1,
+            Gros_Nounours_boost: 0,
             Baleine: 0,
             Baleine_XP: 0,
             Baleine_Level: 1,
+            Baleine_boost: 0,
             Doudou: 0,
             Doudou_XP: 0,
             Doudou_Level: 1,
+            Doudou_boost: 0,
             Coeur: 0,
             Coeur_XP: 0,
             Coeur_Level: 1,
+            Coeur_boost: 0,
             Diva: 0,
             Diva_XP: 0,
             Diva_Level: 1,
+            Diva_boost: 0,
             Poulpy: 0,
             Poulpy_XP: 0,
             Poulpy_Level: 1,
+            Poulpy_boost: 0,
             Colorina: 0,
             Colorina_XP: 0,
             Colorina_Level: 1,
+            Colorina_boost: 0,
+            Double_XP: 5,
+            Double_XP_acheté: 0,
+            Potion_de_Santé_acheté: 0,
+            Amulette_de_Régénération_acheté: 0,
+            lastDoubleXPCheck: 0,
+            theme: false // Défaut clair
           };
           localStorage.setItem('userData', JSON.stringify(userData));
         } else {

@@ -166,16 +166,16 @@
   <script>
     // Données des personnages
     const characters = [
-      { name: "Willy", pv: 11007, attaque: 458, defense: 86, spe: "Il fait 2 attaques !" },
-      { name: "Cocobi", pv: 10647, attaque: 430, defense: 120, spe: "Réduit les PV de l'adversaire a hauteur de 11% de ses pv maximums" },
-      { name: "Oiseau", pv: 9500, attaque: 530, defense: 73, spe: "Inflige des dégâts élevés et gagne 15 de défense pour 2 tours." },
-      { name: "Gros Nounours", pv: 12800, attaque: 420, defense: 73, spe: "Attaque avec 544 de dégâts supplémentaires et ignore la défense de l'adversaire." },
-      { name: "Baleine", pv: 10800, attaque: 420, defense: 112, spe: "Perd 25 de défense et gagne 1200 PV" },
-      { name: "Doudou", pv: 14000, attaque: 330, defense: 90, spe: "Régénère des PV (10% ou 20%)" },
-      { name: "Coeur", pv: 9900, attaque: 464, defense: 103, spe: "Inflige des dégâts et absorbe 20% des PV" },
-      { name: "Diva", pv: 10570, attaque: 456, defense: 98, spe: "Réduit l'attaque de l'adversaire de 25% pendant 3 tours" },
-      { name: "Poulpy", pv: 11200, attaque: 450, defense: 95, spe: "Inflige 200% de dégâts à son adversaire, en ignorant 50% de sa défense et en la réduisant de 20% pour les deux prochains tours." },
-      { name: "Colorina", pv: 9800, attaque: 410, defense: 85, spe: "Colorina attaque son adversaire avec 90% de sa puissance, et diminue de 15% la défense de l'adversaire pendant 2 tours" }
+      { name: "Willy", pv: 11200, attaque: 470, defense: 80, spe: "Il effectue deux attaques." },
+      { name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: "Réduit les PV de l'adversaire de 10% de ses PV maximum." },
+      { name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: "Inflige des dégâts équivalents à 2.5 fois son attaque et augmente sa défense de 20 pour les deux prochains tours." },
+      { name: "Gros Nounours", pv: 13000, attaque: 430, defense: 68, spe: "Inflige des dégâts équivalents à 500 plus son attaque, en ignorant la moitié de la défense de l'adversaire." },
+      { name: "Baleine", pv: 10500, attaque: 430, defense: 115, spe: "Si sa défense est inférieure à 29, il effectue une attaque normale. Sinon, il perd 10 de défense et gagne 1000 PV avant d'attaquer normalement." },
+      { name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: "Régénère des PV. Si elle a plus de la moitié de ses PV maximum, elle régénère 5% de ses PV actuels. Sinon, elle régénère 15% de ses PV actuels." },
+      { name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: "Inflige des dégâts équivalents à 1.5 fois son attaque. Si ses PV sont supérieurs à la moitié de ses PV maximum, il régénère 10% des dégâts infligés. Sinon, il régénère 15% des dégâts infligés." },
+      { name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: "Réduit l'attaque de l'adversaire de 20% pour les trois prochains tours." },
+      { name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: "Inflige des dégâts équivalents à 1.75 fois son attaque, en ignorant 50% de la défense de l'adversaire. Réduit la défense de l'adversaire de 15% pour les deux prochains tours." },
+      { name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: "Inflige des dégâts équivalents à 85% de son attaque et réduit la défense de l'adversaire de 15% pour les trois prochains tours." }
     ];
 
     const characterContainer = document.querySelector('.character-container');
@@ -293,44 +293,56 @@
         trophees: 0,
         argent: 0,
         VICTOIRE: false,
-        version: "1.1.0",
+        version: '2.0.0',
+        recompense: 0,
+        perso_recompense: 0,
         xp_du_jour: 0,
         Willy: 1,
         Willy_XP: 0,
         Willy_Level: 1,
-        Willy_gain: false,
+        Willy_boost: 0,
         Cocobi: 1,
         Cocobi_XP: 0,
         Cocobi_Level: 1,
+        Cocobi_boost: 0,
         Oiseau: 0,
         Oiseau_XP: 0,
         Oiseau_Level: 1,
+        Oiseau_boost: 0,
         Gros_Nounours: 0,
         Gros_Nounours_XP: 0,
         Gros_Nounours_Level: 1,
+        Gros_Nounours_boost: 0,
         Baleine: 0,
         Baleine_XP: 0,
         Baleine_Level: 1,
+        Baleine_boost: 0,
         Doudou: 0,
         Doudou_XP: 0,
         Doudou_Level: 1,
+        Doudou_boost: 0,
         Coeur: 0,
         Coeur_XP: 0,
         Coeur_Level: 1,
+        Coeur_boost: 0,
         Diva: 0,
         Diva_XP: 0,
         Diva_Level: 1,
+        Diva_boost: 0,
         Poulpy: 0,
         Poulpy_XP: 0,
         Poulpy_Level: 1,
+        Poulpy_boost: 0,
         Colorina: 0,
         Colorina_XP: 0,
         Colorina_Level: 1,
+        Colorina_boost: 0,
         Double_XP: 5,
         Double_XP_acheté: 0,
-        pseudo: '', // Initialisation du pseudo vide
-        lastDoubleXPCheck: 0, // Initialisation de la date de dernière vérification de Double XP
-        theme: false, // Initialisation du thème par défaut
+        Potion_de_Santé_acheté: 0,
+        Amulette_de_Régénération_acheté: 0,
+        lastDoubleXPCheck: 0,
+        theme: false // Défaut clair
       }));
     }
 

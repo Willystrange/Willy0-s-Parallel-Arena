@@ -165,7 +165,7 @@
     .dialog button:hover {
       background-color: #0056b3;
     }
-  </style
+  </style>
 </head>
 <body>
   <div class="title">Willy0's</div>
@@ -183,10 +183,10 @@
     </div>
     <button class="view-data-button" onclick="viewGameData()">Mes Stats</button>
     <button class="char-button" onclick="viewCharacters()">Personnages</button>
-    <button class="shop-button" onclick="viewShop()">Boutique</button> <!-- Nouveau bouton ajouté -->
+    <button class="shop-button" onclick="viewShop()">Boutique</button>
   </div>
 
-  <script src="localStorage.js"></script> <!-- Lien vers votre script de gestion de localStorage -->
+  <script src="localStorage.js"></script>
 
   <script>
     function goToSettings() {
@@ -194,27 +194,25 @@
     }
 
     function startGame() {
-      window.location.href = "characters.html"; // Redirection vers la page de sélection des personnages
+      window.location.href = "characters.html";
     }
 
     function viewGameData() {
-      window.location.href = "userdata.html"; // Redirection vers la page d'affichage des données utilisateur
+      window.location.href = "userdata.html";
     }
 
     function viewCharacters() {
-      window.location.href = "perso_stats.html"; // Redirection vers la page d'affichage des personnages
+      window.location.href = "perso_stats.html";
     }
 
     function viewShop() {
-      window.location.href = "boutique.html"; // Redirection vers la boutique
+      window.location.href = "boutique.html";
     }
 
-    // Fonction pour obtenir les données utilisateur de localStorage
     function getUserData() {
       return JSON.parse(localStorage.getItem('userData'));
     }
 
-    // Fonction pour sauvegarder les données utilisateur dans localStorage
     function saveUserData(userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
     }
@@ -222,11 +220,10 @@
     function resetDoubleXPIfNeeded() {
       const now = new Date();
       const lastCheck = new Date(localStorage.getItem('lastDoubleXPCheck') || 0);
-      const resetHour = 9; // 9h du matin
-      const resetMinute = 0; // 30 minutes après 9h
+      const resetHour = 9; 
+      const resetMinute = 0; 
       const userData = getUserData();
 
-      // Vérifier si la dernière vérification était un jour différent
       if (now.getDate() !== lastCheck.getDate() || now.getMonth() !== lastCheck.getMonth() || now.getFullYear() !== lastCheck.getFullYear()) {
         if (now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) {
           userData.Double_XP = 5;
@@ -235,7 +232,6 @@
         }
       } else if ((now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) &&
                  (lastCheck.getHours() < resetHour || (lastCheck.getHours() === resetHour && lastCheck.getMinutes() < resetMinute))) {
-        // Si c'est le même jour mais qu'on est passé après 9h30
         userData.Double_XP = 5;
         saveUserData(userData);
         localStorage.setItem('lastDoubleXPCheck', now.toISOString());
@@ -245,18 +241,31 @@
     document.addEventListener('DOMContentLoaded', function() {
       const userData = getUserData();
 
+      if (!userData) {
+        console.error('Aucune donnée utilisateur trouvée.');
+        return;
+      }
+
       if (userData.version !== game_version) {
         window.location.href = "mise_a_jour.html";
+        return;
       }
 
       resetDoubleXPIfNeeded();
 
-      // Vérification de la valeur Double_XP
       if (userData.Double_XP > 0) {
         document.querySelector('.double-xp').style.display = 'block';
       }
 
-      // Vérification du thème
+      if (userData.recompense > 0) {
+        window.location.href = "recompenses.html";
+        return;
+      } else if (userData.perso_recompense > 0) {
+          window.location.href = "recompenses.html";
+          return;
+      }
+      
+
       if (userData.theme === true) {
         document.body.classList.add('dark-theme');
       }

@@ -114,6 +114,11 @@
             font-weight: bold;
         }
         /* Styles pour le mode sombre */
+        .timer {
+            font-size: 1em; /* Réduit la taille de la police à 75% de la taille par défaut */
+            color: #555; /* Change la couleur du texte, vous pouvez ajuster selon vos préférences */
+            margin-left: 10px; /* Ajoute un peu d'espace entre le titre et le minuteur */
+        }
         .dark-theme {
             background-color: #121212;
             color: #e0e0e0;
@@ -190,16 +195,25 @@
     </div>
     <div class="content">
         <h1>Bienvenue dans la Boutique de Jeux</h1>
+      <h2>Offres Journalières</h2>
+      <div id="daily-timer" class="timer"></div>        <div class="category-wrapper">
+            <div class="arrow arrow-left" id="left-arrow-daily">&lt;</div>
+            <div class="category" id="category-daily">
+                <!-- Les offres journalières seront ajoutées ici -->
+            </div>
+            <div class="arrow arrow-right" id="right-arrow-daily">&gt;</div>
+        </div>
+        <!-- Catégorie XP -->
         <h2>Catégorie XP</h2>
         <div class="category-wrapper">
-            <div class="arrow arrow-left" id="left-arrow">&lt;</div>
+            <div class="arrow arrow-left" id="left-arrow-xp">&lt;</div>
             <div class="category" id="category-xp">
                 <div class="bonus-item">
                     <img src="XP_2.png" alt="Double XP Bonus">
                     <h2>Double XP x3</h2>
                     <p>Profitez du double XP lors de vos 3 prochains combats !</p>
                     <p>Prix : 30 Points</p>
-                    <button class="buyButton" data-price="30" data-quantity="3">Acheter</button>
+                    <button class="buyButton" data-type="xp" data-price="30" data-quantity="3">Acheter</button>
                     <p class="error-message"></p>
                 </div>
                 <div class="bonus-item">
@@ -207,85 +221,291 @@
                     <h2>Double XP MAX</h2>
                     <p>Obtenez le double XP pour les 5 prochains combats !</p>
                     <p>Prix : 45 Points</p>
-                    <button class="buyButton" data-price="45" data-quantity="5">Acheter</button>
+                    <button class="buyButton" data-type="xp" data-price="45" data-quantity="5">Acheter</button>
                     <p class="error-message"></p>
                 </div>
             </div>
-            <div class="arrow arrow-right" id="right-arrow">&gt;</div>
+            <div class="arrow arrow-right" id="right-arrow-xp">&gt;</div>
         </div>
-    </div>
+        
+  <!-- Nouvelle catégorie Soins -->
+  <h2>Catégorie Soins</h2>
+  <div class="category-wrapper">
+      <div class="arrow arrow-left" id="left-arrow-soins">&lt;</div>
+      <div class="category" id="category-soins">
+          <!-- Potions de Santé existantes -->
+          <div class="bonus-item">
+              <img src="Potion-1.png" alt="Potion de Santé x1">
+              <h2>Potion de Santé x1</h2>
+              <p>Augmente les PV du joueur de 15% de leurs PV max actuels.</p>
+              <p>Prix : 20 Points</p>
+              <button class="buyButton" data-type="potion" data-price="20" data-quantity="1">Acheter</button>
+              <p class="error-message"></p>
+          </div>
+          <div class="bonus-item">
+              <img src="Potion-3.png" alt="Potion de Santé x3">
+              <h2>Potion de Santé x3</h2>
+              <p>Augmente les PV du joueur de 15% de leurs PV max actuels.</p>
+              <p>Prix : 54 Points</p>
+              <button class="buyButton" data-type="potion" data-price="54" data-quantity="3">Acheter</button>
+              <p class="error-message"></p>
+          </div>
+          <div class="bonus-item">
+              <img src="Potion-5.png" alt="Potion de Santé x5">
+              <h2>Potion de Santé x5</h2>
+              <p>Augmente les PV du joueur de 15% de leurs PV max actuels.</p>
+              <p>Prix : 80 Points</p>
+              <button class="buyButton" data-type="potion" data-price="80" data-quantity="5">Acheter</button>
+              <p class="error-message"></p>
+          </div>
+
+          <!-- Amulettes de Régénération ajoutées -->
+          <div class="bonus-item">
+              <img src="Amulette-1.png" alt="Amulette de Régénération x1">
+              <h2>Amulette de Régénération x1</h2>
+              <p>Régénère 5% des PV max par tour pendant trois tours.</p>
+              <p>Prix : 56 Points</p>
+              <button class="buyButton" data-type="amulette" data-price="56" data-quantity="1">Acheter</button>
+              <p class="error-message"></p>
+          </div>
+          <div class="bonus-item">
+              <img src="Amulette-3.png" alt="Amulette de Régénération x3">
+              <h2>Amulette de Régénération x3</h2>
+              <p>Régénère 5% des PV max par tour pendant trois tours.</p>
+              <p>Prix : 162 Points</p>
+              <button class="buyButton" data-type="amulette" data-price="162" data-quantity="3">Acheter</button>
+              <p class="error-message"></p>
+          </div>
+          <div class="bonus-item">
+              <img src="Amulette-5.png" alt="Amulette de Régénération x5">
+              <h2>Amulette de Régénération x5</h2>
+              <p>Régénère 5% des PV max par tour pendant trois tours.</p>
+              <p>Prix : 230 Points</p>
+              <button class="buyButton" data-type="amulette" data-price="230" data-quantity="5">Acheter</button>
+              <p class="error-message"></p>
+          </div>
+      </div>
+      <div class="arrow arrow-right" id="right-arrow-soins">&gt;</div>
+  </div>
 
     <script>
-        // Exemple de données utilisateur
-        function getUserData() {
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            if (userData.theme) {
-                document.body.classList.add('dark-theme');
-            }
-            return userData || { argent: 0, Double_XP_acheté: 0 }; // Retourne un objet avec des valeurs par défaut
-            
-        }
-        
+      // Fonction pour mettre à jour le minuteur
+      function updateDailyTimer() {
+          const now = new Date();
+          const resetHour = 9; // Heure à laquelle les offres journalières changent (0h)
+          const nextReset = new Date();
+          nextReset.setHours(resetHour, 0, 0, 0); // 00:00:00 de demain
 
-        function saveUserData(data) {
-            localStorage.setItem('userData', JSON.stringify(data));
-        }
+          if (now > nextReset) {
+              nextReset.setDate(nextReset.getDate() + 1); // Passer au jour suivant
+          }
 
-        // Mettre à jour le solde affiché
-        const userData = getUserData();
-        const argent = Math.round(userData.argent);
-        document.getElementById('balance').textContent = `Solde : ${argent}`;
+          const timeLeft = nextReset - now; // Temps restant en millisecondes
 
-        document.querySelectorAll('.buyButton').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const prix = parseInt(event.target.dataset.price);
-                const quantity = parseInt(event.target.dataset.quantity);
-                const errorMessage = event.target.nextElementSibling;
+          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-                if (userData.argent >= prix) {
-                    userData.argent -= prix;
-                    userData.Double_XP_acheté += quantity;
-                    saveUserData(userData);
-                    document.getElementById('balance').textContent = `Solde : ${userData.argent}`;
-                    errorMessage.textContent = ''; // Effacer le message d'erreur
-                } else {
-                    errorMessage.textContent = 'Solde insuffisant !';
-                }
-            });
-        });
+          document.getElementById('daily-timer').textContent = `- ${hours}h ${minutes}m ${seconds}s`;
 
-        // Gestion des flèches
-        const category = document.getElementById('category-xp');
-        const leftArrow = document.getElementById('left-arrow');
-        const rightArrow = document.getElementById('right-arrow');
+          // Mettre à jour le minuteur toutes les secondes
+          setTimeout(updateDailyTimer, 1000);
+      }
 
-        function updateArrows() {
-            if (category.scrollLeft === 0) {
-                leftArrow.style.display = 'none';
-            } else {
-                leftArrow.style.display = 'flex';
-            }
+      // Initialiser le minuteur au chargement
+      updateDailyTimer();
+      function getUserData() {
+          const userData = JSON.parse(localStorage.getItem('userData'));
+          if (userData && userData.theme) {
+              document.body.classList.add('dark-theme');
+          }
+          return userData || { 
+              argent: 0, 
+              Double_XP_acheté: 0, 
+              Potion_de_Santé_acheté: 0, 
+              Amulette_de_Régénération_acheté: 0, 
+              recompense: 0, 
+              lastLogin: null, 
+              dailyRewardClaimed: false 
+          }; // Valeurs par défaut
+      }
 
-            if (category.scrollWidth - category.clientWidth === category.scrollLeft) {
-                rightArrow.style.display = 'none';
-            } else {
-                rightArrow.style.display = 'flex';
-            }
-        }
+      // Fonction pour sauvegarder les données utilisateur dans le stockage local
+      function saveUserData(data) {
+          localStorage.setItem('userData', JSON.stringify(data));
+      }
 
-        leftArrow.addEventListener('click', () => {
-            category.scrollBy({ left: -250, behavior: 'smooth' });
-        });
+      // Fonction pour générer un nombre entier aléatoire
+      function getRandomInt(max) {
+          return Math.floor(Math.random() * max);
+      }
 
-        rightArrow.addEventListener('click', () => {
-            category.scrollBy({ left: 250, behavior: 'smooth' });
-        });
+      // Fonction pour appliquer une réduction sur le prix
+      function applyDiscount(price) {
+          return Math.round(price * 0.8); // Appliquer une réduction de 20%
+      }
 
-        category.addEventListener('scroll', updateArrows);
-        window.addEventListener('resize', updateArrows);
+      // Fonction pour générer les offres journalières
+      function generateDailyOffers() {
+          const today = new Date().toDateString();
+          let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
 
-        // Initial check
-        updateArrows();
+          if (dailyOffers.date === today) {
+              // Les offres journalières ont déjà été générées pour aujourd'hui
+              return dailyOffers;
+          }
+
+          // Générer de nouvelles offres journalières
+          const dailyCategory = document.getElementById('category-daily');
+          dailyCategory.innerHTML = ''; // Clear previous offers
+
+          const rewardItem = document.createElement('div');
+          rewardItem.classList.add('bonus-item');
+          rewardItem.innerHTML = `
+              <img src="recompense.png" alt="Récompense gratuite">
+              <h2>Récompense Gratuite</h2>
+              <p>Profitez d'une récompense gratuite aujourd'hui !</p>
+              <p>Prix : 0 Points</p>
+              <button class="claimButton">Réclamer</button>
+              <p class="error-message"></p>
+          `;
+          dailyCategory.appendChild(rewardItem);
+
+          const items = [
+              { img: "XP_2.png", title: "Double XP x3", description: "Profitez du double XP lors de vos 3 prochains combats !", price: 30, type: "xp", quantity: 3 },
+              { img: "XP_max.png", title: "Double XP MAX", description: "Obtenez le double XP pour les 5 prochains combats !", price: 45, type: "xp", quantity: 5 },
+              { img: "Potion-1.png", title: "Potion de Santé x1", description: "Augmente les PV du joueur de 15% de leurs PV max actuels.", price: 20, type: "potion", quantity: 1 },
+              { img: "Potion-3.png", title: "Potion de Santé x3", description: "Augmente les PV du joueur de 15% de leurs PV max actuels.", price: 54, type: "potion", quantity: 3 },
+              { img: "Potion-5.png", title: "Potion de Santé x5", description: "Augmente les PV du joueur de 15% de leurs PV max actuels.", price: 80, type: "potion", quantity: 5 },
+              { img: "Amulette-1.png", title: "Amulette de Régénération x1", description: "Régénère 5% des PV max par tour pendant trois tours.", price: 56, type: "amulette", quantity: 1 },
+              { img: "Amulette-3.png", title: "Amulette de Régénération x3", description: "Régénère 5% des PV max par tour pendant trois tours.", price: 162, type: "amulette", quantity: 3 },
+              { img: "Amulette-5.png", title: "Amulette de Régénération x5", description: "Régénère 5% des PV max par tour pendant trois tours.", price: 230, type: "amulette", quantity: 5 }
+          ];
+
+          const randomIndex = getRandomInt(items.length);
+          const item = items[randomIndex];
+          items.splice(randomIndex, 1);
+
+          const discountedPrice = applyDiscount(item.price);
+
+          const offerItem = document.createElement('div');
+          offerItem.classList.add('bonus-item');
+          offerItem.innerHTML = `
+              <img src="${item.img}" alt="${item.title}">
+              <h2>${item.title}</h2>
+              <p>${item.description}</p>
+              <p>Prix normal : ${item.price} Points</p>
+              <p>Prix réduit : ${discountedPrice} Points</p>
+              <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
+              <p class="error-message"></p>
+          `;
+          dailyCategory.appendChild(offerItem);
+
+          dailyOffers = { date: today, item: { img: item.img, title: item.title, description: item.description, price: item.price, discountedPrice, type: item.type, quantity: item.quantity } };
+          localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
+          saveUserData(userData);
+
+          return dailyOffers;
+      }
+
+      // Fonction pour afficher les offres journalières
+      function displayDailyOffers() {
+          const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
+          const dailyCategory = document.getElementById('category-daily');
+          if (!dailyOffers) return;
+
+          const today = new Date().toDateString();
+          if (dailyOffers.date !== today) {
+              generateDailyOffers();
+              return;
+          }
+
+          dailyCategory.innerHTML = ''; // Clear previous offers
+
+          const rewardItem = document.createElement('div');
+          rewardItem.classList.add('bonus-item');
+          rewardItem.innerHTML = `
+              <img src="gratuite-rec.png" alt="Récompense gratuite">
+              <h2>Récompense Gratuite</h2>
+              <p>Profitez d'une récompense gratuite aujourd'hui !</p>
+              <p>Prix : 0 Points</p>
+              <button class="claimButton"${userData.dailyRewardClaimed ? ' disabled' : ''}>${userData.dailyRewardClaimed ? 'Déjà pris' : 'Réclamer'}</button>
+              <p class="error-message"></p>
+          `;
+          dailyCategory.appendChild(rewardItem);
+
+          const item = dailyOffers.item;
+          const offerItem = document.createElement('div');
+          offerItem.classList.add('bonus-item');
+          offerItem.innerHTML = `
+              <img src="${item.img}" alt="${item.title}">
+              <h2>${item.title}</h2>
+              <p>${item.description}</p>
+              <p>Prix normal : ${item.price} Points</p>
+              <p>Prix réduit : ${item.discountedPrice} Points</p>
+              <button class="buyButton" data-type="${item.type}" data-price="${item.discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
+              <p class="error-message"></p>
+          `;
+          dailyCategory.appendChild(offerItem);
+
+          // Mettre à jour les boutons
+          document.querySelectorAll('.claimButton').forEach(button => {
+              button.addEventListener('click', handleClaimButtonClick);
+          });
+
+          document.querySelectorAll('.buyButton').forEach(button => {
+              button.addEventListener('click', handleBuyButtonClick);
+          });
+      }
+
+      // Fonction pour gérer les clics sur le bouton d'achat
+      function handleBuyButtonClick(event) {
+          const prix = parseInt(event.target.dataset.price);
+          const quantity = parseInt(event.target.dataset.quantity);
+          const type = event.target.dataset.type;
+          const errorMessage = event.target.nextElementSibling;
+
+          if (userData.argent >= prix) {
+              userData.argent -= prix;
+              if (type === 'xp') {
+                  userData.Double_XP_acheté += quantity;
+              } else if (type === 'potion') {
+                  userData.Potion_de_Santé_acheté += quantity;
+              } else if (type === 'amulette') {
+                  userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + quantity;
+              }
+              saveUserData(userData);
+              document.getElementById('balance').textContent = `Solde : ${userData.argent}`;
+              errorMessage.textContent = ''; // Effacer le message d'erreur
+          } else {
+              errorMessage.textContent = 'Solde insuffisant !';
+          }
+      }
+
+      // Fonction pour gérer les clics sur le bouton de réclamation de la récompense
+      function handleClaimButtonClick(event) {
+          const button = event.target;
+          button.disabled = true; // Désactiver le bouton
+          button.textContent = 'Déjà pris'; // Changer le texte du bouton
+          button.nextElementSibling.textContent = ''; // Effacer les messages d'erreur éventuels
+
+          // Mettre à jour les données utilisateur
+          userData.recompense = (userData.recompense || 0) + 1;
+          userData.dailyRewardClaimed = true;
+          saveUserData(userData);
+
+          // Rediriger vers recompenses.html
+          window.location.href = 'recompenses.html';
+      }
+
+      // Initialisation
+      const userData = getUserData();
+      generateDailyOffers();
+      displayDailyOffers();
+      document.getElementById('balance').textContent = `Solde : ${userData.argent}`;
+
+      // Afficher les offres journalières au chargement
+      
     </script>
 </body>
 </html>

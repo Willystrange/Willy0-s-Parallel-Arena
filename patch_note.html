@@ -36,7 +36,7 @@
             transition: max-height 0.5s ease-out;
         }
         .note-list.open {
-            max-height: 1000px;
+            max-height: 4000px;
         }
         .note-list li {
             margin-bottom: 10px;
@@ -86,6 +86,50 @@
 </head>
 <body>
     <div class="container">
+        <h1 id="version-200">Note de mise à jour - Version 2.0.0</h1>
+        <ul id="notes-200" class="note-list">
+            <li><strong>Modifications Générales :</strong>
+                <ul>
+                    <li><strong>Progression des Niveaux :</strong> L'XP nécessaire pour monter de niveau n'est plus fixe (100 XP par niveau). Le gain de niveaux est plus rapide au début et devient plus long et difficile à mesure que l'on progresse. Le niveau maximum est désormais 11.</li>
+                    <li><strong>Choix de Statistiques :</strong> À partir du niveau 5, choisissez une statistique à augmenter davantage parmi les PV, l'attaque et la défense de votre personnage.</li>
+                    <li><strong>Niveaux des Adversaires :</strong> Le niveau des adversaires variera en fonction du niveau de votre personnage, avec une différence de niveau ne dépassant pas 2 niveaux.</li>
+                </ul>
+            </li>
+            <li><strong>Boutique :</strong>
+                <ul>
+                    <li><strong>Catégorie « Soin » :</strong> Potions de santé : 1 potion pour 20 points, 3 potions pour 54 points, 5 potions pour 80 points. Amulettes de régénération : 1 amulette pour 56 points, 3 amulettes pour 162 points, 5 amulettes pour 230 points.</li>
+                    <li><strong>Catégorie « Offres Quotidiennes » :</strong> Renouvellement quotidien à 9h. Une récompense aléatoire gratuite chaque matin. Une offre de pack à prix réduit, disponible une fois par jour.</li>
+                    <li><strong>Effets des Objets :</strong> Potion de santé : Restaure 15% des PV actuels. Amulette de régénération : Régénère 5% des PV maximum pendant 3 tours.</li>
+                </ul>
+            </li>
+            <li><strong>Page de Combat :</strong>
+                <ul>
+                    <li><strong>Nouvelle Fonctionnalité :</strong> Un bouton pour afficher les objets utilisables est désormais disponible.</li>
+                    <li><strong>Optimisation de l’Interface :</strong> Les boutons sont placés plus haut sur l’écran d’accueil pour éviter de perturber le joueur. Le chat est repositionné plus en hauteur.</li>
+                </ul>
+            </li>
+            <li><strong>Récompenses des Trophées :</strong>
+                <ul>
+                    <li><strong>Paliers de Récompense :</strong> 10, 20, 30, 40, 60, 80, 100, 120, 150, 180, 220, 260, 300, 350, 400, 460, 520, 580, 650, 720, 800, 880, 970, 1060, 1150, 1250, 1350, 1460, 1570, 1690 trophées.</li>
+                    <li><strong>Types de Récompenses :</strong> DOUBLE XP de partie, XP pour un personnage, Potion de santé, Amulette de régénération, Points, Personnage. Les quantités de XP et de points sont définies aléatoirement par tranches de rareté. Les personnages ont une très faible chance d’apparition et leur rareté influe sur leur fréquence d'obtention.</li>
+                </ul>
+            </li>
+            <li><strong>Améliorations des Personnages :</strong>
+                <ul>
+                    <li><strong>Willy :</strong> PV : 11,200 (augmentation de 193), Attaque : 470 (augmentation de 12), Défense : 80 (baisse de 6). Capacité Spéciale : Willy effectue deux attaques.</li>
+                    <li><strong>Cocobi :</strong> PV : 10,800 (augmentation de 153), Attaque : 440 (augmentation de 10), Défense : 115 (baisse de 5). Capacité Spéciale : Réduit les PV de l'adversaire de 10% de ses PV maximums.</li>
+                    <li><strong>Oiseau :</strong> PV : 9,800 (augmentation de 300), Attaque : 510 (baisse de 20), Défense : 85 (augmentation de 12). Capacité Spéciale : Inflige des dégâts équivalents à 2.5 fois son attaque et augmente sa défense de 20 pour 2 tours.</li>
+                    <li><strong>Gros Nounours :</strong> PV : 13,000 (augmentation de 200), Attaque : 430 (augmentation de 10), Défense : 68 (baisse de 5). Capacité Spéciale : Inflige des dégâts équivalents à 500 plus son attaque, en ignorant la moitié de la défense de l'adversaire.</li>
+                    <li><strong>Baleine :</strong> PV : 10,500 (baisse de 300), Attaque : 430 (augmentation de 10), Défense : 115 (augmentation de 3). Capacité Spéciale : Si sa défense est inférieure à 29, effectue une attaque normale ; sinon, perd 10 de défense et gagne 1000 PV avant d'attaquer normalement.</li>
+                    <li><strong>Doudou :</strong> PV : 13,800 (baisse de 200), Attaque : 350 (augmentation de 20), Défense : 80 (baisse de 10). Capacité Spéciale : Régénère des PV ; plus de la moitié de ses PV maximum, régénère 5% des PV actuels ; sinon, régénère 15% des PV actuels.</li>
+                    <li><strong>Coeur :</strong> PV : 10,000 (augmentation de 100), Attaque : 450 (baisse de 14), Défense : 100 (baisse de 3). Capacité Spéciale : Inflige des dégâts équivalents à 1.5 fois son attaque et régénère 10% des dégâts infligés si ses PV sont supérieurs à la moitié de ses PV maximum ; sinon, régénère 15%.</li>
+                    <li><strong>Diva :</strong> PV : 10,700 (augmentation de 130), Attaque : 440 (baisse de 16), Défense : 100 (augmentation de 2). Capacité Spéciale : Réduit l'attaque de l'adversaire de 25% pendant 3 tours.</li>
+                    <li><strong>Poulpy :</strong> PV : 11,500 (augmentation de 300), Attaque : 440 (baisse de 10), Défense : 100 (augmentation de 5). Capacité Spéciale : Inflige des dégâts équivalents à 1.75 fois son attaque, ignore 50% de la défense de l'adversaire, et réduit la défense de l'adversaire de 15% pour 2 tours.</li>
+                    <li><strong>Colorina :</strong> PV : 9,600 (baisse de 200), Attaque : 420 (augmentation de 10), Défense : 80 (baisse de 5). Capacité Spéciale : Inflige des dégâts équivalents à 85% de son attaque et réduit la défense de l'adversaire de 15% pour 3 tours.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h1 id="version-110">Note de mise à jour - Version 1.1.0</h1>
         <ul id="notes-110" class="note-list">
             <li><strong>Corrections :</strong>
@@ -143,36 +187,6 @@
             </li>
         </ul>
 
-        <h1 id="version-102">Note de mise à jour - Version 1.02</h1>
-        <ul id="notes-102" class="note-list">
-            <li><strong>Ajouts :</strong>
-                <ul>
-                    <li>Ajout d'une boutique d'objets avec deux offres : 
-                        <ul>
-                            <li><strong>Double XP x3</strong> : double l'XP pour les trois prochaines parties, coût : 30 points.</li>
-                            <li><strong>Double XP MAX</strong> : double l'XP pour les cinq prochaines parties, coût : 45 points.</li>
-                        </ul>
-                    </li>
-                    <li>Ajout de l'affichage des paliers de récompenses avec les trophées dans la section <strong>Mes stats</strong>, sous <strong>Nombre de trophées</strong>.</li>
-                    <li>Ajout d'un événement quotidien, <strong>Double XP</strong> : double la quantité d'XP gagnée pendant les cinq premières parties de la journée (après 9 heures).</li>
-                    <li>Ajout d'un système de points, gagnés à chaque partie. Ces points peuvent être utilisés pour améliorer un personnage ou acheter des objets dans la boutique.</li>
-                </ul>
-            </li>
-            <li><strong>Modifications :</strong>
-                <ul>
-                    <li>Refonte du système d'amélioration des personnages : il est désormais nécessaire d'aller dans <strong>Personnages</strong>, puis <strong>Amélioration</strong>. Le bouton <strong>Amélioration</strong> clignote en rouge lorsque suffisamment d'XP est disponible. Lorsqu'il y a assez de points et d'XP, un indicateur rouge apparaît à côté du personnage concerné.</li>
-                    <li>Les améliorations des personnages nécessitent désormais des points en plus de l'argent : 25 points supplémentaires par niveau par rapport à la version précédente.</li>
-                    <li>Refonte du système d’XP : l’XP est maintenant calculé en fonction du niveau et des PV restants du personnage si le joueur gagne la partie. Si le joueur perd, l'XP est déterminé uniquement par le niveau (l'XP diminue avec l'augmentation du niveau).</li>
-                </ul>
-            </li>
-            <li><strong>Corrections et améliorations :</strong>
-                <ul>
-                    <li>Corrections de bugs mineurs.</li>
-                    <li>Amélioration des performances du jeu.</li>
-                </ul>
-            </li>
-        </ul>
-
         <a href="menu_principal.html" class="back-button">Retour</a>
     </div>
     <script>
@@ -211,3 +225,5 @@
     </script>
 </body>
 </html>
+
+
