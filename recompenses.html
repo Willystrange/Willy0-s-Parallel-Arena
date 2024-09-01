@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Récompenses</title>
@@ -27,6 +28,7 @@
     .reward-item {
       font-size: 24px;
       margin: 15px 0;
+      height: 100vh;
     }
 
     .button {
@@ -104,90 +106,228 @@
       background-color: #ffa500;
     }
 
-    /* Styles pour le mode sombre */
-    .dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-
-    .dark-mode .reward-title,
-    .dark-mode .reward-item {
-      color: #e0e0e0;
-    }
-
-    .dark-mode .button {
-      background-color: #333;
-      color: #e0e0e0;
-    }
-
-    .dark-mode .button:hover {
-      background-color: #555;
-    }
-
-    .dark-mode .background-1 {
+    /* Styles pour chaque type de récompense */
+    .background-character {
       background: radial-gradient(circle, #f5c842, #ffcc33, #ffd700);
+      /* Exemple */
     }
 
-    .dark-mode .background-2 {
+    .background-doubleXP {
       background: radial-gradient(circle, #8a2be2, #6a0dad, #4b0082);
+      /* Exemple */
     }
 
-    .dark-mode .background-3 {
-      background: radial-gradient(circle, #00fa9a, #00ced1, #00bfff);
+    .background-healthPotion {
+      background: radial-gradient(circle, #00bfff, #00ced1, #00fa9a);
+      /* Exemple */
     }
 
-    .dark-mode .background-4 {
+    .background-amulet {
       background: radial-gradient(circle, #ff6347, #ffa500, #ffd700);
+      /* Exemple */
+    }
+
+    .background-xp {
+      background: radial-gradient(circle, #00ced1, #00fa9a, #00bfff);
+      /* Exemple */
+    }
+
+    .background-money {
+      background: radial-gradient(circle, #ffd700, #ffa500, #ff6347);
+      /* Exemple */
+    }
+
+    .background-epee {
+      background: radial-gradient(circle, #4b0082, #6a0dad, #8a2be2);
+      /* Exemple */
+    }
+
+    .background-elixir {
+      background: radial-gradient(circle, #00bfff, #00ced1, #00fa9a);
+      /* Exemple */
+    }
+
+    .background-armor {
+      background: radial-gradient(circle, #f5c842, #ffcc33, #ffd700);
+      /* Exemple */
+    }
+
+    .background-bouclier {
+      background: radial-gradient(circle, #ff6347, #ffa500, #ffd700);
+      /* Exemple */
+    }
+
+
+    /* Styles pour le mode sombre selon les préférences du système */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      .reward-title,
+      .reward-item {
+        color: #e0e0e0;
+      }
+
+      .button {
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      .button:hover {
+        background-color: #555;
+      }
+
+      .background-1 {
+        background: radial-gradient(circle, #f5c842, #ffcc33, #ffd700);
+      }
+
+      .background-2 {
+        background: radial-gradient(circle, #8a2be2, #6a0dad, #4b0082);
+      }
+
+      .background-3 {
+        background: radial-gradient(circle, #00fa9a, #00ced1, #00bfff);
+      }
+
+      .background-4 {
+        background: radial-gradient(circle, #ff6347, #ffa500, #ffd700);
+      }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
+
 <body>
   <div class="container">
     <div class="reward-title">Vous avez reçu une récompense !</div>
     <div id="reward-display" class="reward-item"></div>
-    <button class="button" onclick="goToMainMenu()">Retour au menu principal</button>
   </div>
+    <script>
 
-  <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const perf = firebase.performance();
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = firebase.database().ref('maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    maintenanceRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
     const characters = {
       'Doudou': 1,
       'Coeur': 1,
-      'Gros_Nounours': 2,
+      'Grours': 2,
       'Baleine': 2,
       'Poulpy': 2,
       'Willy': 3,
       'Oiseau': 3,
       'Colorina': 3,
       'Cocobi': 4,
-      'Diva': 4
+      'Diva': 4,
+      'Sboonie': 5,
     };
 
     const rarityProbabilities = {
-      1: 0.02, // Légendaire
-      2: 0.03, // Épique
-      3: 0.07, // Rare
-      4: 0.12 // Inhabituel
+      1: 0.09, // Légendaire
+      2: 0.13, // Épique
+      3: 0.29, // Rare
+      4: 0.49, // Inhabituel
     };
-    const rarityProbabilitiesXP = {
-      1: 0.05,
-      2: 0.15,
-      3: 0.2,
-      4: 0.6,
-    }
+
     const xpRanges = {
       1: [100, 200], // Légendaire
       2: [50, 100],  // Épique
       3: [20, 50],   // Rare
-      4: [0, 20]     // Inhabituel
+      4: [5, 20]     // Inhabituel
     };
 
     function getUserData() {
-      return JSON.parse(localStorage.getItem('userData')) || {};
+      let userData = JSON.parse(localStorage.getItem('userData'));
+      return userData;
     }
 
-    function saveUserData(userData) {
-      localStorage.setItem('userData', JSON.stringify(userData));
-    }
+      function saveUserData(userData) {
+        alert('SAUVEGARDE')
+        localStorage.setItem('userData', JSON.stringify(userData));
+
+        // Sauvegarde dans Firebase si l'utilisateur est connecté
+        const userConnect = JSON.parse(localStorage.getItem('userConnect'));
+        const user = firebase.auth().currentUser;
+        if (userConnect.est_connecte) {
+          const userId = userConnect.userid;
+          const userRef = firebase.database().ref(`users/` + userId);
+        userRef.set(userData).then(() => {
+            console.log('Données sauvegardées dans Firebase.');
+        }).catch((error) => {
+            console.error('Erreur lors de la sauvegarde dans Firebase:', error);
+            alert('Erreur lors de la sauvegarde dans Firebase: ' + error.message);
+        });
+        }
+      }
 
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -198,7 +338,7 @@
       let cumulativeProb = 0;
       let selectedRarity = null;
 
-      for (const [rarityLevel, probability] of Object.entries(rarityProbabilitiesXP)) {
+      for (const [rarityLevel, probability] of Object.entries(rarityProbabilities)) {
         cumulativeProb += probability;
         if (rarityRand < cumulativeProb) {
           selectedRarity = parseInt(rarityLevel);
@@ -209,22 +349,23 @@
       if (selectedRarity && xpRanges[selectedRarity]) {
         const [min, max] = xpRanges[selectedRarity];
         return getRandomInt(min, max);
-      } else {
-        console.error('Rareté invalide ou plage d\'XP non définie pour la rareté:', selectedRarity);
-        return 0;
       }
     }
 
-    function getRandomMAXMoney() {
-      const minMAXMoney = 50;
-      const maxMAXMoney = 120;
-      return getRandomInt(minMAXMoney, maxMAXMoney);
-    }
+    function getRandomRarity() {
+      const rarityRand = Math.random();
+      let cumulativeProb = 0;
+      let selectedRarity = null;
 
-    function getRandomMoney() {
-      const minMoney = 1;
-      const maxMoney = 30;
-      return getRandomInt(minMoney, maxMoney);
+      for (const [rarityLevel, probability] of Object.entries(rarityProbabilities)) {
+        cumulativeProb += probability;
+        if (rarityRand < cumulativeProb) {
+          selectedRarity = parseInt(rarityLevel);
+          break;
+        }
+      }
+
+      return selectedRarity || getRandomRarity();  // Valeur par défaut si aucune rareté n'est sélectionnée
     }
 
     function applyBackgroundForRarity(rarity) {
@@ -241,18 +382,7 @@
         let characterObtained = false;
 
         while (!characterObtained) {
-          const rarityRand = Math.random();
-          let cumulativeProb = 0;
-          let selectedRarity = null;
-
-          for (const [rarityLevel, probability] of Object.entries(rarityProbabilities)) {
-            cumulativeProb += probability;
-            if (rarityRand < cumulativeProb) {
-              selectedRarity = parseInt(rarityLevel);
-              break;
-            }
-          }
-
+          const selectedRarity = getRandomRarity();
           const availableCharacters = Object.keys(characters).filter(char => userData[char] !== 1 && characters[char] === selectedRarity);
           if (availableCharacters.length > 0) {
             const reward = availableCharacters[getRandomInt(0, availableCharacters.length - 1)];
@@ -266,79 +396,171 @@
       } else {
         userData.recompense -= 1;
         saveUserData(userData);
-        let random = Math.random();
 
-        const chanceCharacter = 0.19;
-        const chanceDoubleXP = 0.18;
-        const chanceHealthPotion = 0.21;
-        const chanceAmulet = 0.14;
-        const chanceXP = 0.28;
-        const chanceMoney = 0.15;
-        const chanceMAXMoney = 0.03;
+        const rewardTypes = [
+          {type: 'character', chance: 0.06},
+          {type: 'doubleXP', chance: 0.11},
+          {type: 'healthPotion', chance: 0.11},
+          {type: 'amulet', chance: 0.10},
+          {type: 'xp', chance: 0.11},
+          {type: 'money', chance: 0.12},
+          {type: 'epee', chance: 0.10},
+          {type: 'elixir', chance: 0.10},
+          {type: 'armor', chance: 0.10},
+          {type: 'bouclier', chance: 0.9},
+        ];
 
-        if (random < chanceCharacter) {
-          const rarityRand = Math.random();
-          let cumulativeProb = 0;
-          let selectedRarity = null;
 
-          for (const [rarityLevel, probability] of Object.entries(rarityProbabilities)) {
-            cumulativeProb += probability;
-            if (rarityRand < cumulativeProb) {
-              selectedRarity = parseInt(rarityLevel);
-              break;
+        const getRewardType = () => {
+          let rand = Math.random();
+          let cumulativeChance = 0;
+
+          for (const rewardType of rewardTypes) {
+            cumulativeChance += rewardType.chance;
+            if (rand < cumulativeChance) {
+              return rewardType.type;
             }
           }
 
-          const availableCharacters = Object.keys(characters).filter(char => userData[char] !== 1 && characters[char] === selectedRarity);
-          if (availableCharacters.length > 0) {
-            const reward = availableCharacters[getRandomInt(0, availableCharacters.length - 1)];
-            userData[reward] = 1;
-            rewards.push(reward);
-            applyBackgroundForRarity(selectedRarity);
-          } else {
-            rewards = rewards.concat(generateAndStoreReward(userData));
+          return rewardTypes[rewardTypes.length - 1].type;
+        };
+
+        const getNumRewards = () => {
+          const rand = Math.random();
+          if (rand < 0.70) return 1;
+          if (rand < 0.90) return 2;
+          return 3;
+        };
+
+        const numRewards = getNumRewards();
+        for (let i = 0; i < numRewards; i++) {
+          const rewardType = getRewardType();
+
+          switch (rewardType) {
+            case 'character':
+              const selectedRarity = getRandomRarity();
+              const availableCharacters = Object.keys(characters).filter(char => userData[char] !== 1 && characters[char] === selectedRarity);
+
+              if (availableCharacters.length > 0) {
+                const reward = availableCharacters[getRandomInt(0, availableCharacters.length - 1)];
+                userData[reward] = 1;
+                rewards.push(reward);
+                applyBackgroundForRarity(selectedRarity);
+              }
+              break;
+
+            case 'doubleXP':
+              let doubleXPAmount = getRandomInt(1, 5);
+              userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + doubleXPAmount;
+              rewards.push(`DOUBLE XP : +${doubleXPAmount}`);
+              break;
+
+            case 'healthPotion':
+              userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + 1;
+              rewards.push("Potion de Santé");
+              break;
+
+            case 'amulet':
+              userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
+              rewards.push("Amulette de Régénération");
+              break;
+
+            case 'xp':
+              const acquiredCharacters = Object.keys(characters).filter(char => userData[char] === 1);
+              if (acquiredCharacters.length > 0) {
+                const character = acquiredCharacters[getRandomInt(0, acquiredCharacters.length - 1)];
+                const xpAmount = getRandomXP();
+                userData[character + '_XP'] = (userData[character + '_XP'] || 0) + xpAmount;
+                rewards.push(`${character} XP : +${xpAmount}`);
+              }
+              break;
+
+            case 'money':
+              const moneyAmount = getRandomInt(1, 30);
+              userData.argent = (userData.argent || 0) + moneyAmount;
+              rewards.push(`Points : +${moneyAmount}`);
+              break;
+
+            case 'epee':
+              userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + 1;
+              rewards.push("Épée");
+              break;
+            case 'elixir':
+              userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + 1;
+              rewards.push("Elixir de Puissance");
+              break;
+            case 'armor':
+              userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + 1;
+              rewards.push("Armure de fer");
+              break;
+            case 'bouclier':
+              userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0);
+              rewards.push("Bouclier Solide");
           }
-        } else if (random < chanceCharacter + chanceDoubleXP) {
-          let doubleXPAmount = getRandomInt(1, 5);
-          userData.DOUBLE_XP_acheté = (userData.DOUBLE_XP_acheté || 0) + doubleXPAmount;
-          rewards.push(`DOUBLE XP : +${doubleXPAmount}`);
-        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion) {
-          userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + 1;
-          rewards.push("Potion de Santé");
-        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet) {
-          userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
-          rewards.push("Amulette de Régénération");
-        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet + chanceXP) {
-          const acquiredCharacters = Object.keys(characters).filter(char => userData[char] === 1);
-          if (acquiredCharacters.length > 0) {
-            const character = acquiredCharacters[getRandomInt(0, acquiredCharacters.length - 1)];
-            const xpAmount = getRandomXP();
-            userData[character + '_XP'] = (userData[character + '_XP'] || 0) + xpAmount;
-            rewards.push(`${character} XP : +${xpAmount}`);
-          } else {
-            rewards = rewards.concat(generateAndStoreReward(userData));
-          }
-        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet + chanceXP + chanceMoney) {
-          const moneyAmount = getRandomMoney();
-          userData.argent = (userData.argent || 0) + moneyAmount;
-          rewards.push(`Points : +${moneyAmount}`);
-        } else if (random < chanceCharacter + chanceDoubleXP + chanceHealthPotion + chanceAmulet + chanceMoney + chanceMAXMoney) {
-          const maxmoneyamont = getRandomMAXMoney();
-          userData.argent = (userData.argent || 0) + maxmoneyamont;
-          rewards.push(`Points : +${maxmoneyamont}`);
         }
       }
 
       saveUserData(userData);
       return rewards;
     }
+    let currentRewardIndex = 0; // Variable pour suivre l'indice de la récompense actuelle
 
-    function applyDarkMode() {
-      const userData = getUserData();
-      if (userData.theme) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
+    function updateBackground(reward) {
+      // Retirer toutes les classes de fond d'écran existantes
+      document.body.classList.remove(
+        'background-character',
+        'background-doubleXP',
+        'background-healthPotion',
+        'background-amulet',
+        'background-xp',
+        'background-money',
+        'background-epee',
+        'background-elixir',
+        'background-armor',
+        'background-bouclier'
+      );
+
+      // Déterminer la classe de fond d'écran en fonction du type de récompense
+      let backgroundClass = '';
+      switch (reward) {
+        case 'character':
+          backgroundClass = 'background-character';
+          break;
+        case 'doubleXP':
+          backgroundClass = 'background-doubleXP';
+          break;
+        case 'healthPotion':
+          backgroundClass = 'background-healthPotion';
+          break;
+        case 'amulet':
+          backgroundClass = 'background-amulet';
+          break;
+        case 'xp':
+          backgroundClass = 'background-xp';
+          break;
+        case 'money':
+          backgroundClass = 'background-money';
+          break;
+        case 'epee':
+          backgroundClass = 'background-epee';
+          break;
+        case 'elixir':
+          backgroundClass = 'background-elixir';
+          break;
+        case 'armor':
+          backgroundClass = 'background-armor';
+          break;
+        case 'bouclier':
+          backgroundClass = 'background-bouclier';
+          break;
+        default:
+          backgroundClass = ''; // Valeur par défaut, pas de changement de fond
+          break;
+      }
+
+      // Ajouter la classe de fond d'écran appropriée
+      if (backgroundClass) {
+        document.body.classList.add(backgroundClass);
       }
     }
 
@@ -352,7 +574,7 @@
           return;
         }
 
-        if (userData.recompense <= 0 && userData.perdo_recompense <= 0) {
+        if (userData.recompense <= 0 && userData.perso_recompense <= 0) {
           window.location.href = 'menu_principal.html';
         } else {
           rewards = generateAndStoreReward(userData);
@@ -361,7 +583,29 @@
       }
 
       const rewardDisplay = document.getElementById('reward-display');
-      rewardDisplay.innerHTML = rewards.map(reward => `<div class="reward-item">Récompense : ${reward}</div>`).join('');
+      if (rewards.length > 0) {
+        // Afficher la première récompense
+        rewardDisplay.innerText = rewards[currentRewardIndex];
+        updateBackground(rewards[currentRewardIndex]); // Mettre à jour le fond
+        document.body.addEventListener('click', showNextReward);
+      } else {
+        rewardDisplay.innerText = "Aucune récompense à afficher.";
+      }
+    }
+
+    function showNextReward() {
+      const rewards = JSON.parse(localStorage.getItem('currentReward'));
+      const rewardDisplay = document.getElementById('reward-display');
+
+      if (currentRewardIndex < rewards.length - 1) {
+        currentRewardIndex++;
+        rewardDisplay.innerText = rewards[currentRewardIndex];
+
+      } else {
+        document.body.removeEventListener('click', showNextReward);
+        localStorage.removeItem('currentReward'); // Effacer la récompense stockée
+        window.location.href = 'menu_principal.html';
+      }
     }
 
     function goToMainMenu() {
@@ -369,12 +613,10 @@
       window.location.href = 'menu_principal.html';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      applyDarkMode();
-      displayReward();      
+    document.addEventListener('DOMContentLoaded', function () {
+      displayReward();
     });
   </script>
 </body>
+
 </html>
-
-

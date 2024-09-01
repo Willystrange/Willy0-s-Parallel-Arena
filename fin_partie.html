@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Affichage des Données</title>
+  <style>
+    /* Styles par défaut (mode clair) */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      overflow: hidden;
+      /* Pour éviter les barres de défilement pendant l'animation */
+    }
+
+    #content {
+      text-align: center;
+    }
+
+    #gagnant {
+      font-size: 2em;
+      /* Taille du texte */
+      font-weight: bold;
+      margin: 0;
+      animation: crush 1s ease-out;
+    }
+
+    @keyframes crush {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .reward {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    .reward.show {
+      opacity: 1;
+    }
+
+    #quit-button {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      color: #fff;
+      background-color: #ff4500;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #quit-button:hover {
+      background-color: #cc3700;
+    }
+
+    /* Styles pour le mode sombre */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #000; /* Couleur de fond pour le mode sombre */
+        color: #f0f0f0; /* Couleur du texte pour le mode sombre */
+      }
+
+      #content {
+        color: #f0f0f0; /* Couleur du texte dans le contenu pour le mode sombre */
+      }
+
+      #gagnant {
+        color: #f0f0f0; /* Couleur du texte du gagnant pour le mode sombre */
+      }
+
+      .reward {
+        background-color: #333; /* Couleur de fond pour les récompenses en mode sombre */
+        color: #f0f0f0; /* Couleur du texte pour les récompenses en mode sombre */
+      }
+
+      #quit-button {
+        background-color: #333; /* Couleur de fond du bouton pour le mode sombre */
+        color: #f0f0f0; /* Couleur du texte du bouton pour le mode sombre */
+      }
+
+      #quit-button:hover {
+        background-color: #000; /* Couleur du bouton au survol pour le mode sombre */
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="content">
+    <p id="gagnant">Gagnant: En attente...</p>
+    <div class="reward" id="fin_xp">XP Final: En attente...</div>
+    <div class="reward" id="fin_argent">Argent Final: En attente...</div>
+    <div class="reward" id="fin_trophees">Trophées Final: En attente...</div>
+    <button id="quit-button" onclick=window.location.href='menu_principal.html'>Revenir au Menu Principal</button>
+  </div>
+  <script type="module">
+    // Importation des modules Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = ref(database, 'maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    onValue(maintenanceRef, (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+  </script>
+  <script>
+    function afficherDonnees() {
+      
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      userData.partie_commencee = false;
+      localStorage.setItem('userData', JSON.stringify(userData));
+      if (userData) {
+        // Afficher le gagnant
+        document.getElementById('gagnant').textContent = 'Gagnant: ' + userData.gagnant;
+
+        // Afficher les récompenses avec un intervalle d'une seconde
+        setTimeout(() => {
+          document.getElementById('fin_xp').textContent = 'XP : ' + userData.fin_xp;
+          document.getElementById('fin_xp').classList.add('show');
+        }, 1000); // 1 seconde de délai pour la première récompense
+
+        setTimeout(() => {
+          document.getElementById('fin_argent').textContent = 'Points : ' + userData.fin_argent;
+          document.getElementById('fin_argent').classList.add('show');
+        }, 2000); // 2 secondes de délai pour la deuxième récompense
+
+        setTimeout(() => {
+          document.getElementById('fin_trophees').textContent = 'Trophées : ' + userData.fin_trophee;
+          document.getElementById('fin_trophees').classList.add('show');
+        }, 3000); // 3 secondes de délai pour la troisième récompense
+
+        // Afficher le bouton de quitter après l'affichage des récompenses
+        setTimeout(() => {
+          document.getElementById('quit-button').style.display = 'block';
+        }, 5000); // 5 secondes de délai total (3 secondes pour les récompenses + 2 secondes supplémentaires)
+      } else {
+        document.getElementById('content').textContent = 'Aucune donnée trouvée.';
+      }
+    }
+
+    window.onload = afficherDonnees;
+  </script>
+</body>
+
+</html>

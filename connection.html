@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Firebase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    function handleUserConnect(user) {
+      let userConnect = JSON.parse(localStorage.getItem('userConnect')) || {}; // Assurez-vous que userConnect est un objet
+
+      if (user) {
+        userConnect.est_connecte = true;
+        userConnect.userid = user.uid;
+      } else {
+        userConnect.est_connecte = false;
+        userConnect.userid = null;
+      }
+
+      localStorage.setItem('userConnect', JSON.stringify(userConnect));
+    }
+    
+
+    function handleUserData(user) {
+      if (user) {
+        const userId = user.uid;
+        const userRef = database.ref('users/' + userId);
+
+        userRef.once('value', (snapshot) => {
+          let userData;
+
+          if (snapshot.exists()) {
+            userData = snapshot.val();
+          } else {
+            const localStorageData = localStorage.getItem('userData');
+            userData = localStorageData ? JSON.parse(localStorageData) : {};
+          }
+          userRef.set(userData, (error) => {
+            if (error) {
+              console.error('Erreur lors de l\'écriture des données dans Firebase:', error);
+            } else {
+              console.log('Données sauvegardées avec succès dans Firebase');
+            }
+          });
+
+          localStorage.setItem('userData', JSON.stringify(userData));
+        });
+      } else {
+        console.log('Aucun utilisateur connecté');
+      }
+    }
+
+    auth.onAuthStateChanged((user) => {
+      handleUserData(user);
+      handleUserConnect(user);
+    });
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          console.log('Utilisateur connecté:', userCredential.user);
+        })
+        .catch((error) => {
+          console.error('Erreur de connexion:', error.message);
+        });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Connexion</h1>
+    <form id="loginForm" onsubmit="event.preventDefault(); login();">
+      <div class="input-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="input-group">
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" required>
+      </div>
+      <button type="submit">Se connecter</button>
+      <button type="submit"onclick=window.location.href="parametres.html">Quitter</button>
+    </form>
+  </div>
+</body>
+</html>

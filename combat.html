@@ -6,12 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Combat</title>
 
+  <title>Combat</title>
+  <script src="quest.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
+      margin: 100;
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -19,61 +20,55 @@
       background-size: cover;
       color: #333;
       transition: background-color 0.3s, color 0.3s;
+      position: relative;
+      overflow: hidden;
+      /* Empêche le défilement du body */
+    }
+
+    .content {
+      overflow-y: auto;
+      /* Permet le défilement vertical */
+      height: 100vh;
+      /* Occupe toute la hauteur de la fenêtre */
+      -webkit-overflow-scrolling: touch;
+      /* Assure le défilement fluide sur les appareils tactiles */
     }
 
     .top-bar {
-      width: 100%;
       height: 100px;
-      /* Hauteur de la barre */
       background-color: #d1d1d6;
       display: flex;
       align-items: center;
-      /* Centrer verticalement */
       padding: 10px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       z-index: 1000;
-      position: relative;
-      /* Pour la superposition avec les éléments fixés */
-    }
-
-    .header-container {
-      display: flex;
       justify-content: space-between;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     .header-info {
       display: flex;
       flex-direction: column;
-      margin: 0 10px;
+      margin: 0 20px;
     }
 
-    .header-info h3 {
-      margin: 0;
-      padding: 0;
-    }
-
+    .header-info h3,
     .header-info p {
-      margin: 5px 0;
+      margin: 0;
       padding: 0;
     }
 
     #player-money {
       display: none;
-      /* Masquer l'affichage de l'argent */
     }
 
     .combat-container {
-      flex-grow: 1;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      /* Ajuster pour que le combat-log soit plus haut */
       align-items: center;
       padding: 20px;
       box-sizing: border-box;
-      /* Inclure le padding dans la taille totale */
+      margin: 100;
     }
 
     #combat-log {
@@ -83,16 +78,14 @@
       background-color: #f0f0f0;
       border: 1px solid #ccc;
       height: 300px;
-      overflow-y: scroll;
-      margin-top: 0;
-      /* Réduire ou supprimer la marge supérieure */
+      overflow-y: auto;
     }
 
     .combat-actions-wrapper {
       position: fixed;
       bottom: 50px;
       width: 100%;
-      background-color: white;
+      background-color: #fff;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
       padding: 10px;
     }
@@ -103,20 +96,52 @@
     }
 
     .combat-actions button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       border: none;
-      background-color: #ff4500;
-      color: white;
-      border-radius: 5px;
+      padding: 0;
+      font-size: 0;
+      line-height: 0;
+      background-color: transparent;
+      cursor: pointer;
       transition: background-color 0.3s, transform 0.3s;
-      touch-action: manipulation;
     }
 
-    .combat-actions button:hover {
-      background-color: #e03e00;
-      transform: scale(1.05);
+    .combat-actions button#defense-button {
+      background-image: url('defense.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .combat-actions button#attack-button {
+      background-image: url('attaque.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .combat-actions button#special-button {
+      background-image: url('special.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .combat-actions button#special-button.bright {
+      filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+
+    .combat-actions button#special-button.grow {
+      transform: scale(1.1);
+    }
+
+    .combat-actions button#items-button {
+      background-image: url('inventaire.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
     }
 
     #item-selection {
@@ -125,16 +150,10 @@
       margin-top: 10px;
       padding: 10px;
       background: rgba(0, 0, 0, 0.8);
-      /* Fond semi-transparent */
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-      /* Ombre portée */
-    }
-
-    #item-selection h3 {
-      margin: 0;
-      padding: 10px 0;
-      color: #fff;
+      max-height: 300px;
+      overflow-y: auto;
     }
 
     #item-selection button {
@@ -148,123 +167,205 @@
       border: none;
       border-radius: 8px;
       background-color: #4CAF50;
-      /* Couleur de fond verte */
       color: white;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      /* Ombre portée */
       transition: background-color 0.3s, transform 0.3s;
     }
 
     #item-selection button:hover {
       background-color: #45a049;
-      /* Couleur de fond au survol */
       transform: scale(1.05);
     }
 
     #item-selection button:active {
       background-color: #388e3c;
-      /* Couleur de fond lors du clic */
       transform: scale(1.02);
     }
 
-    /* Styles pour le thème sombre */
-    .dark-theme {
-      background-color: #000000;
-      color: #e0e0e0;
+    /* Styles pour le mode sombre */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #000;
+        color: #e0e0e0;
+      }
+
+      .top-bar {
+        background-color: #333;
+      }
+
+      .combat-actions-wrapper {
+        background-color: #333;
+      }
+
+      .combat-actions button {
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      .combat-actions button:hover {
+        background-color: #333;
+      }
+
+      #combat-log {
+        background-color: #333;
+        border-color: #444;
+        color: #e0e0e0;
+      }
+
+      #item-selection {
+        background-color: #333;
+        color: #e0e0e0;
+        border-color: #444;
+      }
+
+      #item-selection button {
+        background-color: #444;
+        color: #e0e0e0;
+        border-color: #555;
+      }
+
+      #item-selection button:hover {
+        background-color: #555;
+      }
     }
 
-    .dark-theme .top-bar {
-      background-color: #333333;
+    .special-bar {
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 5px;
+      height: 5px;
+      overflow: hidden;
+      margin: 5px 0;
     }
 
-    .dark-theme .combat-actions-wrapper {
-      background-color: #222222;
+    .special-fill {
+      height: 100%;
+      width: 0;
+      background-color: #4CAF50;
+      transition: width 0.3s ease-in-out;
     }
 
-    .dark-theme .combat-actions button {
-      background-color: #444444;
-      color: #e0e0e0;
+    /* Masquer les barres de défilement */
+    .content::-webkit-scrollbar {
+      display: none;
     }
 
-    .dark-theme .combat-actions button:hover {
-      background-color: #555555;
+    .content {
+      scrollbar-width: none;
     }
 
-    .dark-theme #combat-log {
-      background-color: #333333;
-      border: 1px solid #444444;
-      color: #e0e0e0;
-    }
-
-    .dark-theme #item-selection {
-      background-color: #333333;
-      color: #e0e0e0;
-      border: 1px solid #444444;
-    }
-
-    .dark-theme #item-selection button {
-      background-color: #444444;
-      color: #e0e0e0;
-      border: 1px solid #555555;
-    }
-
-    .dark-theme #item-selection button:hover {
-      background-color: #555555;
+    .content {
+      -ms-overflow-style: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="top-bar">
-    <div class="header-container">
-      <div id="player-header" class="header-info">
+  <div class="content">
+    <div class="top-bar">
+      <div class="header-info">
         <h3 id="player-name"></h3>
         <p id="player-pv"></p>
-        <!-- L'argent est masqué -->
-        <!-- <p id="player-money"></p> -->
+        <div id="player-special-bar" class="special-bar">
+          <div id="player-special-fill" class="special-fill"></div>
+        </div>
         <p id="player-attack"></p>
         <p id="player-defense"></p>
       </div>
-      <div id="opponent-header" class="header-info">
+      <div class="header-info">
         <h3 id="opponent-name"></h3>
         <p id="opponent-pv"></p>
+        <div id="opponent-special-bar" class="special-bar">
+          <div id="opponent-special-fill" class="special-fill"></div>
+        </div>
         <p id="opponent-attack"></p>
         <p id="opponent-defense"></p>
       </div>
     </div>
-  </div>
 
-  <div class="combat-container">
-    <div id="combat-log"></div>
-  </div>
-
-  <div class="combat-actions-wrapper">
-    <div class="combat-actions">
-      <button id="attack-button" onclick="attack()">Attaquer</button>
-      <button id="special-button" onclick="useSpecial()">Capacité spéciale</button>
-      <button id="items-button" onclick="showItemSelection()">Objets</button>
+    <div class="combat-container">
+      <div id="combat-log"></div>
     </div>
-    <div id="item-selection">
-      <h3>Choisissez un objet à utiliser</h3>
-      <!-- Les boutons d'objets seront ajoutés dynamiquement -->
-      <button onclick="hideItemSelection()">Annuler</button>
+
+    <div class="combat-actions-wrapper">
+      <div class="combat-actions">
+        <button id="attack-button" onclick="handleAttack(playerCharacter, opponentCharacter, true);"></button>
+        <button id="defense-button" onclick="handleDefense(playerCharacter, opponentCharacter, true);"></button>
+        <button id="special-button" onclick="useSpecialAbility(playerCharacter, opponentCharacter, true);"></button>
+        <button id="items-button" onclick="showItemSelection()"></button>
+      </div>
+      <div id="item-selection">
+        <button onclick="hideItemSelection()">Annuler</button>
+      </div>
     </div>
   </div>
+  <script type="module">
+    // Importation des modules Firebase
+    import {initializeApp} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import {getPerformance} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
 
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
 
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
 
-  <script>
-    function getUserData() {
-      userData = JSON.parse(localStorage.getItem('userData'));
-      if (userData.theme) {
-        document.body.classList.add('dark-theme');
-      }
-      return userData;
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
     }
-    getUserData()
+  </script>
+  <script>
+
+    function getUserData() {
+      let userData = localStorage.getItem('userData');
+      if (userData) {
+        userData = JSON.parse(userData);
+        return userData;
+      }
+      return {}; // Retourner un objet vide si userData est null ou undefined
+    }
+
+    getUserData();
+
     function saveUserData(userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
     }
+
     // Récupérer les statistiques du personnage choisi depuis sessionStorage
     let playerCharacter = sessionStorage.getItem('playerCharacter');
     if (playerCharacter) {
@@ -276,9 +377,22 @@
       playerCharacter.perte_defense_colorina = 0;
       playerCharacter.pv_maximum = playerCharacter.pv;
       playerCharacter.amulette_soin = 0;
+      playerCharacter.attaque_epee = 0;
+      playerCharacter.attaque_elixir = 0;
+      playerCharacter.armure = 0;
 
-
-
+      playerCharacter.degats_partie = 0;
+      playerCharacter.objets_partie = 0;
+      playerCharacter.capacite_partie = 0;
+      playerCharacter.degats_partie_base = 0;
+      playerCharacter.objets_soin = 0;
+      playerCharacter.defense_bouton = 0;
+      playerCharacter.defense_droit = 0;
+      playerCharacter.defense_solide = 0;
+      playerCharacter.defense_partie = 0;
+      playerCharacter.immobilisation = 0;
+      playerCharacter.sboonie_attaque = 0;
+      playerCharacter.poulpy_att = 0;
     } else {
       // Rediriger vers index.html si les statistiques du personnage ne sont pas trouvées
       window.location.href = 'index.html';
@@ -293,10 +407,17 @@
       opponentCharacter.Oiseaudefense = 0;
       opponentCharacter.perte_defense_colorina = 0;
       opponentCharacter.pv_maximum = opponentCharacter.pv;
+      opponentCharacter.immobilisation = 0;
+      opponentCharacter.defense_bouton = 0;
+      opponentCharacter.defense_droit = 0;
+      opponentCharacter.sboonie_attaque = 0;
+      opponentCharacter.poulpy_att = 0;
+      opponentCharacter.degats_subit = 0;
     } else {
       // Rediriger vers index.html si les statistiques de l'adversaire ne sont pas trouvées
       window.location.href = 'index.html';
     }
+
     // Empêcher le retour en arrière vers la page précédente
     history.replaceState(null, null, window.location.href);
 
@@ -313,66 +434,129 @@
 
     // Récupérer la capacité spéciale du joueur depuis sessionStorage
     let specialAbility = spe;
-
     // Mettre à jour le bouton de capacité spéciale
     updateSpecialButton();
+    function updateSpecialBar(character, elementId) {
+      const specialBar = document.getElementById(elementId);
+      const fillElement = specialBar.querySelector('.special-fill');
+      const maxSpecialAbility = 1; // La valeur maximale pour la capacité spéciale
+      const widthPercentage = (character.spe / maxSpecialAbility) * 100;
+      fillElement.style.width = `${widthPercentage}%`;
+    }
 
+    function updateUI() {
+      document.getElementById('player-name').textContent = `${playerCharacter.name}`;
+      document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
+      updateSpecialBar(playerCharacter, 'player-special-bar');
+
+      document.getElementById('opponent-name').textContent = `${opponentCharacter.name}`;
+      document.getElementById('opponent-pv').textContent = `PV: ${opponentCharacter.pv}`;
+      updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+    }
+    updateUI();
+
+    // Mettre à jour l'interface utilisateur initialement
     function updateSpecialButton() {
       const specialButton = document.getElementById('special-button');
+      const maxSpecialAbility = 1; // La valeur maximale pour la capacité spéciale
 
-      if (specialAbility >= 1) {
-        specialButton.style.backgroundColor = 'red';
-        specialButton.textContent = 'Capacité spéciale';
+      // Ajouter ou retirer la classe de brillance et d'agrandissement selon la capacité spéciale
+      if (specialAbility >= maxSpecialAbility) {
+        specialButton.classList.add('bright');
+        specialButton.classList.add('grow'); // Ajout de la classe pour agrandir le bouton
+        specialButton.textContent = 'Capacité spéciale'; // Affichage du texte si nécessaire
       } else {
-        specialButton.style.backgroundColor = 'blue';
-        specialButton.textContent = `${specialAbility.toFixed(1)} / 1`;
-
+        specialButton.classList.remove('bright');
+        specialButton.classList.remove('grow'); // Retrait de la classe pour revenir à la taille normale
+        specialButton.textContent = `${specialAbility.toFixed(1)} / 1`; // Affichage du texte si nécessaire
       }
     }
+
     function adversairepasser_tour() {
+      updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+      updateUI();
+      if (opponentCharacter.immobilisation >= 1) {
+        opponentCharacter.immobilisation -= 1;
+      }
+      if (opponentCharacter.defense_droit > 0) {
+        opponentCharacter.defense_droit -= 1;
+      }
       if (opponentCharacter.perte_att > 0) {
         opponentCharacter.perte_att -= 1;
-      } else if (opponentCharacter.perte_att <= 0) {
-        opponentCharacter.attaque = opponentCharacter.attaque_originale;
-        console.log(`${opponentCharacter.name} a récupéré son attaque originale.`);
+        if (opponentCharacter.perte_att == 0) {
+          opponentCharacter.attaque = Math.round(opponentCharacter.attaque / 0.80);
+        }
+      }
+      if (opponentCharacter.poulpy_att > 0) {
+        opponentCharacter.poulpy_att -= 1;
+        if (opponentCharacter.poulpy_att == 0) {
+          opponentCharacter.defense = Math.round(opponentCharacter.defense / 0.85);
+        }
       }
       if (opponentCharacter.Oiseaudefense > 0) {
         opponentCharacter.Oiseaudefense -= 1;
-      } else if (opponentCharacter.Oiseaudefense <= 0) {
-        opponentCharacter.defense = opponentCharacter.defense - 20;
-        console.log(`${opponentCharacter.name} a récupéré sa défense originale.`);
+        if (opponentCharacter.Oiseaudefense == 0) {
+          opponentCharacter.defense -= 20;
+        }
       }
       if (opponentCharacter.perte_defense_colorina > 0) {
         opponentCharacter.perte_defense_colorina -= 1;
-      } else if (opponentCharacter.perte_defense_colorina <= 0) {
-        opponentCharacter.defense = opponentCharacter.defense_originale;
-        console.log(`${opponentCharacter.name} a récupéré sa défense originale.`);
+        if (opponentCharacter.perte_defense_colorina == 0) {
+          opponentCharacter.defense = Math.round(opponentCharacter.defense / 0.85);
+        }
+      }
+      if (opponentCharacter.sboonie_attaque > 0) {
+        opponentCharacter.sboonie_attaque -= 1;
+        if (opponentCharacter.sboonie_attaque == 0) {
+          opponentCharacter.attaque = Math.round(opponentCharacter.attaque / 0.75);
+        }
       }
     }
 
+
     function joueurpasser_tour() {
+      updateSpecialBar(playerCharacter, 'player-special-bar');
+      updateUI();
+      if (playerCharacter.immobilisation >= 1) {
+        playerCharacter.immobilisation -= 1;
+      }
+      if (playerCharacter.amulette_soin > 0) {
+        playerCharacter.pv = Math.round(playerCharacter.pv + (playerCharacter.pv_maximum * 0.02));
+      }
+      if (playerCharacter.defense_droit > 0) {
+        playerCharacter.defense_droit -= 1;
+      }
       if (playerCharacter.perte_att > 0) {
         playerCharacter.perte_att -= 1;
-      } else if (playerCharacter.perte_att <= 0) {
-        playerCharacter.attaque = playerCharacter.attaque_originale;
-        console.log(`${playerCharacter.name} a récupéré son attaque originale.`);
+        if (playerCharacter.perte_att == 0) {
+          playerCharacter.attaque = Math.round(playerCharacter.attaque / 0.80);
+        }
+      }
+      if (playerCharacter.poulpy_att > 0) {
+        playerCharacter.poulpy_att -= 1;
+        if (playerCharacter.poulpy_att == 0) {
+          playerCharacter.defense = Math.round(playerCharacter.defense / 0.85);
+        }
       }
       if (playerCharacter.Oiseaudefense > 0) {
         playerCharacter.Oiseaudefense -= 1;
-      } else if (playerCharacter.Oiseaudefense <= 0) {
-        playerCharacter.defense = playerCharacter.defense - 20;
-        console.log(`${playerCharacter.name} a récupéré sa défense originale.`);
+        if (playerCharacter.Oiseaudefense == 0) {
+          playerCharacter.defense -= 20;
+        }
       }
       if (playerCharacter.perte_defense_colorina > 0) {
         playerCharacter.perte_defense_colorina -= 1;
-      } else if (playerCharacter.perte_defense_colorina <= 0) {
-        playerCharacter.defense = playerCharacter.defense_originale;
-        console.log(`${playerCharacter.name} a récupéré sa défense originale.`);
+        if (playerCharacter.perte_defense_colorina == 0) {
+          playerCharacter.defense = Math.round(playerCharacter.defense / 0.85);
+        }
       }
-      if (playerCharacter.amulette_soin > 0) {
-        playerCharacter.amulette_soin -= 1;
-        playerCharacter.pv = Math.round(playerCharacter.pv + (playerCharacter.pv_maximum * 0.05));
+      if (playerCharacter.sboonie_attaque > 0) {
+        playerCharacter.sboonie_attaque -= 1;
+        if (playerCharacter.sboonie_attaque == 0) {
+          playerCharacter.attaque = Math.round(playerCharacter.attaque / 0.75);
+        }
       }
+
     }
 
     function showItemSelection() {
@@ -384,17 +568,42 @@
 
       // Add buttons for each item in the inventory
       const userData = getUserData();
+      if (userData.bouclier_solide_acheté > 0) {
+        const bouclierButton = document.createElement('button');
+        bouclierButton.textContent = 'Bouclier solide' + `(${userData.bouclier_solide_acheté})`;
+        bouclierButton.onclick = function () {useItem('Bouclier solide');};
+        itemSelectionDiv.appendChild(bouclierButton);
+      }
       if (userData.Potion_de_Santé_acheté > 0) {
         const potionButton = document.createElement('button');
         potionButton.textContent = 'Potion de Santé' + ` (${userData.Potion_de_Santé_acheté})`;
         potionButton.onclick = function () {useItem('Potion de Santé');};
         itemSelectionDiv.appendChild(potionButton);
-      } if (userData.Amulette_de_Régénération_acheté > 0) {
+      }
+      if (userData.Amulette_de_Régénération_acheté > 0) {
         const AmuletteButton = document.createElement('button');
         AmuletteButton.textContent = 'Amulette de Régénération' + ` (${userData.Amulette_de_Régénération_acheté})`;
         AmuletteButton.onclick = function () {useItem('Amulette de Régénération');};
         itemSelectionDiv.appendChild(AmuletteButton);
       }
+      if (userData.epee_tranchante_acheté > 0) {
+        const EpeeButton = document.createElement('button');
+        EpeeButton.textContent = 'Épée Tranchante' + ` (${userData.epee_tranchante_acheté})`;
+        EpeeButton.onclick = function () {useItem('Épée Tranchante');};
+        itemSelectionDiv.appendChild(EpeeButton);
+      }
+      if (userData.elixir_puissance_acheté > 0) {
+        const ElixirButton = document.createElement('button');
+        ElixirButton.textContent = 'Elixir de Puissance' + ` (${userData.elixir_puissance_acheté})`;
+        ElixirButton.onclick = function () {useItem('Elixir de Puissance');};
+        itemSelectionDiv.appendChild(ElixirButton);
+      } if (userData.armure_fer_acheté > 0) {
+        const armureButton = document.createElement('button');
+        armureButton.textContent = 'Armure de Fer' + ` (${userData.armure_fer_acheté})`;
+        armureButton.onclick = function () {useItem('Armure de Fer');};
+        itemSelectionDiv.appendChild(armureButton);
+      }
+
       // Add other items dynamically if needed
       // Example:
       // if (userData.Other_Item) {
@@ -414,31 +623,69 @@
     function hideItemSelection() {
       document.getElementById('item-selection').style.display = 'none';
     }
+
     function useItem(itemName) {
+      const userData = getUserData();
       switch (itemName) {
         case 'Potion de Santé':
-          // Exemple : Régénérer des PV
-          userData = getUserData();
           userData.Potion_de_Santé_acheté -= 1;
-          const ajoutPV = Math.round(playerCharacter.pv * 0.15); // Montant de guérison (peut être ajusté)
-          playerCharacter.pv += ajoutPV;
-          saveUserData(userData);
+          playerCharacter.pv += 1100;
+
           if (playerCharacter.pv > playerCharacter.pv_maximum) {
             playerCharacter.pv = playerCharacter.pv_maximum;
           }
-          break;
-        case 'Amulette de Régénération':
-          userData = getUserData();
-          userData.Amulette_de_Régénération_acheté -= 1;
-          playerCharacter.amulette_soin += 3;
+          playerCharacter.objets_partie += 1;
+          playerCharacter.objets_soin += 1;
           saveUserData(userData);
           break;
-        // Ajoutez d'autres cas pour d'autres objets
+
+        case 'Amulette de Régénération':
+          userData.Amulette_de_Régénération_acheté -= 1;
+          // Amulette soin devient un effet permanent de régénération
+          playerCharacter.amulette_soin = 1; // On garde une régénération constante
+          playerCharacter.objets_partie += 1;
+          playerCharacter.objets_soin += 1;
+          saveUserData(userData);
+          break;
+
+        case 'Épée Tranchante':
+          userData.epee_tranchante_acheté -= 1;
+          // Appliquer une augmentation permanente de l'attaque
+          playerCharacter.attaque = Math.round(playerCharacter.attaque * 1.05); // Moins fort mais permanent
+          playerCharacter.objets_partie += 1;
+          saveUserData(userData);
+          break;
+
+        case 'Elixir de Puissance':
+          userData.elixir_puissance_acheté -= 1;
+          // L'effet reste permanent avec une augmentation modérée
+          playerCharacter.attaque += 50; // Réduction de l'effet initial mais permanent
+          playerCharacter.objets_partie += 1;
+          saveUserData(userData);
+          break;
+
+        case 'Armure de Fer':
+          userData.armure_fer_acheté -= 1;
+          // Réduire l'attaque de l'adversaire de façon permanente
+          opponentCharacter.attaque = Math.round(opponentCharacter.attaque * 0.90); // Moins d'effet mais permanent
+          playerCharacter.objets_partie += 1;
+          saveUserData(userData);
+          break;
+
+        case 'Bouclier solide':
+          userData.bouclier_solide_acheté -= 1;
+          // Appliquer une augmentation permanente de la défense
+          playerCharacter.defense += 15; // Réduit l'effet initial mais permanent
+          playerCharacter.objets_partie += 1;
+          saveUserData(userData);
+          break;
+
         default:
           console.log('Objet non reconnu');
       }
 
       // Mettre à jour l'interface utilisateur
+
       document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
 
       // Masquer la sélection des objets
@@ -453,507 +700,735 @@
       scrollToBottom(); // Assurez-vous que la vue défile vers le bas
     }
 
-    function useSpecial() {
-      if (specialAbility >= 1) {
+    function useSpecialAbility(character, opponent, isPlayer) {
+      if (character.spe >= 1) {
         // Décrémente la quantité de la capacité spéciale utilisée
-        playerCharacter.spe -= 1;
-        specialAbility -= 1;
+        character.spe -= 1;
+        if (isPlayer) {
+          specialAbility -= 1;
+          character.capacite_partie += 1;
+        }
 
-        // Affiche l'effet de la capacité spéciale du joueur
         let specialLogMessage = "";
 
-        switch (playerCharacter.name) {
-          case "Diva":
-            opponentCharacter.attaque *= 0.80;
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! L'attaque de ${opponentCharacter.name} est réduite à ${opponentCharacter.attaque.toFixed(2)} pour les 3 prochains tours.`;
-            opponentCharacter.perte_att += 3;
-            break;
-          case "Willy":
-            playerCharacter.spe -= 0.25;
-            specialAbility -= 0.25;
-            const opponentDefenseModifiee = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
-            const opponentDefensee = Math.round(opponentCharacter.defense * opponentDefenseModifiee);
-            opponentCharacter.pv += opponentDefensee - playerCharacter.attaque;
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il effectue deux attaques !\n\n${playerCharacter.name} attaque ${opponentCharacter.name} et inflige ${playerCharacter.attaque - opponentDefensee} points de dégâts.`;
-            attack(); // Deuxième attaque
-            break;
-          case "Baleine":
-            if (playerCharacter.defense < 29) {
-              specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
-              attack(); // Attaque normale
-            } else {
-              specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 10 de défense et gagne 1000 PV !";
-              playerCharacter.spe -= 0.25;
+
+        if (character.immobilisation >= 1) {
+          specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'a immobilisé, donc l'attaque échoue et rien ne se passe.`;
+          opponent.pv -= 0;
+
+          // Ajouter le message au journal
+          const combatLog = document.getElementById('combat-log');
+          const specialLogEntry = document.createElement('p');
+          specialLogEntry.textContent = specialLogMessage;
+          specialLogEntry.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+          combatLog.appendChild(specialLogEntry);
+        } else if (opponent.defense_bouton === 1) {
+          opponent.defense_bouton = 0;
+          specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'en empêche, donc l'attaque échoue et rien ne se passe.`;
+          opponent.pv -= 0;
+
+          // Ajouter le message au journal
+          const combatLogdefense = document.getElementById('combat-log');
+          const specialLogEntry = document.createElement('p');
+          specialLogEntry.textContent = specialLogMessage;
+          specialLogEntry.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+          combatLogdefense.appendChild(specialLogEntry);
+        } else {
+          switch (character.name) {
+            case "Diva":
+              opponent.attaque *= 0.80;
+              character.spe -= 0.25;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! L'attaque de ${opponent.name} est réduite à ${Math.round(opponent.attaque.toFixed(2))} pour les 3 prochains tours.`;
+              opponent.perte_att += 3;
+              if (!isPlayer) {
+                opponent.perte_att += 1;
+              }
+
+              // Ajouter le message au journal
+              const combatLogDiva = document.getElementById('combat-log');
+              const specialLogEntryD = document.createElement('p');
+              specialLogEntryD.textContent = specialLogMessage;
+              specialLogEntryD.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogDiva.appendChild(specialLogEntryD);
+
+              handleAttack(character, opponent, isPlayer);
+              break;
+
+            case "Willy":
+              character.spe -= 0.25;
               specialAbility -= 0.25;
-              playerCharacter.defense -= 10;
-              playerCharacter.pv += 1000;
-              attack(); // Attaque normale après la capacité spéciale
-            }
-            break;
-          case "Doudou":
-            let regeneratedAmount;
-            if (playerCharacter.pv < (playerCharacter.pv_max / 2)) {
-              regeneratedAmount = Math.ceil(playerCharacter.pv * 0.15);
-              specialLogMessage = `${playerCharacter.name} régénère ${regeneratedAmount} PV (15%).`;
-            } else {
-              regeneratedAmount = Math.ceil(playerCharacter.pv * 0.05);
-              specialLogMessage = `${playerCharacter.name} régénère ${regeneratedAmount} PV (5%).`;
-            }
-            playerCharacter.pv += regeneratedAmount;
-            if (playerCharacter.pv > playerCharacter.pv_max) {
-              playerCharacter.pv = playerCharacter.pv_max;
-            }
-            attack();
-            break;
-          case "Cocobi":
-            // Calculer la réduction des PV de l'adversaire
-            const reductionAmount = Math.ceil(opponentCharacter.pv_maximum * 0.08);
-            opponentCharacter.pv -= reductionAmount;
+              const opponentDefenseModifiee = 0.9 + Math.random() * 0.2; // Entre 0.9 et 1.1
+              const opponentDefensee = Math.round(opponent.defense * opponentDefenseModifiee);
+              opponent.pv += (2 * (opponentDefensee - character.attaque));
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il effectue 3 attaques !\n\n${character.name} attaque ${opponent.name} et inflige ${Math.round(2 * (character.attaque - opponentDefensee))} points de dégâts.`;
+              character.degats_partie += (2 * (character.attaque - opponentDefensee));
 
-            // Vérifier si les PV de l'adversaire ne sont pas inférieurs à zéro
-            if (opponentCharacter.pv < 0) {
-              opponentCharacter.pv = 0;
-            }
+              // Ajouter le message au journal
+              const combatLogWilly = document.getElementById('combat-log');
+              const specialLogEntryW = document.createElement('p');
+              specialLogEntryW.textContent = specialLogMessage;
+              specialLogEntryW.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogWilly.appendChild(specialLogEntryW);
 
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! ${opponentCharacter.name} perd ${reductionAmount} PV.`;
-            break;
-          case "Coeur":
-            const specialDamage = Math.round(playerCharacter.attaque * 1.5);
-            if (playerCharacter.pv > (playerCharacter.pv_max / 2)) {
-              const absorbedHealth = Math.round(specialDamage * 0.1);
-              opponentCharacter.pv -= specialDamage;
-              playerCharacter.pv += absorbedHealth;
-              specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${specialDamage} points de dégâts et récupère ${absorbedHealth} PV.`;
-            } else {
-              const absorbedHealth = Math.round(specialDamage * 0.15);
-              opponentCharacter.pv -= specialDamage;
-              playerCharacter.pv += absorbedHealth;
-              specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${specialDamage} points de dégâts et récupère ${absorbedHealth} PV.`;
-            }
+              handleAttack(character, opponent, isPlayer);
+              break;
 
-            // Assurez-vous que les PV de l'adversaire et du joueur ne dépassent pas les limites
-            if (opponentCharacter.pv < 0) opponentCharacter.pv = 0;
-            if (playerCharacter.pv > playerCharacter.pv_max) playerCharacter.pv = playerCharacter.pv_max;
-            break;
-          case "Gros Nounours":
-            const Damage = 500 + playerCharacter.attaque;
-            const defense = Math.round(opponentCharacter.defense * 0.5);
-            opponentCharacter.pv -= (Damage - defense);
+            case "Baleine":
+              if (character.defense < 29) {
+                specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
 
-            // Ignorer le bouclier de l'adversaire
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${Damage - defense} points de dégâts à ${opponentCharacter.name}, ignorant le bouclier.`;
-            break;
-          case "Poulpy":
-            // Infliger des dégâts à l'adversaire
-            const poulpyDamage = Math.round(playerCharacter.attaque * 1.75);
-            // Ignorer 50% de la défense de l'adversaire
-            const effectiveDefense = Math.round(opponentCharacter.defense * 0.6);
-            const netDamage = Math.max(0, poulpyDamage - effectiveDefense);
-            opponentCharacter.pv -= netDamage;
-            // Réduire la défense de l'adversaire pour les deux prochains tours
-            opponentCharacter.defense *= 0.85;
-            opponentCharacter.perte_att += 2;
+                // Ajouter le message au journal
+                const combatLogBaleineFail = document.getElementById('combat-log');
+                const specialLogEntryB = document.createElement('p');
+                specialLogEntryB.textContent = specialLogMessage;
+                specialLogEntryB.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+                combatLogBaleineFail.appendChild(specialLogEntryB);
 
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${netDamage} points de dégâts à ${opponentCharacter.name}, ignore 50% de sa défense et réduit sa défense de 15% pour les 2 prochains tours.`;
-            break;
-          case "Oiseau":
-            const DamageOiseau = playerCharacter.attaque * 2.5;
-            playerCharacter.defense += 20; // Augmentation de la défense
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${DamageOiseau} points de dégâts et gagne 20 de défense.`;
-            opponentCharacter.pv -= DamageOiseau;
-            playerCharacter.Oiseaudefense += 2; // Durée de l'effet de la capacité spéciale
-            break;
-          case "Colorina":
-            // Infliger 85% de l'attaque en dégâts
-            const colorinaDamage = Math.round(playerCharacter.attaque * 0.85);
-            opponentCharacter.pv -= colorinaDamage;
+                handleAttack(character, opponent, isPlayer);
+              } else {
+                specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 15 de défense et gagne 1000 PV !";
+                character.spe -= 0.25;
+                if (isPlayer) {
+                  specialAbility -= 0.25;
+                }
+                character.defense -= 15;
+                character.pv += 1000;
 
-            // Réduire la défense de l'adversaire de 10% pour les 3 prochains tours
-            opponentCharacter.defense *= 0.85;
-            opponentCharacter.perte_defense_colorina += 3;
+                // Ajouter le message au journal
+                const combatLogBaleine = document.getElementById('combat-log');
+                const specialLogEntryB = document.createElement('p');
+                specialLogEntryB.textContent = specialLogMessage;
+                specialLogEntryB.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+                combatLogBaleine.appendChild(specialLogEntryB);
 
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Il inflige ${colorinaDamage} points de dégâts et réduit la défense de ${opponentCharacter.name} de 15% pour les 3 prochains tours.`;
-            break;
-          default:
-            specialLogMessage = `${playerCharacter.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
-          // Ajouter ici le traitement pour d'autres personnages si nécessaire
+                handleAttack(character, opponent, isPlayer);
+              }
+              break;
+
+            case "Doudou":
+              character.spe -= 0.25;
+              let regeneratedAmount;
+              if (character.pv < (character.pv_max / 2)) {
+                regeneratedAmount = Math.ceil(character.pv * 0.15);
+                specialLogMessage = `${character.name} régénère ${Math.round(regeneratedAmount)} PV.`;
+              } else {
+                regeneratedAmount = Math.ceil(character.pv * 0.05);
+                specialLogMessage = `${character.name} régénère ${Math.round(regeneratedAmount)} PV.`;
+              }
+              character.pv += regeneratedAmount;
+              if (character.pv > character.pv_max) {
+                character.pv = character.pv_max;
+              }
+
+              // Ajouter le message au journal
+              const combatLogDoudou = document.getElementById('combat-log');
+              const specialLogEntryDo = document.createElement('p');
+              specialLogEntryDo.textContent = specialLogMessage;
+              specialLogEntryDo.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogDoudou.appendChild(specialLogEntryDo);
+
+              handleAttack(character, opponent, isPlayer);
+              break;
+
+            case "Cocobi":
+              const reductionAmount = Math.ceil(opponent.pv_maximum * 0.08);
+              opponent.pv -= reductionAmount;
+              if (opponent.pv < 0) {
+                opponent.pv = 0;
+              }
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! ${opponent.name} perd ${Math.round(reductionAmount)} PV.`;
+              character.degats_partie += reductionAmount;
+
+              // Ajouter le message au journal
+              const combatLogCocobi = document.getElementById('combat-log');
+              const specialLogEntryCo = document.createElement('p');
+              specialLogEntryCo.textContent = specialLogMessage;
+              specialLogEntryCo.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogCocobi.appendChild(specialLogEntryCo);
+              break;
+
+            case "Coeur":
+              const specialDamage = Math.round(character.attaque * 1.5);
+              const absorbedHealth = Math.round(specialDamage * (character.pv > (character.pv_max / 2) ? 0.1 : 0.15));
+              opponent.pv -= specialDamage;
+              character.pv += absorbedHealth;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(specialDamage)} points de dégâts et récupère ${Math.round(absorbedHealth)} PV.`;
+              character.degats_partie += specialDamage;
+              if (opponent.pv < 0) opponent.pv = 0;
+              if (character.pv > character.pv_max) character.pv = character.pv_max;
+
+              // Ajouter le message au journal
+              const combatLogCoeur = document.getElementById('combat-log');
+              const specialLogEntryCoe = document.createElement('p');
+              specialLogEntryCoe.textContent = specialLogMessage;
+              specialLogEntryCoe.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogCoeur.appendChild(specialLogEntryCoe);
+              break;
+
+            case "Grours":
+              const Damage = 500 + character.attaque;
+              const defense = Math.round(opponent.defense * 0.5);
+              opponent.pv -= (Damage - defense);
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(Damage - defense)} points de dégâts à ${opponent.name}, ignorant le bouclier.`;
+              character.degats_partie += (Damage - defense);
+
+              // Ajouter le message au journal
+              const combatLogGrours = document.getElementById('combat-log');
+              const specialLogEntryG = document.createElement('p');
+              specialLogEntryG.textContent = specialLogMessage;
+              specialLogEntryG.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogGrours.appendChild(specialLogEntryG);
+              break;
+
+            case "Poulpy":
+              const poulpyDamage = Math.round(character.attaque * 1.75);
+              const effectiveDefense = Math.round(opponent.defense * 0.6);
+              const netDamage = Math.max(0, poulpyDamage - effectiveDefense);
+              opponent.pv -= netDamage;
+              opponent.defense *= 0.85;
+              opponent.poulpy_att += 3;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(netDamage)} points de dégâts à ${opponent.name}, ignore 50% de sa défense et réduit sa défense de 15% pour les 2 prochains tours.`;
+              character.degats_partie += netDamage;
+
+              // Ajouter le message au journal
+              const combatLogPoulpy = document.getElementById('combat-log');
+              const specialLogEntryP = document.createElement('p');
+              specialLogEntryP.textContent = specialLogMessage;
+              specialLogEntryP.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogPoulpy.appendChild(specialLogEntryP);
+              break;
+
+            case "Oiseau":
+              const DamageOiseau = character.attaque * 2.5;
+              character.defense += 20;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(DamageOiseau)} points de dégâts et gagne 20 de défense.`;
+              opponent.pv -= DamageOiseau;
+              character.Oiseaudefense += 2;
+              character.degats_partie += DamageOiseau;
+
+              // Ajouter le message au journal
+              const combatLogOiseau = document.getElementById('combat-log');
+              const specialLogEntryO = document.createElement('p');
+              specialLogEntryO.textContent = specialLogMessage;
+              specialLogEntryO.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogOiseau.appendChild(specialLogEntryO);
+              break;
+
+            case "Colorina":
+              const colorinaDamage = Math.round(character.attaque * 0.85);
+              opponent.pv -= colorinaDamage;
+              opponent.defense *= 0.85;
+              opponent.perte_defense_colorina += 4;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(colorinaDamage)} points de dégâts et réduit la défense de ${opponent.name} de 15% pour les 3 prochains tours.`;
+              character.degats_partie += colorinaDamage;
+
+              // Ajouter le message au journal
+              const combatLogColorina = document.getElementById('combat-log');
+              const specialLogEntryCol = document.createElement('p');
+              specialLogEntryCol.textContent = specialLogMessage;
+              specialLogEntryCol.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogColorina.appendChild(specialLogEntryCol);
+              break;
+            case "Rosalie":
+              const rosalieDamage = Math.round(character.attaque * 2);
+              const immobilizationChance = Math.random();
+              if (immobilizationChance < 0.25) {
+                opponent.immobilisation = 1; // Marque l'adversaire comme immobilisé
+                specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle inflige ${Math.round(rosalieDamage)} points de dégâts et immobilise ${opponent.name} pour un tour.`;
+              } else {
+                specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle inflige ${Math.round(rosalieDamage)} points de dégâts.`;
+              }
+              opponent.pv -= rosalieDamage;
+              if (opponent.pv < 0) opponent.pv = 0;
+              character.degats_partie += rosalieDamage;
+              const combatLogRosalie = document.getElementById('combat-log');
+              const specialLogEntryR = document.createElement('p');
+              specialLogEntryR.textContent = specialLogMessage;
+              specialLogEntryR.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogRosalie.appendChild(specialLogEntryR);
+
+              break;
+            case "Sboonie":
+              pvsupp = Math.round(character.pv_max * 0.05)
+              character.pv += pvsupp;
+              opponent.attaque = Math.round(opponent.attaque * 0.75);
+              if (!isPlayer) {
+                opponent.sboonie_attaque += 1;
+              }
+              opponent.sboonie_attaque += 1;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il régénère ${Math.round(pvsupp)} PV et reduit de 25% l'attaque de ${opponent.name} pour le prochain tour.`;
+              const combatLogSboonie = document.getElementById('combat-log');
+              const specialLogEntryS = document.createElement('p');
+              specialLogEntryS.textContent = specialLogMessage;
+              specialLogEntryS.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogSboonie.appendChild(specialLogEntryS);
+
+              break;
+
+            default:
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
+
+              // Ajouter le message au journal
+              const combatLogDefault = document.getElementById('combat-log');
+              const specialLogEntry = document.createElement('p');
+              specialLogEntry.textContent = specialLogMessage;
+              specialLogEntry.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogDefault.appendChild(specialLogEntry);
+          }
         }
 
-        // Met à jour l'affichage des PV du joueur
-        document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
+        // Met à jour l'affichage des PV du joueur ou de l'adversaire
+        document.getElementById(isPlayer ? 'player-pv' : 'opponent-pv').textContent = `PV: ${character.pv}`;
 
-        // Met à jour le bouton après l'utilisation
-        updateSpecialButton();
-
-        // Ajoute une entrée dans le journal de combat
-        const combatLog = document.getElementById('combat-log');
-        const specialLogEntry = document.createElement('p');
-        specialLogEntry.textContent = specialLogMessage;
-        combatLog.appendChild(specialLogEntry);
+        // Met à jour le bouton après l'utilisation si c'est le joueur
+        if (isPlayer) updateSpecialButton();
+        updateSpecialBar(playerCharacter, 'player-special-bar');
+        updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+        updateUI();
 
         scrollToBottom();
+        if (isPlayer && character.name != "Diva" && character.name != "Willy" && character.name != "Baleine" && character.name != "Doudou") {
+          opponentTurn();
+        }
       }
     }
+
+
+
+
 
     function opponentTurn() {
-      // Décider aléatoirement si l'adversaire attaque ou utilise sa capacité spéciale
-      const useSpecialMove = Math.random() < 0.5 && opponentCharacter.spe >= 1;
+        // Vérifier si l'adversaire a la possibilité de se défendre
+        const canDefend = playerCharacter.spe === 1;
 
-      if (useSpecialMove) {
-        // Utiliser la capacité spéciale de l'adversaire
-        if (opponentCharacter.spe >= 1) {
-          opponentUseSpecial();
+        // Déterminer si l'adversaire doit utiliser sa capacité spéciale
+        const useSpecialMove = Math.random() < 0.7 && opponentCharacter.spe >= 1;
+
+        // Décider aléatoirement l'action de l'adversaire
+        if (canDefend && Math.random() < 0.4 && opponentCharacter.defense_droit === 0) {
+            // L'adversaire choisit de se défendre
+            opponentDefense(opponentCharacter, playerCharacter, false);
+        } else if (useSpecialMove) {
+            // L'adversaire choisit d'utiliser sa capacité spéciale
+            useSpecialAbility(opponentCharacter, playerCharacter, false);
         } else {
-          opponentAttack()
+            // L'adversaire choisit d'attaquer
+            handleAttack(opponentCharacter, playerCharacter, false);
         }
 
+        // Passer au tour suivant
+        adversairepasser_tour();
+        joueurpasser_tour();
+    }
+    function opponentDefense() {
+      opponentCharacter.defense_bouton = 1;
+      opponentCharacter.defense_droit = 4;
+      const combatLog = document.getElementById('combat-log');
+      const logEntry = document.createElement('p');
+      const soin = Math.round(opponentCharacter.degats_subit * 0.8)
+      opponentCharacter.pv += soin;
+      logEntry.textContent = `${opponentCharacter.name} se defend de la dernière attaque de ${playerCharacter.name}.`;
+      logEntry.style.color = '#6699CC';
+      combatLog.appendChild(logEntry);
+      scrollToBottom();
+      handleAttack(opponentCharacter, playerCharacter, false)
+      
+    }
+
+    function handleDefense(character, opponent, isPlayer) {
+
+      const combatLog = document.getElementById('combat-log');
+      const logEntry = document.createElement('p');
+      if (character.defense_droit === 0) {
+        character.spe += 0.1;
+        character.defense_bouton = 1;
+        character.defense_droit = 4;
+        logEntry.textContent = `${character.name} se defend contre la prochaine attaque de ${opponent.name}.`;
+        logEntry.style.color = '#6699CC';
+        combatLog.appendChild(logEntry);
+        if (isPlayer) {
+          character.defense_partie += 1;
+          opponentTurn();
+        }
+
+      } else if (isPlayer) {
+        logEntry.textContent = `${character.name} ne peut pas se défendre avant dans ${character.defense_droit} tours.`;
+        logEntry.style.color = '#6699CC';
+        combatLog.appendChild(logEntry);
+        handleAttack(character, opponent, true)
+      } else if (!isPlayer) {
+        logEntry.textContent = `${character.name} ne peut pas se défendre avant dans ${character.defense_droit} tours.`;
+        logEntry.style.color = '#6699CC';
+      }
+      updateSpecialBar(playerCharacter, 'player-special-bar');
+      updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+      updateUI();
+    }
+
+    function handleAttack(attacker, defender, isPlayerAttacking) {
+      // Augmenter spe de 0.25 à chaque attaque
+      if (attacker.name === "Doudou" || attacker.name === "Diva" || attacker.name === "Cocobi") {
+        attacker.spe += 0.20;
       } else {
-        // Attaquer
-        opponentAttack();
+        attacker.spe += 0.25;
+      }
+      if (isPlayerAttacking) {
+        specialAbility = attacker.spe;
+      }
+      if (attacker.spe >= 1) {
+        attacker.spe = 1;
+      }
+      const combatLog = document.getElementById('combat-log');
+      const logEntry = document.createElement('p');
+      logEntry.style.color = '#CC3333';  // Couleur rouge brique pour l'attaque
+
+
+      let damage;
+      if (isPlayerAttacking) {
+        
+      }
+
+      if (attacker.immobilisation > 0) {
+        damage = 0;
+        logEntry.textContent = `${defender.name} à immobilisé ${attacker.name} ! il ne peut donc pas attaquer.`;
+        combatLog.appendChild(logEntry);
+      } else {
+
+        // Calculer une défense aléatoire entre 85% et 115% de la défense originale de l'adversaire
+        const defenseModifier = 0.9 + Math.random() * 0.2; // Entre 0.9 et 1.1
+        const modifiedDefense = Math.round(defender.defense * defenseModifier);
+        damage = Math.max(0, attacker.attaque - modifiedDefense);
+        if (defender.defense_bouton === 1) {
+          defender.defense_bouton = 0;
+          damage = Math.round(attacker.attaque * 0.2); // Infliger 0 dégâts si la défense est activée
+        }
+
+        // Mettre à jour les PV du défenseur
+        opponentCharacter.degats_subit = damage;
+        let currentPV = defender.pv - damage;
+        if (currentPV < 0) {
+          currentPV = 0;
+        }
+        defender.pv = currentPV;
+
+        if (isPlayerAttacking) {
+          logEntry.textContent = `Vous attaquez et infligez ${damage} points de dégâts à ${defender.name}.`;
+          document.getElementById('opponent-pv').textContent = `PV: ${currentPV}`;
+        } else {
+          logEntry.textContent = `${attacker.name} attaque et inflige ${damage} points de dégâts.`;
+          document.getElementById('player-pv').textContent = `PV: ${currentPV}`;
+        }
+        combatLog.appendChild(logEntry);
+
+        if (isPlayerAttacking) {
+          playerCharacter.degats_partie += damage;
+          if (playerCharacter.spe >= 0.1) {
+            playerCharacter.degats_partie_base += damage;
+          }
+        }
+      }
+
+      // Vérifier si le défenseur est vaincu
+      if (defender.pv === 0) {
+        const userData = getUserData();
+        let perteTrophees = 0;
+
+        if (isPlayerAttacking) {
+          userData.victoires += 1;
+          userData.trophees += 10;
+          userData.fin_trophee = 10;
+        } else {
+
+          userData.defaites += 1;
+          if (userData.trophees < 150) {
+            perteTrophees = 1
+          } else if (userData.trophees <= 150) {
+            perteTrophees = 3;
+          } else if (userData.trophees <= 300) {
+            perteTrophees = 5;
+          } else if (userData.trophees <= 500) {
+            perteTrophees = 8;
+          } else if (userData.trophees <= 750) {
+            perteTrophees = 10;
+          } else {
+            perteTrophees = 12;
+          }
+
+          userData.trophees -= perteTrophees;
+          if (userData.trophees < 0) {
+            userData.trophees = 0;
+          }
+          saveUserData(userData);
+        }
+
+        let gain_XP = calculateXP(attacker, defender, isPlayerAttacking);
+        let gain_argent = Math.round(gain_XP / 3);
+        if (gain_XP < 20 && isPlayerAttacking) {
+          gain_XP = 20;
+        }
+        if (userData.XP_jour >= 2500) {
+          gain_XP = 0;
+        }
+        userData.XP_jour += gain_XP;
+
+        saveUserData(userData);
+
+        if (userData.Double_XP > 0) {
+          gain_XP *= 2;
+          userData.Double_XP -= 1;
+        } else if (userData.Double_XP_acheté > 0) {
+          userData.Double_XP_acheté -= 1;
+          gain_XP *= 2;
+        }
+        userData.pass_XP += gain_XP;
+        saveUserData(userData);
+
+        updateCharacterXP(userData, playerCharacter.name, gain_XP);
+        userData.argent += gain_argent;
+
+        if (isPlayerAttacking) {
+          combatLog.innerHTML += `<p>${defender.name} a été vaincu !`;
+          userData.gagnant = attacker.name;
+          userData.fin_xp = gain_XP;
+          userData.fin_argent = gain_argent;
+          saveUserData(userData);
+        } else {
+          combatLog.innerHTML += `<p>${attacker.name} vous a vaincu !`;
+          userData.gagnant = attacker.name;
+          userData.fin_xp = gain_XP;
+          userData.fin_argent = gain_argent;
+          userData.fin_trophee = -perteTrophees;
+          saveUserData(userData);
+        }
+        saveUserData(userData);
+
+        document.getElementById('attack-button').disabled = true;
+        document.getElementById('special-button').disabled = true;
+
+        if (userData.semaine1) {
+          if (!userData.Semaine1_1_completed) {
+            if (isPlayerAttacking) {
+              userData.Semaine1_1_current += 1;
+              saveUserData(userData);
+            }
+          }
+          if (!userData.Semaine1_2_completed) {
+            userData.Semaine1_2_current += playerCharacter.degats_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine1_3_completed) {
+            userData.Semaine1_3_current += playerCharacter.objets_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine1_5_completed) {
+            userData.Semaine1_5_current += playerCharacter.defense_partie;
+            saveUserData(userData);
+          }
+        }
+        if (userData.semaine2) {
+          if (!userData.Semaine2_1_completed) {
+            if (isPlayerAttacking) {
+              userData.Semaine2_1_current += 1;
+              saveUserData(userData);
+            }
+          }
+          if (!userData.Semaine2_2_completed) {
+            userData.Semaine2_2_current += playerCharacter.degats_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine2_3_completed) {
+            userData.Semaine2_3_current += playerCharacter.objets_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine2_5_completed) {
+            userData.Semaine2_5_current += playerCharacter.defense_partie;
+            saveUserData(userData);
+          }
+        }
+        if (userData.semaine3) {
+          if (!userData.Semaine3_1_completed) {
+            if (isPlayerAttacking) {
+              userData.Semaine3_1_current += 1;
+              saveUserData(userData);
+            }
+          }
+          if (!userData.Semaine3_2_completed) {
+            userData.Semaine3_2_current += playerCharacter.degats_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine3_3_completed) {
+            userData.Semaine3_3_current += playerCharacter.objets_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine3_5_completed) {
+            userData.Semaine3_5_current += playerCharacter.defense_partie;
+            saveUserData(userData);
+          }
+        }
+        if (userData.semaine4) {
+          if (!userData.Semaine4_1_completed) {
+            if (isPlayerAttacking) {
+              userData.Semaine4_1_current += 1;
+              saveUserData(userData);
+            }
+          }
+          if (!userData.Semaine4_2_completed) {
+            userData.Semaine4_2_current += playerCharacter.degats_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine4_3_completed) {
+            userData.Semaine4_3_current += playerCharacter.objets_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine4_5_completed) {
+            userData.Semaine4_5_current += playerCharacter.defense_partie;
+            saveUserData(userData);
+          }
+        }
+        if (userData.semaine5) {
+          if (!userData.Semaine5_1_completed) {
+            if (isPlayerAttacking) {
+              userData.Semaine5_1_current += 1;
+              saveUserData(userData);
+            }
+          }
+          if (!userData.Semaine5_2_completed) {
+            userData.Semaine5_2_current += playerCharacter.degats_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine5_3_completed) {
+            userData.Semaine5_3_current += playerCharacter.objets_partie;
+            saveUserData(userData);
+          }
+          if (!userData.Semaine5_5_completed) {
+            userData.Semaine5_5_current += playerCharacter.defense_partie;
+            saveUserData(userData);
+          }
+        }
+
+        if (userData.quete1_type === "victoire_classique" && playerCharacter.name === userData.quete1_character && isPlayerAttacking) {
+          userData.quete1_current += 1;
+          saveUserData(userData);
+        } else if (userData.quete1_type === "dommages_classique") {
+          userData.quete1_current += playerCharacter.degats_partie;
+          saveUserData(userData);
+        } else if (userData.quete1_type === "objets_total") {
+          userData.quete1_current += playerCharacter.objets_partie;
+          saveUserData(userData);
+        } else if (userData.quete1_type === "defense_classique") {
+          userData.quete1_current += playerCharacter.defense_partie;
+          saveUserData(userData);
+        }
+
+        if (userData.quete2_type === "victoire_classique" && playerCharacter.name === userData.quete2_character && isPlayerAttacking) {
+          userData.quete2_current += 1;
+          saveUserData(userData);
+        } else if (userData.quete2_type === "dommages_classique") {
+          userData.quete2_current += playerCharacter.degats_partie;
+          saveUserData(userData);
+        } else if (userData.quete2_type === "objets_total") {
+          userData.quete2_current += playerCharacter.objets_partie;
+          saveUserData(userData);
+        } else if (userData.quete2_type === "defense_classique") {
+          userData.quete2_current += playerCharacter.defense_partie;
+          saveUserData(userData);
+        }
+
+        if (userData.quete3_type === "victoire_classique" && playerCharacter.name === userData.quete3_character && isPlayerAttacking) {
+          userData.quete3_current += 1;
+          saveUserData(userData);
+        } else if (userData.quete3_type === "dommages_classique") {
+          userData.quete3_current += playerCharacter.degats_partie;
+          saveUserData(userData);
+        } else if (userData.quete3_type === "objets_total") {
+          userData.quete3_current += playerCharacter.objets_partie;
+          saveUserData(userData);
+        } else if (userData.quete3_type === "defense_classique") {
+          userData.quete3_current += playerCharacter.defense_partie;
+          saveUserData(userData);
+        }
+
+        updateCharacterXP(userData, playerCharacter.name, gain_XP);
+        userData.argent += gain_argent;
+
+        // Enregistrer le gagnant et les récompenses dans sessionStorage
+        checkAndDisplayCharacterUnlock(userData);
+        saveUserData(userData);
+        setTimeout(() => {
+          sessionStorage.removeItem('playerCharacter');
+          sessionStorage.removeItem('opponentCharacter');
+          window.location.href = 'fin_partie.html';
+        }, 2000);
+      } else if (isPlayerAttacking) {
+        // Tour de l'adversaire si le joueur attaque et n'a pas encore vaincu l'adversaire
+        opponentTurn();
+        updateSpecialBar(playerCharacter, 'player-special-bar');
+        updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+        updateUI();
+      }
+
+      updateSpecialButton();
+      scrollToBottom();
+    }
+
+    function calculateXP(attacker, defender, isPlayerAttacking) {
+      let userData = getUserData();
+      let niveau = Number(userData[attacker.name + "_Level"]) * 0.1;
+      if (isPlayerAttacking) {
+        let joueur_pv = attacker.pv;
+        let joueur_pv_base = attacker.pv_max;
+        return Math.round((2 * (joueur_pv / joueur_pv_base) * 100) * (1 / (1 + niveau)));
+      } else if (userData.XP_jour >= 2500) {
+        return 0;
+      } else {
+        return Math.round(20 - (2 * (niveau - 1)));
       }
     }
 
-    function opponentUseSpecial() {
-      opponentCharacter.spe -= 1;
+    function updateCharacterXP(userData, characterName, xp) {
 
-      // Affiche l'effet de la capacité spéciale de l'adversaire
-      let specialLogMessage = "";
-
-      switch (opponentCharacter.name) {
-        case "Diva":
-          playerCharacter.attaque *= 0.80;
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! L'attaque de ${playerCharacter.name} est réduite à ${playerCharacter.attaque.toFixed(2)} pour les 3 prochains tours.`;
-          playerCharacter.perte_att += 3;
-          break;
+      switch (characterName) {
         case "Willy":
-          opponentCharacter.spe -= 0.25;
-          specialAbility -= 0.25;
-          const playerDefenseModifiee = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
-          const playerDefensee = Math.round(playerCharacter.defense * playerDefenseModifiee);
-          playerCharacter.pv += playerDefensee - opponentCharacter.attaque;
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il effectue deux attaques !\n\n${opponentCharacter.name} attaque ${playerCharacter.name} et inflige ${opponentCharacter.attaque - playerDefensee} points de dégâts.`;
-          attack(); // Deuxième attaque
-          break;
-        case "Baleine":
-          if (opponentCharacter.defense < 29) {
-            specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
-            attack(); // Attaque normale
-          } else {
-            specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 10 de défense et gagne 1000 PV !";
-            opponentCharacter.spe -= 0.25;
-            specialAbility -= 0.25;
-            opponentCharacter.defense -= 10;
-            opponentCharacter.pv += 1000;
-            attack(); // Attaque normale après la capacité spéciale
-          }
-          break;
-        case "Doudou":
-          let regeneratedAmount;
-          if (opponentCharacter.pv < (opponentCharacter.pv_max / 2)) {
-            regeneratedAmount = Math.ceil(opponentCharacter.pv * 0.15);
-            specialLogMessage = `${opponentCharacter.name} régénère ${regeneratedAmount} PV (15%).`;
-          } else {
-            regeneratedAmount = Math.ceil(opponentCharacter.pv * 0.05);
-            specialLogMessage = `${opponentCharacter.name} régénère ${regeneratedAmount} PV (5%).`;
-          }
-          opponentCharacter.pv += regeneratedAmount;
-          if (opponentCharacter.pv > opponentCharacter.pv_max) {
-            opponentCharacter.pv = opponentCharacter.pv_max;
-          }
-          attack();
+          userData.Willy_XP += xp;
           break;
         case "Cocobi":
-          // Calculer la réduction des PV de l'adversaire
-          const reductionAmount = Math.ceil(playerCharacter.pv_maximum * 0.08);
-          playerCharacter.pv -= reductionAmount;
+          userData.Cocobi_XP += xp;
 
-          // Vérifier si les PV de l'adversaire ne sont pas inférieurs à zéro
-          if (playerCharacter.pv < 0) {
-            playerCharacter.pv = 0;
-          }
-
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! ${playerCharacter.name} perd ${reductionAmount} PV.`;
-          break;
-        case "Coeur":
-          const specialDamage = Math.round(opponentCharacter.attaque * 1.5);
-          if (opponentCharacter.pv > (opponentCharacter.pv_max / 2)) {
-            const absorbedHealth = Math.round(specialDamage * 0.1);
-            playerCharacter.pv -= specialDamage;
-            opponentCharacter.pv += absorbedHealth;
-            specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${specialDamage} points de dégâts et récupère ${absorbedHealth} PV.`;
-          } else {
-            const absorbedHealth = Math.round(specialDamage * 0.15);
-            playerCharacter.pv -= specialDamage;
-            opponentCharacter.pv += absorbedHealth;
-            specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${specialDamage} points de dégâts et récupère ${absorbedHealth} PV.`;
-          }
-
-          // Assurez-vous que les PV de l'adversaire et du joueur ne dépassent pas les limites
-          if (playerCharacter.pv < 0) playerCharacter.pv = 0;
-          if (opponentCharacter.pv > opponentCharacter.pv_max) opponentCharacter.pv = opponentCharacter.pv_max;
-          break;
-        case "Gros Nounours":
-          const Damage = 500 + opponentCharacter.attaque;
-          const defense = Math.round(playerCharacter.defense * 0.5);
-          playerCharacter.pv -= (Damage - defense);
-
-          // Ignorer le bouclier de l'adversaire
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${Damage - defense} points de dégâts à ${playerCharacter.name}, ignorant le bouclier.`;
-          break;
-        case "Poulpy":
-          // Infliger des dégâts à l'adversaire
-          const poulpyDamage = Math.round(opponentCharacter.attaque * 1.75);
-          // Ignorer 50% de la défense de l'adversaire
-          const effectiveDefense = Math.round(playerCharacter.defense * 0.6);
-          const netDamage = Math.max(0, poulpyDamage - effectiveDefense);
-          playerCharacter.pv -= netDamage;
-          // Réduire la défense de l'adversaire pour les deux prochains tours
-          playerCharacter.defense *= 0.85;
-          playerCharacter.perte_att += 2;
-
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${netDamage} points de dégâts à ${playerCharacter.name}, ignore 50% de sa défense et réduit sa défense de 15% pour les 2 prochains tours.`;
           break;
         case "Oiseau":
-          const DamageOiseau = opponentCharacter.attaque * 2.5;
-          opponentCharacter.defense += 20; // Augmentation de la défense
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${DamageOiseau} points de dégâts et gagne 20 de défense.`;
-          playerCharacter.pv -= DamageOiseau;
-          opponentCharacter.Oiseaudefense += 2; // Durée de l'effet de la capacité spéciale
+          userData.Oiseau_XP += xp;
+
+          break;
+        case "Grours":
+          userData.Grours_XP += xp;
+
+          break;
+        case "Baleine":
+          userData.Baleine_XP += xp;
+
+          break;
+        case "Doudou":
+          userData.Doudou_XP += xp;
+
+          break;
+        case "Coeur":
+          userData.Coeur_XP += xp;
+
+          break;
+        case "Diva":
+          userData.Diva_XP += xp;
+
+          break;
+        case "Poulpy":
+          userData.Poulpy_XP += xp;
+
           break;
         case "Colorina":
-          // Infliger 85% de l'attaque en dégâts
-          const colorinaDamage = Math.round(opponentCharacter.attaque * 0.85);
-          playerCharacter.pv -= colorinaDamage;
+          userData.Colorina_XP += xp;
 
-          // Réduire la défense de l'adversaire de 10% pour les 3 prochains tours
-          playerCharacter.defense *= 0.85;
-          playerCharacter.perte_defense_colorina += 3;
-
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Il inflige ${colorinaDamage} points de dégâts et réduit la défense de ${playerCharacter.name} de 15% pour les 3 prochains tours.`;
           break;
-        default:
-          specialLogMessage = `${opponentCharacter.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
-        // Ajouter ici le traitement pour d'autres personnages si nécessaire
+          saveUserData(userData);
       }
-
-
-      // Met à jour l'affichage des PV du joueur
-      document.getElementById('opponent-pv').textContent = `PV: ${opponentCharacter.pv}`;
-
-      // Ajoute une entrée dans le journal de combat
-      const combatLog = document.getElementById('combat-log');
-      const specialLogEntry = document.createElement('p');
-      specialLogEntry.textContent = specialLogMessage;
-      combatLog.appendChild(specialLogEntry);
-
-      scrollToBottom();
-      adversairepasser_tour();
-      joueurpasser_tour();
-    }
-
-    function opponentAttack() {
-      // Augmenter spe de 0.25 à chaque attaque
-      if (opponentCharacter.name === "Doudou" || opponentCharacter.name === "Diva" || opponentCharacter.name === "Cocobi") {
-        opponentCharacter.spe += 0.20;
-      } else {
-        opponentCharacter.spe += 0.25;
-      }
-      // Calculer une défense aléatoire entre 85% et 115% de la défense originale du joueur
-      const playerDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
-      const opponentDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
-
-      const playerDefense = Math.round(playerCharacter.defense * playerDefenseModifier);
-      const opponentDefense = Math.round(opponentCharacter.defense * opponentDefenseModifier);
-
-      const playerDamage = Math.max(0, playerCharacter.attaque - opponentDefense);
-      const opponentDamage = Math.max(0, opponentCharacter.attaque - playerDefense);
-
-      const combatLog = document.getElementById('combat-log');
-
-      // Simulation de l'attaque de l'adversaire
-      const opponentLogEntry = document.createElement('p');
-      opponentLogEntry.textContent = `${opponentCharacter.name} attaque et inflige ${opponentDamage} points de dégâts.`;
-      combatLog.appendChild(opponentLogEntry);
-
-      // Mettre à jour les PV du joueur
-      let currentPlayerPV = playerCharacter.pv - opponentDamage;
-      if (currentPlayerPV < 0) {
-        currentPlayerPV = 0;
-      }
-      document.getElementById('player-pv').textContent = `PV: ${currentPlayerPV}`;
-      playerCharacter.pv = currentPlayerPV;
-
-      // Vérifier si le joueur est vaincu
-      if (currentPlayerPV === 0) {
-        let userData = getUserData();
-        userData.defaites += 1;
-        let perteTrophees = Math.min(20, Math.floor(userData.trophees / 2));
-        userData.trophees = Math.max(0, userData.trophees - perteTrophees);
-        let character = playerCharacter.name;
-        let niveau = Number(userData[character + "_Level"]) * 0.1;
-        let gain_XP = 10 * (1 / (1 + niveau));
-        gain_XP = Math.round(gain_XP); // Arrondir au nombre entier le plus proche
-        let gain_argent = Math.round(gain_XP / 4);
-        if (userData.Double_XP > 0) {
-          gain_XP *= 2;
-          userData.Double_XP -= 1;
-        } else if (userData.Double_XP_acheté > 0) {
-          userData.Double_XP_acheté -= 1;
-          gain_XP *= 2;
-        }
-
-        if (playerCharacter.name === "Willy") {
-          userData.Willy_XP += gain_XP;
-        } else if (playerCharacter.name === "Cocobi") {
-          userData.Cocobi_XP += gain_XP;
-        } else if (playerCharacter.name === "Oiseau") {
-          userData.Diva_XP += gain_XP;
-        } else if (playerCharacter.name === "Gros_Nounours") {
-          userData.Gros_Nounours_XP += gain_XP;
-        } else if (playerCharacter.name === "Baleine") {
-          userData.Baleine_XP += gain_XP;
-        } else if (playerCharacter.name === "Doudou") {
-          userData.Doudou_XP += gain_XP;
-        } else if (playerCharacter.name === "Coeur") {
-          userData.Coeur_XP += gain_XP;
-        } else if (playerCharacter.name === "Diva") {
-          userData.Diva_XP += gain_XP;
-        } else if (playerCharacter.name === "Poulpy") {
-          userData.Poulpy_XP += gain_XP;
-        } else if (playerCharacter.name === "Colorina") {
-          userData.Colorina_XP += gain_XP;
-        }
-        userData.argent += gain_argent;
-
-
-        combatLog.innerHTML += `<p>${opponentCharacter.name} vous à vaincu ! Vous perdez ${perteTrophees} trophées</p>`;
-        combatLog.innerHTML +=
-          `<p>Vous avez gagné ${gain_XP} XP et vous avez reçu ${gain_argent} points</p>`;
-        document.getElementById('attack-button').disabled = true;
-
-
-        // Rediriger vers index.html après la fin du combat
-        setTimeout(() => {
-          sessionStorage.removeItem('playerCharacter');
-          sessionStorage.removeItem('opponentCharacter');
-          window.location.href = 'menu_principal.html';
-        }, 2000); // 2 secondes de délai avant redirection
-        saveUserData(userData);
-      }
-
-      scrollToBottom();
-    }
-
-    function attack() {
-      // Augmenter spe de 0.25 à chaque attaque
-      if (playerCharacter.name === "Doudou" || playerCharacter.name === "Diva" || playerCharacter.name === "Cocobi" ) {
-        specialAbility = Math.min(1, specialAbility + 0.20);
-      } else {
-        specialAbility = Math.min(1, specialAbility + 0.25);
-      }
-      updateSpecialButton();
-
-      // Mettre à jour specialAbility (pour le bouton de capacité spéciale)
-      spe = specialAbility;
-      specialAbility = spe;
-
-      // Calculer une défense aléatoire entre 85% et 115% de la défense originale de l'adversaire
-      const playerDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
-      const opponentDefenseModifier = 0.85 + Math.random() * 0.3; // Entre 0.85 et 1.15
-
-      const playerDefense = Math.round(playerCharacter.defense * playerDefenseModifier);
-      const opponentDefense = Math.round(opponentCharacter.defense * opponentDefenseModifier);
-
-      const playerDamage = Math.max(0, playerCharacter.attaque - opponentDefense);
-      const opponentDamage = Math.max(0, opponentCharacter.attaque - playerDefense);
-
-      const combatLog = document.getElementById('combat-log');
-
-      // Simulation de l'attaque du joueur
-      const playerLogEntry = document.createElement('p');
-      playerLogEntry.textContent = `Vous attaquez et infligez ${playerDamage} points de dégâts à ${opponentCharacter.name}.`;
-      combatLog.appendChild(playerLogEntry);
-
-      // Mettre à jour les PV de l'adversaire
-      let currentOpponentPV = opponentCharacter.pv - playerDamage;
-      if (currentOpponentPV < 0) {
-        currentOpponentPV = 0;
-      }
-      document.getElementById('opponent-pv').textContent = `PV: ${currentOpponentPV}`;
-      opponentCharacter.pv = currentOpponentPV;
-
-      // Vérifier si l'adversaire est vaincu
-      if (currentOpponentPV === 0) {
-        let userData = getUserData();
-        userData.victoires += 1;
-        userData.trophees += 10;
-
-        let character = playerCharacter.name;
-        let niveau = Number(userData[character + "_Level"]) * 0.1;
-        let joueur_pv = playerCharacter.pv;
-        let joueur_pv_base = playerCharacter.pv_max;
-
-        let gain_XP = (2 * (joueur_pv / joueur_pv_base) * 100) * (1 / (1 + niveau));
-        gain_XP = Math.round(gain_XP); // Arrondir au nombre entier le plus proche
-        let gain_argent = Math.round(gain_XP / 4);
-        if (userData.Double_XP > 0) {
-          gain_XP *= 2;
-          userData.Double_XP -= 1;
-        } else if (userData.Double_XP_acheté > 0) {
-          userData.Double_XP_acheté -= 1;
-          gain_XP *= 2;
-        }
-
-        if (playerCharacter.name === "Willy") {
-          userData.Willy_XP += gain_XP;
-        } else if (playerCharacter.name === "Cocobi") {
-          userData.Cocobi_XP += gain_XP;
-        } else if (playerCharacter.name === "Oiseau") {
-          userData.Oiseau_XP += gain_XP;
-        } else if (playerCharacter.name === "Gros_Nounours") {
-          userData.Gros_Nounours_XP += gain_XP;
-        } else if (playerCharacter.name === "Baleine") {
-          userData.Baleine_XP += gain_XP;
-        } else if (playerCharacter.name === "Doudou") {
-          userData.Doudou_XP += gain_XP;
-        } else if (playerCharacter.name === "Coeur") {
-          userData.Coeur_XP += gain_XP;
-        } else if (playerCharacter.name === "Diva") {
-          userData.Diva_XP += gain_XP;
-        } else if (playerCharacter.name === "Poulpy") {
-          userData.Poulpy_XP += gain_XP;
-        } else if (playerCharacter.name === "Colorina") {
-          userData.Colorina_XP += (gain_XP);
-        }
-        userData.argent += gain_argent;
-
-        combatLog.innerHTML += `<p>${opponentCharacter.name} a été vaincu ! Vous gagnez 10 trophées.</p>`;
-        combatLog.innerHTML += `<p>Vous avez gagné ${gain_XP} XP et vous avez reçu ${gain_argent} points</p>`;
-
-        document.getElementById('attack-button').disabled = true;
-
-        // Vérifier le déblocage des personnages
-        checkAndDisplayCharacterUnlock(userData);
-
-
-        // Rediriger vers index.html après la fin du combat
-        setTimeout(() => {
-          sessionStorage.removeItem('playerCharacter');
-          sessionStorage.removeItem('opponentCharacter');
-          window.location.href = 'menu_principal.html';
-        }, 2000); // 2 secondes de délai avant redirection
-        saveUserData(userData);
-      } else {
-        // Tour de l'adversaire
-        opponentTurn();
-      }
-
-      // Mettre à jour le bouton de capacité spéciale après chaque attaque
-      adversairepasser_tour();
-      joueurpasser_tour();
-      updateSpecialButton();
-
-      scrollToBottom();
     }
 
     function scrollToBottom() {
@@ -1020,6 +1495,10 @@
 
       saveUserData(userData);
     }
+    const userData = getUserData();
+    userData.partie_commencee = true;
+    saveUserData(userData);
+
   </script>
 </body>
 

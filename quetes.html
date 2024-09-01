@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Quêtes Hebdomadaires</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      position: relative;
+
+    }
+
+    .content {
+      overflow: auto;
+      /* Permet le défilement dans les conteneurs spécifiques */
+      height: 100vh;
+      /* Ajuster la hauteur selon le besoin */
+    }
+
+    .back-button {
+      display: inline-block;
+      padding: 10px 15px;
+      font-size: 14px;
+      color: #fff;
+      background-color: #007bff;
+      text-decoration: none;
+      border-radius: 5px;
+      position: relative;
+      margin-bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: background-color 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+
+    .dark-mode .back-button {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .back-button:hover {
+      background-color: #555;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .semaine {
+      margin-bottom: 40px;
+    }
+
+    .semaine h2 {
+      background-color: #ddd;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .quêtes {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .quêtes li {
+      background-color: #fff;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar-container {
+      margin-top: 10px;
+      position: relative;
+      height: 30px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #555;
+      width: 0;
+      border-radius: 5px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: width 0.3s;
+    }
+
+    .progress-bar-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      line-height: 30px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Styles pour le mode sombre selon les préférences du système */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      .back-button {
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      .back-button:hover {
+        background-color: #555;
+      }
+
+      .semaine h2 {
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      .quêtes li {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+      }
+
+      .progress-bar-container {
+        background-color: #555;
+      }
+
+      .progress-bar {
+        background-color: #888;
+      }
+    }
+
+    /* Masquer les barres de défilement */
+    /* Pour les navigateurs basés sur Webkit (Chrome, Safari) */
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Pour Firefox */
+    .content {
+      scrollbar-width: none;
+    }
+
+    /* Pour IE et Edge */
+    .content {
+      -ms-overflow-style: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Défis Quotidiens</h1>
+  <div class="semaine" id="daily-quests">
+    <h2>Quêtes du jour</h2>
+    <ul class="quêtes" id="quete1">
+      <!-- Les quêtes quotidiennes seront ajoutées dynamiquement ici -->
+    </ul>
+    <ul class="quêtes" id="quete2"></ul>
+    <ul class="quêtes" id="quete3"></ul>
+  </div>
+  <h1>Défis Hebdomadaires</h1>
+  <div id="quests-container">
+    <!-- Les quêtes des dernières semaines -->
+    <div id="weeks">
+      <!-- Les sections des semaines seront générées par JavaScript -->
+    </div>
+  </div>
+  <div id="countdown" style="text-align: center; font-size: 1.2em; margin-top: 40px;">
+    <p id="countdown-message">Les nouvelles quêtes seront disponibles dans :</p>
+    <div id="timer"></div>
+  </div>
+  <a href="menu_principal.html" class="back-button">Retour au menu principal</a>
+  </div>
+  <script type="module">
+    // Importation des modules Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = ref(database, 'maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    onValue(maintenanceRef, (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+  </script>
+  <script>
+    // Exemple de données (remplacez cette partie par les données réelles)
+    const userData = getUserData();
+
+
+    function assignRandomQuest() {
+      const userData = getUserData();
+      const questContainer = document.getElementById('daily-quests');
+      if (!questContainer) return;
+
+      const questIds = ['quete1', 'quete2', 'quete3'];
+      let allQuestsCompleted = true;
+
+      if (userData.quetes_jour === true) {
+        // Afficher les quêtes déjà générées
+        questIds.forEach(id => {
+          const questElement = document.getElementById(id);
+
+          if (userData[`${id}_text`]) {
+            const questText = userData[`${id}_text`];
+            const questTotal = userData[`${id}_total`];
+            const questCurrent = userData[`${id}_current`];
+
+            if (questCurrent >= questTotal) {
+              if (!userData[`${id}_completed`]) {
+                userData.recompense = (userData.recompense || 0) + 1;
+                userData[`${id}_completed`] = true;
+              }
+              questElement.innerHTML = `
+                  <p>${questText}</p>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar" id="${id}-bar"></div>
+                    <div class="progress-bar-text" id="${id}-text">Quête terminée</div>
+                  </div>
+                `;
+            } else {
+              allQuestsCompleted = false;
+              questElement.innerHTML = `
+                  <p>${questText}</p>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar" id="${id}-bar"></div>
+                    <div class="progress-bar-text" id="${id}-text">${questCurrent} / ${questTotal}</div>
+                  </div>
+                `;
+            }
+            updateDailyProgressBar(`${id}-bar`, questTotal, questCurrent);
+          }
+        });
+
+        if (allQuestsCompleted) {
+          userData.recompense = (userData.recompense || 0) + 1;
+          alert("Toutes les quêtes quotidiennes sont terminées ! Vous avez gagné une récompense supplémentaire.");
+        }
+
+        saveUserData(userData);
+        return; // Quittez la fonction après avoir affiché les quêtes existantes
+      }
+
+      // Initialiser les quêtes du jour comme générées
+      userData.quetes_jour = true;
+
+      // Générer de nouvelles quêtes
+      const availableQuests = [];
+
+      function getRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      const characters = ['Willy', 'Cocobi'];
+      const unlockedCharacters = characters.filter(character => userData[character] === 1);
+
+      if (unlockedCharacters.length > 0) {
+        const randomCharacter = unlockedCharacters[Math.floor(Math.random() * unlockedCharacters.length)];
+        const randomWins = getRandomNumber(3, 5);
+        availableQuests.push({
+          text: `Gagner ${randomWins} parties avec ${randomCharacter}.`,
+          total: randomWins,
+          current: 0,
+          type: 'victoire_classique',
+          character: randomCharacter
+        });
+      }
+
+
+      const randomDamage = getRandomNumber(30000, 70000);
+      availableQuests.push({
+        text: `Infliger ${randomDamage} points de dégâts en mode classique.`,
+        total: randomDamage,
+        current: 0,
+        type: 'dommages_classique'
+      });
+
+      const randomItems = getRandomNumber(3, 10);
+      availableQuests.push({
+        text: `Utiliser ${randomItems} objets.`,
+        total: randomItems,
+        current: 0,
+        type: 'objets_total'
+      });
+
+      const randomSpecials = getRandomNumber(5, 12);
+      availableQuests.push({
+        text: `Survivre à ${randomSpecials} manches en mode survie.`,
+        total: randomSpecials,
+        current: 0,
+        type: 'manches_survie'
+      });
+
+      const randomDefense = getRandomNumber(5, 12);
+      availableQuests.push({
+        text: `Se défendre ${randomDefense} fois en mode classique.`,
+        total: randomDefense,
+        current: 0,
+        type: 'defense_classique'
+      });
+
+      const dailyQuests = getRandomElements(availableQuests, 3);
+
+      dailyQuests.forEach((quest, idx) => {
+        const id = questIds[idx];
+        userData[`${id}_text`] = quest.text;
+        userData[`${id}_total`] = quest.total;
+        userData[`${id}_current`] = quest.current;
+        userData[`${id}_type`] = quest.type;
+        if (quest.character) userData[`${id}_character`] = quest.character;
+        userData[`${id}_completed`] = false; // Initialise comme non terminée
+
+        const questElement = document.getElementById(id);
+        if (questElement) {
+          questElement.innerHTML = `
+              <p>${quest.text}</p>
+              <div class="progress-bar-container">
+                <div class="progress-bar" id="${id}-bar"></div>
+                <div class="progress-bar-text" id="${id}-text">${quest.current} / ${quest.total}</div>
+              </div>
+            `;
+          updateDailyProgressBar(`${id}-bar`, quest.total, quest.current);
+        }
+      });
+
+      saveUserData(userData);
+    }
+
+    function getUserData() {
+      return JSON.parse(localStorage.getItem('userData')) || {};
+    }
+
+    function saveUserData(data) {
+      localStorage.setItem('userData', JSON.stringify(data));
+    }
+
+    function getRandomElements(arr, count) {
+      const shuffled = arr.slice(0);
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled.slice(0, count);
+    }
+
+    function updateDailyProgressBar(id, total, current) {
+      const progressBar = document.querySelector(`#${id} .progress-bar`);
+      const progressBarText = document.querySelector(`#${id} .progress-bar-text`);
+      if (progressBar && progressBarText) {
+        const percentage = (current / total) * 100;
+        progressBar.style.width = percentage + '%';
+        progressBarText.textContent = current >= total ? 'Quête terminée' : `${current} / ${total}`;
+      }
+    }
+
+    function generateAllWeeksQuests() {
+        const userData = getUserData();
+
+        // Générer les quêtes pour les 5 semaines dès la première connexion
+        for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
+            generateQuestsForWeek(userData, weekNumber);
+        }
+
+        // Enregistre que toutes les semaines ont été générées
+        userData.weeklyQuestWeek = 5;
+        saveUserData(userData);
+        displayWeeklyQuests();
+    }
+
+    function generateQuestsForWeek(userData, weekNumber) {
+        const availableQuests = [];
+        const questCount = 5;
+
+        const randomWinGames = getRandomNumber(8, 24);
+        availableQuests.push({
+            text: `Gagner ${randomWinGames} parties en mode classique.`,
+            total: randomWinGames,
+            current: 0
+        });
+
+        const randomDamage = getRandomNumber(100000, 400000);
+        availableQuests.push({
+            text: `Infliger ${randomDamage} points de dégâts en mode classique.`,
+            total: randomDamage,
+            current: 0,
+            type: 'degats',
+        });
+
+        const randomItems = getRandomNumber(12, 24);
+        availableQuests.push({
+            text: `Utiliser ${randomItems} objets.`,
+            total: randomItems,
+            current: 0,
+            type: 'objets',
+        });
+
+        const randomSurviveRounds = getRandomNumber(14, 35);
+        availableQuests.push({
+            text: `Survivre à ${randomSurviveRounds} manches en mode survie.`,
+            total: randomSurviveRounds,
+            current: 0,
+            type: 'survie',
+        });
+
+        const randomDefense = getRandomNumber(15, 45);
+        availableQuests.push({
+            text: `Se défendre ${randomDefense} fois en mode classique.`,
+            total: randomDefense,
+            current: 0,
+            type: 'defense',
+        });
+
+        // Stocker les quêtes de cette semaine avec le format SemaineX_Y
+        availableQuests.forEach((quest, idx) => {
+            const questKey = `Semaine${weekNumber}_${idx + 1}`;
+            userData[`${questKey}_text`] = quest.text;
+            userData[`${questKey}_total`] = quest.total;
+            userData[`${questKey}_current`] = quest.current;
+            userData[`${questKey}_completed`] = false; // Initialise comme non terminée
+            userData[`${questKey}_rewardClaimed`] = false; // Initialise comme non réclamée
+        });
+    }
+
+    function displayWeeklyQuests() {
+        const userData = getUserData();
+        const weeksContainer = document.getElementById('weeks');
+        const currentWeekNumber = getCustomWeekNumber(new Date());
+        let weeklyContent = '';
+
+        // Afficher les quêtes de la semaine en cours et des semaines précédentes
+
+        // Afficher les quêtes de la semaine en cours et des semaines précédentes
+        for (let weekNumber = 1; weekNumber <= currentWeekNumber; weekNumber++) {
+            weeklyContent += `<div class="semaine"><h2>Semaine ${weekNumber}:</h2><ul class="quêtes">`;
+
+            for (let i = 1; i <= 5; i++) {
+                const questKey = `Semaine${weekNumber}_${i}`;
+                const questText = userData[`${questKey}_text`];
+                const questTotal = userData[`${questKey}_total`];
+                const questCurrent = userData[`${questKey}_current`];
+                const questCompleted = userData[`${questKey}_completed`] ? 'Quête terminée' : `${questCurrent} / ${questTotal}`;
+
+                // Utiliser un identifiant unique pour chaque barre de progression
+              if (userData[`${questKey}_current`] >= userData[`${questKey}_total`]) {
+                userData[`${questKey}_completed`] = true;
+                saveUserData(userData);
+              }
+                const progressBarId = `week-${weekNumber}-quest-${i}`;
+
+                weeklyContent += `<li>
+                    <p>${questText}</p>
+                    <div class="progress-bar-container" id="${progressBarId}">
+                        <div class="progress-bar" style="width: ${questCurrent / questTotal * 100}%;"></div>
+                        <div class="progress-bar-text">${questCompleted}</div>
+                    </div>
+                </li>`;
+
+                // Appeler la fonction de mise à jour de la barre de progression
+                setTimeout(() => updateWeeklyProgressBar(progressBarId, questTotal, questCurrent), 0);
+            }
+
+            weeklyContent += `</ul></div>`;
+        }
+
+        weeksContainer.innerHTML = weeklyContent;
+    }
+
+    function checkAndRewardQuestCompletion(questKey, userData) {
+        if (userData[`${questKey}_completed`] && !userData[`${questKey}_rewardClaimed`]) {
+            // Ajouter la récompense à l'utilisateur
+            userData.pass_XP = (userData.pass_XP || 0) + 250;
+            userData.recompense = (userData.recompense || 0) + 1;
+
+            // Marquer la récompense comme réclamée
+            userData[`${questKey}_rewardClaimed`] = true;
+            saveUserData(userData);
+        }
+    }
+
+    function getCustomWeekNumber(date) {
+        const startDate = new Date('2024-08-29'); // La date de début des semaines personnalisées
+        const diff = date - startDate;
+        const oneWeek = 1000 * 60 * 60 * 24 * 7;
+        const weekNumber = Math.ceil(diff / oneWeek);
+
+        return ((weekNumber - 1) % 5) + 1; // Retourne un numéro de semaine entre 1 et 5
+    }
+
+    function getRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomElements(arr, count) {
+        const shuffled = arr.slice(0);
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, count);
+    }
+
+    // Lancement des quêtes hebdomadaires chaque jeudi matin à 9h
+    
+
+    // Initialisation des quêtes hebdomadaires à la première connexion
+    function updateWeeklyProgressBar(id, total, current) {
+        const progressBar = document.querySelector(`#${id} .progress-bar`);
+        const progressBarText = document.querySelector(`#${id} .progress-bar-text`);
+        if (progressBar && progressBarText) {
+            const percentage = (current / total) * 100;
+            progressBar.style.width = percentage + '%';
+            progressBarText.textContent = current >= total ? 'Quête terminée' : `${current} / ${total}`;
+        }
+    }
+    function checkAllQuestsCompletion(userData) {
+        const totalWeeks = 5; // Nombre total de semaines à vérifier
+        const questsPerWeek = 5; // Nombre de quêtes par semaine
+
+        for (let weekNumber = 1; weekNumber <= totalWeeks; weekNumber++) {
+            for (let i = 1; i <= questsPerWeek; i++) {
+                const questKey = `Semaine${weekNumber}_${i}`;
+                checkAndRewardQuestCompletion(questKey, userData);
+            }
+        }
+    }
+
+    function getNextThursdayAtNine() {
+        const now = new Date();
+        let nextThursday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        nextThursday.setDate(now.getDate() + (4 - now.getDay() + 7) % 7); // Trouver le jeudi suivant
+        nextThursday.setHours(9, 0, 0, 0); // Fixer à 9h00
+
+        if (nextThursday <= now) {
+            nextThursday.setDate(nextThursday.getDate() + 7); // Si déjà passé, aller au prochain jeudi
+        }
+
+        return nextThursday;
+    }
+
+    function updateCountdown() {
+        const now = new Date();
+        const nextThursday = getNextThursdayAtNine();
+        const timeDiff = nextThursday - now;
+
+        if (timeDiff <= 0) {
+            // Si le compte à rebours est terminé, réinitialisez le temps pour le prochain jeudi
+            userData.weeklyQuestWeek = getCustomWeekNumber(new Date());
+            saveUserData(userData);
+            updateWeeksStatus();
+            // Affiche les quêtes pour la nouvelle semaine
+            assignRandomQuest(); // Réinitialise les quêtes du jour si nécessaire
+            return;
+        }
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+        document.getElementById('timer').innerHTML = 
+            `${days} jours ${hours} heures ${minutes} minutes ${seconds} secondes`;
+    }
+
+    
+    if (!getUserData().weeklyQuestWeek) {
+        generateAllWeeksQuests();
+        location.reload();
+        console.log(userData);
+    } else {
+        updateWeeksStatus();
+        console.log(userData);
+    }
+    assignRandomQuest();
+    checkAllQuestsCompletion(userData);
+    updateCountdown(); // Affiche le compte à rebours immédiatement
+
+    // Mettre à jour le compte à rebours chaque seconde
+    setInterval(updateCountdown, 1000);
+    
+    function updateWeeksStatus() {
+      const userData = getUserData();
+      const currentDate = new Date();
+      userData.semaine1 = false;
+      userData.semaine2 = false;
+      userData.semaine3 = false;
+      userData.semaine4 = false;
+      userData.semaine5 = false;
+      saveUserData(userData);
+
+      // Définir les dates limites pour chaque semaine
+      const week1Date = new Date('2024-08-29T09:00:00'); // Jeudi 29 août 2024 à 9h
+      const week2Date = new Date('2024-09-05T09:00:00'); // Jeudi 5 septembre 2024 à 9h
+      const week3Date = new Date('2024-09-12T09:00:00'); // Jeudi 12 septembre 2024 à 9h
+      const week4Date = new Date('2024-09-19T09:00:00'); // Jeudi 19 septembre 2024 à 9h
+      const week5Date = new Date('2024-09-26T09:00:00'); // Jeudi 26 septembre 2024 à 9h
+
+      // Vérification des dates et mise à jour du statut de chaque semaine
+      userData.semaine1 = currentDate >= week1Date; // Semaine 1 activée si date actuelle >= 29 août 2024
+      userData.semaine2 = currentDate >= week2Date; // Semaine 2 activée si date actuelle >= 5 septembre 2024
+      userData.semaine3 = currentDate >= week3Date; // Semaine 3 activée si date actuelle >= 12 septembre 2024
+      userData.semaine4 = currentDate >= week4Date; // Semaine 4 activée si date actuelle >= 19 septembre 2024
+      userData.semaine5 = currentDate >= week5Date; // Semaine 5 activée si date actuelle >= 26 septembre 2024
+
+      // Sauvegarder les modifications
+      saveUserData(userData);
+      displayWeeklyQuests(); // Mettre à jour l'affichage des quêtes
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Données Utilisateur</title>
@@ -14,7 +15,21 @@
       color: #333333;
       margin: 0;
       padding: 20px;
+      position: relative;
+      overflow: hidden;
     }
+
+    .content {
+      overflow: auto;
+      /* Permet le défilement dans les conteneurs spécifiques */
+      height: 100vh;
+      /* Ajuster la hauteur selon le besoin */
+    }
+
+    .hidden {
+      display: none;
+    }
+
     .title {
       font-size: 32px;
       margin-bottom: 20px;
@@ -22,6 +37,7 @@
       align-items: center;
       justify-content: flex-start;
     }
+
     .return-link {
       font-size: 16px;
       color: #1e90ff;
@@ -29,7 +45,9 @@
       cursor: pointer;
       margin-right: 10px;
     }
+
     .data-container {
+      
       max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
@@ -38,10 +56,12 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       text-align: left;
     }
+
     .data-item {
       margin-bottom: 10px;
       font-size: 18px;
     }
+
     .delete-button {
       display: inline-block;
       margin-top: 20px;
@@ -53,13 +73,11 @@
       cursor: pointer;
       font-size: 16px;
     }
+
     .delete-button:hover {
       background-color: #ff0000;
     }
-    #version-container {
-      float: right;
-      margin-top: 10px;
-    }
+
     #rewards-container {
       margin-top: 20px;
       overflow: hidden;
@@ -69,107 +87,198 @@
       font-size: 16px;
       text-align: left;
     }
+
     #rewards-container.show {
-      max-height: 1000px; /* Une valeur suffisante pour afficher tout le contenu */
+      max-height: 1300px;
+      /* Une valeur suffisante pour afficher tout le contenu */
       opacity: 1;
     }
+
     .achieved {
       color: green;
     }
+
     .next {
       font-weight: bold;
     }
+
     .clickable {
       cursor: pointer;
     }
-    /* Styles pour le mode sombre */
-    .dark-theme {
-        background-color: #121212;
-        color: #e0e0e0;
+
+    /* Styles pour le mode sombre selon les préférences du système */
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .title {
+            color: #e0e0e0;
+        }
+
+        .return-link {
+            color: #1e90ff;
+        }
+
+        .data-container {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .data-item {
+            color: #e0e0e0;
+        }
+
+        .delete-button {
+            background-color: #b71c1c;
+            color: #e0e0e0;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+
+        #rewards-container {
+            background-color: #1c1c1c;
+            color: #e0e0e0;
+        }
+
+        .achieved {
+            color: #4caf50;
+        }
+
+        .next {
+            font-weight: bold;
+        }
+
+        .clickable {
+            cursor: pointer;
+            color: #ffffff;
+        }
     }
 
-    .dark-theme .title {
-        color: #e0e0e0;
+    /* Masquer les barres de défilement */
+    /* Pour les navigateurs basés sur Webkit (Chrome, Safari) */
+    .content::-webkit-scrollbar {
+      display: none;
     }
 
-    .dark-theme .return-link {
-        color: #1e90ff;
+    /* Pour Firefox */
+    .content {
+      scrollbar-width: none;
     }
 
-    .dark-theme .data-container {
-        background-color: #1e1e1e;
-        color: #e0e0e0;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .dark-theme .data-item {
-        color: #e0e0e0;
-    }
-
-    .dark-theme .delete-button {
-        background-color: #ff4c4c;
-        color: white;
-    }
-
-    .dark-theme .delete-button:hover {
-        background-color: #ff0000;
-    }
-
-    .dark-theme #rewards-container {
-        background-color: #1c1c1c;
-        color: #e0e0e0;
-    }
-
-    .dark-theme .achieved {
-        color: #4caf50;
-    }
-
-    .dark-theme .next {
-        font-weight: bold;
-    }
-
-    .dark-theme .clickable {
-        cursor: pointer;
-        color: #ffffff;
-    }
-    .dark-theme .delete-button {
-        background-color: #b71c1c; /* Couleur de fond sombre pour le bouton */
-        color: #e0e0e0; /* Couleur du texte en mode sombre */
-    }
-
-    .dark-theme .delete-button:hover {
-        background-color: #d32f2f; /* Couleur de fond sombre pour le survol */
+    /* Pour IE et Edge */
+    .content {
+      -ms-overflow-style: none;
     }
   </style>
 </head>
+
 <body>
-  <div class="title">
-    <a class="return-link" onclick="goBack()">&lt; retour</a>
-    <span>Mes Statistiques</span>
-  </div>
-  <div class="data-container">
-    <div class="data-item"><strong>Pseudo:</strong> <span id="pseudo"></span></div>
-    <div class="data-item">
-      <strong><span id="trophees-label" class="clickable" onclick="toggleRewards()">Nombre de trophées:</span></strong> 
-      <span id="trophees"></span>
+  <div class="content">
+    <div class="title">
+      <a class="return-link" onclick="goBack()">&lt; retour</a>
+      <span>Mes Statistiques</span>
     </div>
-    <div id="rewards-container">
-      <!-- Les paliers de récompenses seront affichés ici -->
+    <div class="data-container">
+      <div class="data-item"><strong>Pseudo:</strong> <span id="pseudo"></span></div>
+      <div class="data-item">
+        <strong><span id="trophees-label" class="clickable" onclick="toggleRewards()">Nombre de
+            trophées:</span></strong>
+        <span id="trophees"></span>
+      </div>
+      <div id="rewards-container">
+        <!-- Les paliers de récompenses seront affichés ici -->
+      </div>
+      <div class="data-item"><strong>Victoires:</strong> <span id="victoires"></span></div>
+      <div class="data-item"><strong>Défaites:</strong> <span id="defaites"></span></div>
+      <div class="data-item"><strong>Manche de survie maximum:</strong> <span id="manches_max"></span></div>
+      <button class="delete-button" onclick="supprimerDonnees()">Supprimer les données</button>
     </div>
-    <div class="data-item"><strong>Victoires:</strong> <span id="victoires"></span></div>
-    <div class="data-item"><strong>Défaites:</strong> <span id="defaites"></span></div>
-    <button class="delete-button" onclick="supprimerDonnees()">Supprimer les données</button>
-    <div id="version-container"></div>
   </div>
+  <script type="module">
+    // Importation des modules Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = ref(database, 'maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    onValue(maintenanceRef, (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+  </script>
 
   <script>
     // Fonction pour obtenir les données utilisateur depuis localStorage
     function getUserData() {
       userData = JSON.parse(localStorage.getItem('userData'));
-      if (userData.theme) {
-        document.body.classList.add('dark-theme');
-        }
-        return userData;
+      return userData;
     }
 
     // Fonction pour sauvegarder les données utilisateur dans localStorage
@@ -184,18 +293,7 @@
       document.getElementById('trophees').textContent = userData.trophees;
       document.getElementById('victoires').textContent = userData.victoires;
       document.getElementById('defaites').textContent = userData.defaites;
-    }
-
-    // Fonction pour afficher la version de sauvegarde
-    function afficherVersion() {
-      const userData = getUserData();
-      if (userData.version) {
-        const versionContainer = document.getElementById('version-container');
-        const versionLink = document.createElement('a');
-        versionLink.textContent = `v.${userData.version}`;
-        versionLink.href = 'patch_note.html'; // Lien vers la page des patch notes
-        versionContainer.appendChild(versionLink);
-      }
+      document.getElementById('manches_max').textContent = userData.manches_max;
     }
 
     // Fonction pour revenir en arrière dans l'historique du navigateur
@@ -207,10 +305,13 @@
     function supprimerDonnees() {
       if (confirm("Voulez-vous vraiment supprimer vos données ?")) {
         if (confirm("Êtes-vous sûr de vouloir supprimer définitivement vos données ?")) {
+          localStorage.removeItem('redeemedRewards');
+
           localStorage.removeItem('userData');
           alert("Vos données ont été supprimées.");
           // Recharger la page pour mettre à jour l'affichage
           location.reload();
+          window.location.href = 'index.html';
         }
       }
     }
@@ -226,17 +327,25 @@
       } else {
         // Si les paliers sont cachés, les afficher avec animation
         const trophées = parseInt(document.getElementById('trophees').textContent, 10);
-        const paliers = [50, 150, 250, 400, 550, 750, 1000, 1300];
+        const paliers = [10, 20, 30, 40, 60, 80, 100, 120, 150, 180, 220, 260, 300, 350, 400, 460, 520, 580, 650, 720, 800, 880, 970, 1060, 1150, 1250, 1350, 1460, 1570, 1690];
         let rewardsHtml = '<strong>Paliers de récompenses:</strong><ul>';
 
         let nextPalier = null;
 
-        paliers.forEach(palier => {
+        paliers.forEach((palier, index) => {
           if (trophées >= palier) {
-            rewardsHtml += `<li class="achieved">À ${palier} trophées : 1 nouveau personnage</li>`;
+            if ((index + 1) % 10 === 0) {
+              rewardsHtml += `<li class="achieved">À ${palier} trophées : 1 nouveau personnage</li>`;
+            } else {
+              rewardsHtml += `<li class="achieved">À ${palier} trophées : Récompense aléatoire</li>`;
+            }
           } else {
             if (nextPalier === null) nextPalier = palier;
-            rewardsHtml += `<li class="next">À ${palier} trophées : 1 nouveau personnage</li>`;
+            if ((index + 1) % 10 === 0) {
+              rewardsHtml += `<li class="next">À ${palier} trophées : 1 nouveau personnage</li>`;
+            } else {
+              rewardsHtml += `<li class="next">À ${palier} trophées : Récompense aléatoire</li>`;
+            }
           }
         });
 
@@ -248,17 +357,17 @@
         if (nextPalier !== null) {
           const nextPalierElement = Array.from(rewardsContainer.querySelectorAll('li')).find(li => li.textContent.includes(nextPalier));
           if (nextPalierElement) {
-            nextPalierElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            nextPalierElement.scrollIntoView({behavior: 'smooth', block: 'center'});
           }
         }
       }
     }
 
     // Appeler la fonction pour afficher les données utilisateur lorsque la page est chargée
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       afficherDonneesUtilisateur();
-      afficherVersion();
     });
   </script>
 </body>
+
 </html>

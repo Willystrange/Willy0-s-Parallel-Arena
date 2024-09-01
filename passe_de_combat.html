@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Page avec Boutons</title>
+  <style>
+    /* Styles généraux */
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('passe-fond.jpeg');
+      background-size: cover;
+      background-position: center - 50px;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    h1 {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      margin: 0;
+      color: #333;
+      z-index: 10;
+      font-size: 1em;
+    }
+
+    .player-info {
+      position: fixed;
+      top: 40px;
+      /* Ajustez si nécessaire pour correspondre au bas du titre */
+      left: 0;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      z-index: 9;
+      /* Juste en dessous du titre */
+    }
+
+    .player-info .level-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8em;
+    }
+
+    .player-info .level-info .level,
+    .player-info .level-info .next-level {
+      flex: 1;
+    }
+
+    .player-info .xp {
+      flex: 2;
+      text-align: center;
+      font-size: 0.8em;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto 20px;
+      /* Ajustez la marge supérieure pour éviter la superposition */
+      padding: 20px;
+      position: relative;
+      height: auto;
+      overflow: hidden;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: 90%;
+      overflow-y: auto;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      position: absolute;
+      width: 100%;
+    }
+
+    .page.active {
+      opacity: 1;
+      position: relative;
+    }
+
+    .reward {
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      /* Réduit le padding */
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      /* Réduit l'ombre portée */
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      font-size: 0.8em;
+      /* Réduit la taille de la police */
+      height: 80px;
+      /* Ajuste la hauteur */
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .reward.redeemed {
+      background-color: #e0e0e0;
+    }
+
+    .reward .badge {
+      width: 30px;
+      /* Réduit la largeur */
+      height: 30px;
+      /* Réduit la hauteur */
+      border-radius: 50%;
+      background-color: #FFA500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 6px;
+      /* Réduit la marge inférieure */
+    }
+
+    .reward.redeemed .badge {
+      background-color: #4CAF50;
+      /* Couleur pour récompense récupérée */
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    .controls .control-buttons {
+      margin-bottom: 20px;
+    }
+
+    .controls .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      /* Espace entre les boutons */
+    }
+
+    .controls button,
+    .button-container button {
+      background-color: #FFA500;
+      color: #fff;
+      border: none;
+      font-size: 1em;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .controls button:hover,
+    .button-container button:hover {
+      background-color: #e68900;
+    }
+    .footer {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0;
+      background-color: #f0f0f0;
+      /* Couleur de fond pour le mode clair */
+      position: fixed;
+      /* Fixe la barre au bas de l'écran */
+      bottom: 0;
+      /* Aligne la barre au bas de l'écran */
+      left: 0;
+      width: 100%;
+      /* Prend toute la largeur de l'écran */
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      /* Optionnel : ajoute une ombre pour plus de visibilité */
+      z-index: 1000;
+      /* Assure que la barre reste au-dessus des autres éléments */
+    }
+
+    .footer-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .footer-icon img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .footer-icon:hover {
+      opacity: 0.8;
+    }
+
+    .pass-icon img {
+      border: 2px solid #ff4500;
+      /* Bordure colorée autour de l'icône */
+      border-radius: 50%;
+      /* Bordure arrondie */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      /* Ombre autour de l'icône */
+    }
+
+    .pass-icon:hover img {
+      opacity: 1;
+      /* Assure que l'icône reste visible au survol */
+    }
+    .xp-progress-container {
+      width: 50%;
+      background-color: #fff;
+      border-radius: 20px;
+      height: 15px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #000; /* Ajout d'une bordure noire de 1 pixel */
+    }
+
+    .xp-progress-bar {
+      height: 100%;
+      width: 0;
+      background-color: #ddd;
+      border-radius: 20px;
+      transition: width 0.3s ease;
+    }
+
+    #xp-progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      text-align: center;
+      color: #333;
+      font-weight: bold;
+      z-index: 1; /* Assurez-vous que le texte reste au-dessus de la barre */
+      font-size: 0.8em;
+    }
+
+    .xp-progress-bar::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.1); /* Semi-transparent overlay pour la partie complétée */
+    }
+    .test {
+      margin-bottom: 20px;
+      color: white;
+      font-size: 0.8em;
+      text-align: center;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0); }
+    }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 0.8em;
+      margin-top: 5px;
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-image: url('passe-fond.jpeg');
+        /* Utilisez une image de fond adaptée au mode sombre */
+        background-color: #121212;
+        /* Couleur de fond sombre pour les endroits où l'image n'est pas visible */
+      }
+      .xp-progress-container {
+        background-color: #444;
+      }
+      .xp-progress-bar {
+        background-color: #333;
+      }
+      #xp-progress-text {
+        color: #fff;
+      }
+
+      h1 {
+        background-color: #1e1e1e;
+        border-bottom: 1px solid #333;
+        color: #f5f5f5;
+      }
+
+      .player-info {
+        background-color: rgba(30, 30, 30, 0.9);
+        border-bottom: 1px solid #333;
+        color: #f5f5f5;
+      }
+
+      .page {
+        background-color: rgba(30, 30, 30, 0.9);
+        box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+        /* Ombre claire pour le mode sombre */
+      }
+
+      .reward {
+        background-color: rgba(50, 50, 50, 0.8);
+        border: 1px solid #444;
+        color: #f5f5f5;
+      }
+
+      .reward.redeemed {
+        background-color: #333;
+      }
+
+      .reward .badge {
+        background-color: #444;
+        /* Couleur adaptée au mode sombre */
+      }
+
+      .reward.redeemed .badge {
+        background-color: #000;
+      }
+
+      .controls button,
+      .button-container button {
+        background-color: #444;
+        color: #fff;
+      }
+
+      .controls button:hover,
+      .button-container button:hover {
+        background-color: #555;
+      }
+      .footer {
+        background-color: #333333;
+      }
+      .footer-icon img,
+      .user-info img {
+        filter: invert(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Parallel Pass</h1>
+  <div class="player-info">
+    <div class="level-info">
+      <div class="level" id="current-level"></div>
+      <div class="xp-progress-container">
+        <div class="xp-progress-bar">
+          <span id="xp-progress-text"></span>
+        </div>
+      </div>
+      <div class="next-level" id="next-level"></div>
+    </div>
+  </div>
+  <div class="container" id="album-container">
+    <!-- Pages will be dynamically created here -->
+    <div class="controls">
+      <div class="control-buttons">
+        <button id="prevPage">Page Précédente</button>
+        <button id="nextPage">Page Suivante</button>
+      </div>
+    </div>   
+  </div>
+  <div class="test">Le Parallel Pass 1 durera du 29 août au 3 octobre 2024.</div>
+  <div class="footer">
+      <button class="footer-icon" onclick="viewUpgrades()">
+        <img src="Icon-amelioration.png" alt="Améliorations">
+      </button>
+      <button class="footer-icon" onclick="viewCharacters()">
+        <img src="Icon-personnage.png" alt="Personnages">
+      </button>
+      <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+        <img src="Icon-menu.png" alt="Menu Principal">
+      </button>
+      <button class="footer-icon pass-icon" onclick="goToPasse()">
+        <img src="Icon-passe.png" alt="Passe de combat">
+      </button>
+      <button class="footer-icon" onclick="viewShop()">
+        <img src="Icon-magazin.png" alt="Boutique">
+      </button>        
+    </div>
+  </div>
+  <script type="module">
+    // Importation des modules Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = ref(database, 'maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    onValue(maintenanceRef, (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+  </script>
+  <script>
+    function viewCharacters() {
+      window.location.href = "perso_stats.html";
+    }
+
+    function viewShop() {
+      window.location.href = "boutique.html";
+    }
+
+    function viewUpgrades() {
+      window.location.href = "amelioration.html";
+    }
+
+    function showMainMenu() {
+      window.location.href = "menu_principal.html";
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialisation des données utilisateur
+      const userData = JSON.parse(localStorage.getItem('userData'));
+
+      // Calcul des XP nécessaires pour le niveau suivant
+      function calculateNextLevelXP(level) {
+        return Math.round((50 + (level * 20)) * 1.1);  // 50 XP de base + 20 XP supplémentaires par niveau
+      }
+
+      checkLevelUp();
+      updateLevelInfo();
+
+      // Mise à jour des informations de niveau dans l'interface utilisateur
+      function updateLevelInfo() {
+        const currentLevel = userData.pass_level;
+        const currentXP = userData.pass_XP;
+        const nextLevelXP = calculateNextLevelXP(currentLevel);
+
+        // Calcul du pourcentage d'XP pour la progression
+        const xpPercentage = (currentXP / nextLevelXP) * 100;
+
+        // Mise à jour du texte et de la largeur de la barre de progression
+        const xpProgressBar = document.querySelector('.xp-progress-bar');
+        const xpProgressText = document.getElementById('xp-progress-text');
+        xpProgressText.textContent = `XP: ${currentXP} / ${nextLevelXP}`;
+        xpProgressBar.style.width = `${xpPercentage}%`;
+        
+
+        document.getElementById('current-level').textContent = `${currentLevel}`;
+        document.getElementById('next-level').textContent = `${currentLevel + 1}`;
+      }
+
+      // Vérifie si l'utilisateur a atteint le niveau suivant
+      function checkLevelUp() {
+        let levelGained = false;
+
+        while (true) {
+          const currentLevel = userData.pass_level;
+          const currentXP = userData.pass_XP;
+          const nextLevelXP = calculateNextLevelXP(currentLevel);
+
+          if (currentXP >= nextLevelXP) {
+            userData.pass_level += 1;
+            userData.pass_XP -= nextLevelXP;
+            localStorage.setItem('userData', JSON.stringify(userData));
+
+            levelGained = true;
+            updateLevelInfo();
+          } else {
+            break;
+          }
+        }
+
+        if (levelGained) {
+          alert(`Félicitations ! Vous avez atteint le niveau ${userData.pass_level}.`);
+        }
+      }
+
+      // Liste des récompenses basées sur le niveau
+      const rewards = [
+        {badge: 1, text: "30 points", level: 1, type: 'points', value: 30},
+        {badge: 2, text: "1 potion de santé", level: 2, type: 'Potion_de_Santé'},
+        {badge: 3, text: "1 amulette de régénération", level: 3, type: 'Amulette_de_Régénération'},
+        {badge: 4, text: "20 points", level: 4, type: 'points', value: 20},
+        {badge: 5, text: "2 potions de santé", level: 5, type: 'Potion_de_Santé', value: 2},
+        {badge: 6, text: "1 élixir de puissance", level: 6, type: 'elixir_puissance'},
+        {badge: 7, text: "30 points", level: 7, type: 'points', value: 30},
+        {badge: 8, text: "1 bouclier solide", level: 8, type: 'bouclier_solide'},
+        {badge: 9, text: "2 potions de santé", level: 9, type: 'Potion_de_Santé', value: 2},
+        {badge: 10, text: "1 double XP", level: 10, type: 'Double_XP'},
+        {badge: 11, text: "20 points", level: 11, type: 'points', value: 20},
+        {badge: 12, text: "3 potions de santé", level: 12, type: 'Potion_de_Santé', value: 3},
+        {badge: 13, text: "1 amulette de régénération", level: 13, type: 'Amulette_de_Régénération'},
+        {badge: 14, text: "40 points", level: 14, type: 'points', value: 40},
+        {badge: 15, text: "1 élixir de puissance", level: 15, type: 'elixir_puissance'},
+        {badge: 16, text: "1 armure de fer", level: 16, type: 'armure_fer'},
+        {badge: 17, text: "20 points", level: 17, type: 'points', value: 20},
+        {badge: 18, text: "2 boucliers solides", level: 18, type: 'bouclier_solide', value: 2},
+        {badge: 19, text: "30 points", level: 19, type: 'points', value: 30},
+        {badge: 20, text: "1 récompense aléatoire", level: 20, type: 'recompense'},
+        {badge: 21, text: "20 points", level: 21, type: 'points', value: 20},
+        {badge: 22, text: "1 potion de santé", level: 22, type: 'Potion_de_Santé'},
+        {badge: 23, text: "1 épée tranchante", level: 23, type: 'epee_tranchante'},
+        {badge: 24, text: "30 points", level: 24, type: 'points', value: 30},
+        {badge: 25, text: "2 élixirs de puissance", level: 25, type: 'elixir_puissance', value: 2},
+        {badge: 26, text: "1 amulette de régénération", level: 26, type: 'Amulette_de_Régénération'},
+        {badge: 27, text: "20 points", level: 27, type: 'points', value: 20},
+        {badge: 28, text: "3 potions de santé", level: 28, type: 'Potion_de_Santé', value: 3},
+        {badge: 29, text: "1 armure de fer", level: 29, type: 'armure_fer'},
+        {badge: 30, text: "1 double XP", level: 30, type: 'Double_XP'},
+        {badge: 31, text: "30 points", level: 31, type: 'points', value: 30},
+        {badge: 32, text: "2 boucliers solides", level: 32, type: 'bouclier_solide', value: 2},
+        {badge: 33, text: "1 élixir de puissance", level: 33, type: 'elixir_puissance'},
+        {badge: 34, text: "1 récompense aléatoire", level: 34, type: 'recompense'},
+        {badge: 35, text: "20 points", level: 35, type: 'points', value: 20},
+        {badge: 36, text: "3 potions de santé", level: 36, type: 'Potion_de_Santé', value: 3},
+        {badge: 37, text: "1 bouclier solide", level: 37, type: 'bouclier_solide'},
+        {badge: 38, text: "30 points", level: 38, type: 'points', value: 30},
+        {badge: 39, text: "1 épée tranchante", level: 39, type: 'epee_tranchante'},
+        {badge: 40, text: "1 amulette de régénération", level: 40, type: 'Amulette_de_Régénération'},
+        {badge: 41, text: "20 points", level: 41, type: 'points', value: 20},
+        {badge: 42, text: "2 potions de santé", level: 42, type: 'Potion_de_Santé', value: 2},
+        {badge: 43, text: "1 armure de fer", level: 43, type: 'armure_fer'},
+        {badge: 44, text: "30 points", level: 44, type: 'points', value: 30},
+        {badge: 45, text: "1 double XP", level: 45, type: 'Double_XP'},
+        {badge: 46, text: "3 potions de santé", level: 46, type: 'Potion_de_Santé', value: 3},
+        {badge: 47, text: "20 points", level: 47, type: 'points', value: 20},
+        {badge: 48, text: "1 bouclier solide", level: 48, type: 'bouclier_solide'},
+        {badge: 49, text: "1 élixir de puissance", level: 49, type: 'elixir_puissance'},
+        {badge: 50, text: "30 points", level: 50, type: 'points', value: 30},
+        {badge: 51, text: "2 récompenses aléatoires", level: 51, type: 'recompense'},
+        {badge: 52, text: "1 épée tranchante", level: 52, type: 'epee_tranchante'},
+        {badge: 53, text: "20 points", level: 53, type: 'points', value: 20},
+        {badge: 54, text: "1 amulette de régénération", level: 54, type: 'Amulette_de_Régénération'},
+        {badge: 55, text: "1 armure de fer", level: 55, type: 'armure_fer'},
+        {badge: 56, text: "30 points", level: 56, type: 'points', value: 30},
+        {badge: 57, text: "1 bouclier solide", level: 57, type: 'bouclier_solide'},
+        {badge: 58, text: "2 potions de santé", level: 58, type: 'Potion_de_Santé', value: 2},
+        {badge: 59, text: "1 élixir de puissance", level: 59, type: 'elixir_puissance'},
+        {badge: 60, text: "Personnage Rosalie", level: 60, type: 'Personnage'}
+      ];
+
+      const rewardsPerPage = 6;
+      const totalPages = Math.ceil(rewards.length / rewardsPerPage);
+      const redeemedRewards = JSON.parse(localStorage.getItem('redeemedRewards')) || {};
+
+      function createRewardElement(reward) {
+        const div = document.createElement('div');
+        div.className = `reward ${redeemedRewards[reward.badge] ? 'redeemed' : ''}`;
+        div.dataset.badge = reward.badge;
+        div.dataset.level = reward.level;
+        div.innerHTML = `
+          <div class="badge">${reward.badge}</div>
+          ${reward.text}
+          <div class="error-message hidden" id="error-${reward.badge}">Vous n'avez pas atteint le niveau nécessaire.</div>`;
+        return div;
+      }
+
+      function createPage(pageIndex) {
+        const page = document.createElement('div');
+        page.className = 'page';
+        const start = pageIndex * rewardsPerPage;
+        const end = Math.min(start + rewardsPerPage, rewards.length);
+        for (let i = start; i < end; i++) {
+          page.appendChild(createRewardElement(rewards[i]));
+        }
+        return page;
+      }
+
+      const albumContainer = document.getElementById('album-container');
+
+      for (let i = 0; i < totalPages; i++) {
+        albumContainer.appendChild(createPage(i));
+      }
+
+      const pages = document.querySelectorAll('.page');
+      let currentPageIndex = 0;
+
+      function showPage(index) {
+          pages.forEach((page, i) => {
+              page.classList.toggle('active', i === index); // Affiche la page correspondante
+          });
+
+          // Cache le bouton "Précédent" si on est sur la première page
+          document.getElementById('prevPage').classList.toggle('hidden', index === 0);
+
+          // Cache le bouton "Suivant" si on est sur la dernière page
+          document.getElementById('nextPage').classList.toggle('hidden', index === totalPages - 1);
+      }
+
+      document.getElementById('nextPage').addEventListener('click', function () {
+        if (currentPageIndex < totalPages - 1) {
+          currentPageIndex++;
+          showPage(currentPageIndex);
+        }
+      });
+
+      document.getElementById('prevPage').addEventListener('click', function () {
+        if (currentPageIndex > 0) {
+          currentPageIndex--;
+          showPage(currentPageIndex);
+        }
+      });
+
+    albumContainer.addEventListener('click', function (event) {
+      const rewardElement = event.target.closest('.reward');
+      if (!rewardElement) return;
+
+      const badge = rewardElement.dataset.badge;
+      const levelRequired = parseInt(rewardElement.dataset.level);
+      const errorElement = document.getElementById(`error-${badge}`);
+
+      if (userData.pass_level >= levelRequired) {
+        const reward = rewards.find(r => r.badge === parseInt(badge));
+        if (!redeemedRewards[badge]) {
+          if (reward) {
+            // Gestion des récompenses
+            if (reward.type === 'points') {
+              userData.argent = (userData.argent || 0) + reward.value;
+            } else if (reward.type === 'Potion_de_Santé') {
+              userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + (reward.value || 1);
+            } else if (reward.type === 'Amulette_de_Régénération') {
+              userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
+            } else if (reward.type === 'epee_tranchante') {
+              userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + 1;
+            } else if (reward.type === 'elixir_puissance') {
+              userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + (reward.value || 1);
+            } else if (reward.type === 'armure_fer') {
+              userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + 1;
+            } else if (reward.type === 'Double_XP') {
+              userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + 1;
+            } else if (reward.type === 'Personnage') {
+              userData.Personnage_acheté = (userData.Personnage_acheté || 0) + 1;
+            }
+
+            redeemedRewards[badge] = true;
+            localStorage.setItem('redeemedRewards', JSON.stringify(redeemedRewards));
+            rewardElement.classList.add('redeemed');
+          }
+        }
+      } else {
+        rewardElement.classList.add('shake');
+        errorElement.classList.remove('hidden');
+        setTimeout(() => {
+          rewardElement.classList.remove('shake');
+        }, 500);
+      }
+    });
+    // Affiche la première page au chargement
+    showPage(currentPageIndex);
+  });
+
+  </script>
+</body>
+
+</html>

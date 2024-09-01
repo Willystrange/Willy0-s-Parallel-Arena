@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -16,21 +17,40 @@
       margin: 0;
       padding: 0;
       transition: background-color 0.3s, color 0.3s;
+      position: relative;
+      overflow: hidden;
+      /* Empêche le défilement du body */
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
     }
+
+
+    .content {
+      overflow-y: auto;
+      /* Permet le défilement vertical */
+      height: 100vh;
+      /* Occupe toute la hauteur de la fenêtre */
+      -webkit-overflow-scrolling: touch;
+      /* Assure le défilement fluide sur les appareils tactiles */
+    }
+
     .container {
-      width: 90%;
+
       max-width: 600px;
       margin: 50px auto;
       padding: 20px;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      position: relative;
+      flex: 1;
     }
+
     h1 {
       margin-bottom: 20px;
       color: #333;
     }
+
     .button {
       display: block;
       padding: 15px;
@@ -46,116 +66,287 @@
       margin: 10px 0;
       transition: background-color 0.3s, transform 0.3s;
     }
+
     .button:hover {
       background-color: #e03e00;
       transform: scale(1.02);
     }
-    .theme-switch-container {
-      margin: 20px 0;
-      display: flex;
-      align-items: center;
-      font-size: 18px;
+
+    .version-info {
+      font-size: 16px;
       color: #333;
-    }
-    .theme-switch-container span {
-      margin-right: 10px;
-    }
-    .theme-switch {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 34px;
-    }
-    .theme-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 34px;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      border-radius: 50%;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-    }
-    input:checked + .slider {
-      background-color: #2196F3;
-    }
-    input:checked + .slider:before {
-      transform: translateX(16px);
-    }
-    /* Mode sombre */
-    .dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-    .dark-mode .container {
-      background-color: #1e1e1e;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-    .dark-mode .button {
-      background-color: #555; /* Couleur du bouton en mode sombre */
-      color: #e0e0e0; /* Texte du bouton en mode sombre */
-    }
-    .dark-mode .button:hover {
-      background-color: #666; /* Couleur du bouton au survol en mode sombre */
+      margin-left: auto;
+      margin-right: auto;
+      padding-bottom: 60px;
     }
 
-    /* Conserver les styles du bouton retour */
-    .back-button {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 18px;
-      color: #ff4500;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: color 0.3s;
+    /* Styles pour le formulaire de connexion */
+    #loginForm {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8); /* Fond noir semi-transparent */
+      color: #fff;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000; /* Assure que le formulaire est au-dessus du reste */
+      text-align: center; /* Centre le texte à l'intérieur du formulaire */
     }
-    .back-button:hover {
-      color: #e03e00;
+
+    #loginForm div {
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    #loginForm h2 {
+      margin-bottom: 20px;
+    }
+
+    #loginForm input {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #loginForm button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* Styles pour le mode sombre */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      .container {
+        background-color: #1e1e1e;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        color: #e0e0e0;
+      }
+
+      .button {
+        background-color: #555;
+        color: #e0e0e0;
+      }
+
+      .button:hover {
+        background-color: #666;
+      }
+
+      .version-info {
+        color: #e0e0e0;
+      }
+
+    }
+
+    /* Masquer les barres de défilement */
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .content {
+      scrollbar-width: none;
+    }
+
+    .content {
+      -ms-overflow-style: none;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
+
 <body>
-  <a class="back-button" href="menu_principal.html">&lt; Retour</a>
-  <div class="container">
-    <h1>Paramètres</h1>
-    <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
-    <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
-    <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
-    <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
-    <div class="theme-switch-container">
-      <span>Mode sombre</span>
-      <label class="theme-switch">
-        <input type="checkbox" id="themeSwitch">
-        <span class="slider"></span>
-      </label>
+  <div class="content">
+    <div class="container">
+      <h1>Paramètres</h1>
+      <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
+      <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
+      <a class="button" href="#" onclick="mise_a_jour()">Sauver la sauvegarde</a>
+      <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
+      <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
+      <a id="loginButton" class="button" href="connection.html">Se connecter</a>
+      <a id="logoutButton" class="button" href="#" onclick="logout()" style="display:none;">Se déconnecter</a>
+      <div class="telechargement" id="downloadLinkContainer" style="margin-top: 20px;"></div>
     </div>
-    <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
+    <div id="loginForm" style="display:none;">
+      <h2>Se connecter</h2>
+      <input type="email" id="loginEmail" placeholder="Adresse e-mail" required>
+      <input type="password" id="loginPassword" placeholder="Mot de passe" required>
+      <button class="button" onclick="login()">Connexion</button>
+      <button class="button" onclick="hideLoginForm()">Annuler</button>
+    </div>
+    <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
   </div>
-
   <script src="localStorage.js"></script>
-
   <script>
+    // Importation des modules 
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const perf = firebase.performance();
+    auth.onAuthStateChanged((user) => {
+      updateUI(); // Met à jour l'UI en fonction de l'état de connexion
+    });
+
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({type: 'paint', buffered: true});
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({type: 'first-input', buffered: true});
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = firebase.database().ref('maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    maintenanceRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+    function updateUI() {
+      const user = firebase.auth().currentUser;
+      if (user) {
+        document.getElementById('loginButton').style.display = 'none';
+        document.getElementById('logoutButton').style.display = 'block';
+      } else {
+        document.getElementById('loginButton').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'none';
+      }
+    }
+
+    function logout() {
+      const userData = getUserData();
+      userData.est_connecte = false;
+      saveUser();
+      localStorage.removeItem('userConnect');
+      firebase.auth().signOut().then(() => {
+        alert('Déconnecté avec succès.');
+        updateUI();
+        // Supprimer l'état de connexion et l'ID utilisateur
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userId');
+      }).catch((error) => {
+        // Gestion des erreurs
+        alert('Erreur lors de la déconnexion : ' + error.message);
+      });
+      createUserConnect();
+    }
+    function createUserConnect() {
+      let userConnect = localStorage.getItem('userConnect');
+      if (!userConnect) {
+        userConnect = {
+          est_connecte: false,
+          userid: "",
+        };
+        localStorage.setItem('userConnect', JSON.stringify(userConnect));
+        location.reload();
+      };
+    }
+
+    function saveUser() {
+      // Sauvegarder userData dans localStorag
+      const user = firebase.auth().currentUser;
+      const userData = getUserData();
+      const userId = user.uid;
+      localStorage.setItem('userData', JSON.stringify(userData));
+
+      // Sauvegarder userData dans Firebase
+      const userRef = database.ref('users/' + userId);
+      userRef.set(userData, (error) => {
+        if (error) {
+          alert('Erreur lors de la sauvegarde des données : ' + error.message);
+        } else {
+          alert('Données utilisateur sauvegardées dans Firebase.');
+        }
+      });
+    }
+    
+    function goToSettings() {
+    }
+    function viewCharacters() {
+      window.location.href = "perso_stats.html";
+    }
+
+    function viewShop() {
+      window.location.href = "boutique.html";
+    }
+
+    function viewUpgrades() {
+      window.location.href = "amelioration.html";
+    }
+
+    function showMainMenu() {
+      window.location.href = "menu_principal.html";
+    }
     const secretKey = 'votre_cle_secrete_ici';
 
     function gofeedback() {
@@ -167,12 +358,12 @@
       fileInput.type = 'file';
       fileInput.accept = '.txt';
 
-      fileInput.onchange = function(event) {
+      fileInput.onchange = function (event) {
         var file = event.target.files[0];
         if (!file) return;
 
         var reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
           try {
             var importedData = decrypt(e.target.result);
             var userData = JSON.parse(importedData);
@@ -192,7 +383,7 @@
       try {
         var userData = getUserData();
         var encryptedData = encrypt(JSON.stringify(userData));
-        var blob = new Blob([encryptedData], { type: 'text/plain' });
+        var blob = new Blob([encryptedData], {type: 'text/plain'});
         var url = URL.createObjectURL(blob);
 
         var downloadLinkContainer = document.getElementById('downloadLinkContainer');
@@ -202,12 +393,11 @@
         a.href = url;
         a.download = 'Willy0_s_Parallel_Arena_backup.txt';
         a.textContent = 'Télécharger la sauvegarde';
+        a.className = 'button telechargement'; // Ajout de la classe 'telechargement'
         a.style.display = 'block';
         a.style.marginTop = '10px';
         a.style.padding = '10px';
         a.style.fontSize = '18px';
-        a.style.color = '#fff';
-        a.style.backgroundColor = '#ff4500';
         a.style.borderRadius = '5px';
         a.style.textDecoration = 'none';
 
@@ -247,25 +437,164 @@
     function saveUserData(userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
     }
-
-    function toggleTheme() {
-      var isDarkMode = document.getElementById('themeSwitch').checked;
-      var userData = getUserData();
-      userData.theme = isDarkMode;  // Mettez à jour le thème dans userData
-      saveUserData(userData);
-
-      document.body.classList.toggle('dark-mode', isDarkMode);
-      document.body.classList.toggle('light-mode', !isDarkMode);
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       var userData = getUserData();
-      var savedTheme = userData.theme !== undefined ? userData.theme : false; // Par défaut clair si non défini
-      document.body.classList.add(savedTheme ? 'dark-mode' : 'light-mode');
-      document.getElementById('themeSwitch').checked = savedTheme;
-    });
+      var versionInfo = document.getElementById('versionInfo');
 
-    document.getElementById('themeSwitch').addEventListener('change', toggleTheme);
+      if (userData.version) {
+        versionInfo.textContent = 'v.' + userData.version;
+      } else {
+        versionInfo.textContent = 'Version non disponible';
+      }
+    });
+    function mise_a_jour() {
+      const userData = getUserData();
+
+      // Définition des valeurs par défaut
+      const defaultUserData = {
+        pass_XP: 0,
+        pass_level: 0,
+        nbr_perso: 2,
+        victoires: 0,
+        defaites: 0,
+        manches_max: 0,
+        XP_jour: 0,
+        gagnant: '',
+        fin_manche: 0,
+        fin_xp: 0,
+        fin_argent: 0,
+        fin_trophees: 0,
+        trophees: 0,
+        argent: 0,
+        VICTOIRE: false,
+        version: '2.4.1',
+        recompense: 0,
+        perso_recompense: 0,
+        xp_du_jour: 0,
+        Willy: 1,
+        Willy_XP: 0,
+        Willy_Level: 1,
+        Willy_boost: 0,
+        Cocobi: 1,
+        Cocobi_XP: 0,
+        Cocobi_Level: 1,
+        Cocobi_boost: 0,
+        Oiseau: 0,
+        Oiseau_XP: 0,
+        Oiseau_Level: 1,
+        Oiseau_boost: 0,
+        Grours: 0,
+        Grours_XP: 0,
+        Grours_Level: 1,
+        Grours_boost: 0,
+        Baleine: 0,
+        Baleine_XP: 0,
+        Baleine_Level: 1,
+        Baleine_boost: 0,
+        Doudou: 0,
+        Doudou_XP: 0,
+        Doudou_Level: 1,
+        Doudou_boost: 0,
+        Coeur: 0,
+        Coeur_XP: 0,
+        Coeur_Level: 1,
+        Coeur_boost: 0,
+        Diva: 0,
+        Diva_XP: 0,
+        Diva_Level: 1,
+        Diva_boost: 0,
+        Poulpy: 0,
+        Poulpy_XP: 0,
+        Poulpy_Level: 1,
+        Poulpy_boost: 0,
+        Colorina: 0,
+        Colorina_XP: 0,
+        Colorina_Level: 1,
+        Colorina_boost: 0,
+        Rosalie: 0,
+        Rosalie_XP: 0,
+        Rosalie_Level: 1,
+        Rosalie_boost: 0,
+        Sboonie: 0,
+        Sboonie_XP: 0,
+        Sboonie_Level: 1,
+        Sboonie_boost: 0,
+        Double_XP: 5,
+        Double_XP_acheté: 0,
+        Potion_de_Santé_acheté: 0,
+        Amulette_de_Régénération_acheté: 0,
+        epee_tranchante_acheté: 0,
+        elixir_puissance_acheté: 0,
+        armure_fer_acheté: 0,
+        bouclier_solide_acheté: 0,
+        lastDoubleXPCheck: 0,
+        lastFraudeReset: 0,
+        boutique_recompense: false,
+
+        semaine1: false,
+
+
+        semaine2: false,
+
+
+        semaine3: false,
+
+
+        semaine4: false,
+
+
+
+        semaine5: false,
+
+        semaine6: false,
+
+        crystaux_parrallels: 0,
+
+        quetes_jour: false,
+
+        quete1_type: "",
+        quete1_text: "",
+        quete1_total: "",
+        quete1_current: "",
+        quete1_character: "",
+
+        quete2_type: "",
+        quete2_text: "",
+        quete2_total: "",
+        quete2_current: "",
+        quete2_character: "",
+
+        quete3_type: "",
+        quete3_text: "",
+        quete3_total: "",
+        quete3_current: "",
+        quete3_character: "",
+
+        partie_commencee: false,
+      };
+
+      // Vérification et initialisation des valeurs manquantes ou incorrectes
+      for (const key in defaultUserData) {
+        if (!userData.hasOwnProperty(key)) {
+          userData[key] = defaultUserData[key];
+        }
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      updateUI();
+      var userData = getUserData();
+      var versionInfo = document.getElementById('versionInfo');
+
+      if (userData.version) {
+        versionInfo.textContent = 'v.' + userData.version;
+      } else {
+        versionInfo.textContent = 'Version non disponible';
+      }
+    });
+    const userData = getUserData();
+    console.log(userData);
+    
   </script>
 </body>
+
 </html>

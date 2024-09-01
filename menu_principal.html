@@ -1,76 +1,108 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Willy0's Parallel Arena</title>
+
+  <title>Parallel Arena</title>
   <style>
     body {
-      text-align: center;
-      font-family: 'Arial', sans-serif;
-      background-size: cover;
-      color: #ffffff;
       margin: 0;
       padding: 0;
-      overflow-x: hidden; /* Empêche le défilement horizontal */
-    }
-    .dark-theme {
-      background-color: #000000;
-      color: #ffffff;
-    }
-    .dark-theme .play-button,
-    .dark-theme .view-data-button,
-    .dark-theme .char-button,
-    .dark-theme .shop-button {
-      background-color: #333333;
-      color: #ffffff;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+      font-family: 'Arial', sans-serif;
+      color: #000000;
+      /* Couleur du texte par défaut pour le mode clair */
+      background-color: #ffffff;
+      /* Couleur de fond par défaut pour le mode clair */
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
 
-    .dark-theme .play-button:hover,
-    .dark-theme .view-data-button:hover,
-    .dark-theme .char-button:hover,
-    .dark-theme .shop-button:hover {
-      background-color: #555555;
-    }
-    .title, .title2 {
-      font-size: 48px;
-      margin: 0; /* Enlève les marges par défaut */
-      padding-top: 10px;
-      text-shadow: 2px 2px 4px #000000;
+    .content {
+      overflow: auto;
+      /* Permet le défilement dans les conteneurs spécifiques */
+      height: 100vh;
+      /* Ajuster la hauteur selon le besoin */
     }
 
-    .title2 {
-      margin-bottom: 20px; /* Ajoute l'espacement sous le titre secondaire */
+    .hidden {
+      display: none;
     }
 
-    .button-container {
-      margin-top: 20px;
+    .container {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      height: 100vh;
+      justify-content: space-between;
     }
 
-    .play-button-container {
-      position: relative;
-      width: 200px;
-      margin-bottom: 10px;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      box-sizing: border-box;
+      z-index: 1000;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      background-color: #f0f0f0;
+      padding: 8px 16px;
+      border-radius: 25px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      /* Ajouté pour indiquer que c'est cliquable */
+    }
+
+    .user-info:hover {
+      background-color: #e0e0e0;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-info img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .boutons {
+      padding-top: 50%;
+      display: block;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
     }
 
     .play-button {
-      padding: 15px 30px;
-      font-size: 22px;
-      cursor: pointer;
-      border: none;
       background-color: #ff4500;
       color: #ffffff;
+      border: none;
+
+      margin: 10px auto;
+      font-size: 22px;
+      cursor: pointer;
       border-radius: 5px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
       transition: background-color 0.3s, transform 0.3s;
-      width: 100%;
-      text-align: center;
+      display: block;
+      width: 200px;
+      /* Largeur fixe pour tous les boutons */
+      height: 40px;
+      /* Hauteur fixe pour tous les boutons */
+      box-sizing: border-box;
+      /* Inclut le padding et les bordures dans les dimensions totales */
+      line-height: 30px;
+      /* Aligne verticalement le texte */
     }
 
     .play-button:hover {
@@ -78,61 +110,102 @@
       transform: scale(1.05);
     }
 
-    .double-xp {
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      background-color: yellow;
-      color: red;
-      padding: 5px;
-      font-size: 12px;
-      font-weight: bold;
-      transform: rotate(15deg);
-      border-radius: 3px;
-      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-      display: none;
+    .footer {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0;
+      background-color: #f0f0f0;
+      /* Couleur de fond pour le mode clair */
+      position: fixed;
+      /* Fixe la barre au bas de l'écran */
+      bottom: 0;
+      /* Aligne la barre au bas de l'écran */
+      left: 0;
+      width: 100%;
+      /* Prend toute la largeur de l'écran */
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      /* Optionnel : ajoute une ombre pour plus de visibilité */
+      z-index: 1000;
+      /* Assure que la barre reste au-dessus des autres éléments */
     }
 
-    .view-data-button, .char-button, .shop-button {
-      padding: 15px 30px;
-      font-size: 22px;
-      cursor: pointer;
+    .footer-icon {
+      background: none;
       border: none;
-      background-color: #ff4500;
-      color: #ffffff;
-      border-radius: 5px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-      transition: background-color 0.3s, transform 0.3s;
-      margin-bottom: 10px;
-      width: 200px;
-      text-align: center;
-    }
-
-    .view-data-button:hover, .char-button:hover, .shop-button:hover {
-      background-color: #e03e00;
-      transform: scale(1.05);
-    }
-
-    .settings-icon {
-      position: absolute;
-      top: 10px;
-      left: 10px;
       cursor: pointer;
     }
 
-    .settings-icon img {
+    .footer-icon img {
       width: 50px;
       height: 50px;
     }
 
+    .footer-icon:hover {
+      opacity: 0.8;
+    }
+
+    .main-menu-icon img {
+      border: 2px solid #ff4500;
+      /* Bordure colorée autour de l'icône */
+      border-radius: 50%;
+      /* Bordure arrondie */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      /* Ombre autour de l'icône */
+    }
+
+    .main-menu-icon:hover img {
+      opacity: 1;
+      /* Assure que l'icône reste visible au survol */
+    }
+
+    @keyframes scale-in-top {
+      0% {
+        transform: scale(0);
+        transform-origin: 50% 0%;
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        transform-origin: 50% 0%;
+        opacity: 1;
+      }
+    }
+
+    .scale-in-top {
+      -webkit-animation: scale-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      animation: scale-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    }
+
+    @keyframes scale-out-top {
+      0% {
+        transform: scale(1);
+        transform-origin: 50% 0%;
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(0);
+        transform-origin: 50% 0%;
+        opacity: 0;
+      }
+    }
+
+    .scale-out-top {
+      -webkit-animation: scale-out-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      animation: scale-out-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    }
+
     .dialog-overlay {
       display: none;
+      /* reste inchangé */
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0);
       justify-content: center;
       align-items: center;
       z-index: 1000;
@@ -143,62 +216,369 @@
       padding: 20px;
       border-radius: 8px;
       text-align: center;
+      width: 300px;
+      /* Ajuste la largeur de la fenêtre de dialogue */
     }
 
-    .dialog select {
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px 0;
+    .dialog h2 {
+      margin-bottom: 20px;
     }
 
-    .dialog button {
+    .mode-button {
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
       border: none;
-      background-color: #007bff;
+      background-color: #ff4500;
       color: #ffffff;
       border-radius: 5px;
       margin: 5px;
     }
 
-    .dialog button:hover {
-      background-color: #0056b3;
+    .mode-button:hover {
+      background-color: #e03e00;
+    }
+
+    .cancel-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #cccccc;
+      color: #000000;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .cancel-button:hover {
+      background-color: #999999;
+    }
+
+    .double-xp {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background-color: yellow;
+      color: red;
+      padding: 5px;
+      font-size: 12px;
+      font-weight: bold;
+      transform: rotate(20deg);
+      border-radius: 3px;
+      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+      display: none;
+      /* Visible par défaut pour l'exemple */
+    }
+
+    /* Styles pour le mode sombre basé sur la préférence de l'utilisateur */
+    @media (prefers-color-scheme: dark) {
+      body {
+        color: #ffffff;
+        background-color: #000000;
+      }
+
+      .user-info {
+        background-color: #333333;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .footer {
+        background-color: #333333;
+      }
+
+      .dialog {
+        background: #333333;
+      }
+
+      .play-button {
+        background-color: #2E2E2E;
+        color: #ffffff;
+      }
+
+      .mode-button {
+        background-color: #000000;
+        color: #ffffff;
+      }
+
+      .mode-button:hover {
+        background-color: #444444;
+      }
+
+      .footer-icon img,
+      .user-info img {
+        filter: invert(1);
+      }
+
+      #userQuetes {
+        background-color: transparent;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      #userQuetes img {
+        margin-right: 0;
+      }
+    }
+
+    /* Pour les navigateurs basés sur Webkit (Chrome, Safari) */
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Pour Firefox */
+    .content {
+      scrollbar-width: none;
+    }
+
+    /* Pour IE et Edge */
+    .content {
+      -ms-overflow-style: none;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
+
 <body>
-  <div class="title">Willy0's</div>
-  <div class="title2">Parallel Arena</div>
+  <div class="content">
+    <div class="container">
+      <div class="header">
+        <div class="user-info" id="userPseudo" onclick="goToUserData()">
+          <img src="user-icon.png" alt="Pseudo">
+          <span></span>
+        </div>
+        <div class="user-info" id="userTrophees">
+          <img src="trophy-icon-3.png" alt="Trophées">
+          <span></span>
+        </div>
+        <div class="user-info" id="userQuetes" onclick="goToSettings()">
+          <img src="Icon-parametre.png" alt="Quêtes">
+        </div>
+      </div>
 
-  <!-- Icône des paramètres -->
-  <div class="settings-icon" onclick="goToSettings()">
-    <img src="settings-icon.heic" alt="Paramètres">
-  </div>
+      <div class="boutons">
+        <button class="play-button" onclick="showModeSelection()">Jouer
+        </button>
+        <button class="play-button" onclick="viewQuests()">Quêtes</button>
+        <button class="play-button" onclick="goToActualites()">Actualités</button>
+      </div>
 
-  <div class="button-container">
-    <div class="play-button-container">
-      <span class="double-xp">Double XP !</span>
-      <button class="play-button" onclick="startGame()">Jouer</button>
+      <div class="footer">
+        <button class="footer-icon" onclick="viewUpgrades()">
+          <img src="Icon-amelioration.png" alt="Améliorations">
+        </button>
+        <button class="footer-icon" onclick="viewCharacters()">
+          <img src="Icon-personnage.png" alt="Personnages">
+        </button>
+        <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+          <img src="Icon-menu.png" alt="Menu Principal">
+        </button>
+        <button class="footer-icon" onclick="goToPasse()">
+          <img src="Icon-passe.png" alt="Passe de combat">
+        </button>
+        <button class="footer-icon" onclick="viewShop()">
+          <img src="Icon-magazin.png" alt="Boutique">
+        </button>
+      </div>
     </div>
-    <button class="view-data-button" onclick="viewGameData()">Mes Stats</button>
-    <button class="char-button" onclick="viewCharacters()">Personnages</button>
-    <button class="shop-button" onclick="viewShop()">Boutique</button>
+
+    <div class="dialog-overlay" id="modeDialog">
+      <div class="dialog">
+        <h2>Choisissez le mode de jeu</h2>
+        <button class="mode-button" onclick="startGame('classique')">Classique</button>
+        <button class="mode-button" onclick="startGame('survie')">Survie</button>
+        <button class="cancel-button" onclick="closeModeSelection()">Annuler</button>
+      </div>
+    </div>
   </div>
-
   <script src="localStorage.js"></script>
-
   <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const perf = firebase.performance();
+
+    if ('PerformanceObserver' in window) {
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+      paintObserver.observe({type: 'paint', buffered: true});
+
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+      fidObserver.observe({type: 'first-input', buffered: true});
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = database.ref('maintenance');
+    maintenanceRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+
+    // Fonction pour récupérer les données utilisateur depuis Firebase et mettre à jour localStorage
+    function checkAndUpdateUserConnect() {
+      const userConnect = JSON.parse(localStorage.getItem('userConnect'));
+
+      if (userConnect && userConnect.est_connecte === true) {
+        const userId = userConnect.userid;
+        const userRef = database.ref('users/' + userId);
+
+        userRef.on('value', (snapshot) => {
+          let userData = null;
+          if (snapshot.exists()) {
+            userData = snapshot.val();
+            alert('Tout est bon');
+          } else {
+            alert('Aucune donnée trouvée pour l\'utilisateur.');
+          }
+
+          // Assurez-vous que userData est mis à jour seulement si il existe
+          if (userData) {
+            localStorage.setItem('userData', JSON.stringify(userData));
+          }
+
+          // Recharger les données utilisateur après la mise à jour
+          displayUserInfo();
+        });
+      } else {
+        alert('Il y a un problème avec la connexion utilisateur.');
+      }
+    }
+
+    function getUserData() {
+      let userData = JSON.parse(localStorage.getItem('userData'));
+      return userData;
+    }
+
+    function displayUserInfo() {
+      const userData = getUserData();
+      document.getElementById('userPseudo').querySelector('span').innerText = userData.pseudo || 'Pseudo inconnu';
+      document.getElementById('userTrophees').querySelector('span').innerText = `${userData.trophees || 0}`;
+    }
+
+    // Appliquer le thème et afficher les informations utilisateur lors du chargement de la page
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            console.log('Utilisateur connecté:', user);
+        } else {
+            console.log('Aucun utilisateur connecté');
+        }
+    });
+    window.onload = function () {
+      displayUserInfo(); // Ajouter cette ligne pour vérifier et mettre à jour les données utilisateur
+      checkAndUpdateUserConnect();
+    };
+
+    function applyTheme() {
+      const userData = getUserData();
+      if (userData.theme) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    }
+    function viewQuests() {
+      window.location.href = "quetes.html";
+    }
+
+    function goToPasse() {
+      window.location.href = "passe_de_combat.html";
+    }
+
     function goToSettings() {
       window.location.href = "parametres.html";
     }
 
-    function startGame() {
-      window.location.href = "characters.html";
+    function goToUserData() {
+      window.location.href = "userdata.html";
     }
 
-    function viewGameData() {
-      window.location.href = "userdata.html";
+    function goToActualites() {
+      window.location.href = "actualites.html";
+    }
+
+    function showModeSelection() {
+      var modeDialog = document.getElementById('modeDialog');
+      modeDialog.classList.add('scale-in-top'); // Ajouter l'animation ici
+      modeDialog.style.display = 'flex'; // Afficher le dialogue
+    }
+
+    function closeModeSelection() {
+      var modeDialog = document.getElementById('modeDialog');
+      modeDialog.classList.remove('scale-in-top'); // Supprimer l'animation d'apparition
+      modeDialog.classList.add('scale-out-top'); // Ajouter l'animation de disparition
+
+      // Utilisation de setTimeout pour attendre la fin de l'animation avant de masquer l'élément
+      setTimeout(function () {
+        modeDialog.style.display = 'none'; // Masquer le dialogue
+        modeDialog.classList.remove('scale-out-top'); // Supprimer l'animation de disparition pour la prochaine utilisation
+      }, 500); // Durée de l'animation en millisecondes (0.5s)
+    }
+
+    function saveUserData(userData) {
+      alert('SAUVEGARDE')
+      localStorage.setItem('userData', JSON.stringify(userData));
+
+      // Sauvegarde dans Firebase si l'utilisateur est connecté
+      const userConnect = JSON.parse(localStorage.getItem('userConnect'));
+      const user = firebase.auth().currentUser;
+      if (userConnect.est_connecte) {
+        const userId = userConnect.userid;
+        const userRef = firebase.database().ref(`users/` + userId);
+      userRef.set(userData).then(() => {
+          console.log('Données sauvegardées dans Firebase.');
+      }).catch((error) => {
+          console.error('Erreur lors de la sauvegarde dans Firebase:', error);
+          alert('Erreur lors de la sauvegarde dans Firebase: ' + error.message);
+      });
+      }
+    }
+
+    function startGame(mode) {
+      if (mode === 'classique') {
+        window.location.href = 'characters.html';
+      } else if (mode === 'survie') {
+        window.location.href = 'characters_survie.html';
+      }
     }
 
     function viewCharacters() {
@@ -209,43 +589,48 @@
       window.location.href = "boutique.html";
     }
 
-    function getUserData() {
-      return JSON.parse(localStorage.getItem('userData'));
+    function viewUpgrades() {
+      window.location.href = "amelioration.html";
     }
 
-    function saveUserData(userData) {
-      localStorage.setItem('userData', JSON.stringify(userData));
+    function showMainMenu() {
+      // Placeholder function for menu main action
     }
+
+    // Appliquer le thème et afficher les informations utilisateur lors du chargement de la page
 
     function resetDoubleXPIfNeeded() {
       const now = new Date();
       const lastCheck = new Date(localStorage.getItem('lastDoubleXPCheck') || 0);
-      const resetHour = 9; 
-      const resetMinute = 0; 
+      const resetHour = 9;
+      const resetMinute = 0;
       const userData = getUserData();
 
       if (now.getDate() !== lastCheck.getDate() || now.getMonth() !== lastCheck.getMonth() || now.getFullYear() !== lastCheck.getFullYear()) {
         if (now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) {
           userData.Double_XP = 5;
+          userData.boutique_recompense = false;
+          userData.XP_jour = 0;
+          userData.quetes_jour = false;
+          userData.fraude -= 1;
           saveUserData(userData);
           localStorage.setItem('lastDoubleXPCheck', now.toISOString());
         }
       } else if ((now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) &&
-                 (lastCheck.getHours() < resetHour || (lastCheck.getHours() === resetHour && lastCheck.getMinutes() < resetMinute))) {
+        (lastCheck.getHours() < resetHour || (lastCheck.getHours() === resetHour && lastCheck.getMinutes() < resetMinute))) {
         userData.Double_XP = 5;
+        userData.boutique_recompense = false;
+        userData.XP_jour = 0;
+        userData.quetes_jour = false;
+        userData.fraude -= 1;
         saveUserData(userData);
         localStorage.setItem('lastDoubleXPCheck', now.toISOString());
       }
+      
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const userData = getUserData();
-
-      if (!userData) {
-        console.error('Aucune donnée utilisateur trouvée.');
-        return;
-      }
-
       if (userData.version !== game_version) {
         window.location.href = "mise_a_jour.html";
         return;
@@ -253,23 +638,48 @@
 
       resetDoubleXPIfNeeded();
 
-      if (userData.Double_XP > 0) {
-        document.querySelector('.double-xp').style.display = 'block';
-      }
-
       if (userData.recompense > 0) {
         window.location.href = "recompenses.html";
         return;
       } else if (userData.perso_recompense > 0) {
-          window.location.href = "recompenses.html";
-          return;
+        window.location.href = "recompenses.html";
+        return;
       }
-      
-
-      if (userData.theme === true) {
-        document.body.classList.add('dark-theme');
+      if (userData.fin_partie) {
+        userData.fin_partie = f
       }
     });
+    function checkAndUpdateWeeks() {
+      const userData = getUserData();
+      const currentDate = new Date();
+      const startThursday = new Date('2024-08-01T09:00:00'); // Premier jeudi 1er août 2024 à 9h
+
+      if (currentDate >= startThursday) {
+        const msInWeek = 7 * 24 * 60 * 60 * 1000;
+        const weeksElapsed = Math.floor((currentDate - startThursday) / msInWeek);
+
+        for (let i = 1; i <= weeksElapsed + 1; i++) {
+          if (!userData[`semaine${i}`]) {
+            userData[`semaine${i}`] = true;
+          }
+          saveUserData(userData);
+        }
+      };
+    };
+    checkAndUpdateWeeks();
+    checkAndAskForUsername();
+    function checkAndAskForUsername() {
+      const userData = getUserData();
+      let pseudo = userData.pseudo;
+      while (!pseudo || pseudo.length > 13) { // Vérifier si le pseudo est vide ou dépasse 12 caractères
+        pseudo = prompt("Veuillez entrer votre pseudo (maximum 13 caractères) :");
+        if (pseudo && pseudo.length <= 13) { // Vérifier que le pseudo ne dépasse pas 12 caractères avant de l'accepter
+          userData.pseudo = pseudo;
+          localStorage.setItem('userData', JSON.stringify(userData));
+        }
+      }
+    }
   </script>
 </body>
+
 </html>

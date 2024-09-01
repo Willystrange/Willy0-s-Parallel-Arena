@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Sélection de personnage</title>
@@ -15,12 +16,57 @@
       color: #ffffff;
       margin: 0;
       padding: 0;
+      position: relative;
+      overflow: hidden;
+      /* Empêche le défilement du body */
     }
+
+    .content {
+      overflow-y: auto;
+      /* Permet le défilement vertical */
+      height: 100vh;
+      /* Occupe toute la hauteur de la fenêtre */
+      padding-top: 80px; /* Espace pour le titre et le filtre fixés en haut */
+      -webkit-overflow-scrolling: touch;
+      /* Assure le défilement fluide sur les appareils tactiles */
+    }
+
     h2 {
-      font-size: 36px;
-      margin-top: 50px;
-      text-shadow: 2px 2px 4px #000000;
+      font-size: 24px; /* Réduit la taille du titre */
+      margin: 0; /* Supprime la marge autour du titre */
+      text-shadow: 1px 1px 2px #000000; /* Réduit l'ombre du texte */
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0); /* Fond semi-transparent */
+      padding: 10px 0;
+      z-index: 1000; /* Assure que le titre est au-dessus des autres éléments */
     }
+
+    .sort-menu {
+      margin: 0 auto;
+      width: 60%; /* Ajuste la largeur du filtre */
+      max-width: 300px; /* Définit une largeur maximale pour le filtre */
+      text-align: center; /* Centre le filtre */
+      position: fixed;
+      top: 40px; /* Positionne le filtre juste en dessous du titre */
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0); /* Fond semi-transparent pour le filtre */
+      padding: 10px 0;
+      z-index: 1000; /* Assure que le filtre est au-dessus des autres éléments */
+    }
+
+    .sort-menu select {
+      padding: 5px 10px; /* Réduit le padding pour un aspect plus compact */
+      font-size: 14px; /* Réduit la taille de la police */
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #333;
+    }
+
     .character-button {
       display: block;
       margin: 10px auto;
@@ -35,41 +81,70 @@
       transition: background-color 0.3s, transform 0.3s;
       width: 150px;
       height: 50px;
-      line-height: 30px; /* Ajuster pour centrer verticalement le texte */
+      line-height: 30px;
       position: relative;
     }
+
     .character-button:hover {
       background-color: #e03e00;
       transform: scale(1.05);
     }
+
     .character-button.disabled {
       background-color: #a9a9a9;
       cursor: not-allowed;
     }
+
     .character-button.shake {
       animation: shake 0.5s;
     }
+
     @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
+      0% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      50% {
+        transform: translateX(5px);
+      }
+
+      75% {
+        transform: translateX(-5px);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
     }
+
     .unlock-message {
       color: #ff4500;
       font-size: 14px;
       margin-top: 5px;
       display: none;
     }
+
     .unlock-message.show {
       display: block;
       animation: slideIn 0.5s;
     }
+
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+
     .stats {
       margin: 20px auto;
       padding: 10px;
@@ -82,10 +157,13 @@
       overflow: hidden;
       transition: max-height 1s ease-out, opacity 1s ease-out;
     }
+
     .stats.show {
       opacity: 1;
-      max-height: 220px; /* Ajuster en fonction du contenu */
+      max-height: 220px;
+      /* Ajuster en fonction du contenu */
     }
+
     .choose-button {
       padding: 10px 20px;
       font-size: 18px;
@@ -97,135 +175,281 @@
       box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
       transition: background-color 0.3s, transform 0.3s;
     }
+
     .choose-button:hover {
       background-color: #28a428;
       transform: scale(1.05);
     }
-    /* Styles pour le thème sombre */
-    .dark-theme {
-      background: #121212;
-      color: #e0e0e0;
+    .boutons {
+      margin-bottom: 100px;
     }
 
-    .dark-theme h2 {
-      color: #e0e0e0;
-      text-shadow: 2px 2px 4px #000000;
+    /* Styles pour le mode sombre */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #000;
+        color: #e0e0e0;
+      }
+
+      .content {
+        background: #000;
+        /* Assure un fond sombre pour le contenu */
+      }
+
+      h2 {
+        color: #e0e0e0;
+        text-shadow: 1px 1px 2px #000000; /* Réduit l'ombre du texte en mode sombre */
+      }
+
+      .character-button {
+        background-color: #333;
+        color: #e0e0e0;
+        box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      }
+
+      .character-button:hover {
+        background-color: #555;
+      }
+
+      .character-button.disabled {
+        background-color: #666;
+      }
+
+      .unlock-message {
+        color: #ffb74d;
+        /* Orange atténué pour les messages de déblocage */
+      }
+
+      .choose-button {
+        background-color: #333;
+        color: #e0e0e0;
+        box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      }
+
+      .choose-button:hover {
+        background-color: #444;
+      }
+
+      .stats {
+        background-color: rgba(33, 33, 33, 0.9);
+        color: #e0e0e0;
+        border: 1px solid #555;
+      }
+
+      .stats::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      .stats::-webkit-scrollbar-track {
+        background: #1c1c1c;
+      }
+
+      .stats::-webkit-scrollbar-thumb {
+        background: #555;
+      }
+
+      .stats::-webkit-scrollbar-thumb:hover {
+        background: #777;
+      }
     }
 
-    .dark-theme .character-button {
-      background-color: #333333; /* Couleur de base pour les boutons en mode sombre */
-      color: #e0e0e0;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    /* Masquer les barres de défilement pour tous les thèmes */
+    .content::-webkit-scrollbar {
+      display: none;
     }
 
-    .dark-theme .character-button:hover {
-      background-color: #555555; /* Couleur plus claire pour le survol */
+    .content {
+      scrollbar-width: none;
+      /* Pour Firefox */
+      -ms-overflow-style: none;
+      /* Pour Internet Explorer et Edge */
     }
 
-    .dark-theme .character-button.disabled {
-      background-color: #666666; /* Gris pour les boutons désactivés */
-    }
 
-    .dark-theme .unlock-message {
-      color: #ffb74d; /* Orange atténué pour les messages de déblocage */
-    }
-
-    .dark-theme .choose-button {
-      background-color: #4caf50; /* Une couleur verte atténuée */
-      color: #e0e0e0;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-    }
-
-    .dark-theme .choose-button:hover {
-      background-color: #388e3c; /* Plus foncé pour le survol */
-    }
-
-    .dark-theme .stats {
-      background-color: rgba(33, 33, 33, 0.9);
-      color: #e0e0e0;
-      border: 1px solid #555555; /* Bordure pour les stats */
-    }
-
-    .dark-theme .stats::-webkit-scrollbar {
-      width: 12px;
-    }
-
-    .dark-theme .stats::-webkit-scrollbar-track {
-      background: #1c1c1c; /* Couleur de l'arrière-plan du défilement */
-    }
-
-    .dark-theme .stats::-webkit-scrollbar-thumb {
-      background: #555555; /* Couleur du curseur de défilement */
-    }
-
-    .dark-theme .stats::-webkit-scrollbar-thumb:hover {
-      background: #777777; /* Couleur du curseur de défilement au survol */
-    }
   </style>
 </head>
+
 <body>
-  <h2>Choisissez un personnage</h2>
-  <div id="character-list">
-    <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
+  <div class="content">
+    <h2>Choisissez un personnage</h2>
+    <div class="sort-menu">
+      <label for="sort">Trier par:</label>
+      <select id="sort">
+        <option value="alphabetical">Ordre alphabétique</option>
+        <option value="level_asc">Niveau croissant</option>
+        <option value="level_desc">Niveau décroissant</option>
+      </select>
+    </div>
+    <div class="boutons" id="character-list">
+      <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
+    </div>
   </div>
+  <script type="module">
+    // Importation des modules Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
+        }
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
+        });
+      });
+
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = ref(database, 'maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    onValue(maintenanceRef, (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
+        }
+      }
+    });
+  </script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Récupérer les données utilisateur depuis localStorage
       const userData = getUserData();
-      console.log(userData); // Utilisez userData pour afficher ou manipuler les détails spécifiques à l'utilisateur
 
       // Liste des personnages avec leurs caractéristiques de base
       const characters = [
-        { name: "Willy", pv: 11200, attaque: 470, defense: 80, spe: 0.5, argent: 0, pv_max: 11200, attaque_originale: 470, defense_originale: 80 },
-        { name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115 },
-        { name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85 },
-        { name: "Gros Nounours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68 },
-        { name: "Baleine", pv: 10500, attaque: 430, defense: 115, spe: 0.5, argent: 0, pv_max: 10500, attaque_originale: 430, defense_originale: 115 },
-        { name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: 0, argent: 0, pv_max: 13800, attaque_originale: 350, defense_originale: 80 },
-        { name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: 0.5, argent: 0, pv_max: 10000, attaque_originale: 450, defense_originale: 100 },
-        { name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 10700, attaque_originale: 440, defense_originale: 100 },
-        { name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 11500, attaque_originale: 440, defense_originale: 100 },
-        { name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: 0.5, argent: 0, pv_max: 9600, attaque_originale: 420, defense_originale: 80 }
+        {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: 0.5, argent: 0, pv_max: 11100, attaque_originale: 463, defense_originale: 86},
+        {name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115},
+        {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85},
+        {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68},
+        {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: 0.5, argent: 0, pv_max: 10200, attaque_originale: 435, defense_originale: 105},
+        {name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: 0, argent: 0, pv_max: 13800, attaque_originale: 350, defense_originale: 80},
+        {name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: 0.5, argent: 0, pv_max: 10000, attaque_originale: 450, defense_originale: 100},
+        {name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 10700, attaque_originale: 440, defense_originale: 100},
+        {name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 11500, attaque_originale: 440, defense_originale: 100},
+        {name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: 0.5, argent: 0, pv_max: 9600, attaque_originale: 420, defense_originale: 80},
+        {name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: 0.5, argent: 0, pv_max: 10500, attaque_originale: 460, defense_originale: 85},
+        {name: "Sboonie", pv: 9900, attaque: 410, defense: 95, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 410, defense_originale: 95}
       ];
 
       const characterList = document.getElementById("character-list");
       let playerCharacter = null;
 
-      // Pour chaque personnage, créer un bouton dynamiquement
-      characters.forEach((character, index) => {
-        const button = document.createElement("button");
-        button.classList.add("character-button");
-        button.textContent = character.name;
+      function renderCharacterList(sortType) {
+        characterList.innerHTML = '';
 
-        // Vérifier si le personnage est débloqué ou non
-        if (userData[character.name] === 1) {
-          button.style.backgroundColor = "#ff4500"; // Mettre en orange
-          button.onclick = function() {
-            playerCharacter = character;
-            displayStats(button, playerCharacter);
-            checkAndAskForUsername(); // Vérifier et demander le pseudo après avoir choisi un personnage
-          };
-        } else {
-          button.classList.add("disabled"); // Mettre en gris
-          button.onclick = function() {
-            button.classList.add("shake");
-            setTimeout(() => button.classList.remove("shake"), 500);
+        // Séparer les personnages débloqués des non-débloqués
+        let unlockedCharacters = [];
+        let lockedCharacters = [];
 
-            let unlockMessage = button.nextElementSibling;
-            if (!unlockMessage || !unlockMessage.classList.contains('unlock-message')) {
-              unlockMessage = document.createElement('div');
-              unlockMessage.classList.add('unlock-message');
-              unlockMessage.textContent = "Ce personnage n'est pas encore débloqué !";
-              button.parentNode.insertBefore(unlockMessage, button.nextSibling);
+        characters.forEach(character => {
+          if (userData[character.name] === 1) {
+            unlockedCharacters.push(character);
+          } else {
+            lockedCharacters.push(character);
+          }
+        });
+
+        // Fonction de tri
+        function sortCharacters(characters, sortType) {
+          return characters.sort((a, b) => {
+            if (sortType === 'alphabetical') {
+              return a.name.localeCompare(b.name);
+            } else if (sortType === 'level_asc' || sortType === 'level_desc') {
+              const aLevel = userData[a.name + '_Level'] || 1;
+              const bLevel = userData[b.name + '_Level'] || 1;
+              return sortType === 'level_asc' ? aLevel - bLevel : bLevel - aLevel;
             }
-            unlockMessage.classList.add('show');
-          };
+          });
         }
 
-        characterList.appendChild(button);
-      });
+        // Trier les deux groupes
+        unlockedCharacters = sortCharacters(unlockedCharacters, sortType);
+        lockedCharacters = sortCharacters(lockedCharacters, sortType);
 
-      // Fonction pour afficher les statistiques du personnage sélectionné
+        // Combiner les listes triées
+        const sortedCharacters = unlockedCharacters.concat(lockedCharacters);
+
+        // Créer les boutons des personnages
+        sortedCharacters.forEach(character => {
+          const button = document.createElement("button");
+          button.classList.add("character-button");
+          button.textContent = character.name;
+
+          // Vérifier si le personnage est débloqué ou non
+          if (userData[character.name] === 1) {
+            button.style.backgroundColor = "#ff4500"; // Mettre en orange
+            button.onclick = function () {
+              playerCharacter = character;
+              displayStats(button, playerCharacter);
+            };
+          } else {
+            button.classList.add("disabled"); // Mettre en gris
+            button.onclick = function () {
+              button.classList.add("shake");
+              setTimeout(() => button.classList.remove("shake"), 500);
+
+              let unlockMessage = button.nextElementSibling;
+              if (!unlockMessage || !unlockMessage.classList.contains('unlock-message')) {
+                unlockMessage = document.createElement('div');
+                unlockMessage.classList.add('unlock-message');
+                unlockMessage.textContent = "Ce personnage n'est pas encore débloqué !";
+                button.parentNode.insertBefore(unlockMessage, button.nextSibling);
+              }
+              unlockMessage.classList.add('show');
+            };
+          }
+
+          characterList.appendChild(button);
+        });
+      }
       function displayStats(button, character) {
         // Supprimer tout élément de statistiques existant
         const existingStats = document.querySelectorAll('.stats');
@@ -276,135 +500,132 @@
         statsDiv.classList.add('show');
       }
 
-      // Vérifier et demander le pseudo si nécessaire
-      function checkAndAskForUsername() {
-        let pseudo = userData.pseudo;
-        if (!pseudo) {
-          pseudo = prompt("Veuillez entrer votre pseudo:");
-          if (pseudo) {
-            userData.pseudo = pseudo;
-            localStorage.setItem('userData', JSON.stringify(userData));
+      window.chooseCharacter = function (name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale) {
+        const now = new Date().getTime();
+
+        // Vérifier si le joueur est bloqué
+        if (userData.ban_until && now < userData.ban_until) {
+          const remainingTime = userData.ban_until - now;
+          const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+          const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+          alert(`Vous êtes bloqué pendant encore ${hours} heures ${minutes} minutes ${seconds} secondes.`);
+          return; // Empêcher le démarrage de la partie
+        }
+
+        if (userData.partie_commencee) {
+          userData.fraude = (userData.fraude || 0) + 1;
+          userData.partie_commencee = false;
+          sessionStorage.removeItem('playerCharacter');
+          sessionStorage.removeItem('opponentCharacter');
+          let banDuration = 0;
+
+          // Définir les durées de bannissement en millisecondes
+          switch (userData.fraude) {
+            case 2:
+              banDuration = 15 * 60 * 1000; // 15 minutes
+              break;
+            case 3:
+              banDuration = 45 * 60 * 1000; // 45 minutes
+              break;
+            case 4:
+              banDuration = 1 * 60 * 60 * 1000; // 1 heure
+              break;
+            case 5:
+              banDuration = 3 * 60 * 60 * 1000; // 3 heures
+              break;
+            case 6:
+              banDuration = 5 * 60 * 60 * 1000; // 5 heures
+              break;
+            case 7:
+              banDuration = 10 * 60 * 60 * 1000; // 10 heures
+              break;
+            case 8:
+              banDuration = 20 * 60 * 60 * 1000; // 20 heures
+              break;
+            case 9:
+              banDuration = 24 * 60 * 60 * 1000; // 1 journée (24 heures)
+              break;
+            default:
+              if (userData.fraude > 9) {
+                banDuration = 24 * 60 * 60 * 1000; // 1 journée (24 heures) pour les fraudes suivantes
+                userData.trophees -= 5; // Retirer 5 trophées après la 9ème fraude
+              }
+              break;
           }
+          if (banDuration > 0) {
+            userData.ban_until = now + banDuration;
+            localStorage.setItem('userData', JSON.stringify(userData));
+            alert(`Vous avez été bloqué pendant ${Math.floor(banDuration / (60 * 1000))} minutes en raison de fraudes répétées.`);
+            return; // Empêcher le démarrage de la partie
+          }
+
+          localStorage.setItem('userData', JSON.stringify(userData));
+          alert("Il est interdit de quitter une partie sous peine d'interdiction de jouer pendant un certain temps.");
+          // Vous pouvez ajouter une redirection ou logique ici si nécessaire
+          startGame();
+        } else {
+          startGame();
         }
       }
 
-      window.chooseCharacter = function(name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale) {
-        sessionStorage.setItem('playerCharacter', JSON.stringify({ name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale }));
+      function startGame() {
+        sessionStorage.setItem('playerCharacter', JSON.stringify({
+          name: playerCharacter.name,
+          pv: playerCharacter.pv,
+          attaque: playerCharacter.attaque,
+          defense: playerCharacter.defense,
+          spe: playerCharacter.spe,
+          argent: playerCharacter.argent,
+          pv_max: playerCharacter.pv_max,
+          attaque_originale: playerCharacter.attaque_originale,
+          defense_originale: playerCharacter.defense_originale
+        }));
 
         // Sélection aléatoire d'un adversaire parmi les autres personnages
-        const remainingCharacters = characters.filter(character => character.name !== name);
+        const remainingCharacters = characters.filter(character => character.name !== playerCharacter.name);
         const randomIndex = Math.floor(Math.random() * remainingCharacters.length);
         const opponentCharacter = remainingCharacters[randomIndex];
 
         // Déterminer le niveau de l'adversaire aléatoirement entre (player level - 1) et (player level + 2)
-        const levelKey = name + '_Level';
+        const levelKey = playerCharacter.name + '_Level';
         const playerLevel = userData[levelKey];
         const minOpponentLevel = Math.max(1, playerLevel - 1); // Le niveau de l'adversaire ne peut pas être inférieur à 1
-        const maxOpponentLevel = playerLevel + 1;
-        const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel + 1)) + minOpponentLevel;
+        const maxOpponentLevel = playerLevel + 2;
+        const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel)) + minOpponentLevel;
 
         // Calculer les statistiques de l'adversaire basées sur son niveau
-        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + 0.08 * (opponentLevel - 1)));
-        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + 0.08 * (opponentLevel - 1)));
-        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + 0.08 * (opponentLevel - 1)));
-        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + 0.08 * (opponentLevel - 1)));
-        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + 0.08 * (opponentLevel - 1)));
+        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + 0.1 * (opponentLevel - 1)));
+        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + 0.1 * (opponentLevel - 1)));
+        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + 0.1 * (opponentLevel - 1)));
+        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + 0.1 * (opponentLevel - 1)));
+        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + 0.1 * (opponentLevel - 1)));
 
-        if (opponentLevel >= 5) {
-          const boostType = Math.floor(Math.random() * 3) + 1;
-          if (boostType === 1) {
-            increasedOpponentAttaque = Math.round(increasedOpponentAttaque * 1.02);
-            increasedattaque_originale = increasedOpponentAttaque;
-          } else if (boostType === 2) {
-            increasedOpponentDefense = Math.round(increasedOpponentDefense * 1.02);
-            increaseddefense_originale = increasedOpponentDefense;
-          } else if (boostType === 3) {
-            increasedOpponentPV = Math.round(increasedOpponentPV * 1.02);
-          }
-        }
+        sessionStorage.setItem('opponentCharacter', JSON.stringify({
+          name: opponentCharacter.name,
+          pv: increasedOpponentPV,
+          attaque: increasedOpponentAttaque,
+          defense: increasedOpponentDefense,
+          spe: opponentCharacter.spe,
+          argent: opponentCharacter.argent,
+          pv_max: opponentCharacter.pv_max,
+          attaque_originale: increasedattaque_originale,
+          defense_originale: increaseddefense_originale
+        }));
 
-        sessionStorage.setItem('opponentCharacter', JSON.stringify({ name: opponentCharacter.name, pv: increasedOpponentPV, attaque: increasedOpponentAttaque, defense: increasedOpponentDefense, spe: opponentCharacter.spe, argent: opponentCharacter.argent, pv_max: opponentCharacter.pv_max, attaque_originale: increasedattaque_originale, defense_originale: increaseddefense_originale }));
-
-        // Redirection vers la page de combat
-        window.location.href = 'combat.html';
+        window.location.href = "combat.html";
       }
 
-    // Fonction pour récupérer les données utilisateur depuis localStorage
       function getUserData() {
-      let userData = localStorage.getItem('userData');
-        if (!userData) {
-          // Initialiser les données utilisateur si elles n'existent pas encore
-          userData = {
-            nbr_perso: 2,
-            victoires: 0,
-            defaites: 0,
-            trophees: 0,
-            argent: 0,
-            VICTOIRE: false,
-            version: '2.0.0',
-            recompense: 0,
-            perso_recompense: 0,
-            xp_du_jour: 0,
-            Willy: 1,
-            Willy_XP: 0,
-            Willy_Level: 1,
-            Willy_boost: 0,
-            Cocobi: 1,
-            Cocobi_XP: 0,
-            Cocobi_Level: 1,
-            Cocobi_boost: 0,
-            Oiseau: 0,
-            Oiseau_XP: 0,
-            Oiseau_Level: 1,
-            Oiseau_boost: 0,
-            Gros_Nounours: 0,
-            Gros_Nounours_XP: 0,
-            Gros_Nounours_Level: 1,
-            Gros_Nounours_boost: 0,
-            Baleine: 0,
-            Baleine_XP: 0,
-            Baleine_Level: 1,
-            Baleine_boost: 0,
-            Doudou: 0,
-            Doudou_XP: 0,
-            Doudou_Level: 1,
-            Doudou_boost: 0,
-            Coeur: 0,
-            Coeur_XP: 0,
-            Coeur_Level: 1,
-            Coeur_boost: 0,
-            Diva: 0,
-            Diva_XP: 0,
-            Diva_Level: 1,
-            Diva_boost: 0,
-            Poulpy: 0,
-            Poulpy_XP: 0,
-            Poulpy_Level: 1,
-            Poulpy_boost: 0,
-            Colorina: 0,
-            Colorina_XP: 0,
-            Colorina_Level: 1,
-            Colorina_boost: 0,
-            Double_XP: 5,
-            Double_XP_acheté: 0,
-            Potion_de_Santé_acheté: 0,
-            Amulette_de_Régénération_acheté: 0,
-            lastDoubleXPCheck: 0,
-            theme: false // Défaut clair
-          };
-          localStorage.setItem('userData', JSON.stringify(userData));
-        } else {
-          userData = JSON.parse(userData);
-        }
-
-        // Appliquer le thème sombre si nécessaire
-        if (userData.theme) {
-          document.body.classList.add('dark-theme');
-        }
-
-        return userData;
+        return JSON.parse(localStorage.getItem('userData')) || {};
       }
+      document.getElementById('sort').addEventListener('change', (e) => {
+        renderCharacterList(e.target.value);
+      });
+      renderCharacterList('alphabetical');
     });
   </script>
 </body>
+
 </html>

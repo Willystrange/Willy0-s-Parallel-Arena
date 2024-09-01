@@ -2,104 +2,44 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Vérification de mise à jour</title>
   <style>
-    body {
-      text-align: center;
-      font-family: 'Arial', sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      width: 90%;
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .button {
-      display: block;
-      padding: 15px;
-      font-size: 18px;
-      color: #fff;
-      background-color: #ff4500;
-      border: none;
-      border-radius: 5px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      margin: 10px 0;
-      transition: background-color 0.3s, transform 0.3s;
-    }
-
-    .button:hover {
-      background-color: #e03e00;
-      transform: scale(1.02);
-    }
-
-    .back-button {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 18px;
-      color: #ff4500;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .back-button:hover {
-      color: #e03e00;
-    }
-
-    /* Styles pour le mode sombre */
-    .dark-theme {
+    /* Styles pour le mode sombre selon les préférences du système */
+    @media (prefers-color-scheme: dark) {
+      body {
         background-color: #121212;
         color: #e0e0e0;
-    }
+      }
 
-    .dark-theme .container {
+      .container {
         background-color: #1e1e1e;
         color: #e0e0e0;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-    }
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      }
 
-    .dark-theme h1 {
+      h1 {
         color: #e0e0e0;
-    }
+      }
 
-    .dark-theme .button {
+      .button {
         background-color: #555;
         color: #e0e0e0;
-    }
+      }
 
-    .dark-theme .button:hover {
+      .button:hover {
         background-color: #666;
-    }
+      }
 
-    .dark-theme .back-button {
+      .back-button {
         color: #ff4500;
-    }
+      }
 
-    .dark-theme .back-button:hover {
+      .back-button:hover {
         color: #e03e00;
+      }
     }
   </style>
 </head>
@@ -110,6 +50,80 @@
     <div id="updateMessage"></div>
     <a id="updateButton" class="button" href="#" style="display: none;">Mettre à jour</a>
   </div>
+    <script type="module">
+        // Importation des modules Firebase
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+      import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+      import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+      // Configuration Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+        authDomain: "willy0s-parallel-arena.firebaseapp.com",
+        databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+        projectId: "willy0s-parallel-arena",
+        storageBucket: "willy0s-parallel-arena.appspot.com",
+        messagingSenderId: "683284732830",
+        appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+        measurementId: "G-85B8R4NKNM"
+      };
+
+      // Initialisation de Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+
+      // Initialisation de Firebase Performance Monitoring
+      const perf = getPerformance(app);
+      if ('PerformanceObserver' in window) {
+        // Créer un observateur pour les entrées de type "paint" (pour FCP)
+        const paintObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntriesByName('first-contentful-paint');
+          if (entries.length > 0) {
+            const fcp = entries[0].startTime;
+            console.log('First Contentful Paint (FCP):', fcp, 'ms');
+          }
+        });
+
+        // Observer les événements de type "paint"
+        paintObserver.observe({ type: 'paint', buffered: true });
+
+        // Créer un observateur pour les entrées de type "first-input" (pour FID)
+        const fidObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          entries.forEach((entry) => {
+            if (entry.entryType === 'first-input') {
+              const fid = entry.processingStart - entry.startTime;
+              console.log('First Input Delay (FID):', fid, 'ms');
+            }
+          });
+        });
+
+        // Observer les événements de type "first-input"
+        fidObserver.observe({ type: 'first-input', buffered: true });
+      }
+
+        // Référence à l'état de maintenance dans la base de données
+        const maintenanceRef = ref(database, 'maintenance');
+
+        // Écoute des changements de l'état de maintenance
+        onValue(maintenanceRef, (snapshot) => {
+          const data = snapshot.val();
+          const maintenanceActive = data.active === 'oui';
+          const maintenanceTime = data.heure;
+
+          if (maintenanceActive && maintenanceTime) {
+            const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+            const currentTime = new Date();
+            const currentHour = currentTime.getHours();
+            const currentMinute = currentTime.getMinutes();
+
+            // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+            if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+              window.location.href = 'maintenance.html';
+            }
+          }
+        });
+      </script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -119,9 +133,7 @@
 
     function getUserData() {
         const userData = JSON.parse(localStorage.getItem('userData'));
-        if (userData && userData.theme === true) {
-            document.body.classList.add('dark-theme');
-        }
+        return userData;
     }
 
     const jsonUrl = 'https://willystrange.github.io/Maj-tests/lasted-update.json';

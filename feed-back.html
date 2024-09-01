@@ -1,234 +1,367 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire de Feedback</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #e9ecef;
-            color: #343a40;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Formulaire de Feedback</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #e9ecef;
+      color: #343a40;
+      position: relative;
+      overflow: hidden;
+      /* Empêche le défilement du body */
+    }
+
+    .content {
+      overflow-y: auto;
+      /* Permet le défilement vertical */
+      height: 100vh;
+      /* Occupe toute la hauteur de la fenêtre */
+      -webkit-overflow-scrolling: touch;
+      /* Assure le défilement fluide sur les appareils tactiles */
+    }
+
+    .container {
+      width: 80%;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+    }
+
+    .form-group button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-group button:hover {
+      background-color: #0056b3;
+    }
+
+    .form-group button:focus {
+      outline: none;
+    }
+
+    /* Style pour les étoiles de notation */
+    .rating {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .rating input {
+      display: none;
+    }
+
+    .rating label {
+      font-size: 24px;
+      color: #ddd;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .rating input:checked~label {
+      color: #f39c12;
+    }
+
+    .rating input:checked~label~label {
+      color: #ddd;
+    }
+
+    .rating label:hover,
+    .rating label:hover~label {
+      color: #f39c12;
+    }
+
+    .rating .description {
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    .rating .description span {
+      display: inline-block;
+      width: 20%;
+    }
+
+    /* Styles pour le mode sombre */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212; /* Couleur de fond pour le mode sombre */
+        color: #e0e0e0; /* Couleur du texte pour le mode sombre */
+      }
+
+      .content {
+        background-color: #121212; /* Assure que le fond de la zone de contenu est sombre */
+      }
+
+      .container {
+        background-color: #1e1e1e; /* Couleur de fond pour le conteneur en mode sombre */
+        color: #e0e0e0; /* Couleur du texte dans le conteneur pour le mode sombre */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Ombre plus sombre pour le mode sombre */
+      }
+
+      h1 {
+        color: #e0e0e0; /* Couleur du titre pour le mode sombre */
+      }
+
+      .form-group label {
+        color: #b0b0b0; /* Couleur des labels pour le mode sombre */
+      }
+
+      .form-group input[type="text"],
+      .form-group textarea,
+      .form-group select {
+        background-color: #333; /* Fond sombre pour les champs de formulaire */
+        color: #e0e0e0; /* Couleur du texte dans les champs de formulaire */
+        border: 1px solid #444; /* Bordure sombre pour les champs de formulaire */
+      }
+
+      .form-group button {
+        background-color: #555; /* Couleur de fond du bouton pour le mode sombre */
+        color: #e0e0e0; /* Couleur du texte du bouton pour le mode sombre */
+      }
+
+      .form-group button:hover {
+        background-color: #666; /* Couleur du bouton au survol pour le mode sombre */
+      }
+
+      .rating label {
+        color: #444; /* Couleur des étoiles pour le mode sombre */
+      }
+
+      .rating input:checked~label {
+        color: #f39c12; /* Couleur des étoiles sélectionnées pour le mode sombre */
+      }
+
+      .rating label:hover,
+      .rating label:hover~label {
+        color: #f39c12; /* Couleur des étoiles au survol pour le mode sombre */
+      }
+    }
+
+    /* Masquer les barres de défilement */
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .content {
+      scrollbar-width: none;
+    }
+
+    .content {
+      -ms-overflow-style: none;
+    }
+  </style>
+  <script type="module">
+    // Importation des modules Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Initialisation de Firebase Performance Monitoring
+    const perf = getPerformance(app);
+    if ('PerformanceObserver' in window) {
+      // Créer un observateur pour les entrées de type "paint" (pour FCP)
+      const paintObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntriesByName('first-contentful-paint');
+        if (entries.length > 0) {
+          const fcp = entries[0].startTime;
+          console.log('First Contentful Paint (FCP):', fcp, 'ms');
         }
-        .container {
-            width: 80%;
-            max-width: 700px;
-            margin: 40px auto;
-            padding: 30px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .form-group input[type="text"], .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .form-group textarea {
-            resize: vertical;
-        }
-        .form-group button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        .form-group button:hover {
-            background-color: #0056b3;
-        }
-        .form-group button:focus {
-            outline: none;
-        }
-        /* Style pour les étoiles de notation */
-        .rating {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .rating input {
-            display: none;
-        }
-        .rating label {
-            font-size: 24px;
-            color: #ddd;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-        .rating input:checked ~ label {
-            color: #f39c12;
-        }
-        .rating input:checked ~ label ~ label {
-            color: #ddd;
-        }
-        .rating label:hover,
-        .rating label:hover ~ label {
-            color: #f39c12;
-        }
-        .rating .description {
-            text-align: center;
-            margin-top: 5px;
-        }
-        .rating .description span {
-            display: inline-block;
-            width: 20%;
-        }
-        /* Styles pour le mode sombre */
-        .dark-theme {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-        .dark-theme .container {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-        .dark-theme h1 {
-            color: #e0e0e0;
-        }
-        .dark-theme .form-group label {
-            color: #b0b0b0;
-        }
-        .dark-theme .form-group input[type="text"], 
-        .dark-theme .form-group textarea, 
-        .dark-theme .form-group select {
-            background-color: #333;
-            color: #e0e0e0;
-            border: 1px solid #444;
-        }
-        .dark-theme .form-group button {
-            background-color: #555;
-            color: #e0e0e0;
-        }
-        .dark-theme .form-group button:hover {
-            background-color: #666;
-        }
-        .dark-theme .rating label {
-            color: #444;
-        }
-        .dark-theme .rating input:checked ~ label {
-            color: #f39c12;
-        }
-        .dark-theme .rating label:hover,
-        .dark-theme .rating label:hover ~ label {
-            color: #f39c12;
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            getUserData(); // Applique le thème sombre si nécessaire lors du chargement de la page
+      });
+
+      // Observer les événements de type "paint"
+      paintObserver.observe({ type: 'paint', buffered: true });
+
+      // Créer un observateur pour les entrées de type "first-input" (pour FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const fid = entry.processingStart - entry.startTime;
+            console.log('First Input Delay (FID):', fid, 'ms');
+          }
         });
+      });
 
-        function getUserData() {
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            if (userData && userData.theme === true) {
-                document.body.classList.add('dark-theme');
-            }
+      // Observer les événements de type "first-input"
+      fidObserver.observe({ type: 'first-input', buffered: true });
+    }
+
+    // Référence à l'état de maintenance dans la base de données
+    const maintenanceRef = ref(database, 'maintenance');
+
+    // Écoute des changements de l'état de maintenance
+    onValue(maintenanceRef, (snapshot) => {
+      const data = snapshot.val();
+      const maintenanceActive = data.active === 'oui';
+      const maintenanceTime = data.heure;
+
+      if (maintenanceActive && maintenanceTime) {
+        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
+        const currentTime = new Date();
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+
+        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
+        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
+          window.location.href = 'maintenance.html';
         }
+      }
+    });
+  </script>
+  <script>
 
-        function submitForm(event) {
-            event.preventDefault(); // Empêche l'envoi du formulaire
+    function getUserData() {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+    }
 
-            var category = document.getElementById('category').value;
-            var importance = document.querySelector('input[name="importance"]:checked').value;
-            var comments = document.getElementById('comments').value;
+    function submitForm(event) {
+      event.preventDefault(); // Empêche l'envoi du formulaire
 
-            var subject = "Feedback sur " + category;
-            var body = `Bonjour,
+      var category = document.getElementById('category').value;
+      var importance = document.querySelector('input[name="importance"]:checked').value;
+      var comments = document.getElementById('comments').value;
+
+      var subject = "Feedback sur " + category;
+      var body = `Bonjour,
 
 Je souhaite partager les commentaires suivants :
 
 Catégorie : ${category}
 Importance : ${importance}
 Remarques : ${comments}`
-            var mailtoLink = "mailto:willyxstrange@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      var mailtoLink = "mailto:willyxstrange@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
 
-            window.location.href = mailtoLink; // Ouvre le client mail de l'utilisateur
-        }
+      window.location.href = mailtoLink; // Ouvre le client mail de l'utilisateur
+    }
 
-        function goBack() {
-            window.location.href = "menu_principal.html"; // Redirige vers index.html
-        }
-    </script>
+    function goBack() {
+      window.location.href = "menu_principal.html"; // Redirige vers index.html
+    }
+  </script>
 </head>
+
 <body>
+  <div class="content">
     <div class="container">
-        <h1>Formulaire de Feedback</h1>
-        <form id="feedbackForm" onsubmit="submitForm(event)">
-            <!-- Catégorie -->
-            <div class="form-group">
-                <label for="category">Catégorie</label>
-                <select id="category" name="category" required>
-                    <option value="">Sélectionnez une catégorie</option>
-                    <option value="fonctionnalite">Fonctionnalité</option>
-                    <option value="design">Design</option>
-                    <option value="performance">Performance</option>
-                    <option value="securite">Sécurité</option>
-                    <option value="gameplay">Gameplay</option>
-                    <option value="autre">Autre</option>
-                </select>
-            </div>
-            <!-- Importance -->
-            <div class="form-group">
-                <label>Importance</label>
-                <div class="rating">
-                    <!-- Étoiles pour la notation de l'importance -->
-                    <input type="radio" id="star10" name="importance" value="10">
-                    <label for="star10">☆</label>
-                    <input type="radio" id="star9" name="importance" value="9">
-                    <label for="star9">☆</label>
-                    <input type="radio" id="star8" name="importance" value="8">
-                    <label for="star8">☆</label>
-                    <input type="radio" id="star7" name="importance" value="7">
-                    <label for="star7">☆</label>
-                    <input type="radio" id="star6" name="importance" value="6">
-                    <label for="star6">☆</label>
-                    <input type="radio" id="star5" name="importance" value="5">
-                    <label for="star5">☆</label>
-                    <input type="radio" id="star4" name="importance" value="4">
-                    <label for="star4">☆</label>
-                    <input type="radio" id="star3" name="importance" value="3">
-                    <label for="star3">☆</label>
-                    <input type="radio" id="star2" name="importance" value="2">
-                    <label for="star2">☆</label>
-                    <input type="radio" id="star1" name="importance" value="1">
-                    <label for="star1">☆</label>
-                </div>
-            </div>
-            <!-- Remarques -->
-            <div class="form-group">
-                <label for="comments">Vos remarques :</label>
-                <textarea id="comments" name="comments" rows="5" placeholder="Écrivez ici vos remarques"></textarea>
-            </div>
-            <!-- Soumettre -->
-            <div class="form-group">
-                <button type="submit">Envoyer</button>
-            </div>
-        </form>
-        <!-- Bouton Retour -->
+      <h1>Formulaire de Feedback</h1>
+      <form id="feedbackForm" onsubmit="submitForm(event)">
+        <!-- Catégorie -->
         <div class="form-group">
-            <button type="button" onclick="goBack()">Retour</button>
+          <label for="category">Catégorie</label>
+          <select id="category" name="category" required>
+            <option value="">Sélectionnez une catégorie</option>
+            <option value="fonctionnalite">Fonctionnalité</option>
+            <option value="design">Design</option>
+            <option value="performance">Performance</option>
+            <option value="securite">Sécurité</option>
+            <option value="gameplay">Gameplay</option>
+            <option value="autre">Autre</option>
+          </select>
         </div>
+        <!-- Importance -->
+        <div class="form-group">
+          <label>Importance</label>
+          <div class="rating">
+            <!-- Étoiles pour la notation de l'importance -->
+            <input type="radio" id="star10" name="importance" value="10">
+            <label for="star10">☆</label>
+            <input type="radio" id="star9" name="importance" value="9">
+            <label for="star9">☆</label>
+            <input type="radio" id="star8" name="importance" value="8">
+            <label for="star8">☆</label>
+            <input type="radio" id="star7" name="importance" value="7">
+            <label for="star7">☆</label>
+            <input type="radio" id="star6" name="importance" value="6">
+            <label for="star6">☆</label>
+            <input type="radio" id="star5" name="importance" value="5">
+            <label for="star5">☆</label>
+            <input type="radio" id="star4" name="importance" value="4">
+            <label for="star4">☆</label>
+            <input type="radio" id="star3" name="importance" value="3">
+            <label for="star3">☆</label>
+            <input type="radio" id="star2" name="importance" value="2">
+            <label for="star2">☆</label>
+            <input type="radio" id="star1" name="importance" value="1">
+            <label for="star1">☆</label>
+          </div>
+        </div>
+        <!-- Remarques -->
+        <div class="form-group">
+          <label for="comments">Vos remarques :</label>
+          <textarea id="comments" name="comments" rows="5" placeholder="Écrivez ici vos remarques"></textarea>
+        </div>
+        <!-- Soumettre -->
+        <div class="form-group">
+          <button type="submit">Envoyer</button>
+        </div>
+      </form>
+      <!-- Bouton Retour -->
+      <div class="form-group">
+        <button type="button" onclick="goBack()">Retour</button>
+      </div>
     </div>
+  </div>
 </body>
+
 </html>

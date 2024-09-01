@@ -1,167 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Loading Page</title>
-<style>
-  body {
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-
-  .loading-container {
-    text-align: center;
-    color: white;
-  }
-
-  .loader {
-    width: 50px;
-    height: 50px;
-    border: 2px solid white;
-    border-radius: 50%;
-    border-top-color: transparent;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-  }
-
-  @keyframes spin {
-    100% {
-      transform: rotate(360deg);
+  <title>Loading Page</title>
+  <style>
+    body {
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-  }
-</style>
-</head>
-<body>
-<div class="loading-container">
-  <div class="loader"></div>
-  <div class="loading-text" id="loadingText">Mise à jour en cours...</div>
-</div>
 
-<script>
-  // Phrases de chargement à afficher
-  const loadingPhrases = [
-    "Mise à jour en cours...",
-    "Ne quittez pas...",
-    "Cela peut prendre plusieurs secondes...",
-    "Chargement en cours...",
-    "Veuillez patienter...",
-    "Nous préparons votre contenu...",
-    "Optimisation des données...",
-    "Chargement des ressources...",
-    "Analyse des informations...",
-  ];
+    .loading-container {
+      text-align: center;
+      color: white;
+    }
 
-  const loadingTextElement = document.getElementById('loadingText');
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 2px solid white;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
 
-  function updateLoadingText() {
-    const randomIndex = Math.floor(Math.random() * loadingPhrases.length);
-    loadingTextElement.textContent = loadingPhrases[randomIndex];
-  }
-
-  // Mettre à jour le texte de chargement toutes les 3 secondes (3000 ms)
-  setInterval(updateLoadingText, 3000);
-
-  // Redirection vers index.html après 10 secondes (10000 ms)
-  setTimeout(function() {
-    window.location.href = "index.html";
-  }, 10000);
-
-  function getUserData() {
-    // Fonction pour récupérer les données utilisateur depuis le localStorage (à adapter selon votre besoin)
-    return JSON.parse(localStorage.getItem('userData')) || {};
-  }
-
-  function saveUserData(userData) {
-    // Fonction pour sauvegarder les données utilisateur dans le localStorage (à adapter selon votre besoin)
-    localStorage.setItem('userData', JSON.stringify(userData));
-  }
-
-  function mise_a_jour() {
-    const userData = getUserData();
-
-    // Définition des valeurs par défaut
-    const defaultUserData = {
-      nbr_perso: 2,
-      victoires: 0,
-      defaites: 0,
-      trophees: 0,
-      argent: 0,
-      VICTOIRE: false,
-      version: '2.0.0',
-      recompense: 0,
-      perso_recompense: 0,
-      xp_du_jour: 0,
-      Willy: 1,
-      Willy_XP: 0,
-      Willy_Level: 1,
-      Willy_boost: 0,
-      Cocobi: 1,
-      Cocobi_XP: 0,
-      Cocobi_Level: 1,
-      Cocobi_boost: 0,
-      Oiseau: 0,
-      Oiseau_XP: 0,
-      Oiseau_Level: 1,
-      Oiseau_boost: 0,
-      Gros_Nounours: 0,
-      Gros_Nounours_XP: 0,
-      Gros_Nounours_Level: 1,
-      Gros_Nounours_boost: 0,
-      Baleine: 0,
-      Baleine_XP: 0,
-      Baleine_Level: 1,
-      Baleine_boost: 0,
-      Doudou: 0,
-      Doudou_XP: 0,
-      Doudou_Level: 1,
-      Doudou_boost: 0,
-      Coeur: 0,
-      Coeur_XP: 0,
-      Coeur_Level: 1,
-      Coeur_boost: 0,
-      Diva: 0,
-      Diva_XP: 0,
-      Diva_Level: 1,
-      Diva_boost: 0,
-      Poulpy: 0,
-      Poulpy_XP: 0,
-      Poulpy_Level: 1,
-      Poulpy_boost: 0,
-      Colorina: 0,
-      Colorina_XP: 0,
-      Colorina_Level: 1,
-      Colorina_boost: 0,
-      Double_XP: 5,
-      Double_XP_acheté: 0,
-      Potion_de_Santé_acheté: 0,
-      Amulette_de_Régénération_acheté: 0,
-      lastDoubleXPCheck: 0,
-      theme: false // Défaut clair
-    };
-
-    // Vérification et initialisation des valeurs manquantes ou incorrectes
-    for (const key in defaultUserData) {
-      if (!userData.hasOwnProperty(key)) {
-        userData[key] = defaultUserData[key];
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
       }
     }
+  </style>
+</head>
 
-    // Assure que la version dans userData est toujours la dernière version du jeu
-    userData.version = '2.0.0';
+<body>
+  <div class="loading-container">
+    <!-- Ajout de l'élément "S" qui tourne -->
+    <div class="loader"></div>
+    <div class="loading-text" id="loadingText">Mise à jour en cours...</div>
+  </div>
 
-    // Sauvegarder les données mises à jour dans localStorage
-    saveUserData(userData);
-  }
+  <script>
+    // Phrases de chargement à afficher
+    const loadingPhrases = [
+      "Mise à jour en cours...",
+      "Ne quittez pas...",
+      "Cela peut prendre plusieurs secondes...",
+      "Chargement en cours...",
+      "Veuillez patienter...",
+      "Nous préparons votre contenu...",
+      "Optimisation des données...",
+      "Chargement des ressources...",
+      "Analyse des informations...",
+    ];
 
-  // Appel de la fonction mise_a_jour au chargement de la page
-  mise_a_jour();
-</script>
+    const loadingTextElement = document.getElementById('loadingText');
+
+    function updateLoadingText() {
+      const randomIndex = Math.floor(Math.random() * loadingPhrases.length);
+      loadingTextElement.textContent = loadingPhrases[randomIndex];
+    }
+
+    // Mettre à jour le texte de chargement toutes les 3 secondes (3000 ms)
+    setInterval(updateLoadingText, 3000);
+
+    // Redirection vers index.html après 10 secondes (10000 ms)
+    setTimeout(function () {
+      window.location.href = "index.html";
+    }, 10000);
+
+    function getUserData() {
+      // Fonction pour récupérer les données utilisateur depuis le localStorage (à adapter selon votre besoin)
+      return JSON.parse(localStorage.getItem('userData')) || {};
+    }
+
+    function saveUserData(userData) {
+      // Fonction pour sauvegarder les données utilisateur dans le localStorage (à adapter selon votre besoin)
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+    function versionCompare(v1, v2) {
+      const v1Parts = v1.split('.').map(Number);
+      const v2Parts = v2.split('.').map(Number);
+      for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+        if ((v1Parts[i] || 0) > (v2Parts[i] || 0)) return 1;
+        if ((v1Parts[i] || 0) < (v2Parts[i] || 0)) return -1;
+      }
+      return 0;
+    }
+
+    function mise_a_jour() {
+      const userData = getUserData();
+
+      // Définition des valeurs par défaut
+      const defaultUserData = {
+        pass_XP: 0,
+        pass_level: 0,
+        nbr_perso: 2,
+        victoires: 0,
+        defaites: 0,
+        manches_max: 0,
+        XP_jour: 0,
+        gagnant: '',
+        fin_manche: 0,
+        fin_xp: 0,
+        fin_argent: 0,
+        fin_trophees: 0,
+        trophees: 0,
+        argent: 0,
+        VICTOIRE: false,
+        version: '2.4.1',
+        recompense: 0,
+        perso_recompense: 0,
+        xp_du_jour: 0,
+        Willy: 1,
+        Willy_XP: 0,
+        Willy_Level: 1,
+        Willy_boost: 0,
+        Cocobi: 1,
+        Cocobi_XP: 0,
+        Cocobi_Level: 1,
+        Cocobi_boost: 0,
+        Oiseau: 0,
+        Oiseau_XP: 0,
+        Oiseau_Level: 1,
+        Oiseau_boost: 0,
+        Grours: 0,
+        Grours_XP: 0,
+        Grours_Level: 1,
+        Grours_boost: 0,
+        Baleine: 0,
+        Baleine_XP: 0,
+        Baleine_Level: 1,
+        Baleine_boost: 0,
+        Doudou: 0,
+        Doudou_XP: 0,
+        Doudou_Level: 1,
+        Doudou_boost: 0,
+        Coeur: 0,
+        Coeur_XP: 0,
+        Coeur_Level: 1,
+        Coeur_boost: 0,
+        Diva: 0,
+        Diva_XP: 0,
+        Diva_Level: 1,
+        Diva_boost: 0,
+        Poulpy: 0,
+        Poulpy_XP: 0,
+        Poulpy_Level: 1,
+        Poulpy_boost: 0,
+        Colorina: 0,
+        Colorina_XP: 0,
+        Colorina_Level: 1,
+        Colorina_boost: 0,
+        Rosalie: 0,
+        Rosalie_XP: 0,
+        Rosalie_Level: 1,
+        Rosalie_boost: 0,
+        Sboonie: 0,
+        Sboonie_XP: 0,
+        Sboonie_Level: 1,
+        Sboonie_boost: 0,
+        Double_XP: 5,
+        Double_XP_acheté: 0,
+        Potion_de_Santé_acheté: 0,
+        Amulette_de_Régénération_acheté: 0,
+        epee_tranchante_acheté: 0,
+        elixir_puissance_acheté: 0,
+        armure_fer_acheté: 0,
+        bouclier_solide_acheté: 0,
+        lastDoubleXPCheck: 0,
+        lastFraudeReset: 0,
+        boutique_recompense: false,
+
+        semaine1: false,
+
+
+        semaine2: false,
+
+
+        semaine3: false,
+
+
+        semaine4: false,
+
+
+
+        semaine5: false,
+
+        semaine6: false,
+
+        crystaux_parrallels: 0,
+
+        quetes_jour: false,
+
+        quete1_type: "",
+        quete1_text: "",
+        quete1_total: "",
+        quete1_current: "",
+        quete1_character: "",
+
+        quete2_type: "",
+        quete2_text: "",
+        quete2_total: "",
+        quete2_current: "",
+        quete2_character: "",
+
+        quete3_type: "",
+        quete3_text: "",
+        quete3_total: "",
+        quete3_current: "",
+        quete3_character: "",
+
+        partie_commencee: false,
+      };
+
+      if (versionCompare(userData.version || '0.0.0', defaultUserData.version) < 0) {
+        userData.Semaine2_1_current = 0;
+        userData.Semaine2_2_current = 0;
+        userData.Semaine2_3_current = 0;
+        userData.Semaine2_4_current = 0;
+        userData.Semaine2_5_current = 0;
+
+        userData.Semaine3_1_current = 0;
+        userData.Semaine3_2_current = 0;
+        userData.Semaine3_3_current = 0;
+        userData.Semaine3_4_current = 0;
+        userData.Semaine3_5_current = 0;
+
+        userData.Semaine4_1_current = 0;
+        userData.Semaine4_2_current = 0;
+        userData.Semaine4_3_current = 0;
+        userData.Semaine4_4_current = 0;
+        userData.Semaine4_5_current = 0;
+
+        userData.Semaine5_1_current = 0;
+        userData.Semaine5_2_current = 0;
+        userData.Semaine5_3_current = 0;
+        userData.Semaine5_4_current = 0;
+        userData.Semaine5_5_current = 0;
+      }
+      // Vérification et initialisation des valeurs manquantes ou incorrectes
+      for (const key in defaultUserData) {
+        if (!userData.hasOwnProperty(key)) {
+          userData[key] = defaultUserData[key];
+        }
+      }
+
+      // Assure que la version dans userData est toujours la dernière version du jeu
+      userData.version = '2.4.1';
+
+      // Sauvegarder les données mises à jour dans localStorage
+      saveUserData(userData);
+    }
+
+    // Appel de la fonction mise_a_jour au chargement de la page
+    mise_a_jour();
+  </script>
 </body>
+
 </html>
