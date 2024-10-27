@@ -1,5 +1,5 @@
 // Définir la version du jeu
-const game_version = '2.4.1';
+const game_version = '2.4.2.1';
 
 // Fonction pour obtenir les données utilisateur de localStorage
 function getUserData() {
@@ -49,7 +49,7 @@ if (!localStorage.getItem('userData')) {
       trophees: 0,
       argent: 0,
       VICTOIRE: false,
-      version: '2.4.1',
+      version: '2.4.2',
       recompense: 0,
       perso_recompense: 0,
       xp_du_jour: 0,

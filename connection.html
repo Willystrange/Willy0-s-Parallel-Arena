@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +9,25 @@
     body {
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
+      color: #000;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
+      position: relative;
     }
+
+    
 
     .container {
       background: white;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 300px;
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
     }
 
     h1 {
@@ -40,9 +47,10 @@
 
     .input-group input {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      box-sizing: border-box;
     }
 
     button {
@@ -54,10 +62,43 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      margin-top: 10px;
     }
 
     button:hover {
       background-color: #0056b3;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Mode sombre */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #181818;
+        color: #fff;
+      }
+
+      .container {
+        background: #282828;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      }
+
+      .input-group input {
+        background-color: #333;
+        color: white;
+        border: 1px solid #555;
+      }
+
+      button {
+        background-color: #444;
+      }
+
+      button:hover {
+        background-color: #555;
+      }
+      
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -81,73 +122,162 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    function handleUserConnect(user) {
-      let userConnect = JSON.parse(localStorage.getItem('userConnect')) || {}; // Assurez-vous que userConnect est un objet
-
-      if (user) {
-        userConnect.est_connecte = true;
-        userConnect.userid = user.uid;
-      } else {
-        userConnect.est_connecte = false;
-        userConnect.userid = null;
-      }
-
-      localStorage.setItem('userConnect', JSON.stringify(userConnect));
+    // Sauvegarder l'état de connexion dans le localStorage
+    function saveConnectionState(userId, est_connecte) {
+      const connectionState = {
+        userid: userId,
+        est_connecte: est_connecte
+      };
+      localStorage.setItem('connection', JSON.stringify(connectionState));
     }
-    
 
-    function handleUserData(user) {
-      if (user) {
-        const userId = user.uid;
-        const userRef = database.ref('users/' + userId);
+    // Sauvegarder les données utilisateur dans Firebase
+    function saveUserDataToFirebase(userId) {
+      const userData = JSON.parse(localStorage.getItem('userData')) || {};
+      
 
-        userRef.once('value', (snapshot) => {
-          let userData;
+      const userRef = database.ref(`users/${userId}/userData`);
+      userRef.set(userData, (error) => {
+        if (error) {
+          console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
+        } else {
+          console.log('Données utilisateur et récompenses sauvegardées dans Firebase');
+        }
+      });
+    }
 
-          if (snapshot.exists()) {
-            userData = snapshot.val();
-          } else {
-            const localStorageData = localStorage.getItem('userData');
-            userData = localStorageData ? JSON.parse(localStorageData) : {};
-          }
-          userRef.set(userData, (error) => {
-            if (error) {
-              console.error('Erreur lors de l\'écriture des données dans Firebase:', error);
-            } else {
-              console.log('Données sauvegardées avec succès dans Firebase');
-            }
-          });
+    // Récupérer les données utilisateur depuis Firebase
+    function loadUserDataFromFirebase(userId) {
+      const userRef = database.ref(`users/${userId}`);
 
+      userRef.once('value', (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const userData = data.userData || {};
+          
+
+          // Mise à jour du localStorage
           localStorage.setItem('userData', JSON.stringify(userData));
-        });
-      } else {
-        console.log('Aucun utilisateur connecté');
-      }
+          
+
+          console.log('Données utilisateur récupérées depuis Firebase');
+        } else {
+          console.log('Aucune donnée utilisateur trouvée dans Firebase');
+        }
+      });
     }
 
-    auth.onAuthStateChanged((user) => {
-      handleUserData(user);
-      handleUserConnect(user);
-    });
-
+    // Gestion de la connexion
     function login() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          console.log('Utilisateur connecté:', userCredential.user);
+          const user = userCredential.user;
+          console.log('Utilisateur connecté:', user);
+
+          // Charger les données utilisateur depuis Firebase
+          loadUserDataFromFirebase(user.uid);
+
+          // Sauvegarder l'état de connexion
+          saveConnectionState(user.uid, true);
+
+          // Redirection après la connexion
+          setTimeout(() => {
+            window.location.href = 'menu_principal.html';
+          }, 2000);
         })
         .catch((error) => {
           console.error('Erreur de connexion:', error.message);
+          alert('Erreur de connexion : ' + error.message);
         });
+    }
+    function play() {
+      window.location.href = 'menu_principal.html';
+    }
+
+    // Gestion de l'inscription
+    function register() {
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log('Utilisateur inscrit:', user);
+
+          // Sauvegarder les données locales dans Firebase
+          saveUserDataToFirebase(user.uid);
+
+          // Sauvegarder l'état de connexion
+          saveConnectionState(user.uid, true);
+
+          // Redirection après l'inscription
+          window.location.href = 'menu_principal.html';
+        })
+        .catch((error) => {
+          console.error('Erreur d\'inscription:', error.message);
+          alert('Erreur d\'inscription : ' + error.message);
+        });
+    }
+
+    // Connexion avec Google
+    function googleSignIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          const user = result.user;
+          console.log('Utilisateur connecté avec Google:', user);
+
+          // Vérifier s'il existe déjà des données dans Firebase
+          const userRef = database.ref(`users/${user.uid}`);
+          userRef.once('value', (snapshot) => {
+            if (snapshot.exists()) {
+              // L'utilisateur a déjà des données, les charger dans localStorage
+              loadUserDataFromFirebase(user.uid);
+            } else {
+              // L'utilisateur n'a pas encore de données, les sauvegarder
+              saveUserDataToFirebase(user.uid);
+            }
+
+            // Sauvegarder l'état de connexion
+            saveConnectionState(user.uid, true);
+
+            // Redirection après la connexion Google
+            window.location.href = 'menu_principal.html';
+          });
+        })
+        .catch((error) => {
+          console.error('Erreur de connexion avec Google:', error.message);
+          alert('Erreur de connexion avec Google : ' + error.message);
+        });
+    }
+
+    // Afficher le formulaire de connexion ou d'inscription
+    function showForm(formId) {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById(formId).classList.remove('hidden');
+    }
+
+    function showLoginForm() {
+      showForm('loginForm');
+    }
+
+    function showRegisterForm() {
+      showForm('registerForm');
     }
   </script>
 </head>
+
 <body>
+  
   <div class="container">
-    <h1>Connexion</h1>
+    
     <form id="loginForm" onsubmit="event.preventDefault(); login();">
+      
+      <h1>Connexion</h1>
       <div class="input-group">
         <label for="email">Email:</label>
         <input type="email" id="email" required>
@@ -157,8 +287,27 @@
         <input type="password" id="password" required>
       </div>
       <button type="submit">Se connecter</button>
-      <button type="submit"onclick=window.location.href="parametres.html">Quitter</button>
+      <button type="button" onclick="showRegisterForm()">Créer un compte</button>
+      <button type="button" onclick="googleSignIn()">Connexion avec Google</button>
+      <button type="button" onclick="play()">Jouer sans se connecter</button>
+    </form>
+
+    <form id="registerForm" class="hidden" onsubmit="event.preventDefault(); register();">
+      
+      <h1>Inscription</h1>
+      <div class="input-group">
+        <label for="registerEmail">Email:</label>
+        <input type="email" id="registerEmail" required>
+      </div>
+      <div class="input-group">
+        <label for="registerPassword">Mot de passe:</label>
+        <input type="password" id="registerPassword" required>
+      </div>
+      <button type="submit">S'inscrire</button>
+      <button type="button" onclick="showLoginForm()">Déjà un compte ?</button>
+      <button type="button" onclick="play()">Jouer sans se connecter</button>
     </form>
   </div>
 </body>
+
 </html>

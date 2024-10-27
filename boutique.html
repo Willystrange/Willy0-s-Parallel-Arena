@@ -13,23 +13,28 @@
       margin: 0;
       padding: 0;
       background-color: #f4f4f4;
-      padding-top: 50px; /* Ajustez pour le header fixe */
-      overflow: hidden; /* Masque les barres de défilement */
+      padding-top: 50px;
+      /* Ajustez pour le header fixe */
+      overflow: hidden;
+      /* Masque les barres de défilement */
       height: 100vh;
     }
 
     .scroll-container {
-      overflow: auto; /* Permet le défilement dans le conteneur */
+      overflow: auto;
+      /* Permet le défilement dans le conteneur */
       height: 100%;
       width: 100%;
     }
 
     .scroll-container::-webkit-scrollbar {
-      display: none; /* Pour les navigateurs basés sur Webkit */
+      display: none;
+      /* Pour les navigateurs basés sur Webkit */
     }
 
     .header {
-      position: fixed; /* Fixe la barre du haut */
+      position: fixed;
+      /* Fixe la barre du haut */
       top: 0;
       left: 0;
       width: 100%;
@@ -39,7 +44,8 @@
       padding: 10px;
       background-color: #f0f0f0;
       color: #fff;
-      z-index: 1000; /* Assure que la barre reste au-dessus des autres éléments */
+      z-index: 1000;
+      /* Assure que la barre reste au-dessus des autres éléments */
     }
 
     .header .balance {
@@ -60,7 +66,8 @@
     .category-wrapper {
       position: relative;
       width: 100%;
-      overflow: hidden; /* Cache les éléments qui dépassent */
+      overflow: hidden;
+      /* Cache les éléments qui dépassent */
     }
 
     .category {
@@ -108,25 +115,32 @@
     }
 
     .bonus-item img {
-      width: 50px; /* Ajuster la taille des images pour qu'elles s'adaptent bien */
+      width: 50px;
+      /* Ajuster la taille des images pour qu'elles s'adaptent bien */
       height: auto;
       border-radius: 8px;
     }
 
     .bonus-item h2 {
-      font-size: 16px; /* Ajuster la taille du texte */
+      font-size: 16px;
+      /* Ajuster la taille du texte */
       margin: 5px 0;
       color: #333;
-      overflow: hidden; /* Empêcher le texte de déborder */
-      text-overflow: ellipsis; /* Ajouter des points de suspension si le texte est trop long */
+      overflow: hidden;
+      /* Empêcher le texte de déborder */
+      text-overflow: ellipsis;
+      /* Ajouter des points de suspension si le texte est trop long */
     }
 
     .bonus-item p {
-      font-size: 14px; /* Ajuster la taille du texte */
+      font-size: 14px;
+      /* Ajuster la taille du texte */
       color: #555;
       margin: 2px 0;
-      overflow: hidden; /* Empêcher le texte de déborder */
-      text-overflow: ellipsis; /* Ajouter des points de suspension si le texte est trop long */
+      overflow: hidden;
+      /* Empêcher le texte de déborder */
+      text-overflow: ellipsis;
+      /* Ajouter des points de suspension si le texte est trop long */
     }
 
     .bonus-item button {
@@ -136,7 +150,8 @@
       border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      font-size: 14px; /* Ajuster la taille du texte du bouton */
+      font-size: 14px;
+      /* Ajuster la taille du texte du bouton */
       padding: 5px 10px;
     }
 
@@ -154,13 +169,19 @@
       justify-content: space-around;
       align-items: center;
       padding: 0;
-      background-color: #f0f0f0; /* Couleur de fond pour le mode clair */
-      position: fixed; /* Fixe la barre au bas de l'écran */
-      bottom: 0; /* Aligne la barre au bas de l'écran */
+      background-color: #f0f0f0;
+      /* Couleur de fond pour le mode clair */
+      position: fixed;
+      /* Fixe la barre au bas de l'écran */
+      bottom: 0;
+      /* Aligne la barre au bas de l'écran */
       left: 0;
-      width: 100%; /* Prend toute la largeur de l'écran */
-      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Optionnel : ajoute une ombre pour plus de visibilité */
-      z-index: 1000; /* Assure que la barre reste au-dessus des autres éléments */
+      width: 100%;
+      /* Prend toute la largeur de l'écran */
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      /* Optionnel : ajoute une ombre pour plus de visibilité */
+      z-index: 1000;
+      /* Assure que la barre reste au-dessus des autres éléments */
     }
 
     .footer-icon {
@@ -179,13 +200,17 @@
     }
 
     .boutique-icon img {
-      border: 2px solid #ff4500; /* Bordure colorée autour de l'icône */
-      border-radius: 50%; /* Bordure arrondie */
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Ombre autour de l'icône */
+      border: 2px solid #ff4500;
+      /* Bordure colorée autour de l'icône */
+      border-radius: 50%;
+      /* Bordure arrondie */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      /* Ombre autour de l'icône */
     }
 
     .boutique-icon:hover img {
-      opacity: 1; /* Assure que l'icône reste visible au survol */
+      opacity: 1;
+      /* Assure que l'icône reste visible au survol */
     }
 
     /* Styles pour le mode sombre */
@@ -248,7 +273,8 @@
       }
 
       .footer-icon img {
-        filter: invert(1); /* Inverse les couleurs des images pour le mode sombre */
+        filter: invert(1);
+        /* Inverse les couleurs des images pour le mode sombre */
       }
 
       .scroll-container::-webkit-scrollbar {
@@ -456,7 +482,7 @@
             <h2>Bouclier solide x3</h2>
             <p>Augmente la défense de 15 points.</p>
             <p>Prix: 36 points</p>
-            <p>En stock: <span id="stock-bouclier"></span></p>
+            <p>En stock: <span id="stock-bouclier-3"></span></p>
             <button class="buyButton" data-type="bouclier" data-price="36" data-quantity="3">Acheter</button>
             <p class="error-message"></p>
           </div>
@@ -465,7 +491,7 @@
             <h2>Bouclier solide x5</h2>
             <p>Augmente la défense de 15 points.</p>
             <p>Prix: 55 points</p>
-            <p>En stock: <span id="stock-bouclier"></span></p>
+            <p>En stock: <span id="stock-bouclier-5"></span></p>
             <button class="buyButton" data-type="bouclier" data-price="55" data-quantity="5">Acheter</button>
             <p class="error-message"></p>
           </div>
@@ -498,26 +524,26 @@
         </div>
       </div>
     </div>
-  <div class="footer">
+    <div class="footer">
       <button class="footer-icon" onclick="viewUpgrades()">
         <img src="Icon-amelioration.png" alt="Améliorations">
       </button>
       <button class="footer-icon" onclick="viewCharacters()">
         <img src="Icon-personnage.png" alt="Personnages">
       </button>
-      <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+      <button class="footer-icon" onclick="showMainMenu()">
         <img src="Icon-menu.png" alt="Menu Principal">
       </button>
       <button class="footer-icon" onclick="goToPasse()">
         <img src="Icon-passe.png" alt="Passe de combat">
       </button>
-      <button class="footer-icon" onclick="viewShop()">
+      <button class="footer-icon boutique-icon" onclick="viewShop()">
         <img src="Icon-magazin.png" alt="Boutique">
-      </button>        
+      </button>
     </div>
   </div>
   </div>
-    <script>
+  <script>
 
     // Configuration Firebase
     const firebaseConfig = {
@@ -547,7 +573,7 @@
       });
 
       // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
+      paintObserver.observe({type: 'paint', buffered: true});
 
       // Créer un observateur pour les entrées de type "first-input" (pour FID)
       const fidObserver = new PerformanceObserver((list) => {
@@ -561,7 +587,7 @@
       });
 
       // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
+      fidObserver.observe({type: 'first-input', buffered: true});
     }
 
     // Référence à l'état de maintenance dans la base de données
@@ -637,21 +663,22 @@
     }
 
     // Fonction pour sauvegarder les données utilisateur dans le stockage local
-      function saveUserData(userData) {
-        localStorage.setItem('userData', JSON.stringify(userData));
+    function saveUserData(userData) {
+      const connection = JSON.parse(localStorage.getItem('connection')); // Récupère l'état de connexion
+      localStorage.setItem('userData', JSON.stringify(userData)); // Sauvegarde locale
 
-        // Sauvegarde dans Firebase si l'utilisateur est connecté
-        const user = firebase.auth().currentUser;
-        if (user) {
-          const userId = user.uid;
-          const userRef = firebase.database().ref(`users/${userId}`);
-          userRef.set(userData).then(() => {
-            console.log('Données sauvegardées dans Firebase.');
-          }).catch((error) => {
-            console.error('Erreur lors de la sauvegarde dans Firebase:', error);
-          });
-        }
+      if (connection && connection.est_connecte) { // Vérifie si l'utilisateur est connecté
+        const userId = connection.userid;
+        const userRef = database.ref(`users/${userId}/userData`);
+        userRef.set(userData, (error) => {
+          if (error) {
+            console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
+          } else {
+            console.log('Données utilisateur sauvegardées dans Firebase');
+          }
+        });
       }
+    }
 
     // Fonction pour générer un nombre entier aléatoire
     function getRandomInt(max) {
@@ -787,8 +814,27 @@
       });
     }
 
-    // Fonction pour gérer les clics sur le bouton d'achat
-    // Fonction pour gérer les clics sur le bouton d'achat
+    function updateStockDisplay() {
+      document.getElementById('stock-xp').textContent = userData.Double_XP_acheté;
+      document.getElementById('stock-potion').textContent = userData.Potion_de_Santé_acheté;
+      document.getElementById('stock-amulette').textContent = userData.Amulette_de_Régénération_acheté;
+      document.getElementById('stock-epee').textContent = userData.epee_tranchante_acheté;
+      document.getElementById('stock-elixir').textContent = userData.elixir_puissance_acheté;
+      document.getElementById('stock-armure').textContent = userData.armure_fer_acheté;
+      document.getElementById('stock-xp-1').textContent = userData.Double_XP_acheté;
+      document.getElementById('stock-potion-1').textContent = userData.Potion_de_Santé_acheté;
+      document.getElementById('stock-amulette-1').textContent = userData.Amulette_de_Régénération_acheté;
+      document.getElementById('stock-epee-1').textContent = userData.epee_tranchante_acheté;
+      document.getElementById('stock-elixir-1').textContent = userData.elixir_puissance_acheté;
+      document.getElementById('stock-armure-1').textContent = userData.armure_fer_acheté;
+      document.getElementById('stock-potion-2').textContent = userData.Potion_de_Santé_acheté;
+      document.getElementById('stock-amulette-2').textContent = userData.Amulette_de_Régénération_acheté;
+      document.getElementById('stock-epee-2').textContent = userData.epee_tranchante_acheté;
+      document.getElementById('stock-elixir-2').textContent = userData.elixir_puissance_acheté;
+      document.getElementById('stock-bouclier').textContent = userData.bouclier_solide_acheté;
+      document.getElementById('stock-bouclier-3').textContent = userData.bouclier_solide_acheté;
+      document.getElementById('stock-bouclier-5').textContent = userData.bouclier_solide_acheté;
+    }
     function handleBuyButtonClick(event) {
       const prix = parseInt(event.target.dataset.price);
       const quantity = parseInt(event.target.dataset.quantity);
@@ -810,12 +856,13 @@
         } else if (type === 'armure') {
           userData.armure_fer_acheté += quantity;
         } else if (type === 'bouclier') {
-          userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + quantity;          
+          userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + quantity;
         }
         saveUserData(userData);
         const argent = userData.argent
         document.getElementById('balance').textContent = `Solde : ${argent}`;
         errorMessage.textContent = ''; // Effacer le message d'erreur
+        updateStockDisplay();
       }
       else {
         errorMessage.textContent = 'Solde insuffisant !';
@@ -830,12 +877,16 @@
       button.nextElementSibling.textContent = ''; // Effacer les messages d'erreur éventuels
 
       // Mettre à jour les données utilisateur
-      userData.recompense = (userData.recompense || 0) + 1;
-      userData.boutique_recompense = true;
-      saveUserData(userData);
+      if (!userData.boutique_recompense) {
+        userData.recompense = (userData.recompense || 0) + 1;
+        userData.boutique_recompense = true;
+        saveUserData(userData);
 
-      // Rediriger vers recompenses.html
-      window.location.href = 'recompenses.html';
+        // Rediriger vers recompenses.html
+        window.location.href = 'recompenses.html';
+      }
+
+
     }
 
     // Initialisation
@@ -861,8 +912,8 @@
     document.getElementById('stock-epee-2').textContent = userData.epee_tranchante_acheté;
     document.getElementById('stock-elixir-2').textContent = userData.elixir_puissance_acheté;
     document.getElementById('stock-bouclier').textContent = userData.bouclier_solide_acheté;
-
-
+    document.getElementById('stock-bouclier-3').textContent = userData.bouclier_solide_acheté;
+    document.getElementById('stock-bouclier-5').textContent = userData.bouclier_solide_acheté;
       // Afficher les offres journalières au chargement
 
   </script>

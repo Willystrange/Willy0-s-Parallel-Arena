@@ -50,7 +50,8 @@
       max-width: 300px; /* Définit une largeur maximale pour le filtre */
       text-align: center; /* Centre le filtre */
       position: fixed;
-      top: 40px; /* Positionne le filtre juste en dessous du titre */
+      top: 35px; /* Positionne le filtre juste en dessous du titre */
+      margin-bottom: 20px; /* Ajoute un espace entre le titre et le filtre */
       left: 0;
       right: 0;
       background: rgba(0, 0, 0); /* Fond semi-transparent pour le filtre */
@@ -59,7 +60,7 @@
     }
 
     .sort-menu select {
-      padding: 5px 10px; /* Réduit le padding pour un aspect plus compact */
+      padding: 5px 15px; /* Réduit le padding pour un aspect plus compact */
       font-size: 14px; /* Réduit la taille de la police */
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -160,7 +161,7 @@
 
     .stats.show {
       opacity: 1;
-      max-height: 220px;
+      max-height: 250px;
       /* Ajuster en fonction du contenu */
     }
 
@@ -182,6 +183,7 @@
     }
     .boutons {
       margin-bottom: 100px;
+      margin-top: 20px;
     }
 
     /* Styles pour le mode sombre */
@@ -278,6 +280,8 @@
         <option value="alphabetical">Ordre alphabétique</option>
         <option value="level_asc">Niveau croissant</option>
         <option value="level_desc">Niveau décroissant</option>
+        <option value="rarity_asc">Rareté croissante</option>
+        <option value="rarity_desc">Rareté décroissante</option>
       </select>
     </div>
     <div class="boutons" id="character-list">
@@ -365,18 +369,18 @@
 
       // Liste des personnages avec leurs caractéristiques de base
       const characters = [
-        {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: 0.5, argent: 0, pv_max: 11100, attaque_originale: 463, defense_originale: 86},
-        {name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115},
-        {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85},
-        {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68},
-        {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: 0.5, argent: 0, pv_max: 10200, attaque_originale: 435, defense_originale: 105},
-        {name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: 0, argent: 0, pv_max: 13800, attaque_originale: 350, defense_originale: 80},
-        {name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: 0.5, argent: 0, pv_max: 10000, attaque_originale: 450, defense_originale: 100},
-        {name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 10700, attaque_originale: 440, defense_originale: 100},
-        {name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 11500, attaque_originale: 440, defense_originale: 100},
-        {name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: 0.5, argent: 0, pv_max: 9600, attaque_originale: 420, defense_originale: 80},
-        {name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: 0.5, argent: 0, pv_max: 10500, attaque_originale: 460, defense_originale: 85},
-        {name: "Sboonie", pv: 9900, attaque: 410, defense: 95, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 410, defense_originale: 95}
+        {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: 0.5, argent: 0, pv_max: 11100, attaque_originale: 463, defense_originale: 86, rarity: 'inhabituel'},
+        {name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115, rarity: 'rare'},
+        {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85, rarity: 'inhabituel'},
+        {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68, rarity: 'epique'},
+        {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: 0.5, argent: 0, pv_max: 10200, attaque_originale: 435, defense_originale: 105, rarity: 'epique'},
+        {name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: 0, argent: 0, pv_max: 13800, attaque_originale: 350, defense_originale: 80, rarity: 'legendaire'},
+        {name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: 0.5, argent: 0, pv_max: 10000, attaque_originale: 450, defense_originale: 100, rarity: 'legendaire'},
+        {name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 10700, attaque_originale: 440, defense_originale: 100, rarity: 'rare'},
+        {name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 11500, attaque_originale: 440, defense_originale: 100, rarity: 'epique'},
+        {name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: 0.5, argent: 0, pv_max: 9600, attaque_originale: 420, defense_originale: 80, rarity: 'inhabituel'},
+        {name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: 0.5, argent: 0, pv_max: 10500, attaque_originale: 460, defense_originale: 85, rarity: 'epique'},
+        {name: "Sboonie", pv: 9900, attaque: 410, defense: 95, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 410, defense_originale: 95, rarity: 'commun'}
       ];
 
       const characterList = document.getElementById("character-list");
@@ -397,8 +401,16 @@
           }
         });
 
-        // Fonction de tri
+        // Définir l'ordre des raretés du moins rare au plus rare
         function sortCharacters(characters, sortType) {
+          const rarityOrder = {
+            'commun': 1,
+            'inhabituel': 2,
+            'rare': 3,
+            'epique': 4,
+            'legendaire': 5
+          };
+
           return characters.sort((a, b) => {
             if (sortType === 'alphabetical') {
               return a.name.localeCompare(b.name);
@@ -406,6 +418,10 @@
               const aLevel = userData[a.name + '_Level'] || 1;
               const bLevel = userData[b.name + '_Level'] || 1;
               return sortType === 'level_asc' ? aLevel - bLevel : bLevel - aLevel;
+            } else if (sortType === 'rarity_asc' || sortType === 'rarity_desc') {
+              const aRarity = rarityOrder[a.rarity] || 0;  // Valeur 0 par défaut si la rareté est absente
+              const bRarity = rarityOrder[b.rarity] || 0;
+              return sortType === 'rarity_asc' ? aRarity - bRarity : bRarity - aRarity;
             }
           });
         }
@@ -462,11 +478,11 @@
         // Calculer les statistiques basées sur le niveau actuel du personnage
         const levelKey = character.name + '_Level';
         const currentLevel = userData[levelKey];
-        let increasedPV = Math.round(character.pv * (1 + 0.08 * (currentLevel - 1)));
-        let increasedAttaque = Math.round(character.attaque * (1 + 0.08 * (currentLevel - 1)));
-        let increasedDefense = Math.round(character.defense * (1 + 0.08 * (currentLevel - 1)));
-        let increasedattaque_originale = Math.round(character.attaque_originale * (1 + 0.08 * (currentLevel - 1)));
-        let increaseddefense_originale = Math.round(character.defense_originale * (1 + 0.08 * (currentLevel - 1)));
+        let increasedPV = Math.round(character.pv * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increasedAttaque = Math.round(character.attaque * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increasedDefense = Math.round(character.defense * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increasedattaque_originale = Math.round(character.attaque_originale * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increaseddefense_originale = Math.round(character.defense_originale * (1 + ((0.01 * currentLevel) - 0.01) * 4));
 
         if (currentLevel >= 5) {
           const boostType = Math.floor(Math.random() * 3) + 1;
@@ -483,6 +499,7 @@
 
         statsDiv.innerHTML = `
           <h3>${character.name} (Niveau ${currentLevel})</h3>
+          <p>Rareté: ${character.rarity}</p>          
           <p>PV: ${increasedPV}</p>
           <p>Attaque: ${increasedAttaque}</p>
           <p>Défense: ${increasedDefense}</p>
@@ -596,11 +613,11 @@
         const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel)) + minOpponentLevel;
 
         // Calculer les statistiques de l'adversaire basées sur son niveau
-        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + 0.1 * (opponentLevel - 1)));
-        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + 0.1 * (opponentLevel - 1)));
-        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + 0.1 * (opponentLevel - 1)));
-        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + 0.1 * (opponentLevel - 1)));
-        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + 0.1 * (opponentLevel - 1)));
+        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + ((0.01 * opponentLevel) - 0.01) * 5));
+        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + ((0.01 * opponentLevel) - 0.01) * 5));
+        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + ((0.01 * opponentLevel) - 0.01) * 5));
+        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 5));
+        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 5));
 
         sessionStorage.setItem('opponentCharacter', JSON.stringify({
           name: opponentCharacter.name,

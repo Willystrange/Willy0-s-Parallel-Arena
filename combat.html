@@ -332,7 +332,7 @@
       });
 
       // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
+      paintObserver.observe({type: 'paint', buffered: true});
 
       // Créer un observateur pour les entrées de type "first-input" (pour FID)
       const fidObserver = new PerformanceObserver((list) => {
@@ -346,7 +346,7 @@
       });
 
       // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
+      fidObserver.observe({type: 'first-input', buffered: true});
     }
   </script>
   <script>
@@ -998,27 +998,27 @@
 
 
     function opponentTurn() {
-        // Vérifier si l'adversaire a la possibilité de se défendre
-        const canDefend = playerCharacter.spe === 1;
+      // Vérifier si l'adversaire a la possibilité de se défendre
+      const canDefend = playerCharacter.spe === 1;
 
-        // Déterminer si l'adversaire doit utiliser sa capacité spéciale
-        const useSpecialMove = Math.random() < 0.7 && opponentCharacter.spe >= 1;
+      // Déterminer si l'adversaire doit utiliser sa capacité spéciale
+      const useSpecialMove = Math.random() < 0.7 && opponentCharacter.spe >= 1;
 
-        // Décider aléatoirement l'action de l'adversaire
-        if (canDefend && Math.random() < 0.4 && opponentCharacter.defense_droit === 0) {
-            // L'adversaire choisit de se défendre
-            opponentDefense(opponentCharacter, playerCharacter, false);
-        } else if (useSpecialMove) {
-            // L'adversaire choisit d'utiliser sa capacité spéciale
-            useSpecialAbility(opponentCharacter, playerCharacter, false);
-        } else {
-            // L'adversaire choisit d'attaquer
-            handleAttack(opponentCharacter, playerCharacter, false);
-        }
+      // Décider aléatoirement l'action de l'adversaire
+      if (canDefend && Math.random() < 0.4 && opponentCharacter.defense_droit === 0) {
+        // L'adversaire choisit de se défendre
+        opponentDefense(opponentCharacter, playerCharacter, false);
+      } else if (useSpecialMove) {
+        // L'adversaire choisit d'utiliser sa capacité spéciale
+        useSpecialAbility(opponentCharacter, playerCharacter, false);
+      } else {
+        // L'adversaire choisit d'attaquer
+        handleAttack(opponentCharacter, playerCharacter, false);
+      }
 
-        // Passer au tour suivant
-        adversairepasser_tour();
-        joueurpasser_tour();
+      // Passer au tour suivant
+      adversairepasser_tour();
+      joueurpasser_tour();
     }
     function opponentDefense() {
       opponentCharacter.defense_bouton = 1;
@@ -1032,7 +1032,7 @@
       combatLog.appendChild(logEntry);
       scrollToBottom();
       handleAttack(opponentCharacter, playerCharacter, false)
-      
+
     }
 
     function handleDefense(character, opponent, isPlayer) {
@@ -1040,15 +1040,22 @@
       const combatLog = document.getElementById('combat-log');
       const logEntry = document.createElement('p');
       if (character.defense_droit === 0) {
-        character.spe += 0.1;
-        character.defense_bouton = 1;
-        character.defense_droit = 4;
-        logEntry.textContent = `${character.name} se defend contre la prochaine attaque de ${opponent.name}.`;
-        logEntry.style.color = '#6699CC';
-        combatLog.appendChild(logEntry);
-        if (isPlayer) {
-          character.defense_partie += 1;
-          opponentTurn();
+        if (character.spe >= 0.1) {
+          character.spe -= 0.1;
+          character.defense_bouton = 1;
+          character.defense_droit = 4;
+          logEntry.textContent = `${character.name} se defend contre la prochaine attaque de ${opponent.name}.`;
+          logEntry.style.color = '#6699CC';
+          combatLog.appendChild(logEntry);
+          if (isPlayer) {
+            character.defense_partie += 1;
+            opponentTurn();
+          }
+        } else {
+          logEntry.textContent = `${character.name} n'a pas assez d'énergie spéciale pour se défendre !`;
+          logEntry.style.color = '#6699CC';
+          combatLog.appendChild(logEntry);
+          handleAttack(character, opponent, true)
         }
 
       } else if (isPlayer) {
@@ -1085,7 +1092,7 @@
 
       let damage;
       if (isPlayerAttacking) {
-        
+
       }
 
       if (attacker.immobilisation > 0) {

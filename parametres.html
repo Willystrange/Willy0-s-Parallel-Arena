@@ -1,203 +1,203 @@
-<!DOCTYPE html>
-<html lang="fr">
+  <!DOCTYPE html>
+  <html lang="fr">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <title>Paramètres</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: 'Arial', sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.3s, color 0.3s;
-      position: relative;
-      overflow: hidden;
-      /* Empêche le défilement du body */
-      display: flex;
-      min-height: 100vh;
-      flex-direction: column;
-    }
-
-
-    .content {
-      overflow-y: auto;
-      /* Permet le défilement vertical */
-      height: 100vh;
-      /* Occupe toute la hauteur de la fenêtre */
-      -webkit-overflow-scrolling: touch;
-      /* Assure le défilement fluide sur les appareils tactiles */
-    }
-
-    .container {
-
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      flex: 1;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .button {
-      display: block;
-      padding: 15px;
-      font-size: 18px;
-      color: #fff;
-      background-color: #ff4500;
-      border: none;
-      border-radius: 5px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      margin: 10px 0;
-      transition: background-color 0.3s, transform 0.3s;
-    }
-
-    .button:hover {
-      background-color: #e03e00;
-      transform: scale(1.02);
-    }
-
-    .version-info {
-      font-size: 16px;
-      color: #333;
-      margin-left: auto;
-      margin-right: auto;
-      padding-bottom: 60px;
-    }
-
-    /* Styles pour le formulaire de connexion */
-    #loginForm {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.8); /* Fond noir semi-transparent */
-      color: #fff;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 1000; /* Assure que le formulaire est au-dessus du reste */
-      text-align: center; /* Centre le texte à l'intérieur du formulaire */
-    }
-
-    #loginForm div {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    #loginForm h2 {
-      margin-bottom: 20px;
-    }
-
-    #loginForm input {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-    }
-
-    #loginForm button {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    /* Styles pour le mode sombre */
-    @media (prefers-color-scheme: dark) {
+    <title>Paramètres</title>
+    <style>
       body {
-        background-color: #121212;
-        color: #e0e0e0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        box-sizing: border-box;
       }
 
       .container {
-        background-color: #1e1e1e;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
       h1 {
-        color: #e0e0e0;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
       }
 
       .button {
-        background-color: #555;
-        color: #e0e0e0;
+        display: block;
+        padding: 12px 20px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #ff4500;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        margin-bottom: 10px;
+        transition: background-color 0.3s, transform 0.3s;
       }
 
       .button:hover {
-        background-color: #666;
+        background-color: #e03e00;
+        transform: scale(1.02);
+      }
+
+      .back-button {
+        display: block;
+        padding: 12px 20px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background-color 0.3s, transform 0.3s;
+        margin-top: 20px;
+      }
+
+      .back-button:hover {
+        background-color: #0056b3;
+        transform: scale(1.02);
       }
 
       .version-info {
-        color: #e0e0e0;
+        font-size: 14px;
+        color: #333;
+        text-align: center;
+        margin-top: 20px;
       }
 
-    }
+      /* Styles pour le formulaire de connexion */
+      #loginForm {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 1000;
+        text-align: center;
+      }
 
-    /* Masquer les barres de défilement */
-    .content::-webkit-scrollbar {
-      display: none;
-    }
+      #loginForm div {
+        background: #333;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
 
-    .content {
-      scrollbar-width: none;
-    }
+      #loginForm h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+      }
 
-    .content {
-      -ms-overflow-style: none;
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-</head>
+      #loginForm input {
+        width: calc(100% - 20px);
+        margin-bottom: 10px;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
 
-<body>
-  <div class="content">
-    <div class="container">
-      <h1>Paramètres</h1>
-      <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
-      <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
-      <a class="button" href="#" onclick="mise_a_jour()">Sauver la sauvegarde</a>
-      <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
-      <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
-      <a id="loginButton" class="button" href="connection.html">Se connecter</a>
-      <a id="logoutButton" class="button" href="#" onclick="logout()" style="display:none;">Se déconnecter</a>
-      <div class="telechargement" id="downloadLinkContainer" style="margin-top: 20px;"></div>
+      #loginForm button {
+        width: calc(100% - 20px);
+        margin-top: 10px;
+        padding: 10px;
+      }
+
+      /* Styles pour le mode sombre */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #121212;
+          color: #e0e0e0;
+        }
+
+        .container {
+          background-color: #1e1e1e;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+          color: #e0e0e0;
+        }
+
+        .button {
+          background-color: #555;
+          color: #e0e0e0;
+        }
+
+        .button:hover {
+          background-color: #666;
+        }
+
+        .version-info {
+          color: #e0e0e0;
+        }
+
+        .back-button {
+          background-color: #333;
+        }
+
+        .back-button:hover {
+          background-color: #555;
+        }
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+  </head>
+
+  <body>
+    <div class="content">
+      <div class="container">
+        <h1>Paramètres</h1>
+        <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
+        <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
+        <a class="button" href="#" onclick="mise_a_jour()">Sauver la sauvegarde</a>
+        <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
+        <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
+        <a id="loginButton" class="button" href="connection.html">Se connecter</a>
+        <a id="logoutButton" class="button" href="#" onclick="logout()" style="display:none;">Se déconnecter</a>
+        <a class="back-button" href="menu_principal.html">Retour au menu principal</a>
+        <div class="telechargement" id="downloadLinkContainer" style="margin-top: 20px;"></div>
+      </div>
+      <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
     </div>
-    <div id="loginForm" style="display:none;">
-      <h2>Se connecter</h2>
-      <input type="email" id="loginEmail" placeholder="Adresse e-mail" required>
-      <input type="password" id="loginPassword" placeholder="Mot de passe" required>
-      <button class="button" onclick="login()">Connexion</button>
-      <button class="button" onclick="hideLoginForm()">Annuler</button>
-    </div>
-    <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
-  </div>
   <script src="localStorage.js"></script>
   <script>
     // Importation des modules 
@@ -283,33 +283,13 @@
       }
     }
 
-    function logout() {
-      const userData = getUserData();
-      userData.est_connecte = false;
-      saveUser();
-      localStorage.removeItem('userConnect');
-      firebase.auth().signOut().then(() => {
-        alert('Déconnecté avec succès.');
-        updateUI();
-        // Supprimer l'état de connexion et l'ID utilisateur
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userId');
-      }).catch((error) => {
-        // Gestion des erreurs
-        alert('Erreur lors de la déconnexion : ' + error.message);
-      });
-      createUserConnect();
-    }
+    
     function createUserConnect() {
-      let userConnect = localStorage.getItem('userConnect');
-      if (!userConnect) {
-        userConnect = {
-          est_connecte: false,
-          userid: "",
-        };
-        localStorage.setItem('userConnect', JSON.stringify(userConnect));
-        location.reload();
-      };
+      const connectionn = {
+        userid: "",
+        est_connecte: false,
+      }
+      localStorage.setItem('connection', JSON.stringify(connectionn));
     }
 
     function saveUser() {
@@ -320,7 +300,7 @@
       localStorage.setItem('userData', JSON.stringify(userData));
 
       // Sauvegarder userData dans Firebase
-      const userRef = database.ref('users/' + userId);
+      const userRef = database.ref('users/' + userId + '/userData');
       userRef.set(userData, (error) => {
         if (error) {
           alert('Erreur lors de la sauvegarde des données : ' + error.message);
@@ -467,7 +447,7 @@
         trophees: 0,
         argent: 0,
         VICTOIRE: false,
-        version: '2.4.1',
+        version: '2.4.2.1',
         recompense: 0,
         perso_recompense: 0,
         xp_du_jour: 0,
@@ -591,6 +571,44 @@
         versionInfo.textContent = 'Version non disponible';
       }
     });
+    function logout() {
+      const userData = getUserData();
+      const connectionn = {
+        userid: "",
+        est_connecte: false,
+      }
+      localStorage.setItem('connection', JSON.stringify(connectionn));
+      saveUserData(userData); // Sauvegarder les données localement
+      const user = firebase.auth().currentUser;
+
+      if (user) {
+        const userId = user.uid;
+        const userRef = database.ref('users/' + userId + '/userData');
+
+        // Mettre à jour les données dans Firebase avant la déconnexion
+        userRef.set(userData, (error) => {
+          if (error) {
+            alert('Erreur lors de la sauvegarde des données : ' + error.message);
+          } else {
+            // Supprimer les données locales après la mise à jour réussie
+            
+
+            // Déconnexion Firebase
+            firebase.auth().signOut().then(() => {
+              alert('Déconnecté avec succès.');
+              updateUI();
+            }).catch((error) => {
+              alert('Erreur lors de la déconnexion : ' + error.message);
+            });
+          }
+        });
+      } else {
+        alert("Aucun utilisateur n'est connecté.");
+      }
+      localStorage.removeItem('userData');
+      location.reload();
+      window.location.href = "index.html";
+    }
     const userData = getUserData();
     console.log(userData);
     

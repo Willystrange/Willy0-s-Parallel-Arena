@@ -311,21 +311,19 @@
     }
 
       function saveUserData(userData) {
-        alert('SAUVEGARDE')
-        localStorage.setItem('userData', JSON.stringify(userData));
+        const connection = JSON.parse(localStorage.getItem('connection')); // Récupère l'état de connexion
+        localStorage.setItem('userData', JSON.stringify(userData)); // Sauvegarde locale
 
-        // Sauvegarde dans Firebase si l'utilisateur est connecté
-        const userConnect = JSON.parse(localStorage.getItem('userConnect'));
-        const user = firebase.auth().currentUser;
-        if (userConnect.est_connecte) {
-          const userId = userConnect.userid;
-          const userRef = firebase.database().ref(`users/` + userId);
-        userRef.set(userData).then(() => {
-            console.log('Données sauvegardées dans Firebase.');
-        }).catch((error) => {
-            console.error('Erreur lors de la sauvegarde dans Firebase:', error);
-            alert('Erreur lors de la sauvegarde dans Firebase: ' + error.message);
-        });
+        if (connection && connection.est_connecte) { // Vérifie si l'utilisateur est connecté
+          const userId = connection.userid;
+          const userRef = database.ref(`users/${userId}`);
+          userRef.set(userData, (error) => {
+            if (error) {
+              console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
+            } else {
+              console.log('Données utilisateur sauvegardées dans Firebase');
+            }
+          });
         }
       }
 

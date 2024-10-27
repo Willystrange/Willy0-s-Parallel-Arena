@@ -69,6 +69,13 @@
       background-color: #e0e0e0;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     }
+    .parametre {
+      box-shadow: none;
+      background-color: #fff;
+    }
+    .parametre:hover {
+      background-color: #fff;
+    }
 
     .user-info img {
       width: 40px;
@@ -254,22 +261,6 @@
       background-color: #999999;
     }
 
-    .double-xp {
-      position: absolute;
-      top: -15px;
-      right: -15px;
-      background-color: yellow;
-      color: red;
-      padding: 5px;
-      font-size: 12px;
-      font-weight: bold;
-      transform: rotate(20deg);
-      border-radius: 3px;
-      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-      display: none;
-      /* Visible par défaut pour l'exemple */
-    }
-
     /* Styles pour le mode sombre basé sur la préférence de l'utilisateur */
     @media (prefers-color-scheme: dark) {
       body {
@@ -280,6 +271,16 @@
       .user-info {
         background-color: #333333;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      }
+      .parametre {
+        box-shadow: none;
+        background-color: #000;
+      }
+      .user-info:hover {
+        background-color: #4444;
+      }
+      .parametre:hover {
+        background-color: #000;
       }
 
       .footer {
@@ -294,6 +295,9 @@
         background-color: #2E2E2E;
         color: #ffffff;
       }
+      .play-button:hover {
+        background-color: #4444;
+      }
 
       .mode-button {
         background-color: #000000;
@@ -307,17 +311,6 @@
       .footer-icon img,
       .user-info img {
         filter: invert(1);
-      }
-
-      #userQuetes {
-        background-color: transparent;
-        padding: 0;
-        border-radius: 0;
-        box-shadow: none;
-      }
-
-      #userQuetes img {
-        margin-right: 0;
       }
     }
 
@@ -354,10 +347,11 @@
           <img src="trophy-icon-3.png" alt="Trophées">
           <span></span>
         </div>
-        <div class="user-info" id="userQuetes" onclick="goToSettings()">
+        <div class="user-info parametre" id="userQuetes" onclick="goToSettings()">
           <img src="Icon-parametre.png" alt="Quêtes">
         </div>
       </div>
+      
 
       <div class="boutons">
         <button class="play-button" onclick="showModeSelection()">Jouer
@@ -455,34 +449,7 @@
     });
 
     // Fonction pour récupérer les données utilisateur depuis Firebase et mettre à jour localStorage
-    function checkAndUpdateUserConnect() {
-      const userConnect = JSON.parse(localStorage.getItem('userConnect'));
-
-      if (userConnect && userConnect.est_connecte === true) {
-        const userId = userConnect.userid;
-        const userRef = database.ref('users/' + userId);
-
-        userRef.on('value', (snapshot) => {
-          let userData = null;
-          if (snapshot.exists()) {
-            userData = snapshot.val();
-            alert('Tout est bon');
-          } else {
-            alert('Aucune donnée trouvée pour l\'utilisateur.');
-          }
-
-          // Assurez-vous que userData est mis à jour seulement si il existe
-          if (userData) {
-            localStorage.setItem('userData', JSON.stringify(userData));
-          }
-
-          // Recharger les données utilisateur après la mise à jour
-          displayUserInfo();
-        });
-      } else {
-        alert('Il y a un problème avec la connexion utilisateur.');
-      }
-    }
+    
 
     function getUserData() {
       let userData = JSON.parse(localStorage.getItem('userData'));
@@ -495,18 +462,7 @@
       document.getElementById('userTrophees').querySelector('span').innerText = `${userData.trophees || 0}`;
     }
 
-    // Appliquer le thème et afficher les informations utilisateur lors du chargement de la page
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            console.log('Utilisateur connecté:', user);
-        } else {
-            console.log('Aucun utilisateur connecté');
-        }
-    });
-    window.onload = function () {
-      displayUserInfo(); // Ajouter cette ligne pour vérifier et mettre à jour les données utilisateur
-      checkAndUpdateUserConnect();
-    };
+    
 
     function applyTheme() {
       const userData = getUserData();
@@ -555,21 +511,19 @@
     }
 
     function saveUserData(userData) {
-      alert('SAUVEGARDE')
-      localStorage.setItem('userData', JSON.stringify(userData));
+      const connection = JSON.parse(localStorage.getItem('connection')); // Récupère l'état de connexion
+      localStorage.setItem('userData', JSON.stringify(userData)); // Sauvegarde locale
 
-      // Sauvegarde dans Firebase si l'utilisateur est connecté
-      const userConnect = JSON.parse(localStorage.getItem('userConnect'));
-      const user = firebase.auth().currentUser;
-      if (userConnect.est_connecte) {
-        const userId = userConnect.userid;
-        const userRef = firebase.database().ref(`users/` + userId);
-      userRef.set(userData).then(() => {
-          console.log('Données sauvegardées dans Firebase.');
-      }).catch((error) => {
-          console.error('Erreur lors de la sauvegarde dans Firebase:', error);
-          alert('Erreur lors de la sauvegarde dans Firebase: ' + error.message);
-      });
+      if (connection && connection.est_connecte) { // Vérifie si l'utilisateur est connecté
+        const userId = connection.userid;
+        const userRef = database.ref(`users/${userId}/userData`);
+        userRef.set(userData, (error) => {
+          if (error) {
+            console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
+          } else {
+            console.log('Données utilisateur sauvegardées dans Firebase');
+          }
+        });
       }
     }
 
@@ -649,24 +603,6 @@
         userData.fin_partie = f
       }
     });
-    function checkAndUpdateWeeks() {
-      const userData = getUserData();
-      const currentDate = new Date();
-      const startThursday = new Date('2024-08-01T09:00:00'); // Premier jeudi 1er août 2024 à 9h
-
-      if (currentDate >= startThursday) {
-        const msInWeek = 7 * 24 * 60 * 60 * 1000;
-        const weeksElapsed = Math.floor((currentDate - startThursday) / msInWeek);
-
-        for (let i = 1; i <= weeksElapsed + 1; i++) {
-          if (!userData[`semaine${i}`]) {
-            userData[`semaine${i}`] = true;
-          }
-          saveUserData(userData);
-        }
-      };
-    };
-    checkAndUpdateWeeks();
     checkAndAskForUsername();
     function checkAndAskForUsername() {
       const userData = getUserData();
@@ -679,6 +615,13 @@
         }
       }
     }
+    
+    displayUserInfo();
+    userData = getUserData();
+    if (userData.cadeau) {
+      window.location.href = "cadeau_exeption.html";
+    }
+    saveUserData(userData);
   </script>
 </body>
 

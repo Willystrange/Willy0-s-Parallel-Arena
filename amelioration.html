@@ -19,11 +19,25 @@
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      
     }
+
+    
 
     .content {
       overflow: auto;
       height: 100vh;
+      padding: 20px;
+      
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
     }
 
     .hidden {
@@ -36,18 +50,41 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
     }
 
     .data-container {
       max-width: 800px;
       margin: 100px auto;
-      /* Correction du margin */
       background-color: #ffffff;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
       text-align: left;
-      flex: 1;
+      animation: bounceIn 1.2s ease-out;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      60% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+      }
     }
 
     .character {
@@ -55,15 +92,22 @@
       cursor: pointer;
       padding: 15px;
       margin-bottom: 15px;
-      border-radius: 5px;
+      border-radius: 10px;
       background-color: #f0f8ff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .character:hover {
+      transform: translateY(-5px);
+      background-color: #e6f7ff;
     }
 
     .character-info {
       display: none;
       font-size: 16px;
       color: #555;
+      padding-top: 10px;
     }
 
     .level-up-indicator {
@@ -78,33 +122,30 @@
     }
 
     @keyframes blink {
-
-      0%,
-      50%,
-      100% {
+      0%, 50%, 100% {
         opacity: 1;
       }
-
-      25%,
-      75% {
+      25%, 75% {
         opacity: 0;
       }
     }
 
-    .level-up-button {
+    .level-up-button, .boost-button {
       display: block;
       margin-top: 10px;
       padding: 8px 15px;
       background-color: #1e90ff;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s;
     }
 
-    .level-up-button:hover {
-      background-color: #1c86ee;
+    .level-up-button:hover, .boost-button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
     }
 
     .cost-info {
@@ -112,27 +153,11 @@
       color: #888;
     }
 
-    .boost-button {
-      display: block;
-      margin-top: 5px;
-      padding: 8px 15px;
-      background-color: #32cd32;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .boost-button:hover {
-      background-color: #28a745;
-    }
-
     .footer {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 0;
+      padding: 10px 0;
       background-color: #f0f0f0;
       position: fixed;
       bottom: 0;
@@ -146,6 +171,7 @@
       background: none;
       border: none;
       cursor: pointer;
+      
     }
 
     .footer-icon img {
@@ -154,7 +180,7 @@
     }
 
     .footer-icon:hover {
-      opacity: 0.8;
+      transform: scale(1.1);
     }
 
     .amelioration-icon img {
@@ -167,11 +193,14 @@
       opacity: 1;
     }
 
-    /* Styles pour le mode sombre */
+    /* Mode sombre */
     @media (prefers-color-scheme: dark) {
       body {
         background-color: #121212;
         color: #e0e0e0;
+      }
+      .character:hover {
+        background-color: #333;
       }
 
       .title {
@@ -179,13 +208,13 @@
       }
 
       .data-container {
-        background-color: #1e1e1e;
+        background-color: #333;
         color: #e0e0e0;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
       }
 
       .character {
-        background-color: #1c1c1c;
+        background-color: #333;
         color: #e0e0e0;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       }
@@ -198,33 +227,17 @@
         background-color: #ff5722;
       }
 
-      .level-up-button {
+      .level-up-button, .boost-button {
         background-color: #1e90ff;
         color: #fff;
       }
 
-      .level-up-button:hover {
+      .level-up-button:hover, .boost-button:hover {
         background-color: #0056b3;
       }
 
       .cost-info {
         color: #bbb;
-      }
-
-      .data-container::-webkit-scrollbar {
-        width: 12px;
-      }
-
-      .data-container::-webkit-scrollbar-track {
-        background: #333;
-      }
-
-      .data-container::-webkit-scrollbar-thumb {
-        background: #555;
-      }
-
-      .data-container::-webkit-scrollbar-thumb:hover {
-        background: #777;
       }
 
       .footer {
@@ -236,19 +249,14 @@
       }
     }
 
-    /* Pour les navigateurs basés sur Webkit (Chrome, Safari) */
+    /* Styles pour les navigateurs Webkit */
     .content::-webkit-scrollbar {
       display: none;
     }
 
-    /* Pour Firefox */
     .content {
-      scrollbar-width: none;
-    }
-
-    /* Pour IE et Edge */
-    .content {
-      -ms-overflow-style: none;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -269,7 +277,7 @@
     </div>
 
   <div class="footer">
-      <button class="footer-icon" onclick="viewUpgrades()">
+      <button class="footer-icon amelioration-icon" onclick="viewUpgrades()">
         <img src="Icon-amelioration.png" alt="Améliorations">
       </button>
       <button class="footer-icon" onclick="viewCharacters()">
@@ -391,20 +399,19 @@
     }
 
     function saveUserData(userData) {
-      
-      localStorage.setItem('userData', JSON.stringify(userData));
+      const connection = JSON.parse(localStorage.getItem('connection')); // Récupère l'état de connexion
+      localStorage.setItem('userData', JSON.stringify(userData)); // Sauvegarde locale
 
-      // Sauvegarde dans Firebase si l'utilisateur est connecté
-      const user = firebase.auth().currentUser;
-      if (user) {
-        const userId = user.uid;
-        const userRef = firebase.database().ref(`users/${userId}`);
-        userRef.set(userData).then(() => {
-          console.log('Données sauvegardées dans Firebase.');
-        }).catch((error) => {
-          console.error('Erreur lors de la sauvegarde dans Firebase:', error);
+      if (connection && connection.est_connecte) { // Vérifie si l'utilisateur est connecté
+        const userId = connection.userid;
+        const userRef = database.ref(`users/${userId}/userData`);
+        userRef.set(userData, (error) => {
+          if (error) {
+            console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
+          } else {
+            console.log('Données utilisateur sauvegardées dans Firebase');
+          }
         });
-        
       }
     }
 
@@ -469,6 +476,13 @@
         userData.argent -= cost;
         saveUserData(userData);
         afficherDonneesUtilisateur();
+
+        // Ajouter l'animation de montée de niveau
+        const characterDiv = document.querySelector(`.character[onclick="toggleCharacterInfo('${character}', event)"]`);
+        characterDiv.classList.add('level-up-animation');
+        setTimeout(() => {
+          characterDiv.classList.remove('level-up-animation');
+        }, 600);  // La durée de l'animation
       }
     }
 

@@ -135,30 +135,32 @@
 </head>
 
 <body>
-  <div id="container">
-    <div id="logo">S</div>
-  </div>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then((registration) => {
-          console.log('Service Worker registered with scope:', registration.scope);
+    <div id="rules-container" style="display: flex; justify-content: center; align-items: center; position: absolute; top: 0; left: 0; width: 100%; height: 80vh; background-color: rgba(0, 0, 0, 0.8); z-index: 10;">
+      <div style="background-color: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; text-align: center;">
+        <h2>Règles de Willy0’s Parallel Arena</h2>
+        <p>Veuillez lire et accepter les règles avant de jouer :</p>
+        <ul style="text-align: left; max-height: 300px; overflow-y: scroll; padding-left: 20px;">
+          <li><strong>Accès au jeu :</strong> Willy0’s Parallel Arena est un jeu de combat au tour par tour totalement gratuit. Il est accessible à tous, sans achats intégrés.</li>
+          <li><strong>Utilisation du compte :</strong> Chaque joueur est responsable de la sécurité de son compte. Ne partagez pas vos informations de connexion.</li>
+          <li><strong>Fair-play :</strong> Il est strictement interdit de tricher ou d'exploiter des failles du jeu pour obtenir un avantage injuste. Toute utilisation de logiciels tiers, bots, ou scripts automatisés est interdite.</li>
+          <li><strong>Mises à jour :</strong> Le jeu est régulièrement mis à jour afin d'améliorer l'expérience et de corriger les bugs. Veuillez vous assurer que vous utilisez toujours la dernière version du jeu.</li>
+          <li><strong>Boutique :</strong> Bien que le jeu dispose d'une boutique, tous les contenus disponibles sont gratuits et ne nécessitent aucun achat.</li>
+          <li><strong>Respect des règles du jeu :</strong> Même s'il n'y a pas d'interactions avec d'autres joueurs pour le moment, il est important de respecter le déroulement naturel des combats contre les bots.</li>
+          <li><strong>Collecte de données :</strong> Nous collectons certaines données pour améliorer votre expérience de jeu et à des fins de statistiques. Ces données sont recueillies dans le respect de votre vie privée et conformément à notre politique de confidentialité.</li>
+          <li><strong>Sanctions :</strong> Tout manquement aux présentes règles peut entraîner des avertissements, des suspensions temporaires ou permanentes du compte.</li>
+        </ul>
+        <label>
+          <input type="checkbox" id="accept-rules" /> J'accepte les règles.
+        </label>
+        <br />
+        <button id="start-game" disabled style="margin-top: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px;">Commencer</button>
+      </div>
+    </div>
 
-          // Demander la permission pour les notifications
-          Notification.requestPermission().then((permission) => {
-            if (permission === 'granted') {
-              console.log('Notification permission granted.');
-            } else {
-              console.log('Notification permission denied.');
-            }
-          });
-
-        }).catch((error) => {
-          console.log('Service Worker registration failed:', error);
-        });
-      });
-    }
-  </script>
+    <div id="container" style="display: none;">
+      <div id="logo">S</div>
+    </div>
+  <script src="localStorage.js"></script>
   <script type="module">
     // Importation des modules Firebase
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
@@ -246,11 +248,46 @@
     });
   </script>
   <script>
-    document.getElementById('container').addEventListener('animationend', function (event) {
-      if (event.animationName === 'fadeAndLift') {
-        window.location.href = 'menu_principal.html';
-      }
+    const rulesContainer = document.getElementById('rules-container');
+    const startGameButton = document.getElementById('start-game');
+    const acceptRulesCheckbox = document.getElementById('accept-rules');
+    const gameContainer = document.getElementById('container');
+
+    // Vérifier si l'utilisateur a déjà accepté les règles
+    const rulesAccepted = localStorage.getItem('rulesAccepted');
+
+    if (rulesAccepted === 'true') {
+      // Si les règles ont été acceptées, lancer directement l'animation
+      rulesContainer.style.display = 'none';
+      gameContainer.style.display = 'flex';
+    } else {
+      // Sinon, afficher les règles
+      rulesContainer.style.display = 'flex';
+      gameContainer.style.display = 'none';
+    }
+
+    acceptRulesCheckbox.addEventListener('change', function () {
+      startGameButton.disabled = !this.checked;
     });
+
+    startGameButton.addEventListener('click', function () {
+      // Sauvegarder l'acceptation des règles dans le localStorage
+      localStorage.setItem('rulesAccepted', 'true');
+
+      // Cacher les règles et lancer l'animation du logo
+      rulesContainer.style.display = 'none';
+      gameContainer.style.display = 'flex';
+    });
+      const connection = JSON.parse(localStorage.getItem('connection')); // Transformer la chaîne en objet
+      document.getElementById('container').addEventListener('animationend', function (event) {
+        if (event.animationName === 'fadeAndLift') {
+          if (!connection || !connection.est_connecte) { // Vérifier si l'objet existe et la connexion est valide
+            window.location.href = 'connection.html';
+          } else {
+            window.location.href = 'menu_principal.html';
+          }
+        }
+      });
   </script>
   <script>
     if ('serviceWorker' in navigator) {
@@ -262,16 +299,7 @@
         });
       });
     }
-    function getUserConnect() {
-      let userConnect = localStorage.getItem('userConnect');
-      if (!userConnect) {
-        userConnect = {
-          est_connecte: false,
-          userid: "",
-        };
-        localStorage.setItem('userConnect', JSON.stringify(userConnect));
-      };
-    }
+    
     function getUserData() {
       let userData = localStorage.getItem('userData');
       if (!userData) {
@@ -294,7 +322,7 @@
           trophees: 0,
           argent: 0,
           VICTOIRE: false,
-          version: '2.4.1',
+          version: '2.4.2.1',
           recompense: 0,
           perso_recompense: 0,
           xp_du_jour: 0,
@@ -404,7 +432,6 @@
       }
     };
     getUserData();
-    getUserConnect();
   </script>
 
 

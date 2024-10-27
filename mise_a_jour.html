@@ -115,7 +115,7 @@
         trophees: 0,
         argent: 0,
         VICTOIRE: false,
-        version: '2.4.1',
+        version: '2.4.2.1',
         recompense: 0,
         perso_recompense: 0,
         xp_du_jour: 0,
@@ -221,31 +221,32 @@
         partie_commencee: false,
       };
 
-      if (versionCompare(userData.version || '0.0.0', defaultUserData.version) < 0) {
-        userData.Semaine2_1_current = 0;
-        userData.Semaine2_2_current = 0;
-        userData.Semaine2_3_current = 0;
-        userData.Semaine2_4_current = 0;
-        userData.Semaine2_5_current = 0;
+      const reference_version = '2.4.2.1';
 
-        userData.Semaine3_1_current = 0;
-        userData.Semaine3_2_current = 0;
-        userData.Semaine3_3_current = 0;
-        userData.Semaine3_4_current = 0;
-        userData.Semaine3_5_current = 0;
+      if (versionCompare(userData.version || '0.0.0', reference_version) < 0) {
+        // Suppression des données hebdomadaires si la version est inférieure à la version de référence
+        userData.quetes_genere = false;
+        
+        const semainesToRemove = [
+          'Semaine1_1', 'Semaine1_2', 'Semaine1_3', 'Semaine1_4', 'Semaine1_5',
+          'Semaine2_1', 'Semaine2_2', 'Semaine2_3', 'Semaine2_4', 'Semaine2_5',
+          'Semaine3_1', 'Semaine3_2', 'Semaine3_3', 'Semaine3_4', 'Semaine3_5',
+          'Semaine4_1', 'Semaine4_2', 'Semaine4_3', 'Semaine4_4', 'Semaine4_5',
+          'Semaine5_1', 'Semaine5_2', 'Semaine5_3', 'Semaine5_4', 'Semaine5_5',
+        ];
 
-        userData.Semaine4_1_current = 0;
-        userData.Semaine4_2_current = 0;
-        userData.Semaine4_3_current = 0;
-        userData.Semaine4_4_current = 0;
-        userData.Semaine4_5_current = 0;
+        semainesToRemove.forEach(sem => {
+          delete userData[`${sem}_completed`];
+          delete userData[`${sem}_current`];
+          delete userData[`${sem}_rewardClaimed`];
+          delete userData[`${sem}_text`];
+          delete userData[`${sem}_total`];
+        });
+        userData.cadeau = true;
 
-        userData.Semaine5_1_current = 0;
-        userData.Semaine5_2_current = 0;
-        userData.Semaine5_3_current = 0;
-        userData.Semaine5_4_current = 0;
-        userData.Semaine5_5_current = 0;
+        saveUserData(userData);
       }
+
       // Vérification et initialisation des valeurs manquantes ou incorrectes
       for (const key in defaultUserData) {
         if (!userData.hasOwnProperty(key)) {
@@ -254,7 +255,7 @@
       }
 
       // Assure que la version dans userData est toujours la dernière version du jeu
-      userData.version = '2.4.1';
+      userData.version = '2.4.2.1';
 
       // Sauvegarder les données mises à jour dans localStorage
       saveUserData(userData);

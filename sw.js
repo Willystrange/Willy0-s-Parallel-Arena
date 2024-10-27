@@ -1,6 +1,4 @@
 // sw.js
-// Service Worker existant
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open('my-cache').then((cache) => {
@@ -60,6 +58,7 @@ self.addEventListener('install', (event) => {
         '/Sboonie.html',
         '/Rosalie.html',
         '/maintenance.html',
+        '/cadeau_exeption.html',
       ]);
     })
   );
@@ -70,29 +69,5 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
     })
-  );
-});
-
-// Gestion des notifications push
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  const options = {
-    body: data.body || 'Notification body',
-    icon: data.icon || '/icon.png', // Icône par défaut
-    badge: data.badge || '/icon.png' // Badge par défaut
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'Notification Title', options)
-  );
-});
-
-// Gestion des interactions avec les notifications
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  // Redirection à une page spécifique lors du clic sur la notification
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
   );
 });

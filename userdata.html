@@ -47,7 +47,7 @@
     }
 
     .data-container {
-      
+
       max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
@@ -108,55 +108,55 @@
 
     /* Styles pour le mode sombre selon les préférences du système */
     @media (prefers-color-scheme: dark) {
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
 
-        .title {
-            color: #e0e0e0;
-        }
+      .title {
+        color: #e0e0e0;
+      }
 
-        .return-link {
-            color: #1e90ff;
-        }
+      .return-link {
+        color: #1e90ff;
+      }
 
-        .data-container {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
+      .data-container {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
 
-        .data-item {
-            color: #e0e0e0;
-        }
+      .data-item {
+        color: #e0e0e0;
+      }
 
-        .delete-button {
-            background-color: #b71c1c;
-            color: #e0e0e0;
-        }
+      .delete-button {
+        background-color: #b71c1c;
+        color: #e0e0e0;
+      }
 
-        .delete-button:hover {
-            background-color: #d32f2f;
-        }
+      .delete-button:hover {
+        background-color: #d32f2f;
+      }
 
-        #rewards-container {
-            background-color: #1c1c1c;
-            color: #e0e0e0;
-        }
+      #rewards-container {
+        background-color: #1c1c1c;
+        color: #e0e0e0;
+      }
 
-        .achieved {
-            color: #4caf50;
-        }
+      .achieved {
+        color: #4caf50;
+      }
 
-        .next {
-            font-weight: bold;
-        }
+      .next {
+        font-weight: bold;
+      }
 
-        .clickable {
-            cursor: pointer;
-            color: #ffffff;
-        }
+      .clickable {
+        cursor: pointer;
+        color: #ffffff;
+      }
     }
 
     /* Masquer les barres de défilement */
@@ -175,6 +175,10 @@
       -ms-overflow-style: none;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
 
 <body>
@@ -196,15 +200,9 @@
       <div class="data-item"><strong>Victoires:</strong> <span id="victoires"></span></div>
       <div class="data-item"><strong>Défaites:</strong> <span id="defaites"></span></div>
       <div class="data-item"><strong>Manche de survie maximum:</strong> <span id="manches_max"></span></div>
-      <button class="delete-button" onclick="supprimerDonnees()">Supprimer les données</button>
     </div>
   </div>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
-
+  <script>
     // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
@@ -218,13 +216,11 @@
     };
 
     // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const perf = firebase.performance();
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
     if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
       const paintObserver = new PerformanceObserver((list) => {
         const entries = list.getEntriesByName('first-contentful-paint');
         if (entries.length > 0) {
@@ -232,11 +228,8 @@
           console.log('First Contentful Paint (FCP):', fcp, 'ms');
         }
       });
+      paintObserver.observe({type: 'paint', buffered: true});
 
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
-
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
@@ -246,16 +239,12 @@
           }
         });
       });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
+      fidObserver.observe({type: 'first-input', buffered: true});
     }
 
     // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
-
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
+    const maintenanceRef = database.ref('maintenance');
+    maintenanceRef.on('value', (snapshot) => {
       const data = snapshot.val();
       const maintenanceActive = data.active === 'oui';
       const maintenanceTime = data.heure;
@@ -266,15 +255,11 @@
         const currentHour = currentTime.getHours();
         const currentMinute = currentTime.getMinutes();
 
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
         if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
           window.location.href = 'maintenance.html';
         }
       }
     });
-  </script>
-
-  <script>
     // Fonction pour obtenir les données utilisateur depuis localStorage
     function getUserData() {
       userData = JSON.parse(localStorage.getItem('userData'));
@@ -298,7 +283,7 @@
 
     // Fonction pour revenir en arrière dans l'historique du navigateur
     function goBack() {
-      window.history.back();
+      window.location.href="menu_principal.html";
     }
 
     // Fonction pour supprimer les données utilisateur

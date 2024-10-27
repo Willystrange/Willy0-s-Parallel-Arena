@@ -108,14 +108,22 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  </head>
-  <script type="module">
-    
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+</head>
+
+<body>
+  <div class="content">
+    <div id="newsContainer">
+      <h2>Actualités</h2>
+      <div id="news"></div>
+    </div>
+  </div>
+  <button class="back-button" onclick="window.location.href='menu_principal.html'">Retour</button>
+
+  <script>
     // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
@@ -129,11 +137,10 @@
     };
 
     // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const perf = firebase.performance();
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
     if ('PerformanceObserver' in window) {
       // Créer un observateur pour les entrées de type "paint" (pour FCP)
       const paintObserver = new PerformanceObserver((list) => {
@@ -163,8 +170,8 @@
     }
 
     function fetchNews() {
-      const newsRef = ref(database, 'news/');
-      onValue(newsRef, (snapshot) => {
+      const newsRef = database.ref('news/');
+      newsRef.on('value', (snapshot) => {
         const newsContainer = document.getElementById('news');
         newsContainer.innerHTML = '';
         const news = snapshot.val();
@@ -179,7 +186,7 @@
         newsArray.sort((a, b) => b.Time - a.Time);
 
         // Créer et ajouter les éléments HTML triés
-        newsArray.forEach(({title, content}) => {
+        newsArray.forEach(({ title, content }) => {
           const newsItem = document.createElement('div');
           newsItem.className = 'news-item';
 
@@ -198,11 +205,12 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', fetchNews)
-    const maintenanceRef = ref(database, 'maintenance');
+    document.addEventListener('DOMContentLoaded', fetchNews);
+    
+    const maintenanceRef = database.ref('maintenance');
 
     // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
+    maintenanceRef.on('value', (snapshot) => {
       const data = snapshot.val();
       const maintenanceActive = data.active === 'oui';
       const maintenanceTime = data.heure;
@@ -220,16 +228,6 @@
       }
     });
   </script>
-</head>
-
-<body>
-  <div class="content">
-    <div id="newsContainer">
-      <h2>Actualités</h2>
-      <div id="news"></div>
-    </div>
-  </div>
-  <button class="back-button" onclick=window.location.href="menu_principal.html">Retour</button>
 </body>
 
 </html>

@@ -44,6 +44,7 @@
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 20px;
       margin: 20px;
+      margin-bottom: 50px;
     }
 
     .character {
@@ -228,10 +229,10 @@
       <button class="footer-icon" onclick="viewUpgrades()">
         <img src="Icon-amelioration.png" alt="Améliorations">
       </button>
-      <button class="footer-icon" onclick="viewCharacters()">
+      <button class="footer-icon perso-icon" onclick="viewCharacters()">
         <img src="Icon-personnage.png" alt="Personnages">
       </button>
-      <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+      <button class="footer-icon" onclick="showMainMenu()">
         <img src="Icon-menu.png" alt="Menu Principal">
       </button>
       <button class="footer-icon" onclick="goToPasse()">
@@ -365,13 +366,15 @@
 
       if (isUnlocked) {
         const level = userData[`${character.name}_Level`] || 1;
-        const currentPV = Math.round(character.pv * (1 + (level - 1) * 0.08));
-        const currentAttaque = Math.round(character.attaque * (1 + (level - 1) * 0.08));
-        const currentDefense = Math.round(character.defense * (1 + (level - 1) * 0.08));
+        const currentPV = Math.round(character.pv * (1 + ((0.01 * level) - 0.01) * 4));
+        const currentAttaque = Math.round(character.attaque * (1 + ((0.01 * level) - 0.01) * 4));
+        const currentDefense = Math.round(character.defense * (1 + ((0.01 * level) - 0.01) * 4));
 
         // Afficher les statistiques normalement
         statsElement.innerHTML = `
           <strong>${character.name}</strong><br>
+          Rareté : ${character.rarete}<br>
+          Niveau :
           Niveau: ${level}<br>
           PV: ${currentPV}<br>
           Attaque: ${currentAttaque}<br>
@@ -382,6 +385,7 @@
         // Afficher "(personnage non débloqué)" pour le niveau, et les autres statistiques normalement
         statsElement.innerHTML = `
           <strong>${character.name}</strong><br>
+          Rareté: ${character.rarete}<br>
           Niveau: (personnage non débloqué)<br>
           PV: ${character.pv}<br>
           Attaque: ${character.attaque}<br>

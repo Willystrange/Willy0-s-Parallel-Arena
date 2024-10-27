@@ -165,6 +165,10 @@
       -ms-overflow-style: none;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
 
 <body>
@@ -190,12 +194,7 @@
   </div>
   <a href="menu_principal.html" class="back-button">Retour au menu principal</a>
   </div>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
-
+  <script>
     // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
@@ -209,13 +208,11 @@
     };
 
     // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const perf = firebase.performance();
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
     if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
       const paintObserver = new PerformanceObserver((list) => {
         const entries = list.getEntriesByName('first-contentful-paint');
         if (entries.length > 0) {
@@ -223,11 +220,8 @@
           console.log('First Contentful Paint (FCP):', fcp, 'ms');
         }
       });
+      paintObserver.observe({type: 'paint', buffered: true});
 
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
-
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
@@ -237,16 +231,12 @@
           }
         });
       });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
+      fidObserver.observe({type: 'first-input', buffered: true});
     }
 
     // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
-
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
+    const maintenanceRef = database.ref('maintenance');
+    maintenanceRef.on('value', (snapshot) => {
       const data = snapshot.val();
       const maintenanceActive = data.active === 'oui';
       const maintenanceTime = data.heure;
@@ -257,14 +247,11 @@
         const currentHour = currentTime.getHours();
         const currentMinute = currentTime.getMinutes();
 
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
         if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
           window.location.href = 'maintenance.html';
         }
       }
     });
-  </script>
-  <script>
     // Exemple de données (remplacez cette partie par les données réelles)
     const userData = getUserData();
 
@@ -408,11 +395,28 @@
     }
 
     function getUserData() {
-      return JSON.parse(localStorage.getItem('userData')) || {};
+      return JSON.parse(localStorage.getItem('userData'));
     }
 
-    function saveUserData(data) {
-      localStorage.setItem('userData', JSON.stringify(data));
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+
+      // Sauvegarde dans Firebase si l'utilisateur est connecté
+      const userConnect = JSON.parse(localStorage.getItem('userConnect'));
+      const user = firebase.auth().currentUser;
+      if (!userConnect) {
+        return;
+      }
+      if (userConnect.est_connecte) {
+        const userId = userConnect.userid;
+        const userRef = firebase.database().ref(`users/` + userId);
+        userRef.set(userData).then(() => {
+          console.log('Données sauvegardées dans Firebase.');
+        }).catch((error) => {
+          console.error('Erreur lors de la sauvegarde dans Firebase:', error);
+          alert('Erreur lors de la sauvegarde dans Firebase: ' + error.message);
+        });
+      }
     }
 
     function getRandomElements(arr, count) {
@@ -435,71 +439,72 @@
     }
 
     function generateAllWeeksQuests() {
-        const userData = getUserData();
+      const userData = getUserData();
 
-        // Générer les quêtes pour les 5 semaines dès la première connexion
-        for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
-            generateQuestsForWeek(userData, weekNumber);
-        }
+      // Générer les quêtes pour les 5 semaines dès la première connexion
+      for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
+        generateQuestsForWeek(userData, weekNumber);
+      }
 
-        // Enregistre que toutes les semaines ont été générées
-        userData.weeklyQuestWeek = 5;
-        saveUserData(userData);
-        displayWeeklyQuests();
+      // Enregistre que toutes les semaines ont été générées
+      // userData.weeklyQuestWeek = 5; // Cette ligne est supprimée pour ne pas modifier les semaines
+      saveUserData(userData);
+      displayWeeklyQuests();
     }
 
     function generateQuestsForWeek(userData, weekNumber) {
-        const availableQuests = [];
-        const questCount = 5;
+      userData.quetes_genere = true;
+      const availableQuests = [];
+      const questCount = 5;
 
-        const randomWinGames = getRandomNumber(8, 24);
-        availableQuests.push({
-            text: `Gagner ${randomWinGames} parties en mode classique.`,
-            total: randomWinGames,
-            current: 0
-        });
+      const randomWinGames = getRandomNumber(8, 24);
+      availableQuests.push({
+        text: `Gagner ${randomWinGames} parties en mode classique.`,
+        total: randomWinGames,
+        current: 0
+      });
 
-        const randomDamage = getRandomNumber(100000, 400000);
-        availableQuests.push({
-            text: `Infliger ${randomDamage} points de dégâts en mode classique.`,
-            total: randomDamage,
-            current: 0,
-            type: 'degats',
-        });
+      const randomDamage = getRandomNumber(100000, 400000);
+      availableQuests.push({
+        text: `Infliger ${randomDamage} points de dégâts en mode classique.`,
+        total: randomDamage,
+        current: 0,
+        type: 'degats',
+      });
 
-        const randomItems = getRandomNumber(12, 24);
-        availableQuests.push({
-            text: `Utiliser ${randomItems} objets.`,
-            total: randomItems,
-            current: 0,
-            type: 'objets',
-        });
+      const randomItems = getRandomNumber(12, 24);
+      availableQuests.push({
+        text: `Utiliser ${randomItems} objets.`,
+        total: randomItems,
+        current: 0,
+        type: 'objets',
+      });
 
-        const randomSurviveRounds = getRandomNumber(14, 35);
-        availableQuests.push({
-            text: `Survivre à ${randomSurviveRounds} manches en mode survie.`,
-            total: randomSurviveRounds,
-            current: 0,
-            type: 'survie',
-        });
+      const randomSurviveRounds = getRandomNumber(14, 35);
+      availableQuests.push({
+        text: `Survivre à ${randomSurviveRounds} manches en mode survie.`,
+        total: randomSurviveRounds,
+        current: 0,
+        type: 'survie',
+      });
 
-        const randomDefense = getRandomNumber(15, 45);
-        availableQuests.push({
-            text: `Se défendre ${randomDefense} fois en mode classique.`,
-            total: randomDefense,
-            current: 0,
-            type: 'defense',
-        });
+      const randomDefense = getRandomNumber(15, 45);
+      availableQuests.push({
+        text: `Se défendre ${randomDefense} fois en mode classique.`,
+        total: randomDefense,
+        current: 0,
+        type: 'defense',
+      });
 
-        // Stocker les quêtes de cette semaine avec le format SemaineX_Y
-        availableQuests.forEach((quest, idx) => {
-            const questKey = `Semaine${weekNumber}_${idx + 1}`;
-            userData[`${questKey}_text`] = quest.text;
-            userData[`${questKey}_total`] = quest.total;
-            userData[`${questKey}_current`] = quest.current;
-            userData[`${questKey}_completed`] = false; // Initialise comme non terminée
-            userData[`${questKey}_rewardClaimed`] = false; // Initialise comme non réclamée
-        });
+      // Stocker les quêtes de cette semaine avec le format SemaineX_Y
+      availableQuests.forEach((quest, idx) => {
+        const questKey = `Semaine${weekNumber}_${idx + 1}`;
+        userData[`${questKey}_text`] = quest.text;
+        userData[`${questKey}_total`] = quest.total;
+        userData[`${questKey}_current`] = quest.current;
+        userData[`${questKey}_completed`] = false; // Initialise comme non terminée
+        userData[`${questKey}_rewardClaimed`] = false; // Initialise comme non réclamée
+      });
     }
 
     function displayWeeklyQuests() {
@@ -509,23 +514,24 @@
         let weeklyContent = '';
 
         // Afficher les quêtes de la semaine en cours et des semaines précédentes
-
-        // Afficher les quêtes de la semaine en cours et des semaines précédentes
         for (let weekNumber = 1; weekNumber <= currentWeekNumber; weekNumber++) {
+            if (!userData[`semaine${weekNumber}`]) continue; // Ne pas afficher les semaines non activées
+
             weeklyContent += `<div class="semaine"><h2>Semaine ${weekNumber}:</h2><ul class="quêtes">`;
 
             for (let i = 1; i <= 5; i++) {
                 const questKey = `Semaine${weekNumber}_${i}`;
-                const questText = userData[`${questKey}_text`];
-                const questTotal = userData[`${questKey}_total`];
-                const questCurrent = userData[`${questKey}_current`];
+                const questText = userData[`${questKey}_text`] || ''; // Texte de la quête
+                const questTotal = userData[`${questKey}_total`] || 1; // Total de la quête (défaut à 1 pour éviter la division par zéro)
+                const questCurrent = userData[`${questKey}_current`] || 0; // Progrès actuel de la quête
                 const questCompleted = userData[`${questKey}_completed`] ? 'Quête terminée' : `${questCurrent} / ${questTotal}`;
 
-                // Utiliser un identifiant unique pour chaque barre de progression
-              if (userData[`${questKey}_current`] >= userData[`${questKey}_total`]) {
-                userData[`${questKey}_completed`] = true;
-                saveUserData(userData);
-              }
+                // Mettre à jour le statut de la quête uniquement si elle est complète
+                if (questCurrent >= questTotal) {
+                    userData[`${questKey}_completed`] = true;
+                    saveUserData(userData);
+                }
+
                 const progressBarId = `week-${weekNumber}-quest-${i}`;
 
                 weeklyContent += `<li>
@@ -536,8 +542,8 @@
                     </div>
                 </li>`;
 
-                // Appeler la fonction de mise à jour de la barre de progression
-                setTimeout(() => updateWeeklyProgressBar(progressBarId, questTotal, questCurrent), 0);
+                // Mettre à jour la barre de progression sans délai
+                updateWeeklyProgressBar(progressBarId, questTotal, questCurrent);
             }
 
             weeklyContent += `</ul></div>`;
@@ -547,108 +553,108 @@
     }
 
     function checkAndRewardQuestCompletion(questKey, userData) {
-        if (userData[`${questKey}_completed`] && !userData[`${questKey}_rewardClaimed`]) {
-            // Ajouter la récompense à l'utilisateur
-            userData.pass_XP = (userData.pass_XP || 0) + 250;
-            userData.recompense = (userData.recompense || 0) + 1;
+      if (userData[`${questKey}_completed`] && !userData[`${questKey}_rewardClaimed`]) {
+        // Ajouter la récompense à l'utilisateur
+        userData.pass_XP = (userData.pass_XP || 0) + 250;
+        userData.recompense = (userData.recompense || 0) + 1;
 
-            // Marquer la récompense comme réclamée
-            userData[`${questKey}_rewardClaimed`] = true;
-            saveUserData(userData);
-        }
+        // Marquer la récompense comme réclamée
+        userData[`${questKey}_rewardClaimed`] = true;
+        saveUserData(userData);
+      }
     }
 
     function getCustomWeekNumber(date) {
-        const startDate = new Date('2024-08-29'); // La date de début des semaines personnalisées
-        const diff = date - startDate;
-        const oneWeek = 1000 * 60 * 60 * 24 * 7;
-        const weekNumber = Math.ceil(diff / oneWeek);
+      const startDate = new Date('2024-10-03'); // La date de début des semaines personnalisées
+      const diff = date - startDate;
+      const oneWeek = 1000 * 60 * 60 * 24 * 7;
+      const weekNumber = Math.ceil(diff / oneWeek);
 
-        return ((weekNumber - 1) % 5) + 1; // Retourne un numéro de semaine entre 1 et 5
+      return ((weekNumber - 1) % 5) + 1; // Retourne un numéro de semaine entre 1 et 5
     }
 
     function getRandomNumber(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     function getRandomElements(arr, count) {
-        const shuffled = arr.slice(0);
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled.slice(0, count);
+      const shuffled = arr.slice(0);
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled.slice(0, count);
     }
 
     // Lancement des quêtes hebdomadaires chaque jeudi matin à 9h
-    
+
 
     // Initialisation des quêtes hebdomadaires à la première connexion
     function updateWeeklyProgressBar(id, total, current) {
-        const progressBar = document.querySelector(`#${id} .progress-bar`);
-        const progressBarText = document.querySelector(`#${id} .progress-bar-text`);
-        if (progressBar && progressBarText) {
-            const percentage = (current / total) * 100;
-            progressBar.style.width = percentage + '%';
-            progressBarText.textContent = current >= total ? 'Quête terminée' : `${current} / ${total}`;
-        }
+      const progressBar = document.querySelector(`#${id} .progress-bar`);
+      const progressBarText = document.querySelector(`#${id} .progress-bar-text`);
+      if (progressBar && progressBarText) {
+        const percentage = (current / total) * 100;
+        progressBar.style.width = percentage + '%';
+        progressBarText.textContent = current >= total ? 'Quête terminée' : `${current} / ${total}`;
+      }
     }
     function checkAllQuestsCompletion(userData) {
-        const totalWeeks = 5; // Nombre total de semaines à vérifier
-        const questsPerWeek = 5; // Nombre de quêtes par semaine
+      const totalWeeks = 5; // Nombre total de semaines à vérifier
+      const questsPerWeek = 5; // Nombre de quêtes par semaine
 
-        for (let weekNumber = 1; weekNumber <= totalWeeks; weekNumber++) {
-            for (let i = 1; i <= questsPerWeek; i++) {
-                const questKey = `Semaine${weekNumber}_${i}`;
-                checkAndRewardQuestCompletion(questKey, userData);
-            }
+      for (let weekNumber = 1; weekNumber <= totalWeeks; weekNumber++) {
+        for (let i = 1; i <= questsPerWeek; i++) {
+          const questKey = `Semaine${weekNumber}_${i}`;
+          checkAndRewardQuestCompletion(questKey, userData);
         }
+      }
     }
 
     function getNextThursdayAtNine() {
-        const now = new Date();
-        let nextThursday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        nextThursday.setDate(now.getDate() + (4 - now.getDay() + 7) % 7); // Trouver le jeudi suivant
-        nextThursday.setHours(9, 0, 0, 0); // Fixer à 9h00
+      const now = new Date();
+      let nextThursday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      nextThursday.setDate(now.getDate() + (4 - now.getDay() + 7) % 7); // Trouver le jeudi suivant
+      nextThursday.setHours(9, 0, 0, 0); // Fixer à 9h00
 
-        if (nextThursday <= now) {
-            nextThursday.setDate(nextThursday.getDate() + 7); // Si déjà passé, aller au prochain jeudi
-        }
+      if (nextThursday <= now) {
+        nextThursday.setDate(nextThursday.getDate() + 7); // Si déjà passé, aller au prochain jeudi
+      }
 
-        return nextThursday;
+      return nextThursday;
     }
 
     function updateCountdown() {
-        const now = new Date();
-        const nextThursday = getNextThursdayAtNine();
-        const timeDiff = nextThursday - now;
+      const now = new Date();
+      const nextThursday = getNextThursdayAtNine();
+      const timeDiff = nextThursday - now;
 
-        if (timeDiff <= 0) {
-            // Si le compte à rebours est terminé, réinitialisez le temps pour le prochain jeudi
-            userData.weeklyQuestWeek = getCustomWeekNumber(new Date());
-            saveUserData(userData);
-            updateWeeksStatus();
-            // Affiche les quêtes pour la nouvelle semaine
-            assignRandomQuest(); // Réinitialise les quêtes du jour si nécessaire
-            return;
-        }
-        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      if (timeDiff <= 0) {
+        // Si le compte à rebours est terminé, réinitialisez le temps pour le prochain jeudi
+        userData.weeklyQuestWeek = getCustomWeekNumber(new Date());
+        saveUserData(userData);
+        updateWeeksStatus();
+        // Affiche les quêtes pour la nouvelle semaine
+        assignRandomQuest(); // Réinitialise les quêtes du jour si nécessaire
+        return;
+      }
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
-        document.getElementById('timer').innerHTML = 
-            `${days} jours ${hours} heures ${minutes} minutes ${seconds} secondes`;
+      document.getElementById('timer').innerHTML =
+        `${days} jours ${hours} heures ${minutes} minutes ${seconds} secondes`;
     }
 
-    
-    if (!getUserData().weeklyQuestWeek) {
-        generateAllWeeksQuests();
-        location.reload();
-        console.log(userData);
+    const userData2 = getUserData();
+    if (!userData2.quetes_genere) {
+      generateAllWeeksQuests();
+      updateWeeksStatus();
+      console.log(userData);
     } else {
-        updateWeeksStatus();
-        console.log(userData);
+      updateWeeksStatus();
+      console.log(userData);
     }
     assignRandomQuest();
     checkAllQuestsCompletion(userData);
@@ -656,34 +662,40 @@
 
     // Mettre à jour le compte à rebours chaque seconde
     setInterval(updateCountdown, 1000);
-    
+
     function updateWeeksStatus() {
-      const userData = getUserData();
-      const currentDate = new Date();
-      userData.semaine1 = false;
-      userData.semaine2 = false;
-      userData.semaine3 = false;
-      userData.semaine4 = false;
-      userData.semaine5 = false;
-      saveUserData(userData);
+        const userData = getUserData();
+        const currentDate = new Date();
 
-      // Définir les dates limites pour chaque semaine
-      const week1Date = new Date('2024-08-29T09:00:00'); // Jeudi 29 août 2024 à 9h
-      const week2Date = new Date('2024-09-05T09:00:00'); // Jeudi 5 septembre 2024 à 9h
-      const week3Date = new Date('2024-09-12T09:00:00'); // Jeudi 12 septembre 2024 à 9h
-      const week4Date = new Date('2024-09-19T09:00:00'); // Jeudi 19 septembre 2024 à 9h
-      const week5Date = new Date('2024-09-26T09:00:00'); // Jeudi 26 septembre 2024 à 9h
+        // Obtenir l'heure de Paris
+        const parisCurrentDate = new Date(currentDate.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
 
-      // Vérification des dates et mise à jour du statut de chaque semaine
-      userData.semaine1 = currentDate >= week1Date; // Semaine 1 activée si date actuelle >= 29 août 2024
-      userData.semaine2 = currentDate >= week2Date; // Semaine 2 activée si date actuelle >= 5 septembre 2024
-      userData.semaine3 = currentDate >= week3Date; // Semaine 3 activée si date actuelle >= 12 septembre 2024
-      userData.semaine4 = currentDate >= week4Date; // Semaine 4 activée si date actuelle >= 19 septembre 2024
-      userData.semaine5 = currentDate >= week5Date; // Semaine 5 activée si date actuelle >= 26 septembre 2024
+        // Définir les dates limites pour chaque semaine en utilisant ISO 8601
+        const weekDates = [
+            new Date('2024-10-03T09:00:00+02:00'), // Jeudi 29 août 2024 à 9h (heure de Paris)
+            new Date('2024-10-10T09:00:00+02:00'), // Jeudi 5 septembre 2024 à 9h (heure de Paris)
+            new Date('2024-10-17T09:00:00+02:00'), // Jeudi 12 septembre 2024 à 9h (heure de Paris)
+            new Date('2024-10-24T09:00:00+02:00'), // Jeudi 19 septembre 2024 à 9h (heure de Paris)
+            new Date('2024-10-31T09:00:00+02:00')  // Jeudi 26 septembre 2024 à 9h (heure de Paris)
+        ];
 
-      // Sauvegarder les modifications
-      saveUserData(userData);
-      displayWeeklyQuests(); // Mettre à jour l'affichage des quêtes
+        // Initialiser les semaines à faux
+        for (let i = 0; i < 5; i++) {
+            userData[`semaine${i + 1}`] = false;
+        }
+
+        // Mise à jour du statut de chaque semaine
+        for (let i = 0; i < weekDates.length; i++) {
+            if (parisCurrentDate >= weekDates[i]) {
+                userData[`semaine${i + 1}`] = true;
+            }
+        }
+
+        // Sauvegarder les modifications dans localStorage
+        localStorage.setItem('userData', JSON.stringify(userData));
+
+        // Afficher les quêtes mises à jour
+        displayWeeklyQuests(); 
     }
 
   </script>
