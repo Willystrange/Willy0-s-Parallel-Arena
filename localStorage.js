@@ -1,5 +1,5 @@
 // Définir la version du jeu
-const game_version = '2.4.2.1';
+const game_version = 'D.2.4.2.1';
 
 // Fonction pour obtenir les données utilisateur de localStorage
 function getUserData() {
