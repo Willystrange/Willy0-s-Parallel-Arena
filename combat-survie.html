@@ -197,8 +197,10 @@
     #upgrade-options {
       display: none;
       position: fixed;
-      top: 50%;
       left: 50%;
+      margin-top: 95px;
+      height: 250px;
+      weight: 500px;
       transform: translate(-50%, -50%);
       background: white;
       padding: 20px;
@@ -336,6 +338,14 @@
       -ms-overflow-style: none;
     }
   </style>
+  <style>
+    @media (min-width: 1024px) {
+      .combat-actions-wrapper {
+        position: absolute;
+        bottom: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -417,7 +427,7 @@
       });
 
       // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
+      paintObserver.observe({type: 'paint', buffered: true});
 
       // Créer un observateur pour les entrées de type "first-input" (pour FID)
       const fidObserver = new PerformanceObserver((list) => {
@@ -431,13 +441,16 @@
       });
 
       // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
+      fidObserver.observe({type: 'first-input', buffered: true});
     }
   </script>
   <script>
     function adversairepasser_tour() {
       updateSpecialBar(opponentCharacter, 'opponent-special-bar');
       updateUI();
+      if (opponentCharacter.inconnu_super >= 1) {
+        opponentCharacter.inconnu_super -= 1;
+      }
       if (opponentCharacter.immobilisation >= 1) {
         opponentCharacter.immobilisation -= 1;
       }
@@ -447,7 +460,7 @@
       if (opponentCharacter.perte_att > 0) {
         opponentCharacter.perte_att -= 1;
         if (opponentCharacter.perte_att == 0) {
-          opponentCharacter.attaque = Math.round(opponentCharacter.attaque / 0.80);
+          opponentCharacter.attaque = Math.round(opponentCharacter.attaque / 0.75);
         }
       }
       if (opponentCharacter.poulpy_att > 0) {
@@ -471,13 +484,26 @@
       if (opponentCharacter.sboonie_attaque > 0) {
         opponentCharacter.sboonie_attaque -= 1;
         if (opponentCharacter.sboonie_attaque == 0) {
-          opponentCharacter.attaque = Math.round(opponentCharacter.attaque / 0.80);
+          opponentCharacter.attaque = Math.round(opponentCharacter.attaque / 0.85);
         }
       }
     }
     function joueurpasser_tour() {
       updateSpecialBar(playerCharacter, 'player-special-bar');
       updateUI();
+      playerCharacter.inventaire_objets = false;
+      playerCharacter.objets_utilise = 0;
+      if (playerCharacter.inconnu_use > 4) {
+        playerCharacter.attaque = playerCharacter.attaque - ((playerCharacter.inconnu_use - 4) * 25);
+        playerCharacter.defense = playerCharacter.defense - ((playerCharacter.inconnu_use - 4) * 25);
+
+      }
+      if (playerCharacter.inconnu_super >= 1) {
+        playerCharacter.inconnu_super -= 1;
+      }
+      if (playerCharacter.cape) {
+        playerCharacter.cape = false;
+      }
       if (playerCharacter.immobilisation >= 1) {
         playerCharacter.immobilisation -= 1;
       }
@@ -490,7 +516,7 @@
       if (playerCharacter.perte_att > 0) {
         playerCharacter.perte_att -= 1;
         if (playerCharacter.perte_att == 0) {
-          playerCharacter.attaque = Math.round(playerCharacter.attaque / 0.80);
+          playerCharacter.attaque = Math.round(playerCharacter.attaque / 0.75);
         }
       }
       if (playerCharacter.poulpy_att > 0) {
@@ -514,7 +540,7 @@
       if (playerCharacter.sboonie_attaque > 0) {
         playerCharacter.sboonie_attaque -= 1;
         if (playerCharacter.sboonie_attaque == 0) {
-          playerCharacter.attaque = Math.round(playerCharacter.attaque / 0.75);
+          playerCharacter.attaque = Math.round(playerCharacter.attaque / 0.85);
         }
       }
 
@@ -560,6 +586,15 @@
       character.immobilisation = 0;
       character.sboonie_attaque = 0;
       character.poulpy_att = 0;
+      character.objets_utilise = 0;
+      character.inventaire_objets = false;
+      character.amuletteUses = 0;
+      character.armureUses = 0;
+      character.cape = false;
+      character.capeUses = 0;
+      character.crystalUses = 0;
+      character.inconnu_super = 0;
+      character.inconnu_use = 0;
     }
 
     const opponentStatsRanges = {
@@ -604,6 +639,8 @@
     }
 
     function updateUI() {
+      playerCharacter.pv = Math.round(playerCharacter.pv);
+      opponentCharacter.pv = Math.round(opponentCharacter.pv);
       document.getElementById('player-name').textContent = `${playerCharacter.name}`;
       document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
       updateSpecialBar(playerCharacter, 'player-special-bar');
@@ -668,13 +705,19 @@
     function handleAttack(attacker, defender, isPlayerAttacking) {
       const defenseModifier = 0.9 + Math.random() * 0.2; // Entre 0.9 et 1.1
       const modifiedDefense = Math.round(defender.defense * defenseModifier);
-      const damage = Math.max(0, attacker.attaque - modifiedDefense);
-
-      defender.pv = Math.max(0, defender.pv - damage);
-
+      let damage = Math.max(0, attacker.attaque - modifiedDefense);
       const combatLog = document.getElementById('combat-log');
       const logEntry = document.createElement('p');
       logEntry.style.color = '#CC3333';  // Couleur rouge brique pour l'attaque
+
+      if (defender.cape) {
+        damage = 0;
+        logEntry.textContent = `${defender.name} à utilisé une cape de l'ombre, ${attacker.name} ne l'as donc pas atteint !`;
+      }
+
+      defender.pv = Math.max(0, defender.pv - damage);
+
+
       if (isPlayerAttacking) {
         logEntry.textContent = `Vous attaquez et infligez ${Math.round(damage)} points de dégâts à ${defender.name}.`;
         document.getElementById('opponent-pv').textContent = `PV: ${Math.round(defender.pv)}`;
@@ -686,9 +729,9 @@
       scrollToBottom();
 
       if (defender.pv <= 0) {
-        const userData = getUserData();
 
         if (!isPlayerAttacking) {
+          const userData = getUserData();
           if (userData.quete1_type === "manches_survie") {
             userData.quete1_current += currentWave;
             saveUserData(userData);
@@ -701,59 +744,48 @@
             userData.quete3_current += currentWave;
             saveUserData(userData);
           }
-          if (userData.semaine1) {
-            if (!userData.Semaine1_3_completed) {
-              userData.Semaine1_3_current += playerCharacter.objets_partie;
-              saveUserData(userData);
-            }
-            if (!userData.Semaine1_4_completed) {
-              userData.Semaine1_4_current += currentWave;
-              saveUserData(userData);
-            }
-          }
-          if (userData.semaine2) {
-            if (!userData.Semaine2_3_completed) {
-              userData.Semaine2_3_current += playerCharacter.objets_partie;
-              saveUserData(userData);
-            }
-            if (!userData.Semaine2_4_completed) {
-              userData.Semaine2_4_current += currentWave;
-              saveUserData(userData);
-            }
-          }
-          if (userData.semaine3) {
-            if (!userData.Semaine3_3_completed) {
-              userData.Semaine3_3_current += playerCharacter.objets_partie;
-              saveUserData(userData);
-            }
-            if (!userData.Semaine3_4_completed) {
-              userData.Semaine3_4_current += currentWave;
-              saveUserData(userData);
-            }
-          }
-          if (userData.semaine4) {
-            if (!userData.Semaine4_3_completed) {
-              userData.Semaine4_3_current += playerCharacter.objets_partie;
-              saveUserData(userData);
-            }
-            if (!userData.Semaine4_4_completed) {
-              userData.Semaine4_4_current += currentWave;
-              saveUserData(userData);
-            }
-          }
-          if (userData.semaine5) {
-            if (!userData.Semaine5_3_completed) {
-              userData.Semaine5_3_current += playerCharacter.objets_partie;
-              saveUserData(userData);
-            }
-            if (!userData.Semaine5_4_completed) {
-              userData.Semaine5_4_current += currentWave;
-              saveUserData(userData);
+          for (let week = 1; week <= 5; week++) {
+            if (userData[`semaine${week}`]) {
+              for (let quest = 1; quest <= 5; quest++) {
+                const questKey = `Semaine${week}_${quest}`;
+                const questCompletedKey = `${questKey}_completed`;
+                const questTypeKey = `${questKey}_type`;
+                const questCurrentKey = `${questKey}_current`;
+                const questCharacter = `${questKey}_character`;
+
+                if (!userData[questCompletedKey]) {
+                  switch (userData[questTypeKey]) {
+                    case 'SPS':
+                      if (playerCharacter.name === userData[questCharacter]) {
+                        userData[questCurrentKey] += currentWave;
+                        saveUserData(userData);
+                      }
+                      break;
+                    case 'DS':
+                      userData[questCurrentKey] += playerCharacter.degats_partie;
+                      saveUserData(userData);
+                      break;
+                    case 'CS':
+                      userData[questCurrentKey] += playerCharacter.capacite_partie;
+                      saveUserData(userData);
+                      break;
+                    case 'SS':
+                      userData[questCurrentKey] += currentWave;
+                      saveUserData(userData);
+                      break;
+                    case 'O':
+                      userData[questCurrentKey] += playerCharacter.objets_partie;
+                      saveUserData(userData);
+                      break;
+                  }
+                  saveUserData(userData);
+                }
+              }
             }
           }
 
           calculateRewards(currentWave); // Appeler la fonction de récompense
-          
+
         }
       }
     }
@@ -815,10 +847,19 @@
           specialLogEntry.textContent = specialLogMessage;
           specialLogEntry.style.color = "#9966CC";  // Couleur pour la capacité spéciale
           combatLogdefense.appendChild(specialLogEntry);
+        } else if (character.inconnu_super >= 1) {
+          specialLogMessage = `${character.name} ne peut pas utiliser sa capacité spéciale, car ${character.name} la bloqué pour encore ${character.inconnu_super} tours.`;
+          character.spe += 1;
+          const combatLogInco = document.getElementById('combat-log');
+          const specialLogEntryInco = document.createElement('p');
+          specialLogEntryInco.textContent = specialLogMessage;
+          specialLogEntryInco.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+          combatLogInco.appendChild(specialLogEntryInco);
+          handleAttack(character, opponent, isPlayer);
         } else {
           switch (character.name) {
             case "Diva":
-              opponent.attaque *= 0.80;
+              opponent.attaque *= 0.75;
               specialLogMessage = `${character.name} utilise sa capacité spéciale ! L'attaque de ${opponent.name} est réduite à ${Math.round(opponent.attaque.toFixed(2))} pour les 3 prochains tours.`;
               opponent.perte_att += 3;
               if (!isPlayer) {
@@ -908,7 +949,7 @@
               break;
 
             case "Cocobi":
-              const reductionAmount = Math.ceil(opponent.pv_maximum * 0.08);
+              const reductionAmount = Math.ceil(opponent.pv_maximum * 0.12);
               opponent.pv -= reductionAmount;
               if (opponent.pv < 0) {
                 opponent.pv = 0;
@@ -1029,17 +1070,34 @@
               pvsupp = Math.round(character.pv_max * 0.05)
               character.pv += pvsupp;
               opponent.attaque = Math.round(opponent.attaque * 0.75);
+              opponent.pv -= 50;
               if (!isPlayer) {
                 opponent.sboonie_attaque += 1;
               }
               opponent.sboonie_attaque += 1;
-              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il régénère ${Math.round(pvsupp)} PV et reduit de 25% l'attaque de ${opponent.name} pour le prochain tour.`;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il régénère ${Math.round(pvsupp)} PV, inflige 50 de dégâts et reduit de 15% l'attaque de ${opponent.name} pour le prochain tour.`;
               const combatLogSboonie = document.getElementById('combat-log');
               const specialLogEntryS = document.createElement('p');
               specialLogEntryS.textContent = specialLogMessage;
               specialLogEntryS.style.color = "#9966CC";  // Couleur pour la capacité spéciale
               combatLogSboonie.appendChild(specialLogEntryS);
 
+              break;
+            case 'Inconnu':
+              opponent.inconnu_super += 3;
+              if (isPlayer) {
+                opponent.inconnu_super += 1;
+              }
+              character.attaque += 25;
+              character.defense += 25;
+              character.inconnu_use += 1;
+              specialLogMessage = `${character.name} utilise sa capacité spécial, il augmente son attaque et sa défense de 15 et ${opponent.name} ne peut pas utiliser sa capacité spéciale pendant 3 tours !`;
+              const combatLogInconnu = document.getElementById('combat-log');
+              const specialLogEntryI = document.createElement('p');
+              specialLogEntryI.textContent = specialLogMessage;
+              specialLogEntryI.style.color = "#9966CC";  // Couleur pour la capacité spéciale
+              combatLogInconnu.appendChild(specialLogEntryI);
+              handleAttack(character, opponent, isPlayer);
               break;
             case "Blitzkrieger":
               const blitzkriegerDamage = Math.round(character.attaque * 2);
@@ -1233,64 +1291,79 @@
     }
 
     function showItemSelection() {
+      const userData = getUserData();
       const itemSelectionDiv = document.getElementById('item-selection');
       itemSelectionDiv.style.display = 'block';
 
       // Clear previous items
       itemSelectionDiv.innerHTML = '<h3>Choisissez un objet à utiliser</h3>';
 
-      // Add buttons for each item in the inventory
-      const userData = getUserData();
+      const availableItems = [];
+      // Vérifier si l'amulette de régénération a déjà été utilisée
+      if (userData.crystal_acheté > 0 && playerCharacter.crystalUses < 2) {
+        availableItems.push({name: 'Crystal de renouveau', count: userData.crystal_acheté});
+      }
+      if (userData.Cape_acheté > 0 && playerCharacter.capeUses < 2) {
+        availableItems.push({name: "Cape de l'ombre", count: userData.Cape_acheté});
+      }
       if (userData.bouclier_solide_acheté > 0) {
-        const bouclierButton = document.createElement('button');
-        bouclierButton.textContent = 'Bouclier solide' + `(${userData.bouclier_solide_acheté})`;
-        bouclierButton.onclick = function () {useItem('Bouclier solide');};
-        itemSelectionDiv.appendChild(bouclierButton);
+        availableItems.push({name: 'Bouclier solide', count: userData.bouclier_solide_acheté});
       }
       if (userData.Potion_de_Santé_acheté > 0) {
-        const potionButton = document.createElement('button');
-        potionButton.textContent = 'Potion de Santé' + ` (${userData.Potion_de_Santé_acheté})`;
-        potionButton.onclick = function () {useItem('Potion de Santé');};
-        itemSelectionDiv.appendChild(potionButton);
+        availableItems.push({name: 'Potion de Santé', count: userData.Potion_de_Santé_acheté});
       }
-      if (userData.Amulette_de_Régénération_acheté > 0) {
-        const AmuletteButton = document.createElement('button');
-        AmuletteButton.textContent = 'Amulette de Régénération' + ` (${userData.Amulette_de_Régénération_acheté})`;
-        AmuletteButton.onclick = function () {useItem('Amulette de Régénération');};
-        itemSelectionDiv.appendChild(AmuletteButton);
+      if (userData.armure_fer_acheté > 0 && playerCharacter.armureUses < 2) {
+        // L'armure ne s'affiche plus si elle a été utilisée deux fois
+        availableItems.push({name: 'Armure de Fer', count: userData.armure_fer_acheté});
+      }
+      if (userData.Amulette_de_Régénération_acheté > 0 && playerCharacter.amuletteUses < 1) {
+        // L'amulette ne s'affiche plus si elle a été utilisée une fois
+        availableItems.push({name: 'Amulette de Régénération', count: userData.Amulette_de_Régénération_acheté});
       }
       if (userData.epee_tranchante_acheté > 0) {
-        const EpeeButton = document.createElement('button');
-        EpeeButton.textContent = 'Épée Tranchante' + ` (${userData.epee_tranchante_acheté})`;
-        EpeeButton.onclick = function () {useItem('Épée Tranchante');};
-        itemSelectionDiv.appendChild(EpeeButton);
+        availableItems.push({name: 'Épée Tranchante', count: userData.epee_tranchante_acheté});
       }
       if (userData.elixir_puissance_acheté > 0) {
-        const ElixirButton = document.createElement('button');
-        ElixirButton.textContent = 'Elixir de Puissance' + ` (${userData.elixir_puissance_acheté})`;
-        ElixirButton.onclick = function () {useItem('Elixir de Puissance');};
-        itemSelectionDiv.appendChild(ElixirButton);
-      } if (userData.armure_fer_acheté > 0) {
-        const armureButton = document.createElement('button');
-        armureButton.textContent = 'Armure de Fer' + ` (${userData.armure_fer_acheté})`;
-        armureButton.onclick = function () {useItem('Armure de Fer');};
-        itemSelectionDiv.appendChild(armureButton);
+        availableItems.push({name: 'Elixir de Puissance', count: userData.elixir_puissance_acheté});
       }
 
-      // Add other items dynamically if needed
-      // Example:
-      // if (userData.Other_Item) {
-      //   const otherItemButton = document.createElement('button');
-      //   otherItemButton.textContent = 'Other Item';
-      //   otherItemButton.onclick = function() { useItem('Other_Item'); };
-      //   itemSelectionDiv.appendChild(otherItemButton);
-      // }
 
-      // Add an "Annuler" button at the end
-      const cancelButton = document.createElement('button');
-      cancelButton.textContent = 'Annuler';
-      cancelButton.onclick = hideItemSelection;
-      itemSelectionDiv.appendChild(cancelButton);
+
+      // Si aucun objet n'a été utilisé
+      if (playerCharacter.objets_utilise === 0) {
+        // Si inventaire_objets est à false, on sélectionne 3 objets aléatoirement
+        if (!playerCharacter.inventaire_objets) {
+          playerCharacter.selectedItems = [];
+
+          // Mélanger les items disponibles et en sélectionner 3
+          const shuffledItems = availableItems.sort(() => 0.5 - Math.random());
+          playerCharacter.selectedItems = shuffledItems.slice(0, 3);
+
+          // Passer inventaire_objets à true pour se souvenir de la sélection
+          playerCharacter.inventaire_objets = true;
+        }
+
+        // Afficher les 3 objets sélectionnés
+        playerCharacter.selectedItems.forEach(item => {
+          const itemButton = document.createElement('button');
+          itemButton.textContent = `${item.name} (${item.count})`;
+          itemButton.onclick = function () {useItem(item.name);};
+          itemSelectionDiv.appendChild(itemButton);
+        });
+
+        // Ajouter le bouton Annuler
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Annuler';
+        cancelButton.onclick = hideItemSelection;
+        itemSelectionDiv.appendChild(cancelButton);
+
+      } else if (playerCharacter.objets_utilise !== 0) {
+        // Si des objets ont déjà été utilisés, proposer uniquement le bouton Annuler
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Annuler';
+        cancelButton.onclick = hideItemSelection;
+        itemSelectionDiv.appendChild(cancelButton);
+      }
     }
     function hideItemSelection() {
       document.getElementById('item-selection').style.display = 'none';
@@ -1298,7 +1371,24 @@
 
     function useItem(itemName) {
       const userData = getUserData();
+      playerCharacter.objets_utilise = 1;
       switch (itemName) {
+        case 'Crystal de renouveau':
+          userData.crystal_acheté -= 1;
+          playerCharacter.crystalUses += 1;
+          playerCharacter.spe += 0.8;
+          if (playerCharacter.spe > 1) {
+            playerCharacter.spe = 1;
+          }
+          saveUserData(userData);
+          updateUI();
+          break;
+        case "Cape de l'ombre":
+          userData.Cape_acheté -= 1;
+          playerCharacter.capeUses += 1;
+          playerCharacter.cape = true;
+          saveUserData(userData);
+          break;
         case 'Potion de Santé':
           userData.Potion_de_Santé_acheté -= 1;
           playerCharacter.pv += 1100;
@@ -1314,6 +1404,7 @@
         case 'Amulette de Régénération':
           userData.Amulette_de_Régénération_acheté -= 1;
           // Amulette soin devient un effet permanent de régénération
+          playerCharacter.amuletteUses += 1;
           playerCharacter.amulette_soin = 1; // On garde une régénération constante
           playerCharacter.objets_partie += 1;
           playerCharacter.objets_soin += 1;
@@ -1339,6 +1430,7 @@
         case 'Armure de Fer':
           userData.armure_fer_acheté -= 1;
           // Réduire l'attaque de l'adversaire de façon permanente
+          playerCharacter.armureUses += 1;
           opponentCharacter.attaque = Math.round(opponentCharacter.attaque * 0.90); // Moins d'effet mais permanent
           playerCharacter.objets_partie += 1;
           saveUserData(userData);
@@ -1413,20 +1505,21 @@
       disableActionButtons(false);
     }
     function upgradeStat(stat) {
+      playerCharacter.pv = playerCharacter.pv_maximum;
       switch (stat) {
         case 'pv':
-          const pvIncrease = playerCharacter.pv_maximum * 0.1;
-          playerCharacter.pv += pvIncrease;
-          if (playerCharacter.pv > playerCharacter.pv_maximum) {
-            playerCharacter.pv = playerCharacter.pv_maximum;
-          }
-          document.getElementById('player-pv').textContent = `PV: ${Math.round(playerCharacter.pv)}`;
+          playerCharacter.pv_maximum = Math.round(playerCharacter.pv_maximum * 1.1);
+          playerCharacter.pv = Math.round(playerCharacter.pv_maximum);
+          updateUI()
+          
           break;
         case 'attaque':
-          playerCharacter.attaque *= 1.1;
+          playerCharacter.attaque *= 1.15;
+          updateUI();
           break;
         case 'defense':
-          playerCharacter.defense *= 1.1;
+          playerCharacter.defense *= 1.2;
+          updateUI();
           break;
         default:
           console.log('Statistique non reconnue');

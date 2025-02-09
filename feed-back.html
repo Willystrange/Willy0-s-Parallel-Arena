@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="Formulaire de feedback">
   <title>Formulaire de Feedback</title>
   <style>
+    /* Style général */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       background-color: #e9ecef;
       color: #343a40;
-      position: relative;
       overflow: hidden;
-      /* Empêche le défilement du body */
     }
-
     .content {
-      overflow-y: auto;
-      /* Permet le défilement vertical */
       height: 100vh;
-      /* Occupe toute la hauteur de la fenêtre */
+      overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      /* Assure le défilement fluide sur les appareils tactiles */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      animation: fadeIn 0.5s ease-in-out;
     }
-
+    .content::-webkit-scrollbar {
+      display: none;
+    }
     .container {
       width: 80%;
       max-width: 700px;
@@ -34,23 +34,20 @@
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.5s ease-out;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 20px;
     }
-
     .form-group {
       margin-bottom: 20px;
     }
-
     .form-group label {
       display: block;
       font-weight: bold;
       margin-bottom: 8px;
     }
-
     .form-group input[type="text"],
     .form-group textarea,
     .form-group select {
@@ -60,11 +57,9 @@
       border-radius: 5px;
       box-sizing: border-box;
     }
-
     .form-group textarea {
       resize: vertical;
     }
-
     .form-group button {
       background-color: #007bff;
       color: #fff;
@@ -75,237 +70,201 @@
       font-size: 16px;
       transition: background-color 0.3s ease;
     }
-
     .form-group button:hover {
       background-color: #0056b3;
     }
-
     .form-group button:focus {
       outline: none;
     }
-
-    /* Style pour les étoiles de notation */
+    /* Étoiles de notation */
     .rating {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
     }
-
     .rating input {
       display: none;
     }
-
     .rating label {
       font-size: 24px;
       color: #ddd;
       cursor: pointer;
       transition: color 0.3s ease;
     }
-
-    .rating input:checked~label {
+    .rating input:checked ~ label {
       color: #f39c12;
     }
-
-    .rating input:checked~label~label {
+    .rating input:checked ~ label ~ label {
       color: #ddd;
     }
-
     .rating label:hover,
-    .rating label:hover~label {
+    .rating label:hover ~ label {
       color: #f39c12;
     }
-
-    .rating .description {
-      text-align: center;
-      margin-top: 5px;
+    /* Animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-
-    .rating .description span {
-      display: inline-block;
-      width: 20%;
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
     }
-
-    /* Styles pour le mode sombre */
+    /* Message de confirmation */
+    #confirmationMessage {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease-in-out;
+      z-index: 1000;
+    }
+    #confirmationMessage.show {
+      opacity: 1;
+    }
+    /* Mode sombre */
     @media (prefers-color-scheme: dark) {
       body {
-        background-color: #121212; /* Couleur de fond pour le mode sombre */
-        color: #e0e0e0; /* Couleur du texte pour le mode sombre */
+        background-color: #121212;
+        color: #e0e0e0;
       }
-
       .content {
-        background-color: #121212; /* Assure que le fond de la zone de contenu est sombre */
+        background-color: #121212;
       }
-
       .container {
-        background-color: #1e1e1e; /* Couleur de fond pour le conteneur en mode sombre */
-        color: #e0e0e0; /* Couleur du texte dans le conteneur pour le mode sombre */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Ombre plus sombre pour le mode sombre */
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
       }
-
       h1 {
-        color: #e0e0e0; /* Couleur du titre pour le mode sombre */
+        color: #e0e0e0;
       }
-
       .form-group label {
-        color: #b0b0b0; /* Couleur des labels pour le mode sombre */
+        color: #b0b0b0;
       }
-
       .form-group input[type="text"],
       .form-group textarea,
       .form-group select {
-        background-color: #333; /* Fond sombre pour les champs de formulaire */
-        color: #e0e0e0; /* Couleur du texte dans les champs de formulaire */
-        border: 1px solid #444; /* Bordure sombre pour les champs de formulaire */
+        background-color: #333;
+        color: #e0e0e0;
+        border: 1px solid #444;
       }
-
       .form-group button {
-        background-color: #555; /* Couleur de fond du bouton pour le mode sombre */
-        color: #e0e0e0; /* Couleur du texte du bouton pour le mode sombre */
+        background-color: #555;
+        color: #e0e0e0;
       }
-
       .form-group button:hover {
-        background-color: #666; /* Couleur du bouton au survol pour le mode sombre */
+        background-color: #666;
       }
-
       .rating label {
-        color: #444; /* Couleur des étoiles pour le mode sombre */
+        color: #444;
       }
-
-      .rating input:checked~label {
-        color: #f39c12; /* Couleur des étoiles sélectionnées pour le mode sombre */
+      .rating input:checked ~ label {
+        color: #f39c12;
       }
-
       .rating label:hover,
-      .rating label:hover~label {
-        color: #f39c12; /* Couleur des étoiles au survol pour le mode sombre */
+      .rating label:hover ~ label {
+        color: #f39c12;
       }
-    }
-
-    /* Masquer les barres de défilement */
-    .content::-webkit-scrollbar {
-      display: none;
-    }
-
-    .content {
-      scrollbar-width: none;
-    }
-
-    .content {
-      -ms-overflow-style: none;
+      #confirmationMessage {
+        background: #218838;
+      }
     }
   </style>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+  <!-- Chargement des scripts Firebase avec defer -->
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configuration Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+        authDomain: "willy0s-parallel-arena.firebaseapp.com",
+        databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+        projectId: "willy0s-parallel-arena",
+        storageBucket: "willy0s-parallel-arena.appspot.com",
+        messagingSenderId: "683284732830",
+        appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+        measurementId: "G-85B8R4NKNM"
+      };
 
-    // Configuration Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-      authDomain: "willy0s-parallel-arena.firebaseapp.com",
-      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-      projectId: "willy0s-parallel-arena",
-      storageBucket: "willy0s-parallel-arena.appspot.com",
-      messagingSenderId: "683284732830",
-      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-      measurementId: "G-85B8R4NKNM"
-    };
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+      const maintenanceStartRef = database.ref('maintenance/start');
+      const maintenanceEndRef = database.ref('maintenance/end');
 
-    // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
-    if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {
-          const fcp = entries[0].startTime;
-          console.log('First Contentful Paint (FCP):', fcp, 'ms');
-        }
-      });
-
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
-
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (entry.entryType === 'first-input') {
-            const fid = entry.processingStart - entry.startTime;
-            console.log('First Input Delay (FID):', fid, 'ms');
-          }
-        });
-      });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
-    }
-
-    // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
-
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
-      const data = snapshot.val();
-      const maintenanceActive = data.active === 'oui';
-      const maintenanceTime = data.heure;
-
-      if (maintenanceActive && maintenanceTime) {
-        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-        const currentTime = new Date();
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-          window.location.href = 'maintenance.html';
-        }
+      // Fonction de vérification de maintenance
+      function checkMaintenance() {
+        Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+          .then(([startSnapshot, endSnapshot]) => {
+            const maintenanceStart = new Date(startSnapshot.val());
+            const maintenanceEnd = new Date(endSnapshot.val());
+            const currentTime = new Date();
+            if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+              window.location.href = 'maintenance.html';
+            }
+          })
+          .catch(error => {
+            console.error("Erreur lors de la récupération des données de maintenance:", error);
+          });
       }
-    });
-  </script>
-  <script>
+      checkMaintenance();
+      setInterval(checkMaintenance, 10000);
 
-    function getUserData() {
-      const userData = JSON.parse(localStorage.getItem('userData'));
-    }
-
-    function submitForm(event) {
-      event.preventDefault(); // Empêche l'envoi du formulaire
-
-      var category = document.getElementById('category').value;
-      var importance = document.querySelector('input[name="importance"]:checked').value;
-      var comments = document.getElementById('comments').value;
-
-      var subject = "Feedback sur " + category;
-      var body = `Bonjour,
+      // Gestion de l'envoi du formulaire avec animation et feedback visuel
+      const feedbackForm = document.getElementById('feedbackForm');
+      const container = document.querySelector('.container');
+      const confirmationMessage = document.getElementById('confirmationMessage');
+      
+      feedbackForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const category = document.getElementById('category').value;
+        const importance = document.querySelector('input[name="importance"]:checked')?.value || '';
+        const comments = document.getElementById('comments').value;
+        const subject = "Feedback sur " + category;
+        const body = `Bonjour,
 
 Je souhaite partager les commentaires suivants :
 
 Catégorie : ${category}
 Importance : ${importance}
-Remarques : ${comments}`
-      var mailtoLink = "mailto:willyxstrange@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+Remarques : ${comments}`;
+        
+        // Afficher le message de confirmation
+        confirmationMessage.textContent = "Redirection vers votre client mail...";
+        confirmationMessage.classList.add('show');
 
-      window.location.href = mailtoLink; // Ouvre le client mail de l'utilisateur
-    }
+        // Appliquer l'animation de fade-out au conteneur
+        container.style.animation = "fadeOut 0.5s ease-out forwards";
+        
+        // Après 600ms (animation terminée), rediriger vers mailto
+        setTimeout(() => {
+          window.location.href = "mailto:willyxstrange@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+        }, 600);
+      });
 
-    function goBack() {
-      window.location.href = "parametres.html"; // Redirige vers parametres.html
-    }
+      // Bouton Retour
+      document.getElementById('goBackButton').addEventListener('click', () => {
+        window.location.href = "parametres.html";
+      });
+    });
   </script>
 </head>
-
 <body>
+  <div id="confirmationMessage"></div>
   <div class="content">
     <div class="container">
       <h1>Formulaire de Feedback</h1>
-      <form id="feedbackForm" onsubmit="submitForm(event)">
+      <form id="feedbackForm">
         <!-- Catégorie -->
         <div class="form-group">
           <label for="category">Catégorie</label>
@@ -323,27 +282,26 @@ Remarques : ${comments}`
         <div class="form-group">
           <label>Importance</label>
           <div class="rating">
-            <!-- Étoiles pour la notation de l'importance -->
             <input type="radio" id="star10" name="importance" value="10">
-            <label for="star10">☆</label>
+            <label for="star10" aria-label="10 étoiles">☆</label>
             <input type="radio" id="star9" name="importance" value="9">
-            <label for="star9">☆</label>
+            <label for="star9" aria-label="9 étoiles">☆</label>
             <input type="radio" id="star8" name="importance" value="8">
-            <label for="star8">☆</label>
+            <label for="star8" aria-label="8 étoiles">☆</label>
             <input type="radio" id="star7" name="importance" value="7">
-            <label for="star7">☆</label>
+            <label for="star7" aria-label="7 étoiles">☆</label>
             <input type="radio" id="star6" name="importance" value="6">
-            <label for="star6">☆</label>
+            <label for="star6" aria-label="6 étoiles">☆</label>
             <input type="radio" id="star5" name="importance" value="5">
-            <label for="star5">☆</label>
+            <label for="star5" aria-label="5 étoiles">☆</label>
             <input type="radio" id="star4" name="importance" value="4">
-            <label for="star4">☆</label>
+            <label for="star4" aria-label="4 étoiles">☆</label>
             <input type="radio" id="star3" name="importance" value="3">
-            <label for="star3">☆</label>
+            <label for="star3" aria-label="3 étoiles">☆</label>
             <input type="radio" id="star2" name="importance" value="2">
-            <label for="star2">☆</label>
+            <label for="star2" aria-label="2 étoiles">☆</label>
             <input type="radio" id="star1" name="importance" value="1">
-            <label for="star1">☆</label>
+            <label for="star1" aria-label="1 étoile">☆</label>
           </div>
         </div>
         <!-- Remarques -->
@@ -351,17 +309,16 @@ Remarques : ${comments}`
           <label for="comments">Vos remarques :</label>
           <textarea id="comments" name="comments" rows="5" placeholder="Écrivez ici vos remarques"></textarea>
         </div>
-        <!-- Soumettre -->
+        <!-- Bouton d'envoi -->
         <div class="form-group">
           <button type="submit">Envoyer</button>
         </div>
       </form>
       <!-- Bouton Retour -->
       <div class="form-group">
-        <button type="button" onclick="goBack()">Retour</button>
+        <button type="button" id="goBackButton">Retour</button>
       </div>
     </div>
   </div>
 </body>
-
 </html>

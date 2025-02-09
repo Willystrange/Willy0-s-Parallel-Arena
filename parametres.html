@@ -1,618 +1,549 @@
-  <!DOCTYPE html>
-  <html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Paramètres</title>
+  <style>
+    /* Variables CSS pour faciliter les modifications ultérieures */
+    :root {
+      --font: 'Arial', sans-serif;
+      --color-bg-light: #f5f5f5;
+      --color-bg-dark: #121212;
+      --color-text-light: #333;
+      --color-text-dark: #e0e0e0;
+      --color-container-light: #fff;
+      --color-container-dark: #1e1e1e;
+      --button-bg: #ff4500;
+      --button-bg-hover: #e03e00;
+      --back-button-bg: #007bff;
+      --back-button-bg-hover: #0056b3;
+    }
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    body {
+      font-family: var(--font);
+      background-color: var(--color-bg-light);
+      color: var(--color-text-light);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-    <title>Paramètres</title>
-    <style>
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: var(--color-container-light);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .button, .back-button {
+      display: block;
+      padding: 12px 20px;
+      font-size: 16px;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .button {
+      background-color: var(--button-bg);
+    }
+
+    .button:hover {
+      background-color: var(--button-bg-hover);
+      transform: scale(1.02);
+    }
+
+    .back-button {
+      background-color: var(--back-button-bg);
+      margin-top: 20px;
+    }
+
+    .back-button:hover {
+      background-color: var(--back-button-bg-hover);
+      transform: scale(1.02);
+    }
+
+    .version-info {
+      font-size: 14px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* Formulaire de connexion */
+    #loginForm {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0,0,0,0.8);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000;
+      text-align: center;
+    }
+    #loginForm div {
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    #loginForm h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    #loginForm input,
+    #loginForm button {
+      width: calc(100% - 20px);
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    /* Mode sombre via media queries */
+    @media (prefers-color-scheme: dark) {
       body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+        background-color: var(--color-bg-dark);
+        color: var(--color-text-dark);
       }
-
-      .content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-        box-sizing: border-box;
-      }
-
       .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: var(--color-container-dark);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
       }
-
-      h1 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        font-size: 24px;
-        color: #333;
-      }
-
-      .button {
-        display: block;
-        padding: 12px 20px;
-        font-size: 16px;
-        color: #fff;
-        background-color: #ff4500;
-        border: none;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-        margin-bottom: 10px;
-        transition: background-color 0.3s, transform 0.3s;
-      }
-
-      .button:hover {
-        background-color: #e03e00;
-        transform: scale(1.02);
-      }
-
-      .back-button {
-        display: block;
-        padding: 12px 20px;
-        font-size: 16px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-        transition: background-color 0.3s, transform 0.3s;
-        margin-top: 20px;
-      }
-
-      .back-button:hover {
-        background-color: #0056b3;
-        transform: scale(1.02);
-      }
-
-      .version-info {
-        font-size: 14px;
-        color: #333;
-        text-align: center;
-        margin-top: 20px;
-      }
-
-      /* Styles pour le formulaire de connexion */
-      #loginForm {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 1000;
-        text-align: center;
-      }
-
-      #loginForm div {
-        background: #333;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      }
-
-      #loginForm h2 {
-        margin-top: 0;
-        margin-bottom: 20px;
-      }
-
-      #loginForm input {
-        width: calc(100% - 20px);
-        margin-bottom: 10px;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        border-radius: 5px;
-        box-sizing: border-box;
-      }
-
-      #loginForm button {
-        width: calc(100% - 20px);
-        margin-top: 10px;
-        padding: 10px;
-      }
-
-      /* Styles pour le mode sombre */
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #121212;
-          color: #e0e0e0;
-        }
-
-        .container {
-          background-color: #1e1e1e;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-          color: #e0e0e0;
-        }
-
-        .button {
-          background-color: #555;
-          color: #e0e0e0;
-        }
-
-        .button:hover {
-          background-color: #666;
-        }
-
-        .version-info {
-          color: #e0e0e0;
-        }
-
-        .back-button {
-          background-color: #333;
-        }
-
-        .back-button:hover {
-          background-color: #555;
-        }
-      }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
-  </head>
-
-  <body>
-    <div class="content">
-      <div class="container">
-        <h1>Paramètres</h1>
-        <a class="button" href="#" onclick="showImportOptions()">Importer une sauvegarde</a>
-        <a class="button" href="#" onclick="downloadBackup()">Sauvegarder les données</a>
-        <a class="button" href="#" onclick="mise_a_jour()">Sauver la sauvegarde</a>
-        <a class="button" href="#" onclick="gofeedback()">Contactez le développeur</a>
-        <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
-        <a id="loginButton" class="button" href="connection.html">Se connecter</a>
-        <a id="logoutButton" class="button" href="#" onclick="logout()" style="display:none;">Se déconnecter</a>
-        <a class="back-button" href="menu_principal.html">Retour au menu principal</a>
-        <div class="telechargement" id="downloadLinkContainer" style="margin-top: 20px;"></div>
-      </div>
-      <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
+      h1 { color: var(--color-text-dark); }
+      .button { background-color: #555; color: var(--color-text-dark); }
+      .button:hover { background-color: #666; }
+      .back-button { background-color: #333; }
+      .back-button:hover { background-color: #555; }
+      .version-info { color: var(--color-text-dark); }
+    }
+  </style>
+  <!-- Chargement des bibliothèques en version « compat » -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+</head>
+<body>
+  <div class="content">
+    <div class="container">
+      <h1>Paramètres</h1>
+      <a class="button" href="#" id="importBackup">Importer une sauvegarde</a>
+      <a class="button" href="#" id="downloadBackup">Sauvegarder les données</a>
+      <a class="button" href="#" id="updateBackup">Sauver la sauvegarde</a>
+      <a class="button" href="#" id="contactDev">Contactez le développeur</a>
+      <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
+      <a class="button" id="loginButton" href="connection.html">Se connecter</a>
+      <a class="button" id="logoutButton" href="#" style="display:none;">Se déconnecter</a>
+      <a class="back-button" href="menu_principal.html">Retour au menu principal</a>
+      <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
     </div>
+    <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
+  </div>
+
+  <!-- Inclusion d'un script local si nécessaire -->
   <script src="localStorage.js"></script>
   <script>
-    // Importation des modules 
+    // Encapsuler le code dans une IIFE pour éviter la pollution globale
+    (function() {
+      'use strict';
 
-    // Configuration Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-      authDomain: "willy0s-parallel-arena.firebaseapp.com",
-      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-      projectId: "willy0s-parallel-arena",
-      storageBucket: "willy0s-parallel-arena.appspot.com",
-      messagingSenderId: "683284732830",
-      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-      measurementId: "G-85B8R4NKNM"
-    };
+      /* ---------- Configuration Firebase ---------- */
+      const firebaseConfig = {
+        apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+        authDomain: "willy0s-parallel-arena.firebaseapp.com",
+        databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+        projectId: "willy0s-parallel-arena",
+        storageBucket: "willy0s-parallel-arena.appspot.com",
+        messagingSenderId: "683284732830",
+        appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+        measurementId: "G-85B8R4NKNM"
+      };
 
-    // Initialisation de Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
-    const perf = firebase.performance();
-    auth.onAuthStateChanged((user) => {
-      updateUI(); // Met à jour l'UI en fonction de l'état de connexion
-    });
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const database = firebase.database();
+      const perf = firebase.performance();
+      const secretKey = 'votre_cle_secrete_ici';
 
-    if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {
-          const fcp = entries[0].startTime;
-          console.log('First Contentful Paint (FCP):', fcp, 'ms');
-        }
-      });
-
-      // Observer les événements de type "paint"
-      paintObserver.observe({type: 'paint', buffered: true});
-
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (entry.entryType === 'first-input') {
-            const fid = entry.processingStart - entry.startTime;
-            console.log('First Input Delay (FID):', fid, 'ms');
+      /* ---------- Observateurs de performance ---------- */
+      if ('PerformanceObserver' in window) {
+        const paintObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntriesByName('first-contentful-paint');
+          if (entries.length > 0) {
+            console.log('FCP:', entries[0].startTime, 'ms');
           }
         });
-      });
+        paintObserver.observe({type: 'paint', buffered: true});
 
-      // Observer les événements de type "first-input"
-      fidObserver.observe({type: 'first-input', buffered: true});
-    }
-
-    // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = firebase.database().ref('maintenance');
-
-    // Écoute des changements de l'état de maintenance
-    maintenanceRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      const maintenanceActive = data.active === 'oui';
-      const maintenanceTime = data.heure;
-
-      if (maintenanceActive && maintenanceTime) {
-        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-        const currentTime = new Date();
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-          window.location.href = 'maintenance.html';
-        }
+        const fidObserver = new PerformanceObserver((list) => {
+          list.getEntries().forEach(entry => {
+            if (entry.entryType === 'first-input') {
+              console.log('FID:', entry.processingStart - entry.startTime, 'ms');
+            }
+          });
+        });
+        fidObserver.observe({type: 'first-input', buffered: true});
       }
-    });
-    function updateUI() {
-      const user = firebase.auth().currentUser;
-      if (user) {
-        document.getElementById('loginButton').style.display = 'none';
-        document.getElementById('logoutButton').style.display = 'block';
-      } else {
-        document.getElementById('loginButton').style.display = 'block';
-        document.getElementById('logoutButton').style.display = 'none';
-      }
-    }
 
-    
-    function createUserConnect() {
-      const connectionn = {
-        userid: "",
-        est_connecte: false,
-      }
-      localStorage.setItem('connection', JSON.stringify(connectionn));
-    }
-
-    function saveUser() {
-      // Sauvegarder userData dans localStorag
-      const user = firebase.auth().currentUser;
-      const userData = getUserData();
-      const userId = user.uid;
-      localStorage.setItem('userData', JSON.stringify(userData));
-
-      // Sauvegarder userData dans Firebase
-      const userRef = database.ref('users/' + userId + '/userData');
-      userRef.set(userData, (error) => {
-        if (error) {
-          alert('Erreur lors de la sauvegarde des données : ' + error.message);
-        } else {
-          alert('Données utilisateur sauvegardées dans Firebase.');
-        }
-      });
-    }
-    
-    function goToSettings() {
-    }
-    function viewCharacters() {
-      window.location.href = "perso_stats.html";
-    }
-
-    function viewShop() {
-      window.location.href = "boutique.html";
-    }
-
-    function viewUpgrades() {
-      window.location.href = "amelioration.html";
-    }
-
-    function showMainMenu() {
-      window.location.href = "menu_principal.html";
-    }
-    const secretKey = 'votre_cle_secrete_ici';
-
-    function gofeedback() {
-      window.location.href = "feed-back.html";
-    }
-
-    function showImportOptions() {
-      var fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = '.txt';
-
-      fileInput.onchange = function (event) {
-        var file = event.target.files[0];
-        if (!file) return;
-
-        var reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            var importedData = decrypt(e.target.result);
-            var userData = JSON.parse(importedData);
-            saveUserData(userData);
-            alert('Sauvegarde importée avec succès !');
-            location.reload();
-          } catch (error) {
-            alert('Erreur lors de l\'importation de la sauvegarde. Les données sont peut-être corrompues ou la clé est incorrecte.');
+      /* ---------- Gestion de la maintenance ---------- */
+      async function checkMaintenance() {
+        try {
+          const [startSnap, endSnap] = await Promise.all([
+            database.ref('maintenance/start').once('value'),
+            database.ref('maintenance/end').once('value')
+          ]);
+          const maintenanceStart = new Date(startSnap.val());
+          const maintenanceEnd = new Date(endSnap.val());
+          const currentTime = new Date();
+          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+            window.location.href = 'maintenance.html';
           }
+        } catch (error) {
+          console.error("Erreur maintenance:", error);
+        }
+      }
+      checkMaintenance();
+      setInterval(checkMaintenance, 10000);
+
+      /* ---------- Fonctions utilitaires ---------- */
+      const getUserData = () => JSON.parse(localStorage.getItem('userData')) || {};
+      const saveUserData = (data) => localStorage.setItem('userData', JSON.stringify(data));
+
+      function encrypt(data) {
+        try {
+          return CryptoJS.AES.encrypt(data, secretKey).toString();
+        } catch (error) {
+          console.error('Erreur de cryptage:', error);
+          alert('Erreur de cryptage des données.');
+          return '';
+        }
+      }
+
+      function decrypt(data) {
+        try {
+          const bytes = CryptoJS.AES.decrypt(data, secretKey);
+          return bytes.toString(CryptoJS.enc.Utf8);
+        } catch (error) {
+          console.error('Erreur de décryptage:', error);
+          alert('Erreur de décryptage des données.');
+          return '';
+        }
+      }
+
+      /* ---------- Mise à jour de l'interface ---------- */
+      function updateUI() {
+        const user = auth.currentUser;
+        document.getElementById('loginButton').style.display = user ? 'none' : 'block';
+        document.getElementById('logoutButton').style.display = user ? 'block' : 'none';
+      }
+      auth.onAuthStateChanged(() => updateUI());
+
+      /* ---------- Actions sur les sauvegardes ---------- */
+      function handleImportBackup() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt';
+        fileInput.addEventListener('change', (event) => {
+          const file = event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const importedData = decrypt(e.target.result);
+              const userData = JSON.parse(importedData);
+              saveUserData(userData);
+              alert('Sauvegarde importée avec succès !');
+              location.reload();
+            } catch (error) {
+              alert("Erreur lors de l'importation. Vérifiez la clé et l'intégrité des données.");
+            }
+          };
+          reader.readAsText(file);
+        });
+        fileInput.click();
+      }
+
+      function handleDownloadBackup() {
+        try {
+          const userData = getUserData();
+          const encryptedData = encrypt(JSON.stringify(userData));
+          const blob = new Blob([encryptedData], {type: 'text/plain'});
+          const url = URL.createObjectURL(blob);
+          const container = document.getElementById('downloadLinkContainer');
+          container.innerHTML = '';
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Willy0_s_Parallel_Arena_backup.txt';
+          a.textContent = 'Télécharger la sauvegarde';
+          a.className = 'button';
+          a.style.marginTop = '10px';
+          container.appendChild(a);
+          alert('Sauvegarde effectuée avec succès ! Cliquez sur le lien pour télécharger le fichier.');
+        } catch (error) {
+          alert('Erreur lors de la sauvegarde des données.');
+        }
+      }
+
+      function updateBackup() {
+        // Fonction à compléter selon la logique métier (mise à jour des sauvegardes)
+        const userData = getUserData();
+        const defaultUserData = {
+          pass_XP: 0,
+          pass_level: 0,
+          nbr_perso: 2,
+          victoires: 0,
+          defaites: 0,
+          manches_max: 0,
+          XP_jour: 0,
+          gagnant: '',
+          fin_manche: 0,
+          fin_xp: 0,
+          fin_argent: 0,
+          fin_trophees: 0,
+          trophees: 0,
+          argent: 0,
+          VICTOIRE: false,
+          version: '2.5',
+          recompense: 0,
+          perso_recompense: 0,
+          xp_du_jour: 0,
+          Willy: 1,
+          Willy_XP: 0,
+          Willy_Level: 1,
+          Willy_boost: 0,
+          Cocobi: 1,
+          Cocobi_XP: 0,
+          Cocobi_Level: 1,
+          Cocobi_boost: 0,
+          Oiseau: 0,
+          Oiseau_XP: 0,
+          Oiseau_Level: 1,
+          Oiseau_boost: 0,
+          Grours: 0,
+          Grours_XP: 0,
+          Grours_Level: 1,
+          Grours_boost: 0,
+          Baleine: 0,
+          Baleine_XP: 0,
+          Baleine_Level: 1,
+          Baleine_boost: 0,
+          Doudou: 0,
+          Doudou_XP: 0,
+          Doudou_Level: 1,
+          Doudou_boost: 0,
+          Coeur: 0,
+          Coeur_XP: 0,
+          Coeur_Level: 1,
+          Coeur_boost: 0,
+          Diva: 0,
+          Diva_XP: 0,
+          Diva_Level: 1,
+          Diva_boost: 0,
+          Poulpy: 0,
+          Poulpy_XP: 0,
+          Poulpy_Level: 1,
+          Poulpy_boost: 0,
+          Colorina: 0,
+          Colorina_XP: 0,
+          Colorina_Level: 1,
+          Colorina_boost: 0,
+          Rosalie: 0,
+          Rosalie_XP: 0,
+          Rosalie_Level: 1,
+          Rosalie_boost: 0,
+          Sboonie: 0,
+          Sboonie_XP: 0,
+          Sboonie_Level: 1,
+          Sboonie_boost: 0,
+          Inconnu: 0,
+          Inconnu_XP: 0,
+          Inconnu_Level: 1,
+          Inconnu_boost: 0,
+          Double_XP: 5,
+          Double_XP_acheté: 0,
+          Potion_de_Santé_acheté: 0,
+          Amulette_de_Régénération_acheté: 0,
+          epee_tranchante_acheté: 0,
+          elixir_puissance_acheté: 0,
+          armure_fer_acheté: 0,
+          bouclier_solide_acheté: 0,
+          Cape_acheté: 0,
+          crystal_acheté: 0,
+          lastDoubleXPCheck: 0,
+          lastFraudeReset: 0,
+          boutique_recompense: false,
+          semaine1: false,
+          semaine2: false,
+          semaine3: false,
+          semaine4: false,
+          semaine5: false,
+          semaine6: false,
+          crystaux_parrallels: 0,
+          quetes_jour: false,
+          quete1_type: "",
+          quete1_text: "",
+          quete1_total: "",
+          quete1_current: "",
+          quete1_character: "",
+          quete2_type: "",
+          quete2_text: "",
+          quete2_total: "",
+          quete2_current: "",
+          quete2_character: "",
+          quete3_type: "",
+          quete3_text: "",
+          quete3_total: "",
+          quete3_current: "",
+          quete3_character: "",
+          partie_commencee: false,
         };
-        reader.readAsText(file);
-      };
-      fileInput.click();
-    }
 
-    function downloadBackup() {
-      try {
-        var userData = getUserData();
-        var encryptedData = encrypt(JSON.stringify(userData));
-        var blob = new Blob([encryptedData], {type: 'text/plain'});
-        var url = URL.createObjectURL(blob);
-
-        var downloadLinkContainer = document.getElementById('downloadLinkContainer');
-        downloadLinkContainer.innerHTML = ''; // Clear previous link if any
-
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'Willy0_s_Parallel_Arena_backup.txt';
-        a.textContent = 'Télécharger la sauvegarde';
-        a.className = 'button telechargement'; // Ajout de la classe 'telechargement'
-        a.style.display = 'block';
-        a.style.marginTop = '10px';
-        a.style.padding = '10px';
-        a.style.fontSize = '18px';
-        a.style.borderRadius = '5px';
-        a.style.textDecoration = 'none';
-
-        downloadLinkContainer.appendChild(a);
-
-        alert('Sauvegarde effectuée avec succès ! Cliquez sur le lien pour télécharger le fichier.');
-      } catch (error) {
-        alert('Erreur lors de la sauvegarde des données.');
-      }
-    }
-
-    function encrypt(data) {
-      try {
-        return CryptoJS.AES.encrypt(data, secretKey).toString();
-      } catch (error) {
-        console.error('Erreur de cryptage:', error);
-        alert('Erreur de cryptage des données.');
-        return '';
-      }
-    }
-
-    function decrypt(data) {
-      try {
-        var bytes = CryptoJS.AES.decrypt(data, secretKey);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (error) {
-        console.error('Erreur de décryptage:', error);
-        alert('Erreur de décryptage des données.');
-        return '';
-      }
-    }
-
-    function getUserData() {
-      return JSON.parse(localStorage.getItem('userData')) || {};
-    }
-
-    function saveUserData(userData) {
-      localStorage.setItem('userData', JSON.stringify(userData));
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      var userData = getUserData();
-      var versionInfo = document.getElementById('versionInfo');
-
-      if (userData.version) {
-        versionInfo.textContent = 'v.' + userData.version;
-      } else {
-        versionInfo.textContent = 'Version non disponible';
-      }
-    });
-    function mise_a_jour() {
-      const userData = getUserData();
-
-      // Définition des valeurs par défaut
-      const defaultUserData = {
-        pass_XP: 0,
-        pass_level: 0,
-        nbr_perso: 2,
-        victoires: 0,
-        defaites: 0,
-        manches_max: 0,
-        XP_jour: 0,
-        gagnant: '',
-        fin_manche: 0,
-        fin_xp: 0,
-        fin_argent: 0,
-        fin_trophees: 0,
-        trophees: 0,
-        argent: 0,
-        VICTOIRE: false,
-        version: '2.4.2.1',
-        recompense: 0,
-        perso_recompense: 0,
-        xp_du_jour: 0,
-        Willy: 1,
-        Willy_XP: 0,
-        Willy_Level: 1,
-        Willy_boost: 0,
-        Cocobi: 1,
-        Cocobi_XP: 0,
-        Cocobi_Level: 1,
-        Cocobi_boost: 0,
-        Oiseau: 0,
-        Oiseau_XP: 0,
-        Oiseau_Level: 1,
-        Oiseau_boost: 0,
-        Grours: 0,
-        Grours_XP: 0,
-        Grours_Level: 1,
-        Grours_boost: 0,
-        Baleine: 0,
-        Baleine_XP: 0,
-        Baleine_Level: 1,
-        Baleine_boost: 0,
-        Doudou: 0,
-        Doudou_XP: 0,
-        Doudou_Level: 1,
-        Doudou_boost: 0,
-        Coeur: 0,
-        Coeur_XP: 0,
-        Coeur_Level: 1,
-        Coeur_boost: 0,
-        Diva: 0,
-        Diva_XP: 0,
-        Diva_Level: 1,
-        Diva_boost: 0,
-        Poulpy: 0,
-        Poulpy_XP: 0,
-        Poulpy_Level: 1,
-        Poulpy_boost: 0,
-        Colorina: 0,
-        Colorina_XP: 0,
-        Colorina_Level: 1,
-        Colorina_boost: 0,
-        Rosalie: 0,
-        Rosalie_XP: 0,
-        Rosalie_Level: 1,
-        Rosalie_boost: 0,
-        Sboonie: 0,
-        Sboonie_XP: 0,
-        Sboonie_Level: 1,
-        Sboonie_boost: 0,
-        Double_XP: 5,
-        Double_XP_acheté: 0,
-        Potion_de_Santé_acheté: 0,
-        Amulette_de_Régénération_acheté: 0,
-        epee_tranchante_acheté: 0,
-        elixir_puissance_acheté: 0,
-        armure_fer_acheté: 0,
-        bouclier_solide_acheté: 0,
-        lastDoubleXPCheck: 0,
-        lastFraudeReset: 0,
-        boutique_recompense: false,
-
-        semaine1: false,
-
-
-        semaine2: false,
-
-
-        semaine3: false,
-
-
-        semaine4: false,
-
-
-
-        semaine5: false,
-
-        semaine6: false,
-
-        crystaux_parrallels: 0,
-
-        quetes_jour: false,
-
-        quete1_type: "",
-        quete1_text: "",
-        quete1_total: "",
-        quete1_current: "",
-        quete1_character: "",
-
-        quete2_type: "",
-        quete2_text: "",
-        quete2_total: "",
-        quete2_current: "",
-        quete2_character: "",
-
-        quete3_type: "",
-        quete3_text: "",
-        quete3_total: "",
-        quete3_current: "",
-        quete3_character: "",
-
-        partie_commencee: false,
-      };
-
-      // Vérification et initialisation des valeurs manquantes ou incorrectes
-      for (const key in defaultUserData) {
-        if (!userData.hasOwnProperty(key)) {
-          userData[key] = defaultUserData[key];
-        }
-      }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      updateUI();
-      var userData = getUserData();
-      var versionInfo = document.getElementById('versionInfo');
-
-      if (userData.version) {
-        versionInfo.textContent = 'v.' + userData.version;
-      } else {
-        versionInfo.textContent = 'Version non disponible';
-      }
-    });
-    function logout() {
-      const userData = getUserData();
-      const connectionn = {
-        userid: "",
-        est_connecte: false,
-      }
-      localStorage.setItem('connection', JSON.stringify(connectionn));
-      saveUserData(userData); // Sauvegarder les données localement
-      const user = firebase.auth().currentUser;
-
-      if (user) {
-        const userId = user.uid;
-        const userRef = database.ref('users/' + userId + '/userData');
-
-        // Mettre à jour les données dans Firebase avant la déconnexion
-        userRef.set(userData, (error) => {
-          if (error) {
-            alert('Erreur lors de la sauvegarde des données : ' + error.message);
-          } else {
-            // Supprimer les données locales après la mise à jour réussie
-            
-
-            // Déconnexion Firebase
-            firebase.auth().signOut().then(() => {
-              alert('Déconnecté avec succès.');
-              updateUI();
-            }).catch((error) => {
-              alert('Erreur lors de la déconnexion : ' + error.message);
-            });
+        // Compléter ou fusionner les données par défaut avec les données existantes
+        Object.keys(defaultUserData).forEach(key => {
+          if (!(key in userData)) {
+            userData[key] = defaultUserData[key];
           }
         });
-      } else {
-        alert("Aucun utilisateur n'est connecté.");
+        saveUserData(userData);
+        alert('Mise à jour de la sauvegarde effectuée.');
       }
-      localStorage.removeItem('userData');
-      location.reload();
-      window.location.href = "index.html";
-    }
-    const userData = getUserData();
-    console.log(userData);
-    
+
+      /* ---------- Déconnexion ---------- */
+      function logout() {
+        const userData = getUserData();
+        // Sauvegarde dans Firebase si nécessaire
+        if (auth.currentUser) {
+          const userId = auth.currentUser.uid;
+          database.ref(`users/${userId}/userData`).set(userData, (error) => {
+            if (error) {
+              alert('Erreur lors de la sauvegarde : ' + error.message);
+            } else {
+              auth.signOut().then(() => {
+                alert('Déconnecté avec succès.');
+                updateUI();
+                localStorage.removeItem('userData');
+                window.location.href = "index.html";
+              }).catch(err => alert('Erreur de déconnexion : ' + err.message));
+            }
+          });
+        } else {
+          alert("Aucun utilisateur n'est connecté.");
+        }
+      }
+
+      /* ---------- Initialisation au chargement ---------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        updateUI();
+        const userData = getUserData();
+        const versionInfo = document.getElementById('versionInfo');
+        versionInfo.textContent = userData.version ? 'v.' + userData.version : 'Version non disponible';
+
+        // Événements sur les boutons
+        document.getElementById('importBackup').addEventListener('click', handleImportBackup);
+        document.getElementById('downloadBackup').addEventListener('click', handleDownloadBackup);
+        document.getElementById('updateBackup').addEventListener('click', updateBackup);
+        document.getElementById('contactDev').addEventListener('click', () => {
+          window.location.href = "feed-back.html";
+        });
+        document.getElementById('logoutButton').addEventListener('click', (e) => {
+          e.preventDefault();
+          logout();
+        });
+
+        // Si le nombre de parties est inférieur à 5, afficher le bouton "Changer la difficulté"
+        if (
+          (userData.parties_test !== undefined && userData.parties_test < 5) ||
+          (userData.parties_weekend_test !== undefined && userData.parties_weekend_test < 5)
+        ) {
+          const container = document.querySelector('.container');
+
+          // Création du bouton "Changer la difficulté"
+          const changeDifficultyBtn = document.createElement('button');
+          changeDifficultyBtn.className = 'button';
+          changeDifficultyBtn.textContent = 'Changer la difficulté';
+          container.appendChild(changeDifficultyBtn);
+
+          // Création du menu déroulant pour choisir la difficulté
+          const difficultySelect = document.createElement('select');
+          difficultySelect.style.display = 'none'; // caché par défaut
+          difficultySelect.style.marginTop = '10px';
+
+          // Option par défaut (non sélectionnable)
+          const defaultOption = document.createElement('option');
+          defaultOption.textContent = 'Sélectionnez la difficulté';
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          difficultySelect.appendChild(defaultOption);
+
+          // Option Facile → correspond à "easy"
+          const optionEasy = document.createElement('option');
+          optionEasy.value = 'easy';
+          optionEasy.textContent = 'Facile';
+          difficultySelect.appendChild(optionEasy);
+
+          // Option Moyenne → correspond à "medium"
+          const optionMedium = document.createElement('option');
+          optionMedium.value = 'medium';
+          optionMedium.textContent = 'Moyenne';
+          difficultySelect.appendChild(optionMedium);
+
+          // Option Difficile → correspond à "hard"
+          const optionHard = document.createElement('option');
+          optionHard.value = 'hard';
+          optionHard.textContent = 'Difficile';
+          difficultySelect.appendChild(optionHard);
+
+          container.appendChild(difficultySelect);
+
+          // Au clic sur le bouton, le menu déroulant apparaît (ou disparaît s'il est déjà affiché)
+          changeDifficultyBtn.addEventListener('click', () => {
+            difficultySelect.style.display = difficultySelect.style.display === 'none' ? 'block' : 'none';
+          });
+
+          // Lorsqu'un choix est effectué, on met à jour la difficulté et on sauvegarde
+          difficultySelect.addEventListener('change', () => {
+            const selectedValue = difficultySelect.value;
+            userData.difficulty = selectedValue; // "easy", "medium" ou "hard"
+            saveUserData(userData);
+            alert('Difficulté changée en ' + difficultySelect.options[difficultySelect.selectedIndex].text);
+            // Cacher le menu déroulant après le choix
+            difficultySelect.style.display = 'none';
+          });
+        }
+      });
+    })();
   </script>
 </body>
-
 </html>

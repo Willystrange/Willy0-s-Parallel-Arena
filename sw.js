@@ -59,6 +59,8 @@ self.addEventListener('install', (event) => {
         '/Rosalie.html',
         '/maintenance.html',
         '/cadeau_exeption.html',
+        "/Cape_de_l'ombre.png",
+        '/Crystale.png',
       ]);
     })
   );

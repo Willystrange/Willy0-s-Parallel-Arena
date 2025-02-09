@@ -1,5 +1,5 @@
 // Définir la version du jeu
-const game_version = 'D.2.4.2.1';
+const game_version = '2.5';
 
 // Fonction pour obtenir les données utilisateur de localStorage
 function getUserData() {
@@ -24,17 +24,21 @@ function checkAndUpdateWeeks(userData) {
     for (let i = 1; i <= weeksElapsed + 1; i++) {
       if (!userData[`semaine${i}`]) {
         userData[`semaine${i}`] = true;
+      }
+      saveUserData(userData);
     }
-    saveUserData(userData);
   }
-}
 
-// Fonction pour ajuster aléatoirement les personnages
 
-// Vérifie si les données utilisateur existent, sinon initialise avec les valeurs par défaut
-if (!localStorage.getItem('userData')) {
-  localStorage.setItem('userData', JSON.stringify({
-    pass_XP: 0,
+
+  
+
+  // Fonction pour ajuster aléatoirement les personnages
+
+  // Vérifie si les données utilisateur existent, sinon initialise avec les valeurs par défaut
+  if (!localStorage.getItem('userData')) {
+    localStorage.setItem('userData', JSON.stringify({
+      pass_XP: 0,
       pass_level: 0,
       nbr_perso: 2,
       victoires: 0,
@@ -47,9 +51,10 @@ if (!localStorage.getItem('userData')) {
       fin_argent: 0,
       fin_trophees: 0,
       trophees: 0,
+      tropheesMax: 0,
       argent: 0,
       VICTOIRE: false,
-      version: '2.4.2',
+      version: '2.5',
       recompense: 0,
       perso_recompense: 0,
       xp_du_jour: 0,
@@ -101,6 +106,10 @@ if (!localStorage.getItem('userData')) {
       Sboonie_XP: 0,
       Sboonie_Level: 1,
       Sboonie_boost: 0,
+      Inconnu: 0,
+      Inconnu_XP: 0,
+      Inconnu_Level: 1,
+      Inconnu_boost: 0,
       Double_XP: 5,
       Double_XP_acheté: 0,
       Potion_de_Santé_acheté: 0,
@@ -109,6 +118,8 @@ if (!localStorage.getItem('userData')) {
       elixir_puissance_acheté: 0,
       armure_fer_acheté: 0,
       bouclier_solide_acheté: 0,
+      Cape_acheté: 0,
+      crystal_acheté: 0,
       lastDoubleXPCheck: 0,
       lastFraudeReset: 0,
       boutique_recompense: false,
@@ -153,5 +164,9 @@ if (!localStorage.getItem('userData')) {
       quete3_character: "",
 
       partie_commencee: false,
-  }));
-}}
+
+      parties_test: 0,
+      parties_weekend_test: 0,
+    }));
+  }
+}

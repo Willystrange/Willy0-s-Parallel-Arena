@@ -282,6 +282,11 @@
       /* Pour Internet Explorer et Edge */
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
 
 <body>
@@ -301,11 +306,7 @@
       <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
     </div>
   </div>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
+    <script>
 
     // Configuration Firebase
     const firebaseConfig = {
@@ -320,62 +321,36 @@
     };
 
     // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-    if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {
-          const fcp = entries[0].startTime;
-          console.log('First Contentful Paint (FCP):', fcp, 'ms');
-        }
-      });
+    firebase.initializeApp(firebaseConfig);
 
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
 
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (entry.entryType === 'first-input') {
-            const fid = entry.processingStart - entry.startTime;
-            console.log('First Input Delay (FID):', fid, 'ms');
+    const database = firebase.database();
+
+    const maintenanceStartRef = database.ref('maintenance/start');
+    const maintenanceEndRef = database.ref('maintenance/end'); 
+
+
+    function checkMaintenance() {
+      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+        .then(([startSnapshot, endSnapshot]) => {
+          const maintenanceStart = new Date(startSnapshot.val()); // Convertir la date de début
+          const maintenanceEnd = new Date(endSnapshot.val()); // Convertir la date de fin
+          const currentTime = new Date(); // Heure actuelle
+
+          // Vérifier si la maintenance est active
+          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+            window.location.href = 'maintenance.html'; // Rediriger vers maintenance.html si la maintenance est active
           }
+        })
+        .catch(error => {
+          console.error("Erreur lors de la récupération des données de maintenance:", error);
         });
-      });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
     }
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
+    checkMaintenance();
 
-    // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
-
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
-      const data = snapshot.val();
-      const maintenanceActive = data.active === 'oui';
-      const maintenanceTime = data.heure;
-
-      if (maintenanceActive && maintenanceTime) {
-        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-        const currentTime = new Date();
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-          window.location.href = 'maintenance.html';
-        }
-      }
-    });
-  </script>
-  <script>
+    // Vérifier la maintenance toutes les 10 secondes
+    setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
     document.addEventListener('DOMContentLoaded', function () {
       // Fonction pour récupérer les données utilisateur depuis localStorage
       function getUserData() {
@@ -465,17 +440,18 @@
       // Liste des personnages avec leurs caractéristiques de base
       const characters = [
         {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: 0.5, argent: 0, pv_max: 11100, attaque_originale: 463, defense_originale: 86, rarity: 'inhabituel'},
-        {name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115, rarity: 'rare'},
+        {name: "Cocobi", pv: 11100, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115, rarity: 'rare'},
         {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85, rarity: 'inhabituel'},
         {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68, rarity: 'epique'},
         {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: 0.5, argent: 0, pv_max: 10200, attaque_originale: 435, defense_originale: 105, rarity: 'epique'},
         {name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: 0, argent: 0, pv_max: 13800, attaque_originale: 350, defense_originale: 80, rarity: 'legendaire'},
         {name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: 0.5, argent: 0, pv_max: 10000, attaque_originale: 450, defense_originale: 100, rarity: 'legendaire'},
-        {name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 10700, attaque_originale: 440, defense_originale: 100, rarity: 'rare'},
+        {name: "Diva", pv: 11021, attaque: 475, defense: 100, spe: 0.5, argent: 0, pv_max: 11021, attaque_originale: 449, defense_originale: 100, rarity: 'rare'},
         {name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: 0.5, argent: 0, pv_max: 11500, attaque_originale: 440, defense_originale: 100, rarity: 'epique'},
         {name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: 0.5, argent: 0, pv_max: 9600, attaque_originale: 420, defense_originale: 80, rarity: 'inhabituel'},
         {name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: 0.5, argent: 0, pv_max: 10500, attaque_originale: 460, defense_originale: 85, rarity: 'epique'},
-        {name: "Sboonie", pv: 9900, attaque: 410, defense: 95, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 410, defense_originale: 95, rarity: 'commun'}
+        {name: "Sboonie", pv: 10200, attaque: 410, defense: 95, spe: 0.5, argent: 0, pv_max: 9900, attaque_originale: 410, defense_originale: 95, rarity: 'commun'},
+        {name: "Inconnu", pv: 11300, attaque: 435, defense: 83, spe: 0.25, argent: 0, pv_max: 11300, attaque_originale: 420, defense_originale: 75, rarity: "épique"}
       ];
 
       const characterList = document.getElementById("character-list");
@@ -533,10 +509,14 @@
           const button = document.createElement("button");
           button.classList.add("character-button");
           button.textContent = character.name;
+          const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
           // Vérifier si le personnage est débloqué ou non
-          if (userData[character.name] === 1) {
-            button.style.backgroundColor = "#ff4500"; // Mettre en orange
+            if (userData[character.name] === 1) {
+            button.style.backgroundColor = "#ff4500"; // Mettre en orange 
+            if (darkModeMediaQuery.matches) {
+              button.style.backgroundColor = "#2C3E50";
+            }
             button.onclick = function () {
               playerCharacter = character;
               displayStats(button, playerCharacter);
@@ -572,25 +552,15 @@
 
         // Calculer les statistiques basées sur le niveau actuel du personnage
         const levelKey = character.name + '_Level';
-        const currentLevel = userData[levelKey] || 1;
-        let increasedPV = Math.round(character.pv * (1 + ((0.01 * currentLevel) - 0.01) * 4));
-        let increasedAttaque = Math.round(character.attaque * (1 + ((0.01 * currentLevel) - 0.01) * 4));
-        let increasedDefense = Math.round(character.defense * (1 + ((0.01 * currentLevel) - 0.01) * 4));
-        let increasedattaque_originale = Math.round(character.attaque_originale * (1 + ((0.01 * currentLevel) - 0.01) * 4));
-        let increaseddefense_originale = Math.round(character.defense_originale * (1 + ((0.01 * currentLevel) - 0.01) * 4));
-
-        if (currentLevel >= 5) {
-          const boostType = Math.floor(Math.random() * 3) + 1;
-          if (boostType === 1) {
-            increasedAttaque = Math.round(increasedAttaque * 1.02);
-            increasedattaque_originale = increasedAttaque;
-          } else if (boostType === 2) {
-            increasedDefense = Math.round(increasedDefense * 1.02);
-            increaseddefense_originale = increasedDefense;
-          } else if (boostType === 3) {
-            increasedPV = Math.round(increasedPV * 1.02);
-          }
-        }
+        const currentLevel = userData[levelKey];
+        const pv_pts = userData[character.name + '_PV_pts'] || 0;
+        const attaque_pts = userData[character.name + '_attaque_pts'] || 0;
+        const defense_pts = userData[character.name + '_defense_pts'] || 0;
+        let increasedPV = Math.round((1 + pv_pts * 0.02) * character.pv);
+        let increasedAttaque = Math.round((1 + attaque_pts * 0.02) * character.attaque);
+        let increasedDefense = Math.round((1 + defense_pts * 0.02) * character.defense);
+        let increasedattaque_originale = Math.round((1 + attaque_pts * 0.02) * character.attaque);
+        let increaseddefense_originale = Math.round((1 + defense_pts * 0.02) * character.defense);
 
         statsDiv.innerHTML = `
           <h3>${character.name} (Niveau ${currentLevel})</h3>

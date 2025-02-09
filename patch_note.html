@@ -98,18 +98,169 @@
       .back-button:hover {
         background-color: #0056b3;
       }
+
+      .mail {
+        color: white;
+      }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
 
 <body>
   <div class="container">
+    <h1 id="version-25">Note de mise à jour - Version 2.5</h1>
+    <ul id="notes-25" class="note-list">
+      <li><strong>Nouveautés du Passe de Combat :</strong>
+        <ul>
+          <li><strong>Parallel Pass 3</strong> : Découvrez les nouvelles récompenses et défis de cette saison !</li>
+          <li><strong>Arrivée du Parallel Pass 3 Premium</strong> : Disponible pour 1050 points, ce pass premium propose
+            encore
+            plus de récompenses exclusives dont un personange épique !</li>
+        </ul>
+      </li>
+      <li><strong>Corrections générales :</strong>
+        <ul>
+          <li>De nombreux bugs ont été corrigés.</li>
+          <li>Correction d’un problème empêchant les personnages <strong>Rosalie</strong> et <strong>Sboonie</strong>
+            d'être améliorés dans la page d'amélioration.</li>
+          <li>Adaptation de plusieurs pages au mode paysage :
+            <ul>
+              <li><strong>Passe de combat</strong></li>
+              <li><strong>Menu principal</strong></li>
+              <li><strong>Page d’amélioration</strong> : ajout d'une barre de recherche pour trouver facilement un
+                personnage. La fenêtre d’un personnage est désormais intégralement visible sans défilement nécessaire.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><strong>Équilibrage des personnages :</strong>
+        <ul>
+          <li><strong>Diva</strong>
+            <ul>
+              <li><strong>Attaque</strong> : Augmentée à 475 (au lieu de 449).</li>
+              <li><strong>Capacité spéciale</strong> : Réduction de l'attaque de l'adversaire portée à 25% pour les
+                trois prochains tours.</li>
+            </ul>
+          </li>
+          <li><strong>Sboonie</strong>
+            <ul>
+              <li><strong>PV</strong> : Augmentés à 10,200 (au lieu de 9,900).</li>
+              <li><strong>Capacité spéciale</strong> :
+                <ul>
+                  <li>Régénération augmentée à 8% de ses PV maximum (au lieu de 5%).</li>
+                  <li>Ajout d'une capacité offensive infligeant 50 points de dégâts à l'adversaire.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>Cocobi</strong>
+            <ul>
+              <li><strong>PV</strong> : Augmentés à 11,000 (au lieu de 10,800).</li>
+              <li><strong>Défense</strong> : Maintenue à 115.</li>
+              <li><strong>Capacité spéciale</strong> : Réduction des PV de l'adversaire portée à 12% de ses PV maximum
+                (au lieu de 10%).</li>
+            </ul>
+          </li>
+          <li><strong>L’Inconnu</strong>
+            <ul>
+              <li><strong>Mode Survie</strong> : Les boosts d'attaque et de défense sont limités à 4, soit +100
+                d'attaque et de défense. Au-delà, les boosts n'auront pas d'effet.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><strong>Corrections spécifiques :</strong>
+        <ul>
+          <li>Correction d’un bug où la capacité spéciale de <strong>Sboonie</strong> retirait 25% de l'attaque de
+            l'adversaire au lieu de 15%.</li>
+          <li>Correction d’un bug où le super de <strong>Cocobi</strong> retirait seulement 8% des PV max de
+            l'adversaire au lieu de 10%.</li>
+          <li><strong>Mode Classique</strong> : réduction de la difficulté des adversaires à des niveaux élevés pour les
+            rendre plus abordables.</li>
+          <li>Résolution du problème d'affichage de nombres décimaux dans les PV en mode Classique et Survie.</li>
+        </ul>
+      </li>
+      <li><strong>Ajouts d’objets :</strong>
+        <ul>
+          <li><strong>Cape de l'ombre</strong>
+            <ul>
+              <li><strong>Prix</strong> : 55 points.</li>
+              <li><strong>Effet</strong> : Ignore tous les dégâts de la prochaine attaque directe de l'adversaire.</li>
+              <li><strong>Utilisation</strong> : 2 fois par partie maximum.</li>
+            </ul>
+          </li>
+          <li><strong>Cristal de renouveau</strong>
+            <ul>
+              <li><strong>Prix</strong> : 50 points.</li>
+              <li><strong>Effet</strong> : Recharge instantanément 0.8 points de capacité spéciale.</li>
+              <li><strong>Utilisation</strong> : 2 fois par partie.</li>
+            </ul>
+          </li>
+          <li>Ajout des nouveaux objets dans les récompenses aléatoires.</li>
+          <li>Correction de l’attribution des boucliers dans les récompenses aléatoires.</li>
+          <li>Correction d’un bug pouvant afficher un message d'erreur au lieu de donner une récompense aléatoire,
+            entraînant parfois le plantage du jeu.</li>
+        </ul>
+      </li>
+      <li><strong>Modifications de la boutique :</strong>
+        <ul>
+          <li>La boutique a été retravaillée pour un affichage plus clair sans options de quantité directement visibles
+            (x1, x3, x5). Désormais, la quantité d'un objet se sélectionne dans une section dédiée sous l’affichage du
+            stock.
+            <ul>
+              <li><strong>Promotions</strong> :
+                <ul>
+                  <li>-8% pour 3 unités</li>
+                  <li>-13% pour 5 unités</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>Ajout d'une barre de recherche pour trouver plus facilement un objet dans la boutique.</li>
+        </ul>
+      </li>
+      <li><strong>Utilisation des objets en combat :</strong>
+        <ul>
+          <li><strong>Règles d’utilisation</strong> :
+            <ul>
+              <li>Un seul objet peut être utilisé par tour.</li>
+              <li>Limite d’utilisation par partie :
+                <ul>
+                  <li><strong>Amulette de régénération</strong> : 1 utilisation.</li>
+                  <li><strong>Armure de fer</strong> : 2 utilisations.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>L’interface affiche désormais un maximum de 3 objets par tour.</li>
+        </ul>
+      </li>
+      <li><strong>⚠️Attention⚠️</strong>
+        <ul>
+          <li>Nous envisageons de supprimer les fonctionnalités « Sauvegarder les données » et « Importer une sauvegarde
+            ». Nous vous invitons à partager votre opinion sur cette modification en nous contactant via la section «
+            Contacter le développeur » ou par email à l'adresse suivante : <a
+              href="mailto:willyxstrange@gmail.com">willyxstrange@gmail.com</a>. Si ce changement venait à arriver, il
+            arriverais avec la prochaine mise à jour et vous serez averti au moins 3 jours avant dans la section «
+            actualité » du menu principal. Nous apprécions vos retours et vos suggestions concernant notre jeu, et nous
+            serions ravis de bénéficier de votre aide pour l'améliorer !</li>
+        </ul>
+      </li>
+    </ul>
     <h1 id="version-2421">Note de mise à jour - Version 2.4.2.1</h1>
     <ul id="notes-2421" class="note-list">
       <li><strong>Corrections :</strong>
         <ul>
-          <li>Correction du bug qui affichait les mêmes quêtes que lors du précédent pass. Les quêtes ont été réinitialisées et une compensation de 1000 XP sera attribuée pour le pass après la mise à jour.</li>
-          <li>Correction du bug qui permettait d'utiliser la défense même avec 0 énergie spéciale en mode classique.</li>
+          <li>Correction du bug qui affichait les mêmes quêtes que lors du précédent pass. Les quêtes ont été
+            réinitialisées et une compensation de 1000 XP sera attribuée pour le pass après la mise à jour.</li>
+          <li>Correction du bug qui permettait d'utiliser la défense même avec 0 énergie spéciale en mode classique.
+          </li>
         </ul>
       </li>
     </ul>
@@ -117,31 +268,44 @@
     <ul id="notes-242" class="note-list">
       <li><strong>Corrections et améliorations :</strong>
         <ul>
-          <li>Correction d’un bug dans la boutique, la page d'amélioration, et la page des statistiques des personnages où le cercle d’indication de navigation n’apparaissait pas.</li>
+          <li>Correction d’un bug dans la boutique, la page d'amélioration, et la page des statistiques des personnages
+            où le cercle d’indication de navigation n’apparaissait pas.</li>
           <li>Correction d’un problème d’actualisation des objets dans la boutique après achat.</li>
         </ul>
       </li>
       <li><strong>Nouvelles fonctionnalités :</strong>
         <ul>
-          <li><strong>Parallel Pass 2 :</strong> Le Parallel Pass 2 remplace le précédent et sera disponible du 05 octobre au 09 novembre 2024. Ce Pass ne contient pas de personnage en raison d’une réduction de notre rythme de développement liée à la reprise de nos études.</li>
-          <li><strong>Affichage de la rareté :</strong> La rareté des personnages est désormais visible dans la case des statistiques, aussi bien sur la page de sélection que sur celle des personnages.</li>
-          <li><strong>Filtre par rareté :</strong> Un filtre « rareté » a été ajouté sur la page de sélection des personnages.</li>
-          <li><strong>Création de compte :</strong> Il est désormais possible de créer un compte pour synchroniser votre progression sur différents appareils.</li>
-          <li><strong>Sauvegarde automatique :</strong> Les données de jeu sont désormais sauvegardées automatiquement à chaque session.</li>
+          <li><strong>Parallel Pass 2 :</strong> Le Parallel Pass 2 remplace le précédent et sera disponible du 05
+            octobre au 09 novembre 2024. Ce Pass ne contient pas de personnage en raison d’une réduction de notre rythme
+            de développement liée à la reprise de nos études.</li>
+          <li><strong>Affichage de la rareté :</strong> La rareté des personnages est désormais visible dans la case des
+            statistiques, aussi bien sur la page de sélection que sur celle des personnages.</li>
+          <li><strong>Filtre par rareté :</strong> Un filtre « rareté » a été ajouté sur la page de sélection des
+            personnages.</li>
+          <li><strong>Création de compte :</strong> Il est désormais possible de créer un compte pour synchroniser votre
+            progression sur différents appareils.</li>
+          <li><strong>Sauvegarde automatique :</strong> Les données de jeu sont désormais sauvegardées automatiquement à
+            chaque session.</li>
         </ul>
       </li>
       <li><strong>Modifications et ajustements :</strong>
         <ul>
-          <li><strong>Défense en mode classique :</strong> Lorsqu’un joueur se défend, il perd désormais 0,1 point de charge de capacité spéciale au lieu d’en gagner.</li>
-          <li><strong>Rééquilibrage des statistiques :</strong> Les changements de statistiques liés au niveau du joueur ou de l’adversaire sont moins significatifs pour maintenir un certain équilibre.</li>
-          <li><strong>Interface améliorée :</strong> La page des paramètres a été retravaillée pour offrir une meilleure expérience visuelle.</li>
-          <li><strong>Ajustements mineurs :</strong> Divers ajustements ont été réalisés pour améliorer l'affichage et la fluidité.</li>
+          <li><strong>Défense en mode classique :</strong> Lorsqu’un joueur se défend, il perd désormais 0,1 point de
+            charge de capacité spéciale au lieu d’en gagner.</li>
+          <li><strong>Rééquilibrage des statistiques :</strong> Les changements de statistiques liés au niveau du joueur
+            ou de l’adversaire sont moins significatifs pour maintenir un certain équilibre.</li>
+          <li><strong>Interface améliorée :</strong> La page des paramètres a été retravaillée pour offrir une meilleure
+            expérience visuelle.</li>
+          <li><strong>Ajustements mineurs :</strong> Divers ajustements ont été réalisés pour améliorer l'affichage et
+            la fluidité.</li>
         </ul>
       </li>
       <li><strong>Gestion des comptes :</strong>
         <ul>
-          <li><strong>Suppression de données :</strong> La suppression des données n’est plus possible directement depuis la page des statistiques.</li>
-          <li><strong>Gestion des infractions :</strong> Nous nous réservons le droit de suspendre ou supprimer tout compte en cas de violation des règles ou sur demande.</li>
+          <li><strong>Suppression de données :</strong> La suppression des données n’est plus possible directement
+            depuis la page des statistiques.</li>
+          <li><strong>Gestion des infractions :</strong> Nous nous réservons le droit de suspendre ou supprimer tout
+            compte en cas de violation des règles ou sur demande.</li>
         </ul>
       </li>
     </ul>
@@ -345,35 +509,8 @@
         </ul>
       </li>
     </ul>
-    <h1 id="version-2372">Note de mise à jour - Version 2.3.72</h1>
-    <ul id="notes-2372" class="note-list">
-      <li><strong>Optimisations :</strong>
-        <ul>
-          <li>Optimisations diverses.</li>
-        </ul>
-      </li>
-      <li><strong>Modifications :</strong>
-        <ul>
-          <li>Modifications apportées à la page d'actualités.</li>
-        </ul>
-      </li>
-      <li><strong>Corrections :</strong>
-        <ul>
-          <li>Correction d'un léger bogue d'affichage dans la page des noted de mises a jour.</li>
-          <li>Correction d'un bogue empêchant l'adaptation de la page des statistiques au mode de couleur de l'appareil.
-          </li>
-          <li>Correction de la couleur du bouton « Télécharger » dans les paramètres en mode sombre.</li>
-        </ul>
-      </li>
-    </ul>
   </div>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
-
-    // Configuration Firebase
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
       authDomain: "willy0s-parallel-arena.firebaseapp.com",
@@ -385,64 +522,38 @@
       measurementId: "G-85B8R4NKNM"
     };
 
-    // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
-    if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {
-          const fcp = entries[0].startTime;
-          console.log('First Contentful Paint (FCP):', fcp, 'ms');
-        }
-      });
+    firebase.initializeApp(firebaseConfig);
 
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
 
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (entry.entryType === 'first-input') {
-            const fid = entry.processingStart - entry.startTime;
-            console.log('First Input Delay (FID):', fid, 'ms');
+    const database = firebase.database();
+
+
+    const maintenanceStartRef = database.ref('maintenance/start');
+    const maintenanceEndRef = database.ref('maintenance/end');
+
+
+    function checkMaintenance() {
+      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+        .then(([startSnapshot, endSnapshot]) => {
+          const maintenanceStart = new Date(startSnapshot.val()); // Convertir la date de début
+          const maintenanceEnd = new Date(endSnapshot.val()); // Convertir la date de fin
+          const currentTime = new Date(); // Heure actuelle
+
+          // Vérifier si la maintenance est active
+          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+            window.location.href = 'maintenance.html'; // Rediriger vers maintenance.html si la maintenance est active
           }
+        })
+        .catch(error => {
+          console.error("Erreur lors de la récupération des données de maintenance:", error);
         });
-      });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
     }
 
-    // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
+    checkMaintenance();
 
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
-      const data = snapshot.val();
-      const maintenanceActive = data.active === 'oui';
-      const maintenanceTime = data.heure;
-
-      if (maintenanceActive && maintenanceTime) {
-        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-        const currentTime = new Date();
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-          window.location.href = 'maintenance.html';
-        }
-      }
-    });
-  </script>
-
-  <script>
+    // Vérifier la maintenance toutes les 10 secondes
+    setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
     function getUserData() {
       const userData = JSON.parse(localStorage.getItem('userData'));
       return userData;

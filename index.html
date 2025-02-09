@@ -45,6 +45,8 @@
   <link rel="prefetch" href="/defense.png">
   <link rel="prefetch" href="/actualites.html">
   <link rel="prefetch" href="/passe_fond.jpeg">
+  <link rel="prefetch" href="/Cape_de_l'ombre.png">
+  <link rel="prefetch" href="/Crystale_de_renouveau.png">
   <style>
     body {
       display: flex;
@@ -132,42 +134,55 @@
     }
   </style>
   <link rel="manifest" href="/manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+
 </head>
 
 <body>
-    <div id="rules-container" style="display: flex; justify-content: center; align-items: center; position: absolute; top: 0; left: 0; width: 100%; height: 80vh; background-color: rgba(0, 0, 0, 0.8); z-index: 10;">
-      <div style="background-color: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; text-align: center;">
-        <h2>Règles de Willy0’s Parallel Arena</h2>
-        <p>Veuillez lire et accepter les règles avant de jouer :</p>
-        <ul style="text-align: left; max-height: 300px; overflow-y: scroll; padding-left: 20px;">
-          <li><strong>Accès au jeu :</strong> Willy0’s Parallel Arena est un jeu de combat au tour par tour totalement gratuit. Il est accessible à tous, sans achats intégrés.</li>
-          <li><strong>Utilisation du compte :</strong> Chaque joueur est responsable de la sécurité de son compte. Ne partagez pas vos informations de connexion.</li>
-          <li><strong>Fair-play :</strong> Il est strictement interdit de tricher ou d'exploiter des failles du jeu pour obtenir un avantage injuste. Toute utilisation de logiciels tiers, bots, ou scripts automatisés est interdite.</li>
-          <li><strong>Mises à jour :</strong> Le jeu est régulièrement mis à jour afin d'améliorer l'expérience et de corriger les bugs. Veuillez vous assurer que vous utilisez toujours la dernière version du jeu.</li>
-          <li><strong>Boutique :</strong> Bien que le jeu dispose d'une boutique, tous les contenus disponibles sont gratuits et ne nécessitent aucun achat.</li>
-          <li><strong>Respect des règles du jeu :</strong> Même s'il n'y a pas d'interactions avec d'autres joueurs pour le moment, il est important de respecter le déroulement naturel des combats contre les bots.</li>
-          <li><strong>Collecte de données :</strong> Nous collectons certaines données pour améliorer votre expérience de jeu et à des fins de statistiques. Ces données sont recueillies dans le respect de votre vie privée et conformément à notre politique de confidentialité.</li>
-          <li><strong>Sanctions :</strong> Tout manquement aux présentes règles peut entraîner des avertissements, des suspensions temporaires ou permanentes du compte.</li>
-        </ul>
-        <label>
-          <input type="checkbox" id="accept-rules" /> J'accepte les règles.
-        </label>
-        <br />
-        <button id="start-game" disabled style="margin-top: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px;">Commencer</button>
-      </div>
+  <div id="rules-container"
+    style="display: flex; justify-content: center; align-items: center; position: absolute; top: 0; left: 0; width: 100%; height: 80vh; background-color: rgba(0, 0, 0, 0.8); z-index: 10;">
+    <div
+      style="background-color: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; text-align: center;">
+      <h2>Règles de Willy0’s Parallel Arena</h2>
+      <p>Veuillez lire et accepter les règles avant de jouer :</p>
+      <ul style="text-align: left; max-height: 300px; overflow-y: scroll; padding-left: 20px;">
+        <li><strong>Accès au jeu :</strong> Willy0’s Parallel Arena est un jeu de combat au tour par tour totalement
+          gratuit. Il est accessible à tous, sans achats intégrés.</li>
+        <li><strong>Utilisation du compte :</strong> Chaque joueur est responsable de la sécurité de son compte. Ne
+          partagez pas vos informations de connexion.</li>
+        <li><strong>Fair-play :</strong> Il est strictement interdit de tricher ou d'exploiter des failles du jeu pour
+          obtenir un avantage injuste. Toute utilisation de logiciels tiers, bots, ou scripts automatisés est interdite.
+        </li>
+        <li><strong>Mises à jour :</strong> Le jeu est régulièrement mis à jour afin d'améliorer l'expérience et de
+          corriger les bugs. Veuillez vous assurer que vous utilisez toujours la dernière version du jeu.</li>
+        <li><strong>Boutique :</strong> Bien que le jeu dispose d'une boutique, tous les contenus disponibles sont
+          gratuits et ne nécessitent aucun achat.</li>
+        <li><strong>Respect des règles du jeu :</strong> Même s'il n'y a pas d'interactions avec d'autres joueurs pour
+          le moment, il est important de respecter le déroulement naturel des combats contre les bots.</li>
+        <li><strong>Collecte de données :</strong> Nous collectons certaines données pour améliorer votre expérience de
+          jeu et à des fins de statistiques. Ces données sont recueillies dans le respect de votre vie privée et
+          conformément à notre politique de confidentialité.</li>
+        <li><strong>Sanctions :</strong> Tout manquement aux présentes règles peut entraîner des avertissements, des
+          suspensions temporaires ou permanentes du compte.</li>
+      </ul>
+      <label>
+        <input type="checkbox" id="accept-rules" /> J'accepte les règles.
+      </label>
+      <br />
+      <button id="start-game" disabled
+        style="margin-top: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px;">Commencer</button>
     </div>
+  </div>
 
-    <div id="container" style="display: none;">
-      <div id="logo">S</div>
-    </div>
+  <div id="container" style="display: none;">
+    <div id="logo">S</div>
+  </div>
   <script src="localStorage.js"></script>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
-
-    // Configuration Firebase
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
       authDomain: "willy0s-parallel-arena.firebaseapp.com",
@@ -179,75 +194,50 @@
       measurementId: "G-85B8R4NKNM"
     };
 
-    // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
-    if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {
-          const fcp = entries[0].startTime;
-          console.log('First Contentful Paint (FCP):', fcp, 'ms');
-        }
-      });
+    firebase.initializeApp(firebaseConfig);
 
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
 
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (entry.entryType === 'first-input') {
-            const fid = entry.processingStart - entry.startTime;
-            console.log('First Input Delay (FID):', fid, 'ms');
+    const database = firebase.database();
+
+
+    const maintenanceStartRef = database.ref('maintenance/start');
+    const maintenanceEndRef = database.ref('maintenance/end');
+
+
+    function checkMaintenance() {
+      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+        .then(([startSnapshot, endSnapshot]) => {
+          const maintenanceStart = new Date(startSnapshot.val()); // Convertir la date de début
+          const maintenanceEnd = new Date(endSnapshot.val()); // Convertir la date de fin
+          const currentTime = new Date(); // Heure actuelle
+
+          // Vérifier si la maintenance est active
+          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+            window.location.href = 'maintenance.html'; // Rediriger vers maintenance.html si la maintenance est active
           }
+        })
+        .catch(error => {
+          console.error("Erreur lors de la récupération des données de maintenance:", error);
         });
-      });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
     }
 
-    // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
+    checkMaintenance();
 
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
-      const data = snapshot.val();
-      const maintenanceActive = data.active === 'oui';
-      const maintenanceTime = data.heure;
-
-      if (maintenanceActive && maintenanceTime) {
-        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-        const currentTime = new Date();
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-          // Rediriger après la première partie de l'animation
-          document.getElementById('container').addEventListener('animationend', function (event) {
-            if (event.animationName === 'fadeAndLift') {
-              window.location.href = 'maintenance.html';
-            }
-          });
-        } else {
-          // Rediriger vers le menu principal si la maintenance n'est pas active ou l'heure est passée
-          document.getElementById('container').addEventListener('animationend', function (event) {
-            if (event.animationName === 'fadeAndLift') {
-              window.location.href = 'menu_principal.html';
-            }
-          });
+    // Vérifier la maintenance toutes les 10 secondes
+    setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
+    document.getElementById('container').addEventListener('animationend', function (event) {
+      if (event.animationName === 'fadeAndLift') {
+        window.location.href = 'maintenance.html';
+      } else {
+      // Rediriger vers le menu principal si la maintenance n'est pas active ou l'heure est passée
+      document.getElementById('container').addEventListener('animationend', function (event) {
+        if (event.animationName === 'fadeAndLift') {
+          window.location.href = 'menu_principal.html';
         }
-      }
-    });
-  </script>
-  <script>
+      });
+    }});
+  
     const rulesContainer = document.getElementById('rules-container');
     const startGameButton = document.getElementById('start-game');
     const acceptRulesCheckbox = document.getElementById('accept-rules');
@@ -278,18 +268,21 @@
       rulesContainer.style.display = 'none';
       gameContainer.style.display = 'flex';
     });
-      const connection = JSON.parse(localStorage.getItem('connection')); // Transformer la chaîne en objet
-      document.getElementById('container').addEventListener('animationend', function (event) {
-        if (event.animationName === 'fadeAndLift') {
-          if (!connection || !connection.est_connecte) { // Vérifier si l'objet existe et la connexion est valide
-            window.location.href = 'connection.html';
-          } else {
-            window.location.href = 'menu_principal.html';
-          }
+    const connection = JSON.parse(localStorage.getItem('connection')); // Transformer la chaîne en objet
+    document.getElementById('container').addEventListener('animationend', function (event) {
+      if (event.animationName === 'fadeAndLift') {
+        if (!connection || !connection.est_connecte) { // Vérifier si l'objet existe et la connexion est valide
+          window.location.href = 'connection.html';
+        } else {
+          window.location.href = 'menu_principal.html';
         }
-      });
+      }
+    });
   </script>
   <script>
+
+    
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then((registration) => {
@@ -299,14 +292,36 @@
         });
       });
     }
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("firebase-messaging-sw.js")
+            .then((registration) => {
+                console.log("✅ Service Worker enregistré :", registration);
+            })
+            .catch((error) => {
+                console.error("❌ Erreur Service Worker :", error);
+            });
+    }
+
     
+
+    function getAIData() {
+      let AIData_weekend = localStorage.getItem('historicalData_weekend');
+      
+      let AIData = localStorage.getItem('historicalData');
+      if (!AIData) {
+        AIData = [[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,1,0,100],[0,1,100,2,1,0,80],[0,1,100,0,1,0,80],[0,1,100,0,1,0,80],[0,0,100,0,0,0,80],[1,0,80,0,0,0,80],[1,0,80,0,0,0,60],[0,0,80,2,0,0,60],[0,0,80,0,1,0,60],[0,1,80,1,1,0,60],[0,1,80,0,1,0,40],[0,1,80,0,1,0,40],[0,1,60,0,1,0,40],[1,1,60,0,1,0,40],[0,1,60,1,1,0,40],[1,1,60,0,1,0,40],[0,1,60,2,1,0,20],[0,1,60,0,1,0,20],[0,1,60,0,1,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,0,0,100],[0,1,100,2,0,0,100],[0,1,100,0,0,0,80],[0,1,100,0,0,0,80],[0,1,100,1,1,0,80],[0,1,100,0,0,0,80],[0,1,80,0,0,0,80],[1,1,80,0,0,0,80],[0,0,80,2,0,0,60],[0,0,80,0,1,0,60],[0,0,80,0,0,0,60],[0,0,60,0,0,0,60],[1,0,60,0,0,4,60],[1,0,60,0,0,4,60],[0,1,60,1,1,0,60],[1,1,60,0,1,0,60],[0,1,60,2,1,0,40],[0,1,60,0,1,0,40],[0,1,40,0,1,0,40],[0,0,40,0,0,0,40],[1,0,40,0,0,0,20],[0,0,40,2,0,0,20],[0,0,40,0,0,0,20],[0,1,20,1,1,0,20],[0,1,20,0,0,0,20],[0,1,20,0,0,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,0,0,100],[0,1,100,2,0,0,80],[0,1,100,0,0,0,80],[0,1,100,0,0,0,80],[0,1,80,1,1,0,80],[0,1,80,0,1,0,80],[0,1,80,0,1,0,80],[1,1,80,0,1,0,60],[0,1,80,1,1,0,60],[1,1,80,0,1,0,60],[0,1,60,2,1,0,60],[0,1,60,0,1,0,40],[0,1,60,0,1,0,40],[0,1,60,1,1,0,40],[0,1,60,0,1,0,40],[0,1,60,0,1,0,40],[1,1,40,0,0,0,40],[0,0,40,2,0,0,20],[0,0,40,0,0,0,20],[0,0,40,0,0,4,20],[0,0,40,0,0,2,20],[0,1,20,1,1,1,20],[0,1,20,0,1,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,1,0,100],[1,1,100,0,1,0,100],[0,1,100,2,1,0,80],[0,0,100,0,1,0,80],[0,1,80,1,1,0,80],[0,1,80,0,1,0,80],[0,1,80,0,1,0,80],[0,1,80,0,1,0,80],[1,0,80,0,0,0,80],[0,0,80,2,0,0,60],[0,0,60,0,0,0,60],[0,0,60,0,0,4,60],[0,0,60,0,0,2,60],[0,1,60,1,1,1,60],[0,1,60,0,1,0,60],[1,1,60,0,1,0,40],[0,1,60,2,0,0,40],[0,0,40,0,0,0,40],[0,0,40,0,0,0,40],[0,0,40,0,0,0,20],[0,1,40,1,1,0,20],[0,1,40,0,0,0,20],[1,1,40,0,0,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,0,0,100],[0,1,100,2,0,0,100],[0,0,100,0,0,0,80],[0,0,100,0,0,4,100],[0,0,100,0,0,2,80],[0,1,80,1,1,1,80],[0,1,80,0,1,0,80],[1,1,80,0,1,0,80],[0,1,80,2,0,0,60],[0,1,80,0,0,0,60],[0,0,60,0,0,0,60],[0,0,60,0,0,4,60],[1,0,60,0,0,1,60],[0,1,60,1,0,0,60],[1,1,60,0,1,0,60],[0,1,60,2,1,0,40],[0,1,60,0,1,0,40],[0,1,60,0,1,0,40],[0,1,40,0,0,0,40],[1,0,40,0,0,0,40],[0,0,40,2,0,0,20],[0,0,40,0,0,0,20],[0,1,40,1,1,0,20],[0,1,40,0,0,0,20],[0,1,20,0,0,0,20]];
+        localStorage.setItem('historicalData', JSON.stringify(AIData));
+      }
+    }
+    getAIData();
+
+
     function getUserData() {
       let userData = localStorage.getItem('userData');
       if (!userData) {
         // Initialiser les données utilisateur si elles n'existent pas encore
         userData = {
-          est_connecte: false,
-          userid: "",
           pass_XP: 0,
           pass_level: 0,
           nbr_perso: 2,
@@ -322,7 +337,7 @@
           trophees: 0,
           argent: 0,
           VICTOIRE: false,
-          version: '2.4.2.1',
+          version: '2.5',
           recompense: 0,
           perso_recompense: 0,
           xp_du_jour: 0,
@@ -374,6 +389,10 @@
           Sboonie_XP: 0,
           Sboonie_Level: 1,
           Sboonie_boost: 0,
+          Inconnu: 0,
+          Inconnu_XP: 0,
+          Inconnu_Level: 1,
+          Inconnu_boost: 0,
           Double_XP: 5,
           Double_XP_acheté: 0,
           Potion_de_Santé_acheté: 0,
@@ -382,6 +401,8 @@
           elixir_puissance_acheté: 0,
           armure_fer_acheté: 0,
           bouclier_solide_acheté: 0,
+          Cape_acheté: 0,
+          crystal_acheté: 0,
           lastDoubleXPCheck: 0,
           lastFraudeReset: 0,
           boutique_recompense: false,
@@ -426,6 +447,8 @@
           quete3_character: "",
 
           partie_commencee: false,
+          parties_test: 0,
+          parties_weekend_test: 0,
         };
 
         localStorage.setItem('userData', JSON.stringify(userData));

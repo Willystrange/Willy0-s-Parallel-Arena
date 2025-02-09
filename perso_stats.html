@@ -11,53 +11,42 @@
     body {
       text-align: center;
       font-family: 'Arial', sans-serif;
-
       background-size: cover;
       color: #ffffff;
       margin: 0;
       padding: 0;
-      position: relative;
-      overflow: hidden;
-      height: 100vh;
     }
 
     .content {
-      overflow: auto;
-      /* Permet le défilement dans les conteneurs spécifiques */
-      height: 100vh;
-      /* Ajuster la hauteur selon le besoin */
-    }
-
-    .hidden {
-      display: none;
+      overflow-y: auto;
+      height: calc(100vh - 60px);
+      /* Ajustement pour exclure la barre de navigation */
+      padding: 20px 10px;
     }
 
     .title {
-      font-size: 48px;
-      margin-bottom: 20px;
-      padding-top: 50px;
+      font-size: 32px;
+      margin-bottom: 15px;
+      padding-top: 10px;
       text-shadow: 2px 2px 4px #000000;
     }
 
     .character-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      margin: 20px;
-      margin-bottom: 50px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
     }
 
     .character {
       background-color: rgba(0, 0, 0, 0.5);
-      padding: 15px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: transform 1.5s;
+      transition: transform 0.3s;
     }
 
     .character.unlocked {
       background-color: rgba(255, 69, 0, 1);
-      /* Couleur verte pour les personnages débloqués */
     }
 
     .character:hover {
@@ -65,19 +54,24 @@
     }
 
     .stats {
-      display: none; /* Cache par défaut */
+      display: none;
+      /* Cache par défaut */
       background-color: rgba(255, 255, 255, 0.9);
       color: #000;
       padding: 20px;
       border-radius: 10px;
-      position: absolute; /* Utilisez absolute pour mieux contrôler le centrage */
-      top: 32%; /* Centre verticalement */
-      left: 5%; /* Centre horizontalement */
-      transform: translate(-50%, -50%); /* Ajuste le centrage */
-      width: 80%; /* Largeur ajustable */
+      position: absolute;
+      top: 32%;
+      /* Centre verticalement */
+
+      text-align: left;
+      /* Alignement du texte à gauche */
+      width: 80%;
+      /* Largeur ajustable */
       max-width: 500px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      z-index: 1000; /* Assure que la boîte est au-dessus des autres éléments */
+      z-index: 1000;
+      /* Assure que la boîte est au-dessus des autres éléments */
     }
 
     .stats.show {
@@ -95,18 +89,17 @@
       align-items: center;
       padding: 0;
       background-color: #f0f0f0;
-      /* Couleur de fond pour le mode clair */
+      /* Couleur de fond */
       position: fixed;
-      /* Fixe la barre au bas de l'écran */
+      /* Fixe la barre au bas de l'Ã©cran */
       bottom: 0;
-      /* Aligne la barre au bas de l'écran */
       left: 0;
       width: 100%;
-      /* Prend toute la largeur de l'écran */
+      /* Prend toute la largeur */
       box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-      /* Optionnel : ajoute une ombre pour plus de visibilité */
+      /* Ombre optionnelle */
       z-index: 1000;
-      /* Assure que la barre reste au-dessus des autres éléments */
+      /* Toujours au-dessus des autres Ã©lÃ©ments */
     }
 
     .footer-icon {
@@ -137,83 +130,86 @@
       opacity: 1;
       /* Assure que l'icône reste visible au survol */
     }
-    .slide-in-fwd-center {
-      -webkit-animation: slide-in-fwd-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-      animation: slide-in-fwd-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+
+    .button-improve {
+      background-color: #ff4500;
+      /* Couleur orange */
+      color: #ffffff;
+      /* Texte blanc */
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, transform 0.2s;
     }
 
-    @keyframes slide-in-fwd-center {
-      0% {
-        transform: translateZ(-1400px);
-        opacity: 0;
-      }
-      100% {
-        transform: translateZ(0);
-        opacity: 1;
-      }
+    .button-improve:hover {
+      background-color: #ff6347;
+      /* Couleur plus claire au survol */
+      transform: scale(1.05);
+      /* Effet d'agrandissement */
     }
 
-    /* Styles pour le mode sombre */
+    /* Bouton dans le mode sombre */
     @media (prefers-color-scheme: dark) {
+      .button-improve {
+        background-color: #333333;
+        /* Gris foncé */
+        color: #e0e0e0;
+        /* Texte gris clair */
+        border: 1px solid #444444;
+        /* Bordure pour le contraste */
+      }
+
+      .button-improve:hover {
+        background-color: #444444;
+        /* Couleur plus claire au survol */
+      }
+    }
+
+
+    /* Mode sombre */
+    @media (prefers-color-scheme: dark) {
+      .perso-icon img {
+        border: 2px solid #2C3E50;
+        /* Bordure colorée autour de l'icône */
+      }
+
       body {
         background-color: #000000;
         color: #e0e0e0;
       }
 
-      .content {
-        background-color: #000000;
-      }
-
-      .title {
-        color: #ffffff;
-        text-shadow: 2px 2px 4px #000000;
-      }
-
       .character {
-        background-color: #333333;
+        background-color: #222;
         color: #e0e0e0;
-        border: 1px solid #444444;
       }
 
       .character.unlocked {
-        background-color: #000000;
-        color: #ffffff;
-        border: 1px solid #444444;
+        background-color: #2C3E50;
       }
 
       .stats {
         background-color: rgba(0, 0, 0, 0.9);
         color: #e0e0e0;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
       }
 
       .footer {
         background-color: #333333;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.5);
       }
 
       .footer-icon img {
-        filter: invert(1);
+        filter: brightness(0.8);
       }
-
-      .perso-icon img {
-        border: 2px solid #ff4500;
-      }
-    }
-
-    .content::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Pour Firefox */
-    .content {
-      scrollbar-width: none;
-    }
-
-    /* Pour IE et Edge */
-    .content {
-      -ms-overflow-style: none;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
 
 <body>
@@ -225,31 +221,22 @@
     <div class="stats">
       <!-- Les statistiques seront affichées ici -->
     </div>
-  <div class="footer">
-      <button class="footer-icon" onclick="viewUpgrades()">
-        <img src="Icon-amelioration.png" alt="Améliorations">
-      </button>
-      <button class="footer-icon perso-icon" onclick="viewCharacters()">
-        <img src="Icon-personnage.png" alt="Personnages">
-      </button>
-      <button class="footer-icon" onclick="showMainMenu()">
-        <img src="Icon-menu.png" alt="Menu Principal">
-      </button>
-      <button class="footer-icon" onclick="goToPasse()">
-        <img src="Icon-passe.png" alt="Passe de combat">
-      </button>
-      <button class="footer-icon" onclick="viewShop()">
-        <img src="Icon-magazin.png" alt="Boutique">
-      </button>        
-    </div>
   </div>
-  <script type="module">
-    // Importation des modules Firebase
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-    import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
-
-    // Configuration Firebase
+  <div class="footer">
+    <button class="footer-icon perso-icon" onclick="viewCharacters()" id="perso-icon">
+      <img src="Characters.svg" alt="Personnages">
+    </button>
+    <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+      <img src="Menu.svg" alt="Menu Principal">
+    </button>
+    <button class="footer-icon passe-icon" onclick="goToPasse()">
+      <img src="Pass.svg" alt="Passe de combat">
+    </button>
+    <button class="footer-icon" onclick="viewShop()">
+      <img src="Shop.svg" alt="Boutique">
+    </button>
+  </div>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
       authDomain: "willy0s-parallel-arena.firebaseapp.com",
@@ -261,64 +248,38 @@
       measurementId: "G-85B8R4NKNM"
     };
 
-    // Initialisation de Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
 
-    // Initialisation de Firebase Performance Monitoring
-    const perf = getPerformance(app);
-    if ('PerformanceObserver' in window) {
-      // Créer un observateur pour les entrées de type "paint" (pour FCP)
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {
-          const fcp = entries[0].startTime;
-          console.log('First Contentful Paint (FCP):', fcp, 'ms');
-        }
-      });
+    firebase.initializeApp(firebaseConfig);
 
-      // Observer les événements de type "paint"
-      paintObserver.observe({ type: 'paint', buffered: true });
 
-      // Créer un observateur pour les entrées de type "first-input" (pour FID)
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (entry.entryType === 'first-input') {
-            const fid = entry.processingStart - entry.startTime;
-            console.log('First Input Delay (FID):', fid, 'ms');
+    const database = firebase.database();
+
+
+    const maintenanceStartRef = database.ref('maintenance/start');
+    const maintenanceEndRef = database.ref('maintenance/end');
+
+
+    function checkMaintenance() {
+      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+        .then(([startSnapshot, endSnapshot]) => {
+          const maintenanceStart = new Date(startSnapshot.val()); // Convertir la date de début
+          const maintenanceEnd = new Date(endSnapshot.val()); // Convertir la date de fin
+          const currentTime = new Date(); // Heure actuelle
+
+          // Vérifier si la maintenance est active
+          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+            window.location.href = 'maintenance.html'; // Rediriger vers maintenance.html si la maintenance est active
           }
+        })
+        .catch(error => {
+          console.error("Erreur lors de la récupération des données de maintenance:", error);
         });
-      });
-
-      // Observer les événements de type "first-input"
-      fidObserver.observe({ type: 'first-input', buffered: true });
     }
 
-    // Référence à l'état de maintenance dans la base de données
-    const maintenanceRef = ref(database, 'maintenance');
+    checkMaintenance();
 
-    // Écoute des changements de l'état de maintenance
-    onValue(maintenanceRef, (snapshot) => {
-      const data = snapshot.val();
-      const maintenanceActive = data.active === 'oui';
-      const maintenanceTime = data.heure;
-
-      if (maintenanceActive && maintenanceTime) {
-        const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-        const currentTime = new Date();
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-
-        // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-        if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-          window.location.href = 'maintenance.html';
-        }
-      }
-    });
-  </script>
-
-  <script>
+    // Vérifier la maintenance toutes les 10 secondes
+    setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
     function goToPasse() {
       window.location.href = 'passe_de_combat.html';
     }
@@ -339,18 +300,19 @@
     }
     // Données des personnages
     const characters = [
-        {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: "Il effectue trois attaques.", rarete: "inhabituel"},
-        {name: "Cocobi", pv: 10800, attaque: 440, defense: 115, spe: "Réduit les PV de l'adversaire de 10% de ses PV maximum.", rarete: "rare"},
-        {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: "Inflige des dégâts équivalents à 2.5 fois son attaque et augmente sa défense de 20 pour les deux prochains tours.", rarete: "inhabituel"},
-        {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: "Inflige des dégâts équivalents à 500 plus son attaque, en ignorant la moitié de la défense de l'adversaire.", rarete: "épique"},
-        {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: "Si sa défense est inférieure à 29, il effectue une attaque normale. Sinon, il perd 15 de défense et gagne 1000 PV avant d'attaquer normalement.", rarete: "épique"},
-        {name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: "Régénère des PV. Si elle a plus de la moitié de ses PV maximum, elle régénère 5% de ses PV actuels. Sinon, elle régénère 15% de ses PV actuels.", rarete: "légendaire"},
-        {name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: "Inflige des dégâts équivalents à 1.5 fois son attaque. Si ses PV sont supérieurs à la moitié de ses PV maximum, il régénère 10% des dégâts infligés. Sinon, il régénère 15% des dégâts infligés.", rarete: "légendaire"},
-        {name: "Diva", pv: 10700, attaque: 440, defense: 100, spe: "Réduit l'attaque de l'adversaire de 20% pour les trois prochains tours.", rarete: "rare"},
-        {name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: "Inflige des dégâts équivalents à 1.75 fois son attaque, en ignorant 50% de la défense de l'adversaire. Réduit la défense de l'adversaire de 15% pour les deux prochains tours.", rarete: "épique"},
-        {name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: "Inflige des dégâts équivalents à 85% de son attaque et réduit la défense de l'adversaire de 15% pour les trois prochains tours.", rarete: "inhabituel"},
-        {name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: "inflige des dégâts équivalents à 2 fois son attaque et invoque un tourbillon qui a 25% de chance d'immobiliser l'adversaire pour un tour, empêchant toute action ou capacité spéciale pendant ce tour.", rarete: "épique"},
-        {name: "Sboonie", pv: 9900, attaque: 410, defense: 95, spe: "Sboonie régénère 5% de ses PV maximum et réduit l'attaque de l'adversaire de 15% pour le prochain tour.", rarete: "commun"}
+      {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: "Effectue trois attaques.", rarete: "inhabituel", classe: "Lame de l’Ombre"},
+      {name: "Cocobi", pv: 11000, attaque: 440, defense: 115, spe: "Réduit les PV adverses de 12% de ses PV max.", rarete: "rare", classe: "Briseur de Défense"},
+      {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: "Inflige 2.5x son attaque et gagne 20 défense pour 2 tours.", rarete: "inhabituel", classe: "Assassin Sauvage"},
+      {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: "Inflige 500 + son attaque, en ignorant 50% de la défense.", rarete: "épique", classe: "Colosse Invincible"},
+      {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: "Si défense ≥ 29, perd 15 défense, gagne 1000 PV, puis attaque.", rarete: "épique", classe: "Gardien Résolu"},
+      {name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: "Régénère 5% ou 15% de ses PV actuels selon ses PV max.", rarete: "légendaire", classe: "Régénérateur Mystique"},
+      {name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: "Inflige 1.5x son attaque et régénère 10% ou 15% des dégâts.", rarete: "légendaire", classe: "Soigneur d’Élite"},
+      {name: "Diva", pv: 11021, attaque: 475, defense: 100, spe: "Réduit l'attaque adverse de 25% pour 3 tours.", rarete: "rare", classe: "Lame de l’Ombre"},
+      {name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: "Inflige 1.75x son attaque en ignorant 50% de la défense et réduit la défense adverse de 15% pour 2 tours.", rarete: "épique", classe: "Briseur de Défense"},
+      {name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: "Inflige 85% de son attaque et réduit la défense adverse de 15% pour 3 tours.", rarete: "inhabituel", classe: "Briseur de Défense"},
+      {name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: "Inflige 2x son attaque et invoque un tourbillon avec 25% de chance d'immobiliser l'adversaire pour 1 tour.", rarete: "épique", classe: "Maître des Arcanes"},
+      {name: "Sboonie", pv: 10200, attaque: 410, defense: 95, spe: "Régénère 8% de ses PV max, inflige 50 dégâts et réduit l'attaque adverse de 15% pour 1 tour.", rarete: "commun", classe: "Soigneur d’Élite"},
+      {name: "Inconnu", pv: 11300, attaque: 435, defense: 83, spe: "Bloque la capacité adverse pour 3 tours et gagne +25 attaque et défense.", rarete: "épique", classe: "Maître des Arcanes"}
     ];
 
     const characterContainer = document.querySelector('.character-container');
@@ -358,34 +320,44 @@
     const improvementButton = document.getElementById('improvementButton');
 
     // Fonction pour afficher les statistiques mises à jour en fonction du niveau
-    
+
     const displayCharacterStats = (character) => {
-      
       const userData = getUserData();
       const isUnlocked = userData[character.name] === 1;
 
+      let statsContent;
+
       if (isUnlocked) {
         const level = userData[`${character.name}_Level`] || 1;
-        const currentPV = Math.round(character.pv * (1 + ((0.01 * level) - 0.01) * 4));
-        const currentAttaque = Math.round(character.attaque * (1 + ((0.01 * level) - 0.01) * 4));
-        const currentDefense = Math.round(character.defense * (1 + ((0.01 * level) - 0.01) * 4));
+        const pv_pts = userData[`${character.name}_PV_pts`] || 0;
+        const attaque_pts = userData[`${character.name}_attaque_pts`] || 0;
+        const defense_pts = userData[`${character.name}_defense_pts`] || 0;
 
-        // Afficher les statistiques normalement
-        statsElement.innerHTML = `
+        const currentPV = Math.round((1 + pv_pts * 0.02) * character.pv);
+        const currentAttaque = Math.round((1 + attaque_pts * 0.02) * character.attaque);
+        const currentDefense = Math.round((1 + defense_pts * 0.02) * character.defense);
+
+        // Afficher les statistiques normalement avec le bouton d'amélioration
+        statsContent = `
           <strong>${character.name}</strong><br>
-          Rareté : ${character.rarete}<br>
-          Niveau :
+          Rareté: ${character.rarete}<br>
+          Classe: ${character.classe}<br>
           Niveau: ${level}<br>
           PV: ${currentPV}<br>
           Attaque: ${currentAttaque}<br>
           Défense: ${currentDefense}<br>
-          Spéciale: ${character.spe}
+          Spéciale: ${character.spe}<br>
+          <br>
+          <button class="button-improve" onclick="window.location.href='Ameliorations/${character.name}amelioration.html'">
+            Améliorer ${character.name}
+          </button>
         `;
       } else {
-        // Afficher "(personnage non débloqué)" pour le niveau, et les autres statistiques normalement
-        statsElement.innerHTML = `
+        // Afficher "(personnage non débloqué)" pour le niveau, sans bouton
+        statsContent = `
           <strong>${character.name}</strong><br>
           Rareté: ${character.rarete}<br>
+          Classe: ${character.classe}<br>
           Niveau: (personnage non débloqué)<br>
           PV: ${character.pv}<br>
           Attaque: ${character.attaque}<br>
@@ -393,6 +365,9 @@
           Spéciale: ${character.spe}
         `;
       }
+
+      // Afficher les statistiques dans l'élément HTML
+      statsElement.innerHTML = statsContent;
 
       // Afficher la boîte de statistiques
       statsElement.classList.remove('hide');
@@ -416,7 +391,7 @@
     });
 
     // Fonction pour masquer la boîte de statistiques
-    
+
 
     // Fonction pour masquer la boîte de statistiques
     const hideStats = () => {
@@ -481,7 +456,7 @@
       const userData = getUserData();
       const characters = [
         'Willy', 'Cocobi', 'Oiseau', 'Gros_Nounours', 'Baleine', 'Doudou',
-        'Coeur', 'Diva', 'Poulpy', 'Colorina', 'Rosalie', 'Sboonie'
+        'Coeur', 'Diva', 'Poulpy', 'Colorina', 'Rosalie', 'Sboonie', 'Inconnu'
       ];
 
       // Filtrer les personnages déjà à 1
@@ -524,6 +499,8 @@
 
     // Appeler la fonction pour ajuster les personnages au chargement de la page ou au besoin
     adjustCharacters(getUserData().nbr_perso);
+    const userData = getUserData();
+    saveUserData(userData);
   </script>
 </body>
 

@@ -22,7 +22,7 @@
         .maintenance-container {
             text-align: center;
             background-color: #444;
-            padding: 40px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
         }
@@ -32,7 +32,7 @@
             margin-bottom: 20px;
         }
 
-        .maintenance-countdown {
+        .maintenance-info {
             font-size: 18px;
             margin-top: 10px;
         }
@@ -41,114 +41,87 @@
 <body>
     <div class="maintenance-container">
         <h1 class="maintenance-title">Le jeu est en maintenance</h1>
-        <p class="maintenance-countdown" id="countdown">Chargement du temps restant...</p>
+        <p class="maintenance-info" id="maintenance-info">Chargement des informations...</p>
     </div>
 
     <script type="module">
-        // Importation des modules Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-        import { getPerformance } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-performance.js';
 
-        // Configuration Firebase
         const firebaseConfig = {
-          apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-          authDomain: "willy0s-parallel-arena.firebaseapp.com",
-          databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-          projectId: "willy0s-parallel-arena",
-          storageBucket: "willy0s-parallel-arena.appspot.com",
-          messagingSenderId: "683284732830",
-          appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-          measurementId: "G-85B8R4NKNM"
+            apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+            authDomain: "willy0s-parallel-arena.firebaseapp.com",
+            databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+            projectId: "willy0s-parallel-arena",
+            storageBucket: "willy0s-parallel-arena.appspot.com",
+            messagingSenderId: "683284732830",
+            appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+            measurementId: "G-85B8R4NKNM"
         };
 
-        // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const maintenanceStartRef = ref(database, 'maintenance/start');
+        const maintenanceEndRef = ref(database, 'maintenance/end');
 
-        // Initialisation de Firebase Performance Monitoring
-        const perf = getPerformance(app);
-        if ('PerformanceObserver' in window) {
-          // Créer un observateur pour les entrées de type "paint" (pour FCP)
-          const paintObserver = new PerformanceObserver((list) => {
-            const entries = list.getEntriesByName('first-contentful-paint');
-            if (entries.length > 0) {
-              const fcp = entries[0].startTime;
-              console.log('First Contentful Paint (FCP):', fcp, 'ms');
-            }
-          });
+        const maintenanceInfoElement = document.getElementById('maintenance-info');
 
-          // Observer les événements de type "paint"
-          paintObserver.observe({ type: 'paint', buffered: true });
+        let startTime = null;
+        let endTime = null;
 
-          // Créer un observateur pour les entrées de type "first-input" (pour FID)
-          const fidObserver = new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            entries.forEach((entry) => {
-              if (entry.entryType === 'first-input') {
-                const fid = entry.processingStart - entry.startTime;
-                console.log('First Input Delay (FID):', fid, 'ms');
-              }
-            });
-          });
+        function formatDateTime(datetime) {
+            const date = new Date(datetime);
+            const now = new Date();
 
-          // Observer les événements de type "first-input"
-          fidObserver.observe({ type: 'first-input', buffered: true });
-        }
+            const isToday = date.toDateString() === now.toDateString();
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const timePart = minutes === 0 ? `${hours}h` : `${hours}h${minutes}`;
 
-        // Référence à l'heure de fin de maintenance dans Firebase
-        const maintenanceRef = ref(database, 'maintenance/heure');
-        let countdownInterval;
-
-        // Fonction pour calculer et afficher le décompte jusqu'à l'heure prévue
-        function updateCountdown(endTime) {
-            // Arrêter tout décompte en cours
-            clearInterval(countdownInterval);
-
-            const countdownElement = document.getElementById('countdown');
-
-            function calculateTimeLeft() {
-                const now = new Date();
-                const timeParts = endTime.split(':');
-                const endDate = new Date();
-                endDate.setHours(parseInt(timeParts[0]), parseInt(timeParts[1]), 0, 0);
-
-                // Si l'heure de fin est déjà passée aujourd'hui, on considère le lendemain
-                
-                
-                
-            
-            
-
-                const timeDifference = endDate - now;
-
-                if (timeDifference > 0) {
-                    const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
-                    const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-                    const seconds = Math.floor((timeDifference / 1000) % 60);
-                    countdownElement.textContent = `Temps restant avant la fin de la maintenance : ${hours}h ${minutes}m ${seconds}s`;
-                } else {
-                    countdownElement.textContent = 'La maintenance est terminée.';
-                    window.location.href = 'index.html';
-                }
-            }
-
-            // Mettre à jour le décompte toutes les secondes
-            calculateTimeLeft(); // Initialiser immédiatement
-            countdownInterval = setInterval(calculateTimeLeft, 1000);
-        }
-
-        // Écouteur en temps réel pour l'heure de fin de maintenance
-        onValue(maintenanceRef, (snapshot) => {
-            const endTime = snapshot.val();
-
-            // Si l'heure est définie, démarre le décompte
-            if (endTime) {
-                updateCountdown(endTime);
+            if (isToday) {
+                return `Heure de fin estimée: ${timePart}`;
             } else {
-                document.getElementById('countdown').textContent = 'Heure de fin de maintenance non disponible.';
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = date.toLocaleDateString('fr-FR', options);
+                return `Date de fin estimée: ${formattedDate} à ${timePart}`;
             }
+        }
+
+        function updateMaintenanceInfo() {
+            if (startTime && endTime) {
+                maintenanceInfoElement.textContent = formatDateTime(endTime);
+                checkMaintenanceEnd(endTime);
+            } else {
+                maintenanceInfoElement.textContent = 'Les horaires de maintenance ne sont pas disponibles.';
+            }
+        }
+
+        // Vérifier si l'heure de fin est atteinte
+        function checkMaintenanceEnd(endTime) {
+            const currentTime = new Date();
+            const maintenanceEndTime = new Date(endTime);
+            if (currentTime >= maintenanceEndTime) {
+                window.location.href = 'index.html'; // Redirection vers index.html
+            }
+        }
+
+        // Mise à jour automatique des valeurs si Firebase change
+        onValue(maintenanceStartRef, (snapshot) => {
+            startTime = snapshot.val();
+            updateMaintenanceInfo();
         });
+
+        onValue(maintenanceEndRef, (snapshot) => {
+            endTime = snapshot.val();
+            updateMaintenanceInfo();
+        });
+
+        // Vérification périodique de l'heure de fin toutes les 30 secondes
+        setInterval(() => {
+            if (endTime) {
+                checkMaintenanceEnd(endTime);
+            }
+        }, 30000); // Vérifie toutes les 30 secondes
     </script>
 </body>
 </html>

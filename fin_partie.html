@@ -18,17 +18,17 @@
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
       color: #333;
-      overflow: hidden;
-      /* Pour éviter les barres de défilement pendant l'animation */
+      overflow: hidden; /* Pour éviter les barres de défilement pendant l'animation */
+      flex-direction: column;
     }
 
     #content {
       text-align: center;
+      width: 100%;
     }
 
     #gagnant {
       font-size: 2em;
-      /* Taille du texte */
       font-weight: bold;
       margin: 0;
       animation: crush 1s ease-out;
@@ -72,6 +72,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      margin-left: 35%;
       transition: background-color 0.3s ease;
     }
 
@@ -108,16 +109,54 @@
         background-color: #000; /* Couleur du bouton au survol pour le mode sombre */
       }
     }
+
+    #message_test {
+      font-size: 24px;
+      color: #ff0000;
+      margin: 20px;
+    }
+
+    /* Responsive: ajuster le texte et bouton pour les petits écrans */
+    @media (max-width: 600px) {
+      #gagnant {
+        font-size: 1.5em;
+      }
+
+      .reward {
+        font-size: 0.9em;
+      }
+
+      #quit-button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+      }
+    }
+
+    @media (max-width: 400px) {
+      #gagnant {
+        font-size: 1.2em;
+      }
+
+      .reward {
+        font-size: 0.8em;
+      }
+
+      #quit-button {
+        padding: 6px 12px;
+        font-size: 0.8em;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div id="content">
     <p id="gagnant">Gagnant: En attente...</p>
+    <p id="message_test"></p>
     <div class="reward" id="fin_xp">XP Final: En attente...</div>
     <div class="reward" id="fin_argent">Argent Final: En attente...</div>
     <div class="reward" id="fin_trophees">Trophées Final: En attente...</div>
-    <button id="quit-button" onclick=window.location.href='menu_principal.html'>Revenir au Menu Principal</button>
+    <button id="quit-button" onclick="window.location.href='menu_principal.html'">Revenir au Menu Principal</button>
   </div>
   <script type="module">
     // Importation des modules Firebase
@@ -195,29 +234,39 @@
   </script>
   <script>
     function afficherDonnees() {
-      
       const userData = JSON.parse(localStorage.getItem('userData'));
       userData.partie_commencee = false;
       localStorage.setItem('userData', JSON.stringify(userData));
+
       if (userData) {
-        // Afficher le gagnant
-        document.getElementById('gagnant').textContent = 'Gagnant: ' + userData.gagnant;
+        // Affichage du message si parties_test < 5
+        if (userData.parties_test < 5) {
+          document.getElementById('message_test').textContent = 'Pendant vos 5 premières parties dans ce mode, l\'XP, les points et les trophées sont désactivés afin que vous puissiez avoir le temps de tester et de découvrir le mode !';
+          // Masquer les récompenses
+          document.getElementById('gagnant').style.display = 'none';
+          document.getElementById('fin_xp').style.display = 'none';
+          document.getElementById('fin_argent').style.display = 'none';
+          document.getElementById('fin_trophees').style.display = 'none';
+        } else {
+          // Afficher le gagnant
+          document.getElementById('gagnant').textContent = 'Gagnant: ' + userData.gagnant;
 
-        // Afficher les récompenses avec un intervalle d'une seconde
-        setTimeout(() => {
-          document.getElementById('fin_xp').textContent = 'XP : ' + userData.fin_xp;
-          document.getElementById('fin_xp').classList.add('show');
-        }, 1000); // 1 seconde de délai pour la première récompense
+          // Afficher les récompenses avec un intervalle d'une seconde
+          setTimeout(() => {
+            document.getElementById('fin_xp').textContent = 'XP : ' + userData.fin_xp;
+            document.getElementById('fin_xp').classList.add('show');
+          }, 1000); // 1 seconde de délai pour la première récompense
 
-        setTimeout(() => {
-          document.getElementById('fin_argent').textContent = 'Points : ' + userData.fin_argent;
-          document.getElementById('fin_argent').classList.add('show');
-        }, 2000); // 2 secondes de délai pour la deuxième récompense
+          setTimeout(() => {
+            document.getElementById('fin_argent').textContent = 'Points : ' + userData.fin_argent;
+            document.getElementById('fin_argent').classList.add('show');
+          }, 2000); // 2 secondes de délai pour la deuxième récompense
 
-        setTimeout(() => {
-          document.getElementById('fin_trophees').textContent = 'Trophées : ' + userData.fin_trophee;
-          document.getElementById('fin_trophees').classList.add('show');
-        }, 3000); // 3 secondes de délai pour la troisième récompense
+          setTimeout(() => {
+            document.getElementById('fin_trophees').textContent = 'Trophées : ' + userData.fin_trophee;
+            document.getElementById('fin_trophees').classList.add('show');
+          }, 3000); // 3 secondes de délai pour la troisième récompense
+        }
 
         // Afficher le bouton de quitter après l'affichage des récompenses
         setTimeout(() => {

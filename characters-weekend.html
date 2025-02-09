@@ -204,7 +204,7 @@
       }
 
       .character-button {
-        background-color: #2C3E50;
+        background-color: #333;
         color: #e0e0e0;
         box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
       }
@@ -293,7 +293,7 @@
       <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
     </div>
   </div>
-  <script>
+    <script>
 
     // Configuration Firebase
     const firebaseConfig = {
@@ -345,7 +345,7 @@
       // Liste des personnages avec leurs caractéristiques de base
       const characters = [
         {name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: 0.5, argent: 0, pv_max: 11100, attaque_originale: 463, defense_originale: 86, rarity: 'inhabituel'},
-        {name: "Cocobi", pv: 11000, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115, rarity: 'rare'},
+        {name: "Cocobi", pv: 11100, attaque: 440, defense: 115, spe: 0.5, argent: 0, pv_max: 10800, attaque_originale: 440, defense_originale: 115, rarity: 'rare'},
         {name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: 0.5, argent: 0, pv_max: 9800, attaque_originale: 510, defense_originale: 85, rarity: 'inhabituel'},
         {name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: 0.5, argent: 0, pv_max: 1300, attaque_originale: 430, defense_originale: 68, rarity: 'epique'},
         {name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: 0.5, argent: 0, pv_max: 10200, attaque_originale: 435, defense_originale: 105, rarity: 'epique'},
@@ -407,7 +407,6 @@
         lockedCharacters = sortCharacters(lockedCharacters, sortType);
 
         // Combiner les listes triées
-        const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
         const sortedCharacters = unlockedCharacters.concat(lockedCharacters);
 
         // Créer les boutons des personnages
@@ -418,11 +417,7 @@
 
           // Vérifier si le personnage est débloqué ou non
           if (userData[character.name] === 1) {
-            button.style.backgroundColor = "#ff4500"; // Mettre en orange 
-            if (darkModeMediaQuery.matches) {
-              button.style.backgroundColor = "#2C3E50";
-            }
-            
+            button.style.backgroundColor = "#ff4500"; // Mettre en orange
             button.onclick = function () {
               playerCharacter = character;
               displayStats(button, playerCharacter);
@@ -459,17 +454,24 @@
         // Calculer les statistiques basées sur le niveau actuel du personnage
         const levelKey = character.name + '_Level';
         const currentLevel = userData[levelKey];
-        const pv_pts = userData[character.name + '_PV_pts'] || 0;
-        const attaque_pts = userData[character.name + '_attaque_pts'] || 0;
-        const defense_pts = userData[character.name + '_defense_pts'] || 0;
-        let increasedPV = Math.round((1 + pv_pts * 0.02) * character.pv);
-        let increasedAttaque = Math.round((1 + attaque_pts * 0.02) * character.attaque);
-        let increasedDefense = Math.round((1 + defense_pts * 0.02) * character.defense);
-        let increasedattaque_originale = Math.round((1 + attaque_pts * 0.02) * character.attaque);
-        let increaseddefense_originale = Math.round((1 + defense_pts * 0.02) * character.defense);
-        
+        let increasedPV = Math.round(character.pv * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increasedAttaque = Math.round(character.attaque * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increasedDefense = Math.round(character.defense * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increasedattaque_originale = Math.round(character.attaque_originale * (1 + ((0.01 * currentLevel) - 0.01) * 4));
+        let increaseddefense_originale = Math.round(character.defense_originale * (1 + ((0.01 * currentLevel) - 0.01) * 4));
 
-        
+        if (currentLevel >= 5) {
+          const boostType = Math.floor(Math.random() * 3) + 1;
+          if (boostType === 1) {
+            increasedAttaque = Math.round(increasedAttaque * 1.02);
+            increasedattaque_originale = increasedAttaque;
+          } else if (boostType === 2) {
+            increasedDefense = Math.round(increasedDefense * 1.02);
+            increaseddefense_originale = increasedDefense;
+          } else if (boostType === 3) {
+            increasedPV = Math.round(increasedPV * 1.02);
+          }
+        }
 
         statsDiv.innerHTML = `
           <h3>${character.name} (Niveau ${currentLevel})</h3>
@@ -587,11 +589,11 @@
         const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel)) + minOpponentLevel;
 
         // Calculer les statistiques de l'adversaire basées sur son niveau
-        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + ((0.01 * opponentLevel) - 0.01) * 3.5));
-        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + ((0.01 * opponentLevel) - 0.01) * 3.5));
-        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + ((0.01 * opponentLevel) - 0.01) * 3.5));
-        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 3.5));
-        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 3.5));
+        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
+        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
+        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
+        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
+        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
 
         sessionStorage.setItem('opponentCharacter', JSON.stringify({
           name: opponentCharacter.name,
@@ -605,7 +607,7 @@
           defense_originale: increaseddefense_originale
         }));
 
-        window.location.href = "combat.html";
+        window.location.href = "combat-weekend.html";
       }
 
       function getUserData() {
