@@ -550,6 +550,13 @@
       audio.src = tracks[currentTrack];
       playMusic();
     });
+    navigator.permissions.query({ name: "autoplay" }).then((result) => {
+    if (result.state === "granted") {
+        playMusic(); // Reprend la musique automatiquement
+    } else {
+        console.log("Autoplay non autorisé, l'utilisateur doit interagir.");
+    }
+});
   </script>
 </body>
 </html>
