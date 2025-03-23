@@ -544,6 +544,10 @@
           </div>
         </div>
       </div>
+      <audio id="bg-music">
+        <source src="B1.mp3" type="audio/mpeg">
+        Votre navigateur ne supporte pas l'audio.
+      </audio>
 
       <div class="footer">
         <button class="footer-icon perso-icon" onclick="viewCharacters()" id="perso-icon">
@@ -1056,6 +1060,67 @@
     generateDailyOffers();
     displayDailyOffers();
     updateStockDisplay();
+  document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem('autoplayEnabled') === 'true') {
+        playMusic();
+      }
+    });
+  </script>
+  <script>
+    // Récupération de l'élément audio
+    const audio = document.getElementById('bg-music');
+    // Liste des pistes à jouer en séquence
+    const tracks = ['B1.mp3', 'B2.mp3'];
+    // Récupère l'indice de la piste en cours depuis le localStorage, ou démarre à 0
+    let currentTrack = parseInt(localStorage.getItem('currentTrack')) || 0;
+    audio.src = tracks[currentTrack];
+
+    // Si une position a été enregistrée pour cette piste, la restaurer
+    let savedTime = parseFloat(localStorage.getItem('currentTime'));
+    if (!isNaN(savedTime)) { audio.currentTime = savedTime; }
+
+    // Variable pour limiter l'enregistrement à une mise à jour par seconde
+    let lastTimeUpdate = 0;
+
+    // Fonction pour lancer la musique
+    function playMusic() {
+      audio.play().catch(() => {
+        console.log("La lecture automatique est bloquée par le navigateur.");
+      });
+    }
+
+    // Fonction qui active l'autoplay et mémorise l'autorisation
+    function enableAutoplay() {
+      playMusic();
+      localStorage.setItem('autoplayEnabled', 'true');
+    }
+
+    // À la fin de la piste, passe à la suivante et réinitialise la position sauvegardée
+    audio.addEventListener('ended', () => {
+      currentTrack = (currentTrack + 1) % tracks.length;
+      localStorage.setItem('currentTrack', currentTrack);
+      localStorage.removeItem('currentTime'); // Réinitialise pour la nouvelle piste
+      audio.src = tracks[currentTrack];
+      playMusic();
+    });
+
+    // Enregistre la position actuelle dans le localStorage, au moins une fois par seconde
+    audio.addEventListener('timeupdate', () => {
+      let now = Math.floor(audio.currentTime);
+      if (now !== lastTimeUpdate) {
+        lastTimeUpdate = now;
+        localStorage.setItem('currentTime', audio.currentTime);
+      }
+    });
+
+    // Fallback pour activer la lecture sur les interactions tactiles ou clic si besoin
+    function autoPlayFallback() {
+      playMusic();
+    }
+    if (localStorage.getItem('autoplayEnabled') === 'true') {
+      document.addEventListener('touchstart', autoPlayFallback, { once: true });
+      document.addEventListener('click', autoPlayFallback, { once: true });
+    }
   </script>
 
 </body>

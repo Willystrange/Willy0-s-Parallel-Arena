@@ -1,40 +1,48 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Music Player</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture Audio Automatique</title>
 </head>
 <body>
-  <script>
-    let musicEnabled = false;
-    const audioFiles = ['B1.mp3', 'B2.mp3'];
-    let currentTrack = 0;
-    const audio = new Audio();
-    audio.loop = false;
 
-    // Lorsqu'un morceau se termine, passe au suivant en boucle si la musique est activée
-    audio.addEventListener('ended', () => {
-      currentTrack = (currentTrack + 1) % audioFiles.length;
-      if (musicEnabled) {
-        audio.src = audioFiles[currentTrack];
-        audio.play();
-      }
-    });
+    <button id="playButton">Jouer la musique</button>
 
-    // Fonction pour activer/désactiver la musique
-    function toggleMusic() {
-      musicEnabled = !musicEnabled;
-      if (musicEnabled) {
-        currentTrack = 0;
-        audio.src = audioFiles[currentTrack];
-        audio.play();
-      } else {
-        audio.pause();
-      }
-      return musicEnabled;
-    }
-    // Expose la fonction afin qu'elle soit accessible depuis la page parente
-    window.toggleMusic = toggleMusic;
-  </script>
+    <audio id="audioB1" src="B1.mp3" loop></audio>
+    <audio id="audioB2" src="B2.mp3" loop></audio>
+
+    <script>
+        const audioB1 = document.getElementById("audioB1");
+        const audioB2 = document.getElementById("audioB2");
+        const playButton = document.getElementById("playButton");
+
+        function startMusic() {
+            audioB1.play()
+                .then(() => {
+                    localStorage.setItem("musicAllowed", "true");
+                    playButton.style.display = "none";
+                    audioB1.onended = () => {
+                        audioB2.play();
+                    };
+                })
+                .catch(error => {
+                    console.log("Autoplay bloqué, interaction requise.");
+                });
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("musicAllowed") === "true") {
+                audioB1.play().catch(error => console.log("Lecture B1 bloquée."));
+                audioB1.onended = () => {
+                    audioB2.play();
+                };
+                playButton.style.display = "none";
+            }
+        });
+
+        playButton.addEventListener("click", startMusic);
+    </script>
+
 </body>
 </html>

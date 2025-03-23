@@ -4,6 +4,8 @@ self.addEventListener('install', (event) => {
     caches.open('my-cache').then((cache) => {
       return cache.addAll([
         '/',
+        '/B1.mp3',
+        '/B2.mp3',
         '/index.html',
         '/menu_principal.html',
         '/parametres.html',

@@ -192,12 +192,12 @@
       <a class="button" id="loginButton" href="connection.html">Se connecter</a>
       <a class="button" id="logoutButton" href="#" style="display:none;">Se déconnecter</a>
       
-      <!-- Système audio simplifié pour la Web App -->
+      <!-- Système audio pour la Web App (lecture séquentielle sans attribut loop) -->
       <audio id="bg-music">
         <source src="B1.mp3" type="audio/mpeg">
         Votre navigateur ne supporte pas l'audio.
       </audio>
-      <!-- Bouton pour activer le son (et stocker l'autorisation dans le localStorage) -->
+      <!-- Bouton d'activation du son. Si l'autorisation a déjà été donnée sur une autre page, ce bouton sera caché -->
       <button class="button" onclick="enableAutoplay()">Activer le son</button>
       
       <a class="back-button" href="menu_principal.html">Retour au menu principal</a>
@@ -206,7 +206,7 @@
     <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
   </div>
 
-  <!-- Script principal (Firebase, gestion des sauvegardes, etc.) -->
+  <!-- Script principal (Firebase, sauvegardes, etc.) -->
   <script src="localStorage.js"></script>
   <script>
     (function () {
@@ -350,7 +350,6 @@
       }
 
       function updateBackup() {
-        // Fonction à compléter selon la logique métier (mise à jour des sauvegardes)
         const userData = getUserData();
         const defaultUserData = {
           pass_XP: 0,
@@ -514,7 +513,7 @@
           logout();
         });
 
-        // Si l'utilisateur a déjà autorisé l'autoplay, lance la musique automatiquement
+        // Si l'utilisateur a déjà autorisé l'autoplay (sur une autre page), relance la musique automatiquement
         if (localStorage.getItem('autoplayEnabled') === 'true') {
           playMusic();
         }
@@ -522,13 +521,24 @@
     }());
   </script>
 
-  <!-- Script audio simplifié pour la Web App -->
+  <!-- Script audio (lecture séquentielle, enregistrement de la position et reprise) -->
   <script>
-    // Configuration de la musique avec changement de piste
+    // Récupération de l'élément audio
     const audio = document.getElementById('bg-music');
+    // Liste des pistes à jouer en séquence
     const tracks = ['B1.mp3', 'B2.mp3'];
+    // Récupère l'indice de la piste en cours depuis le localStorage, ou démarre à 0
     let currentTrack = parseInt(localStorage.getItem('currentTrack')) || 0;
     audio.src = tracks[currentTrack];
+
+    // Si une position a été enregistrée pour cette piste, la restaurer
+    let savedTime = parseFloat(localStorage.getItem('currentTime'));
+    if (!isNaN(savedTime)) {
+      audio.currentTime = savedTime;
+    }
+
+    // Variable pour limiter l'enregistrement à une mise à jour par seconde
+    let lastTimeUpdate = 0;
 
     // Fonction pour lancer la musique
     function playMusic() {
@@ -537,26 +547,30 @@
       });
     }
 
-    // Fonction qui active l'autoplay et mémorise l'autorisation
+    // Fonction d'activation de l'autoplay et stockage de l'autorisation
     function enableAutoplay() {
       playMusic();
       localStorage.setItem('autoplayEnabled', 'true');
     }
 
-    // Passer à la piste suivante une fois la piste terminée
+    // Lors de la fin de la piste, passe à la suivante et réinitialise la position enregistrée
     audio.addEventListener('ended', () => {
       currentTrack = (currentTrack + 1) % tracks.length;
       localStorage.setItem('currentTrack', currentTrack);
+      localStorage.removeItem('currentTime'); // Réinitialise pour la nouvelle piste
       audio.src = tracks[currentTrack];
       playMusic();
     });
-    navigator.permissions.query({ name: "autoplay" }).then((result) => {
-    if (result.state === "granted") {
-        playMusic(); // Reprend la musique automatiquement
-    } else {
-        console.log("Autoplay non autorisé, l'utilisateur doit interagir.");
-    }
-});
+
+    // Enregistre la position de lecture dans le localStorage au moins une fois par seconde
+    audio.addEventListener('timeupdate', () => {
+      let now = Math.floor(audio.currentTime);
+      if (now !== lastTimeUpdate) {
+        lastTimeUpdate = now;
+        localStorage.setItem('currentTime', audio.currentTime);
+      }
+    });
+    
   </script>
 </body>
 </html>
