@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Willy0's Parallel Arena</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+
+    }
+
+
+
+    .content {
+
+
+      flex: 1;
+      /* Permet à .content de prendre tout l'espace restant */
+      padding: 20px;
+      margin-bottom: 60px;
+      /* Ajout d'une marge inférieure pour éviter que le contenu ne soit caché par le footer */
+
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .search-bar-container {
+      position: relative;
+      margin-left: auto;
+      align-items: center;
+    }
+
+    #search-bar {
+      padding: 5px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+    }
+
+    #clear-search {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      display: none;
+    }
+
+    .title {
+      font-size: 28px;
+      margin-bottom: 10px;
+      /* Espace ajusté entre le titre et la barre de recherche */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .data-container {
+      max-width: 800px;
+      margin: 100px auto;
+      margin-top: 20px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      text-align: left;
+      animation: bounceIn 1.2s ease-out;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      60% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .character {
+      position: relative;
+      cursor: pointer;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      background-color: #f0f8ff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .character:hover {
+      transform: translateY(-5px);
+      background-color: #e6f7ff;
+    }
+
+    .character-info {
+      display: none;
+      font-size: 16px;
+      color: #555;
+      padding-top: 10px;
+    }
+
+    .level-up-indicator {
+      position: absolute;
+      left: -15px;
+      top: 10px;
+      width: 12px;
+      height: 12px;
+      background-color: red;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      50%,
+      100% {
+        opacity: 1;
+      }
+
+      25%,
+      75% {
+        opacity: 0;
+      }
+    }
+
+    .level-up-button,
+    .boost-button {
+      display: block;
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: #ff4500;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s;
+    }
+
+    .level-up-button:hover,
+    .boost-button:hover {
+      background-color: #ff5000;
+      transform: scale(1.05);
+    }
+
+    .cost-info {
+      font-size: 14px;
+      color: #888;
+    }
+
+
+    .footer {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0;
+      background-color: #f0f0f0;
+      /* Couleur de fond */
+      position: fixed;
+      /* Fixe la barre au bas de l'Ã©cran */
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      /* Prend toute la largeur */
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      /* Ombre optionnelle */
+      z-index: 1000;
+      /* Toujours au-dessus des autres Ã©lÃ©ments */
+    }
+
+    .footer-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .footer-icon img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .footer-icon:hover {
+      opacity: 0.8;
+    }
+
+
+    .amelioration-icon img {
+      border: 2px solid #ff4500;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .main-menu-icon:hover img {
+      opacity: 1;
+    }
+
+    /* Gestion du format paysage */
+    @media only screen and (orientation: landscape) {
+      body {
+        flex-direction: column;
+      }
+
+      .title {
+        font-size: 24px;
+      }
+
+      .data-container {
+        max-width: 70%;
+        /* Adapte la largeur pour le paysage */
+        margin: 20px auto;
+      }
+
+      .footer {
+        flex-direction: row;
+        /* Changer la direction des éléments du footer */
+        padding: 1px;
+        /* Ajuster le padding */
+      }
+    }
+
+    .dialog-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      z-index: 1000;
+      width: 300px;
+      text-align: center;
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    }
+
+    .dialog-message {
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .dialog-dropdown {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .dialog-button {
+      background-color: #ff4500;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .dialog-button:hover {
+      background-color: #ff4700;
+    }
+
+    .dialog-button:focus {
+      outline: none;
+    }
+
+    .dialog-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      width: 300px;
+      padding: 20px;
+      background-color: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+      z-index: 1000;
+    }
+
+    /* Mode sombre */
+    @media (prefers-color-scheme: dark) {
+      .footer {
+        background-color: #333333;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .footer-icon img {
+        filter: brightness(0.8);
+      }
+
+      .dialog-dropdown {
+        background-color: #333;
+        color: #fff;
+      }
+
+      .dialog-container {
+        background-color: #333;
+        color: #fff;
+      }
+
+      .dialog-button {
+        background-color: #000;
+      }
+
+      .dialog-button:hover {
+        background-color: #333;
+      }
+
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      .character:hover {
+        background-color: #333;
+      }
+
+      .title {
+        color: #e0e0e0;
+      }
+
+      .data-container {
+        background-color: #333;
+        color: #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      }
+
+      .character {
+        background-color: #333;
+        color: #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .character-info {
+        color: #e0e0e0;
+      }
+
+      .level-up-indicator {
+        background-color: #ff5722;
+      }
+
+      .level-up-button,
+      .boost-button {
+        background-color: #444;
+        color: #fff;
+      }
+
+      .level-up-button:hover,
+      .boost-button:hover {
+        background-color: #555;
+      }
+
+      .cost-info {
+        color: #bbb;
+      }
+
+    }
+
+    .show-more {
+      background: none;
+      border: none;
+      color: #1e90ff;
+      font-size: 16px;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      outline: none;
+    }
+
+    .show-more:hover {
+      color: #0056b3;
+    }
+
+    /* Styles pour les navigateurs Webkit */
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .content {
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* IE and Edge */
+    }
+
+    .points-bubble {
+      position: fixed;
+      top: 75px;
+      right: 25px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+
+    .dialog-enter {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .dialog-exit {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+
+
+    /* Styles pour les boutons "+" et "-" */
+    .stat-button {
+      background-color: #1e90ff;
+      color: white;
+
+      border: none;
+      border-radius: 5px;
+      padding: 3px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .stat-button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .stat-button:disabled {
+      background-color: #cccccc;
+      color: #666666;
+      cursor: not-allowed;
+    }
+
+    .stat-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Mode sombre */
+    @media (prefers-color-scheme: dark) {
+      .stat-button {
+        background-color: #3a3a3a;
+        color: #e0e0e0;
+      }
+
+      .stat-button:hover {
+        background-color: #555555;
+      }
+
+      .stat-button:disabled {
+        background-color: #666666;
+        color: #999999;
+      }
+    }
+
+    /* Bouton "Confirmer" spécifique */
+    button.stat-button.confirm-button {
+      font-weight: bold;
+      padding: 8px 15px;
+    }
+
+    /* Couleurs identiques pour les modes clair et sombre */
+    button.stat-button.confirm-button:hover {
+      background-color: #0073e6; /* Couleur un peu plus marquée au survol */
+    }
+
+    @media (prefers-color-scheme: dark) {
+      button.stat-button.confirm-button {
+        background-color: #444; /* Gris foncé */
+        color: #e0e0e0;
+      }
+
+      button.stat-button.confirm-button:hover {
+        background-color: #666; /* Gris plus clair au survol */
+      }
+    }
+
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+
+<body>
+  <div class="content">
+    <div class="title">
+      <span>Amélioration de Oiseau</span>
+    </div>
+    <div class="data-container">
+      <div id="characters-unlocked"></div>
+    </div>
+
+    <div class="footer">
+
+      <button class="footer-icon" onclick="viewCharacters()">
+        <img src="../Characters.svg" alt="Personnages">
+      </button>
+      <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+        <img src="../Menu.svg" alt="Menu Principal">
+      </button>
+      <button class="footer-icon" onclick="goToPasse()">
+        <img src="../Pass.svg" alt="Passe de combat">
+      </button>
+      <button class="footer-icon" onclick="viewShop()">
+        <img src="../Shop.svg" alt="Boutique">
+      </button>
+    </div>
+  </div>
+  <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+
+    // Initialisation Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const maintenanceStartRef = database.ref('maintenance/start');
+    const maintenanceEndRef = database.ref('maintenance/end'); 
+
+
+    function checkMaintenance() {
+      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+        .then(([startSnapshot, endSnapshot]) => {
+          const maintenanceStart = new Date(startSnapshot.val()); // Convertir la date de début
+          const maintenanceEnd = new Date(endSnapshot.val()); // Convertir la date de fin
+          const currentTime = new Date(); // Heure actuelle
+
+          // Vérifier si la maintenance est active
+          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+            window.location.href = '../maintenance.html'; // Rediriger vers maintenance.html si la maintenance est active
+          }
+        })
+        .catch(error => {
+          console.error("Erreur lors de la récupération des données de maintenance:", error);
+        });
+    }
+
+    checkMaintenance();
+
+    // Vérifier la maintenance toutes les 10 secondes
+    setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
+
+    function StartedGame() {
+      const userData = getUserData();
+      if (userData.partie_commencee) {
+        window.location.href="../combat.html";
+      }  else if (userData.partie_commencee_weekend) {
+        window.location.href="../combat-weekend.html";
+      }
+    }
+    StartedGame();
+
+    function getUserData() {
+      let userData = JSON.parse(localStorage.getItem('userData'));
+      if (!userData) {
+        userData = {};
+      }
+      if (userData.theme) {
+        document.body.classList.add('dark-theme');
+      }
+      return userData;
+    }
+    function xpPourNiveauSuivant(level) {
+      return level * level * 20;
+    }
+
+    function coutPourNiveauSuivant(level) {
+      return level * 25;
+    }
+
+    let User = false;
+    let userId = null;
+
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+      console.log("Données sauvegardées localement");
+      if (User && userId) {
+        const userRef = database.ref(`users/${userId}/userData`);
+        userRef.set(userData, (error) => {
+          if (error) { 
+            console.error("Erreur lors de l'enregistrement dans Firebase:", error); 
+          } else { 
+            console.log('Données utilisateur sauvegardées dans Firebase');
+          }
+        });
+      }
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        console.log("Utilisateur authentifié avec UID :", user.uid);
+        User = true;
+        userId = user.uid;
+        // S'assurer que userData existe
+        let currentUserData = getUserData();
+        saveUserData(currentUserData);
+      } else { 
+        console.log("Aucun utilisateur authentifié"); 
+      }
+    });
+
+    function loadPv() {
+      const userData = getUserData();
+      // Accéder à la valeur de stat dynamiquement dans userData
+      const Perso = userData[`Oiseau_PV_pts`] || 0;
+
+      // Calculer Willypv avec la formule donnée
+      let persopv = Math.round((1 + Perso * 0.02) * 9800);
+
+      // Retourner la valeur calculée
+      return persopv;
+    }
+
+    function loadAttaque() {
+      const userData = getUserData();
+      // Accéder à la valeur de stat dynamiquement dans userData
+      const perso = userData[`Oiseau_attaque_pts`] || 0;
+
+      // Calculer Willypv avec la formule donnée
+      let persoattaque = Math.round((1 + perso * 0.02) * 510);
+
+      // Retourner la valeur calculée
+      return persoattaque;
+    }
+
+    function levelUp() {
+      const userData = getUserData();
+      const level = userData['Oiseau_Level'];
+      const xp = userData['Oiseau_XP'];
+      const xpNeeded = xpPourNiveauSuivant(level);
+      const cost = coutPourNiveauSuivant(level);
+      const points = userData.argent || 0;
+
+      if (level < 11 && xp >= xpNeeded && points >= cost) {
+        userData['Oiseau_Level'] += 1;
+        userData['Oiseau_XP'] -= xpNeeded;
+        userData.Oiseau_pts += 4;
+        userData.argent -= cost;
+        saveUserData(userData);
+
+        afficherDonneesUtilisateur();
+
+
+      }
+    }
+
+    function loadDefense() {
+      const userData = getUserData();
+      // Accéder à la valeur de stat dynamiquement dans userData
+      const perso = userData[`Oiseau_defense_pts`] || 0;
+
+      // Calculer Willypv avec la formule donnée
+      let persodefense = Math.round((1 + perso * 0.02) * 85);
+
+      // Retourner la valeur calculée
+      return persodefense;
+    }
+
+    function afficherDonneesUtilisateur() {
+      console.log('Données utilisateur chargées');
+      const userData = getUserData();
+      userData.Oiseau_pts = userData.Oiseau_pts || 0;
+      userData.Oiseau_PV_pts = userData.Oiseau_PV_pts || 0;
+      userData.Oiseau_attaque_pts = userData.Oiseau_attaque_pts || 0;
+      userData.Oiseau_defense_pts = userData.Oiseau_defense_pts || 0;
+      saveUserData(userData);
+      const PersoPoints = userData.Oiseau_pts || 0;
+      const points = userData.argent;
+
+      if (userData['Oiseau'] === 1) {
+
+        const level = userData['Oiseau_Level'];
+        const xp = userData['Oiseau_XP'];
+        const xpNeeded = xpPourNiveauSuivant(level);
+        const cost = coutPourNiveauSuivant(level);
+        const canLevelUp = xp >= xpNeeded && points >= cost;
+        const pv = loadPv();
+        const attaque = loadAttaque();
+        const defense = loadDefense();
+
+        const willyHTML = `
+          <div id="Willy-info" class="character-info">
+            <strong>Cocobi</strong><br>
+
+            Classe: Assassin Sauvage
+            <span 
+              id="Willy-tooltip-icon" 
+              class="tooltip-icon" 
+              onclick="afficherDetailsPerso()"
+              style="cursor: pointer; margin-left: 10px;"
+            >&#x26A0;</span>
+            <br>
+
+            PV : ${pv}<br>
+            Attaque : ${attaque}<br>
+            Défense : ${defense}<br>
+            Spécialité : Inflige 2.5x son attaque et gagne 20 défense pour 2 tours.<br>
+            Rareté : rare<br>
+          </div>
+          Niveau: ${level}${level >= 11 ? ' (Niveau Maximum atteint !)' : ''}<br>
+          ${level < 11 ? `Points d'XP: ${xp} / ${xpNeeded}<br>` : ''}
+          ${level < 11 ? `Points disponibles: ${points}<br>` : ''}
+          ${level < 11 ? `<div class="cost-info">Coût pour monter au niveau suivant: ${cost} points</div>` : ''}
+          ${canLevelUp && level < 11 ? `<button class="level-up-button" id="level-up-button" onclick="levelUp()">Monter de niveau</button>` : ''}
+          `;
+
+        // Mettre à jour le contenu principal
+        document.getElementById('characters-unlocked').innerHTML = willyHTML;
+        document.getElementById('Willy-info').style.display = 'block';
+
+
+      }
+
+      console.log('1')
+      console.log(userData.Oiseau_pts)
+
+      if (userData.Oiseau_pts > 0 && userData.Oiseau_PV_pts < 25 && userData.Oiseau_attaque_pts < 30 && userData.Oiseau_defense_pts < 10) {
+        console.log('2')
+        afficherBoutonsStats(userData);
+        desactiverBoutons(true);
+      } else {
+        desactiverBoutons(false);
+      }
+    }
+
+
+    let modificationsTemp = {}; // Objet pour stocker les modifications temporaires
+
+    function afficherBoutonsStats(userData) {
+      document.getElementById('Willy-info').innerHTML = ''; // Réinitialiser l'affichage
+
+      const stats = ['PV', 'attaque', 'defense'];
+
+      stats.forEach((stat) => {
+        const valeurStat = (userData[`Oiseau_${stat}_pts`] || 0) + (modificationsTemp[stat] || 0);
+        let maxStat = 0
+        if (stat === 'PV') {
+          maxStat = 25;
+        } else if (stat === 'attaque') {
+          maxStat = 30;
+        } else if (stat === 'defense') {
+          maxStat = 20;
+        }
+
+        // Vérifier si les points disponibles sont suffisants pour afficher le bouton "+"
+        const affichageBoutonPlus = valeurStat < maxStat && (userData.Oiseau_pts - totalPointsUtilises()) > 0;
+
+        const statElement = document.createElement('div');
+        statElement.innerHTML = `
+          <span>${stat} : ${valeurStat}</span>
+          ${affichageBoutonPlus ? `<button class="stat-button" onclick="modifierStat('${stat}', 1)">+</button>` : ''}
+          ${(modificationsTemp[stat] || 0) > 0 ? `<button class="stat-button" onclick="modifierStat('${stat}', -1)">-</button>` : ''}
+        `;
+        document.getElementById('Willy-info').appendChild(statElement);
+      });
+
+      // Ajouter ou mettre à jour la bulle des points restants
+      let bubble = document.getElementById('Willy-points-bubble');
+      if (!bubble) {
+        bubble = document.createElement('div');
+        bubble.id = 'Willy-points-bubble';
+        bubble.className = 'points-bubble';
+        document.body.appendChild(bubble);
+      }
+      bubble.textContent = `Points restants : ${userData.Oiseau_pts - totalPointsUtilises()}`;
+
+      // Ajouter le bouton "Confirmer"
+      const confirmerButton = document.createElement('button');
+      confirmerButton.textContent = 'Confirmer';
+      confirmerButton.className = 'stat-button confirm-button';
+      confirmerButton.onclick = confirmerStats;
+      document.getElementById('Willy-info').appendChild(confirmerButton);
+    }
+
+    function modifierStat(stat, valeur) {
+      const userData = getUserData();
+      if (!userData) return;
+
+      let maxStat = 0;
+      if (stat === 'PV') {
+        maxStat = 25;
+      } else if (stat === 'attaque') {
+        maxStat = 30;
+      } else if (stat === 'defense') {
+        maxStat = 20;
+      }
+      const valeurActuelle = (userData[`Oiseau_${stat}_pts`] || 0) + (modificationsTemp[stat] || 0);
+
+      if (valeur === 1 && (userData.Oiseau_pts - totalPointsUtilises()) > 0 && valeurActuelle < maxStat) {
+        modificationsTemp[stat] = (modificationsTemp[stat] || 0) + 1;
+      } else if (valeur === -1 && (modificationsTemp[stat] || 0) > 0) {
+        modificationsTemp[stat]--;
+      }
+
+      // Mettre à jour l'affichage des boutons et de la bulle
+      afficherBoutonsStats(userData);
+    }
+
+    function totalPointsUtilises() {
+      // Calculer la somme des points utilisés dans les modifications temporaires
+      return Object.values(modificationsTemp).reduce((sum, val) => sum + (val || 0), 0);
+    }
+
+    function confirmerStats() {
+      const userData = getUserData();
+      if (!userData) {
+        console.error("Impossible de confirmer les stats : données utilisateur introuvables.");
+        return;
+      }
+
+      // Initialiser les valeurs si elles sont absentes
+      modificationsTemp.PV = modificationsTemp.PV || 0;
+      modificationsTemp.attaque = modificationsTemp.attaque || 0;
+      modificationsTemp.defense = modificationsTemp.defense || 0;
+
+      const totalPts = totalPointsUtilises();
+
+      if (totalPts > userData.Oiseau_pts) {
+        console.error("Erreur : points à attribuer supérieurs aux points disponibles.");
+        alerte("Erreur : points à attribuer supérieurs aux points disponibles.");
+        return;
+      }
+
+      // Appliquer les modifications aux statistiques
+      for (const stat of ["PV", "attaque", "defense"]) {
+        userData[`Oiseau_${stat}_pts`] = (userData[`Oiseau_${stat}_pts`] || 0) + (modificationsTemp[stat] || 0);
+      }
+
+      // Mise à jour des points restants
+      userData.Oiseau_pts -= totalPts;
+
+      // Réinitialiser les modifications temporaires
+      modificationsTemp = {};
+
+      // Supprimer la bulle de points restants
+      const bubble = document.getElementById('Willy-points-bubble');
+      if (bubble) {
+        bubble.remove();
+      }
+
+      // Sauvegarder les données utilisateur
+      try {
+        saveUserData(userData);
+        afficherDonneesUtilisateur();
+        console.log("Modifications confirmées avec succès !");
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
+      }
+    }
+
+
+    function afficherDetailsPerso() {
+        alert("Briseur de Défense: Capable de réduire les défenses adverses tout en infligeant des dégâts conséquents.");
+    }
+
+
+    function desactiverBoutons(desactiver) {
+      const boutons = document.querySelectorAll('.footer-icon');
+      boutons.forEach((bouton) => {
+        bouton.disabled = desactiver;
+      });
+    }
+
+    // Charge les données utilisateur et affiche automatiquement la fenêtre de Willy
+    afficherDonneesUtilisateur();
+
+    function showMainMenu() {
+      window.location.href = "../menu_principal.html";
+    }
+
+    function goToPasse() {
+      window.location.href = "../passe_de_combat.html";
+    }
+
+    function viewCharacters() {
+      window.location.href = "../perso_stats.html";
+    }
+
+    function viewShop() {
+      window.location.href = "../boutique.html";
+    }
+
+    function viewUpgrades() {
+      // Fonction placeholder pour d'éventuelles améliorations
+    }
+  </script>
+</body>
+
+</html>
