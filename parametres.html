@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Paramètres</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     /* Variables CSS pour faciliter les modifications ultérieures */
     :root {
@@ -46,7 +47,7 @@
       padding: 20px;
       background: var(--color-container-light);
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
@@ -55,14 +56,15 @@
       font-size: 24px;
     }
 
-    .button, .back-button {
+    .button,
+    .back-button {
       display: block;
       padding: 12px 20px;
       font-size: 16px;
       color: #fff;
       border: none;
       border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       cursor: pointer;
       text-align: center;
       text-decoration: none;
@@ -100,7 +102,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background-color: rgba(0,0,0,0.8);
+      background-color: rgba(0, 0, 0, 0.8);
       color: #fff;
       display: flex;
       justify-content: center;
@@ -109,16 +111,19 @@
       z-index: 1000;
       text-align: center;
     }
+
     #loginForm div {
       background: #333;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
+
     #loginForm h2 {
       margin-top: 0;
       margin-bottom: 20px;
     }
+
     #loginForm input,
     #loginForm button {
       width: calc(100% - 20px);
@@ -136,16 +141,36 @@
         background-color: var(--color-bg-dark);
         color: var(--color-text-dark);
       }
+
       .container {
         background-color: var(--color-container-dark);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
-      h1 { color: var(--color-text-dark); }
-      .button { background-color: #555; color: var(--color-text-dark); }
-      .button:hover { background-color: #666; }
-      .back-button { background-color: #333; }
-      .back-button:hover { background-color: #555; }
-      .version-info { color: var(--color-text-dark); }
+
+      h1 {
+        color: var(--color-text-dark);
+      }
+
+      .button {
+        background-color: #555;
+        color: var(--color-text-dark);
+      }
+
+      .button:hover {
+        background-color: #666;
+      }
+
+      .back-button {
+        background-color: #333;
+      }
+
+      .back-button:hover {
+        background-color: #555;
+      }
+
+      .version-info {
+        color: var(--color-text-dark);
+      }
     }
   </style>
   <!-- Chargement des bibliothèques en version « compat » -->
@@ -166,17 +191,25 @@
       <a class="button" href="verification_maj.html">Vérifier si une mise à jour est disponible</a>
       <a class="button" id="loginButton" href="connection.html">Se connecter</a>
       <a class="button" id="logoutButton" href="#" style="display:none;">Se déconnecter</a>
+      
+      <!-- Système audio simplifié pour la Web App -->
+      <audio id="bg-music">
+        <source src="B1.mp3" type="audio/mpeg">
+        Votre navigateur ne supporte pas l'audio.
+      </audio>
+      <!-- Bouton pour activer le son (et stocker l'autorisation dans le localStorage) -->
+      <button class="button" onclick="enableAutoplay()">Activer le son</button>
+      
       <a class="back-button" href="menu_principal.html">Retour au menu principal</a>
       <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
     </div>
     <a id="versionInfo" class="version-info" href="patch_note.html" title="Voir les notes de mise à jour"></a>
   </div>
 
-  <!-- Inclusion d'un script local si nécessaire -->
+  <!-- Script principal (Firebase, gestion des sauvegardes, etc.) -->
   <script src="localStorage.js"></script>
   <script>
-    // Encapsuler le code dans une IIFE pour éviter la pollution globale
-    (function() {
+    (function () {
       'use strict';
 
       /* ---------- Configuration Firebase ---------- */
@@ -335,7 +368,7 @@
           trophees: 0,
           argent: 0,
           VICTOIRE: false,
-          version: '2.5',
+          version: 'B2.1.0.00',
           recompense: 0,
           perso_recompense: 0,
           xp_du_jour: 0,
@@ -428,9 +461,9 @@
           quete3_current: "",
           quete3_character: "",
           partie_commencee: false,
+          difficulty: "hard",
         };
 
-        // Compléter ou fusionner les données par défaut avec les données existantes
         Object.keys(defaultUserData).forEach(key => {
           if (!(key in userData)) {
             userData[key] = defaultUserData[key];
@@ -443,7 +476,6 @@
       /* ---------- Déconnexion ---------- */
       function logout() {
         const userData = getUserData();
-        // Sauvegarde dans Firebase si nécessaire
         if (auth.currentUser) {
           const userId = auth.currentUser.uid;
           database.ref(`users/${userId}/userData`).set(userData, (error) => {
@@ -452,6 +484,7 @@
             } else {
               auth.signOut().then(() => {
                 alert('Déconnecté avec succès.');
+                localStorage.removeItem('connection');
                 updateUI();
                 localStorage.removeItem('userData');
                 window.location.href = "index.html";
@@ -470,7 +503,6 @@
         const versionInfo = document.getElementById('versionInfo');
         versionInfo.textContent = userData.version ? 'v.' + userData.version : 'Version non disponible';
 
-        // Événements sur les boutons
         document.getElementById('importBackup').addEventListener('click', handleImportBackup);
         document.getElementById('downloadBackup').addEventListener('click', handleDownloadBackup);
         document.getElementById('updateBackup').addEventListener('click', updateBackup);
@@ -482,68 +514,42 @@
           logout();
         });
 
-        // Si le nombre de parties est inférieur à 5, afficher le bouton "Changer la difficulté"
-        if (
-          (userData.parties_test !== undefined && userData.parties_test < 5) ||
-          (userData.parties_weekend_test !== undefined && userData.parties_weekend_test < 5)
-        ) {
-          const container = document.querySelector('.container');
-
-          // Création du bouton "Changer la difficulté"
-          const changeDifficultyBtn = document.createElement('button');
-          changeDifficultyBtn.className = 'button';
-          changeDifficultyBtn.textContent = 'Changer la difficulté';
-          container.appendChild(changeDifficultyBtn);
-
-          // Création du menu déroulant pour choisir la difficulté
-          const difficultySelect = document.createElement('select');
-          difficultySelect.style.display = 'none'; // caché par défaut
-          difficultySelect.style.marginTop = '10px';
-
-          // Option par défaut (non sélectionnable)
-          const defaultOption = document.createElement('option');
-          defaultOption.textContent = 'Sélectionnez la difficulté';
-          defaultOption.disabled = true;
-          defaultOption.selected = true;
-          difficultySelect.appendChild(defaultOption);
-
-          // Option Facile → correspond à "easy"
-          const optionEasy = document.createElement('option');
-          optionEasy.value = 'easy';
-          optionEasy.textContent = 'Facile';
-          difficultySelect.appendChild(optionEasy);
-
-          // Option Moyenne → correspond à "medium"
-          const optionMedium = document.createElement('option');
-          optionMedium.value = 'medium';
-          optionMedium.textContent = 'Moyenne';
-          difficultySelect.appendChild(optionMedium);
-
-          // Option Difficile → correspond à "hard"
-          const optionHard = document.createElement('option');
-          optionHard.value = 'hard';
-          optionHard.textContent = 'Difficile';
-          difficultySelect.appendChild(optionHard);
-
-          container.appendChild(difficultySelect);
-
-          // Au clic sur le bouton, le menu déroulant apparaît (ou disparaît s'il est déjà affiché)
-          changeDifficultyBtn.addEventListener('click', () => {
-            difficultySelect.style.display = difficultySelect.style.display === 'none' ? 'block' : 'none';
-          });
-
-          // Lorsqu'un choix est effectué, on met à jour la difficulté et on sauvegarde
-          difficultySelect.addEventListener('change', () => {
-            const selectedValue = difficultySelect.value;
-            userData.difficulty = selectedValue; // "easy", "medium" ou "hard"
-            saveUserData(userData);
-            alert('Difficulté changée en ' + difficultySelect.options[difficultySelect.selectedIndex].text);
-            // Cacher le menu déroulant après le choix
-            difficultySelect.style.display = 'none';
-          });
+        // Si l'utilisateur a déjà autorisé l'autoplay, lance la musique automatiquement
+        if (localStorage.getItem('autoplayEnabled') === 'true') {
+          playMusic();
         }
       });
-    })();
+    }());
+  </script>
+
+  <!-- Script audio simplifié pour la Web App -->
+  <script>
+    // Configuration de la musique avec changement de piste
+    const audio = document.getElementById('bg-music');
+    const tracks = ['B1.mp3', 'B2.mp3'];
+    let currentTrack = parseInt(localStorage.getItem('currentTrack')) || 0;
+    audio.src = tracks[currentTrack];
+
+    // Fonction pour lancer la musique
+    function playMusic() {
+      audio.play().catch(() => {
+        console.log("La lecture automatique est bloquée par le navigateur.");
+      });
+    }
+
+    // Fonction qui active l'autoplay et mémorise l'autorisation
+    function enableAutoplay() {
+      playMusic();
+      localStorage.setItem('autoplayEnabled', 'true');
+    }
+
+    // Passer à la piste suivante une fois la piste terminée
+    audio.addEventListener('ended', () => {
+      currentTrack = (currentTrack + 1) % tracks.length;
+      localStorage.setItem('currentTrack', currentTrack);
+      audio.src = tracks[currentTrack];
+      playMusic();
+    });
   </script>
 </body>
 </html>

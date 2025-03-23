@@ -1,5 +1,5 @@
 // Définir la version du jeu
-const game_version = '2.5';
+const game_version = 'B2.1.0.00';
 
 // Fonction pour obtenir les données utilisateur de localStorage
 function getUserData() {
@@ -54,7 +54,7 @@ function checkAndUpdateWeeks(userData) {
       tropheesMax: 0,
       argent: 0,
       VICTOIRE: false,
-      version: '2.5',
+      version: 'B2.1.0.00',
       recompense: 0,
       perso_recompense: 0,
       xp_du_jour: 0,
@@ -164,6 +164,7 @@ function checkAndUpdateWeeks(userData) {
       quete3_character: "",
 
       partie_commencee: false,
+      partie_commencee_weekend: false,
 
       parties_test: 0,
       parties_weekend_test: 0,

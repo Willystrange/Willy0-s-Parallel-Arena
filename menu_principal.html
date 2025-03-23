@@ -251,6 +251,16 @@
       animation: scale-out-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
     }
 
+    #playerFrame {
+      display: none;
+    }
+
+    #contentFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
     /* Fenêtre de dialogue */
     .dialog-overlay {
       display: none;
@@ -463,373 +473,371 @@
       <button class="mode-button" onclick="startGame('survie')">Survie</button>
       <button class="cancel-button" onclick="closeModeSelection()">Annuler</button>
     </div>
-  </div>
+    <audio id="bg-music" loop>
+      <source src="B1.mp3" type="audio/mpeg">
+    </audio>
 
-  <!-- Lecteur audio pour la playlist -->
-  <audio id="bg-music" src="B1.mp3"></audio>
 
-  <script>
-    const playlist = ["B1.mp3", "B2.mp3"];
-    let currentIndex = 0;
-    const audioElement = document.getElementById("bg-music");
-    audioElement.volume = 0.5;
+    <script src="localStorage.js"></script>
+    <script>
+      /*==============================*
+       *    INITIALISATION FIREBASE   *
+       *==============================*/
+      const firebaseConfig = {
+        apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+        authDomain: "willy0s-parallel-arena.firebaseapp.com",
+        databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+        projectId: "willy0s-parallel-arena",
+        storageBucket: "willy0s-parallel-arena.appspot.com",
+        messagingSenderId: "683284732830",
+        appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+        measurementId: "G-85B8R4NKNM"
+      };
+      if (!firebase.apps.length) {firebase.initializeApp(firebaseConfig);}
+      const database = firebase.database();
+      const perf = firebase.performance();
 
-    // Gestion de la playlist : quand une musique se termine, passe à la suivante
-    audioElement.addEventListener("ended", () => {
-      currentIndex = (currentIndex + 1) % playlist.length;
-      audioElement.src = playlist[currentIndex];
-      audioElement.play().catch(error => console.error("Erreur lors de la lecture:", error));
-    });
-
-    // Dès le chargement de la page, proposer d'activer la musique
-    document.addEventListener("DOMContentLoaded", () => {
-      if (confirm("Voulez-vous activer la musique ?")) {
-        audioElement.play().catch(error => console.error("Erreur lors de la lecture:", error));
-      }
-    });
-  </script>
-
-  <!-- Script localStorage et logique de l'application -->
-  <script src="localStorage.js"></script>
-  <script>
-    /*==============================*
-     *    INITIALISATION FIREBASE   *
-     *==============================*/
-    const firebaseConfig = {
-      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-      authDomain: "willy0s-parallel-arena.firebaseapp.com",
-      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-      projectId: "willy0s-parallel-arena",
-      storageBucket: "willy0s-parallel-arena.appspot.com",
-      messagingSenderId: "683284732830",
-      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-      measurementId: "G-85B8R4NKNM"
-    };
-    if (!firebase.apps.length) {firebase.initializeApp(firebaseConfig);}
-    const database = firebase.database();
-    const perf = firebase.performance();
-
-    /* Mesure des performances FCP et FID */
-    if ('PerformanceObserver' in window) {
-      const paintObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntriesByName('first-contentful-paint');
-        if (entries.length > 0) {console.log('First Contentful Paint (FCP):', entries[0].startTime, 'ms');}
-      });
-      paintObserver.observe({type: 'paint', buffered: true});
-      const fidObserver = new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry) => {
-          if (entry.entryType === 'first-input') {console.log('First Input Delay (FID):', entry.processingStart - entry.startTime, 'ms');}
+      /* Mesure des performances FCP et FID */
+      if ('PerformanceObserver' in window) {
+        const paintObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntriesByName('first-contentful-paint');
+          if (entries.length > 0) {console.log('First Contentful Paint (FCP):', entries[0].startTime, 'ms');}
         });
-      });
-      fidObserver.observe({type: 'first-input', buffered: true});
-    }
-
-    /*==============================*
-     *     GESTION MAINTENANCE       *
-     *==============================*/
-    const maintenanceStartRef = database.ref('maintenance/start');
-    const maintenanceEndRef = database.ref('maintenance/end');
-    function checkMaintenance() {
-      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
-        .then(([startSnapshot, endSnapshot]) => {
-          const maintenanceStart = new Date(startSnapshot.val());
-          const maintenanceEnd = new Date(endSnapshot.val());
-          const currentTime = new Date();
-          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
-            window.location.href = 'maintenance.html';
-          }
-        })
-        .catch(error => console.error("Erreur lors de la récupération des données de maintenance:", error));
-    }
-    checkMaintenance();
-    setInterval(checkMaintenance, 10000);
-
-    /*==============================*
-     *      GESTION DES DONNÉES      *
-     *==============================*/
-    let User = false;
-    let userId = null;
-
-    // On s'assure de récupérer ou d'initialiser l'objet userData
-    function getUserData() {
-      return JSON.parse(localStorage.getItem('userData')) || {};
-    }
-    function saveUserData(userData) {
-      localStorage.setItem('userData', JSON.stringify(userData));
-      console.log("Données sauvegardées localement");
-      if (User && userId) {
-        const userRef = database.ref(`users/${userId}/userData`);
-        userRef.set(userData, (error) => {
-          if (error) {
-            console.error("Erreur lors de l'enregistrement dans Firebase:", error);
-          } else {
-            console.log('Données utilisateur sauvegardées dans Firebase');
-          }
+        paintObserver.observe({type: 'paint', buffered: true});
+        const fidObserver = new PerformanceObserver((list) => {
+          list.getEntries().forEach((entry) => {
+            if (entry.entryType === 'first-input') {console.log('First Input Delay (FID):', entry.processingStart - entry.startTime, 'ms');}
+          });
         });
+        fidObserver.observe({type: 'first-input', buffered: true});
       }
-    }
 
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        console.log("Utilisateur authentifié avec UID :", user.uid);
-        User = true;
-        userId = user.uid;
-        // S'assurer que userData existe
-        let currentUserData = getUserData();
-        saveUserData(currentUserData);
-      } else {
-        console.log("Aucun utilisateur authentifié");
+      /*==============================*
+       *     GESTION MAINTENANCE       *
+       *==============================*/
+      const maintenanceStartRef = database.ref('maintenance/start');
+      const maintenanceEndRef = database.ref('maintenance/end');
+      function checkMaintenance() {
+        Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
+          .then(([startSnapshot, endSnapshot]) => {
+            const maintenanceStart = new Date(startSnapshot.val());
+            const maintenanceEnd = new Date(endSnapshot.val());
+            const currentTime = new Date();
+            if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+              window.location.href = 'maintenance.html';
+            }
+          })
+          .catch(error => console.error("Erreur lors de la récupération des données de maintenance:", error));
       }
-    });
+      checkMaintenance();
+      setInterval(checkMaintenance, 10000);
 
-    function displayUserInfo() {
-      const userData = getUserData();
-      document.getElementById('pseudoTitle').querySelector('span').innerText = userData.pseudo || 'Pseudo inconnu';
-    }
-    function updateStats() {
-      const userData = getUserData();
-      document.getElementById("currentTrophies").textContent = userData.trophees;
-      document.getElementById("maxTrophies").textContent = userData.tropheesMax;
-      document.getElementById("classicWins").textContent = userData.victoires;
-      document.getElementById("survivalWins").textContent = userData.manches_max;
-      document.getElementById("classicGames").textContent = userData.classicGames || 0;
-      document.getElementById("survivalGames").textContent = userData.survivalGames || 0;
-      updateTrophyProgress();
-    }
-    function trophyVerif() {
-      let userData = getUserData();
-      if (userData.trophees > userData.tropheesMax) {
-        userData.tropheesMax = userData.trophees;
-        saveUserData(userData);
+      /*==============================*
+       *      GESTION DES DONNÉES      *
+       *==============================*/
+      let User = false;
+      let userId = null;
+
+      // On s'assure de récupérer ou d'initialiser l'objet userData
+      function getUserData() {
+        return JSON.parse(localStorage.getItem('userData')) || {};
       }
-    }
+      function saveUserData(userData) {
+        localStorage.setItem('userData', JSON.stringify(userData));
+        console.log("Données sauvegardées localement");
+        if (User && userId) {
+          const userRef = database.ref(`users/${userId}/userData`);
+          userRef.set(userData, (error) => {
+            if (error) {
+              console.error("Erreur lors de l'enregistrement dans Firebase:", error);
+            } else {
+              console.log('Données utilisateur sauvegardées dans Firebase');
+            }
+          });
+        }
+      }
 
-    /* Fonction de mise à jour de la barre de progression des trophées */
-    function updateTrophyProgress() {
-      const userData = getUserData();
-      const trophies = userData.trophees;
-      const rewardPals = [
-        {trophies: 10}, {trophies: 20}, {trophies: 30}, {trophies: 40},
-        {trophies: 60}, {trophies: 80}, {trophies: 100}, {trophies: 120},
-        {trophies: 150}, {trophies: 180}, {trophies: 220}, {trophies: 260},
-        {trophies: 300}, {trophies: 350}, {trophies: 400}, {trophies: 460},
-        {trophies: 520}, {trophies: 580}, {trophies: 650}, {trophies: 720},
-        {trophies: 800}, {trophies: 880}, {trophies: 970}, {trophies: 1060},
-        {trophies: 1150}, {trophies: 1250}, {trophies: 1350}, {trophies: 1460},
-        {trophies: 1570}, {trophies: 1690}
-      ];
-      let previousThreshold = 0, nextThreshold = rewardPals[0].trophies, currentIndex = 0;
-      for (let i = 0; i < rewardPals.length; i++) {
-        if (trophies < rewardPals[i].trophies) {
-          nextThreshold = rewardPals[i].trophies;
-          currentIndex = i;
-          break;
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          console.log("Utilisateur authentifié avec UID :", user.uid);
+          User = true;
+          userId = user.uid;
+          // S'assurer que userData existe
+          let currentUserData = getUserData();
+          saveUserData(currentUserData);
         } else {
-          previousThreshold = rewardPals[i].trophies;
+          console.log("Aucun utilisateur authentifié");
         }
-        if (i === rewardPals.length - 1) {
-          nextThreshold = rewardPals[i].trophies;
-          currentIndex = i;
+      });
+
+      function displayUserInfo() {
+        const userData = getUserData();
+        document.getElementById('pseudoTitle').querySelector('span').innerText = userData.pseudo || 'Pseudo inconnu';
+      }
+      function updateStats() {
+        const userData = getUserData();
+        document.getElementById("currentTrophies").textContent = userData.trophees;
+        document.getElementById("maxTrophies").textContent = userData.tropheesMax;
+        document.getElementById("classicWins").textContent = userData.victoires;
+        document.getElementById("survivalWins").textContent = userData.manches_max;
+        document.getElementById("classicGames").textContent = userData.classicGames || 0;
+        document.getElementById("survivalGames").textContent = userData.survivalGames || 0;
+        updateTrophyProgress();
+      }
+      function trophyVerif() {
+        let userData = getUserData();
+        if (userData.trophees > userData.tropheesMax) {
+          userData.tropheesMax = userData.trophees;
+          saveUserData(userData);
         }
       }
-      let progress = previousThreshold === 0 ? (trophies / nextThreshold) * 100
-        : ((trophies - previousThreshold) / (nextThreshold - previousThreshold)) * 100;
-      progress = Math.min(progress, 100);
-      document.getElementById("trophiesProgressFill").style.width = progress + "%";
-      let rewardText = "Prochaine récompense à " + nextThreshold + " trophées : 1 récompense aléatoire";
-      if ((currentIndex + 1) % 8 === 0) {rewardText += " et un nouveau personnage aléatoire";}
-      document.getElementById("nextRewards").textContent = rewardText;
-    }
 
-    /*==============================*
-     *    GESTION DE L'EN-TÊTE       *
-     *==============================*/
-    const header = document.getElementById("header");
-    const interactionZone = document.querySelector(".interaction-zone");
-    let startY = 0, isDragging = false;
-    const minHeight = 60, maxHeight = window.innerHeight;
-    interactionZone.addEventListener("touchstart", (e) => {
-      startY = e.touches[0].clientY; isDragging = true; header.style.transition = "none";
-    });
-    interactionZone.addEventListener("touchmove", (e) => {
-      if (!isDragging) return;
-      const deltaY = e.touches[0].clientY - startY;
-      const currentHeaderHeight = parseInt(header.style.height) || minHeight;
-      const newHeight = Math.min(maxHeight, Math.max(minHeight, currentHeaderHeight + deltaY));
-      header.style.height = `${newHeight}px`;
-      updateStatsPosition(newHeight);
-    });
-    interactionZone.addEventListener("touchend", () => {
-      isDragging = false;
-      finalizeHeaderHeight();
-      updateStatsPosition(parseInt(header.style.height) || minHeight);
-    });
-    if (!("ontouchstart" in window)) {
-      let dragged = false;
-      interactionZone.addEventListener("mousedown", (e) => {
-        startY = e.clientY;
-        isDragging = true;
-        dragged = false;
-        header.style.transition = "none";
+      /* Fonction de mise à jour de la barre de progression des trophées */
+      function updateTrophyProgress() {
+        const userData = getUserData();
+        const trophies = userData.trophees;
+        const rewardPals = [
+          {trophies: 10}, {trophies: 20}, {trophies: 30}, {trophies: 40},
+          {trophies: 60}, {trophies: 80}, {trophies: 100}, {trophies: 120},
+          {trophies: 150}, {trophies: 180}, {trophies: 220}, {trophies: 260},
+          {trophies: 300}, {trophies: 350}, {trophies: 400}, {trophies: 460},
+          {trophies: 520}, {trophies: 580}, {trophies: 650}, {trophies: 720},
+          {trophies: 800}, {trophies: 880}, {trophies: 970}, {trophies: 1060},
+          {trophies: 1150}, {trophies: 1250}, {trophies: 1350}, {trophies: 1460},
+          {trophies: 1570}, {trophies: 1690}
+        ];
+        let previousThreshold = 0, nextThreshold = rewardPals[0].trophies, currentIndex = 0;
+        for (let i = 0; i < rewardPals.length; i++) {
+          if (trophies < rewardPals[i].trophies) {
+            nextThreshold = rewardPals[i].trophies;
+            currentIndex = i;
+            break;
+          } else {
+            previousThreshold = rewardPals[i].trophies;
+          }
+          if (i === rewardPals.length - 1) {
+            nextThreshold = rewardPals[i].trophies;
+            currentIndex = i;
+          }
+        }
+        let progress = previousThreshold === 0 ? (trophies / nextThreshold) * 100
+          : ((trophies - previousThreshold) / (nextThreshold - previousThreshold)) * 100;
+        progress = Math.min(progress, 100);
+        document.getElementById("trophiesProgressFill").style.width = progress + "%";
+        let rewardText = "Prochaine récompense à " + nextThreshold + " trophées : 1 récompense aléatoire";
+        if ((currentIndex + 1) % 8 === 0) {rewardText += " et un nouveau personnage aléatoire";}
+        document.getElementById("nextRewards").textContent = rewardText;
+      }
+
+      /*==============================*
+       *    GESTION DE L'EN-TÊTE       *
+       *==============================*/
+      const header = document.getElementById("header");
+      const interactionZone = document.querySelector(".interaction-zone");
+      let startY = 0, isDragging = false;
+      const minHeight = 60, maxHeight = window.innerHeight;
+      interactionZone.addEventListener("touchstart", (e) => {
+        startY = e.touches[0].clientY; isDragging = true; header.style.transition = "none";
       });
-      document.addEventListener("mousemove", (e) => {
+      interactionZone.addEventListener("touchmove", (e) => {
         if (!isDragging) return;
-        const deltaY = e.clientY - startY;
-        if (Math.abs(deltaY) > 5) {dragged = true;}
+        const deltaY = e.touches[0].clientY - startY;
         const currentHeaderHeight = parseInt(header.style.height) || minHeight;
         const newHeight = Math.min(maxHeight, Math.max(minHeight, currentHeaderHeight + deltaY));
         header.style.height = `${newHeight}px`;
         updateStatsPosition(newHeight);
       });
-      document.addEventListener("mouseup", () => {
-        if (isDragging) {
-          if (!dragged) {
-            const currentHeaderHeight = parseInt(header.style.height) || minHeight;
-            header.style.height = currentHeaderHeight === minHeight ? `${maxHeight}px` : `${minHeight}px`;
-            updateStatsPosition(currentHeaderHeight === minHeight ? maxHeight : minHeight);
-            header.style.transition = "height 0.2s ease";
-          } else {
-            finalizeHeaderHeight();
-            updateStatsPosition(parseInt(header.style.height) || minHeight);
-          }
-          isDragging = false;
-        }
+      interactionZone.addEventListener("touchend", () => {
+        isDragging = false;
+        finalizeHeaderHeight();
+        updateStatsPosition(parseInt(header.style.height) || minHeight);
       });
-    }
-    function updateStatsPosition(currentHeight) {
-      const stats = document.querySelector(".stats");
-      if (currentHeight > minHeight + 40) {
-        stats.style.opacity = "1";
-        stats.style.transform = `translateY(${(currentHeight - minHeight) / 2}px)`;
-      } else {
-        stats.style.opacity = "0";
-        stats.style.transform = "translateY(20px)";
+      if (!("ontouchstart" in window)) {
+        let dragged = false;
+        interactionZone.addEventListener("mousedown", (e) => {
+          startY = e.clientY;
+          isDragging = true;
+          dragged = false;
+          header.style.transition = "none";
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!isDragging) return;
+          const deltaY = e.clientY - startY;
+          if (Math.abs(deltaY) > 5) {dragged = true;}
+          const currentHeaderHeight = parseInt(header.style.height) || minHeight;
+          const newHeight = Math.min(maxHeight, Math.max(minHeight, currentHeaderHeight + deltaY));
+          header.style.height = `${newHeight}px`;
+          updateStatsPosition(newHeight);
+        });
+        document.addEventListener("mouseup", () => {
+          if (isDragging) {
+            if (!dragged) {
+              const currentHeaderHeight = parseInt(header.style.height) || minHeight;
+              header.style.height = currentHeaderHeight === minHeight ? `${maxHeight}px` : `${minHeight}px`;
+              updateStatsPosition(currentHeaderHeight === minHeight ? maxHeight : minHeight);
+              header.style.transition = "height 0.2s ease";
+            } else {
+              finalizeHeaderHeight();
+              updateStatsPosition(parseInt(header.style.height) || minHeight);
+            }
+            isDragging = false;
+          }
+        });
       }
-    }
-    function finalizeHeaderHeight() {
-      const currentHeaderHeight = parseInt(header.style.height) || minHeight;
-      header.style.transition = "height 0.2s ease";
-      header.style.height = currentHeaderHeight < (maxHeight + minHeight) / 6 ? `${minHeight}px` : `${maxHeight}px`;
-    }
-    document.addEventListener("DOMContentLoaded", () => {updateStatsPosition(minHeight);});
-
-    /*==============================*
-     *       NAVIGATION & MODES      *
-     *==============================*/
-    function viewQuests() {window.location.href = "quetes.html";}
-    function goToPasse() {window.location.href = "passe_de_combat.html";}
-    function goToSettings() {window.location.href = "parametres.html";}
-    function goToActualites() {window.location.href = "actualites.html";}
-    function viewCharacters() {window.location.href = "perso_stats.html";}
-    function viewShop() {window.location.href = "boutique.html";}
-    function viewUpgrades() {window.location.href = "amelioration.html";}
-    function showMainMenu() { /* Placeholder pour le menu principal */}
-    function showModeSelection() {
-      const modeDialog = document.getElementById('modeDialog');
-      modeDialog.classList.add('scale-in-top');
-      modeDialog.style.display = 'flex';
-    }
-    function closeModeSelection() {
-      const modeDialog = document.getElementById('modeDialog');
-      modeDialog.classList.remove('scale-in-top');
-      modeDialog.classList.add('scale-out-top');
-      setTimeout(() => {
-        modeDialog.style.display = 'none';
-        modeDialog.classList.remove('scale-out-top');
-      }, 500);
-    }
-    // Mise à jour pour incrémenter le compteur de parties lancées selon le mode sélectionné
-    function startGame(mode) {
-      const userData = getUserData();
-      if (mode === 'classique') {
-        userData.classicGames = (userData.classicGames || 0) + 1;
-        saveUserData(userData);
-        window.location.href = 'characters.html';
-      } else if (mode === 'survie') {
-        userData.survivalGames = (userData.survivalGames || 0) + 1;
-        saveUserData(userData);
-        window.location.href = 'characters_survie.html';
-      }
-    }
-    const initialUserData = getUserData();
-    function StartedGame(userData) {
-      if (userData.partie_commencee) {
-        window.location.href = "combat.html";
-      } else if (userData.partie_commencee_weekend) {
-        window.location.href = "combat-weekend.html";
-      }
-    }
-    StartedGame(initialUserData);
-
-    /*==============================*
-     *      RÉINITIALISATION XP      *
-     *==============================*/
-    function resetDoubleXPIfNeeded() {
-      const now = new Date();
-      const lastCheck = new Date(localStorage.getItem('lastDoubleXPCheck') || 0);
-      const resetHour = 9, resetMinute = 0;
-      const userData = getUserData();
-      function reset() {
-        userData.Double_XP = 5;
-        userData.boutique_recompense = false;
-        userData.XP_jour = 0;
-        userData.quetes_jour = false;
-        userData.fraude = (userData.fraude || 0) - 1;
-        saveUserData(userData);
-        localStorage.setItem('lastDoubleXPCheck', now.toISOString());
-      }
-      if (
-        now.getDate() !== lastCheck.getDate() ||
-        now.getMonth() !== lastCheck.getMonth() ||
-        now.getFullYear() !== lastCheck.getFullYear()
-      ) {
-        if (now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) {reset();}
-      } else if (
-        (now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) &&
-        (lastCheck.getHours() < resetHour || (lastCheck.getHours() === resetHour && lastCheck.getMinutes() < resetMinute))
-      ) {
-        reset();
-      }
-    }
-
-    /*==============================*
-     *         CHARGEMENT           *
-     *==============================*/
-    document.addEventListener('DOMContentLoaded', function () {
-      const userData = getUserData();
-      if (userData.version !== game_version) {
-        window.location.href = "mise_a_jour.html";
-        return;
-      }
-      resetDoubleXPIfNeeded();
-      if (userData.recompense > 0 || userData.perso_recompense > 0) {
-        window.location.href = "recompenses.html";
-        return;
-      }
-      if (userData.fin_partie) { /* Action à définir... */}
-    });
-
-    // Fonction qui demande et enregistre le pseudo si nécessaire
-    function checkAndAskForUsername() {
-      let userData = getUserData();
-      let pseudo = userData.pseudo;
-      while (!pseudo || pseudo.length > 13) {
-        pseudo = prompt("Veuillez entrer votre pseudo (maximum 13 caractères) :");
-        if (pseudo && pseudo.length <= 13) {
-          userData.pseudo = pseudo;
-          saveUserData(userData);
-          // Met à jour userData après la sauvegarde
-          userData = getUserData();
+      function updateStatsPosition(currentHeight) {
+        const stats = document.querySelector(".stats");
+        if (currentHeight > minHeight + 40) {
+          stats.style.opacity = "1";
+          stats.style.transform = `translateY(${(currentHeight - minHeight) / 2}px)`;
+        } else {
+          stats.style.opacity = "0";
+          stats.style.transform = "translateY(20px)";
         }
       }
-    }
-    checkAndAskForUsername();
-    displayUserInfo();
-    trophyVerif();
-    updateStats();
+      function finalizeHeaderHeight() {
+        const currentHeaderHeight = parseInt(header.style.height) || minHeight;
+        header.style.transition = "height 0.2s ease";
+        header.style.height = currentHeaderHeight < (maxHeight + minHeight) / 6 ? `${minHeight}px` : `${maxHeight}px`;
+      }
+      document.addEventListener("DOMContentLoaded", () => {updateStatsPosition(minHeight);});
+
+      /*==============================*
+       *       NAVIGATION & MODES      *
+       *==============================*/
+      function viewQuests() {window.location.href = "quetes.html";}
+      function goToPasse() {window.location.href = "passe_de_combat.html";}
+      function goToSettings() {window.location.href = "parametres.html";}
+      function goToActualites() {window.location.href = "actualites.html";}
+      function viewCharacters() {window.location.href = "perso_stats.html";}
+      function viewShop() {window.location.href = "boutique.html";}
+      function viewUpgrades() {window.location.href = "amelioration.html";}
+      function showMainMenu() { /* Placeholder pour le menu principal */}
+      function showModeSelection() {
+        const modeDialog = document.getElementById('modeDialog');
+        modeDialog.classList.add('scale-in-top');
+        modeDialog.style.display = 'flex';
+      }
+      function closeModeSelection() {
+        const modeDialog = document.getElementById('modeDialog');
+        modeDialog.classList.remove('scale-in-top');
+        modeDialog.classList.add('scale-out-top');
+        setTimeout(() => {
+          modeDialog.style.display = 'none';
+          modeDialog.classList.remove('scale-out-top');
+        }, 500);
+      }
+      // Mise à jour pour incrémenter le compteur de parties lancées selon le mode sélectionné
+      function startGame(mode) {
+        const userData = getUserData();
+        if (mode === 'classique') {
+          userData.classicGames = (userData.classicGames || 0) + 1;
+          saveUserData(userData);
+          window.location.href = 'characters.html';
+        } else if (mode === 'survie') {
+          userData.survivalGames = (userData.survivalGames || 0) + 1;
+          saveUserData(userData);
+          window.location.href = 'characters_survie.html';
+        }
+      }
+      const initialUserData = getUserData();
+      function StartedGame(userData) {
+        if (userData.partie_commencee) {
+          window.location.href = "combat.html";
+        } else if (userData.partie_commencee_weekend) {
+          window.location.href = "combat-weekend.html";
+        }
+      }
+      StartedGame(initialUserData);
+
+      /*==============================*
+       *      RÉINITIALISATION XP      *
+       *==============================*/
+      function resetDoubleXPIfNeeded() {
+        const now = new Date();
+        const lastCheck = new Date(localStorage.getItem('lastDoubleXPCheck') || 0);
+        const resetHour = 9, resetMinute = 0;
+        const userData = getUserData();
+        function reset() {
+          userData.Double_XP = 5;
+          userData.boutique_recompense = false;
+          userData.XP_jour = 0;
+          userData.quetes_jour = false;
+          userData.fraude = (userData.fraude || 0) - 1;
+          saveUserData(userData);
+          localStorage.setItem('lastDoubleXPCheck', now.toISOString());
+        }
+        if (
+          now.getDate() !== lastCheck.getDate() ||
+          now.getMonth() !== lastCheck.getMonth() ||
+          now.getFullYear() !== lastCheck.getFullYear()
+        ) {
+          if (now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) {reset();}
+        } else if (
+          (now.getHours() > resetHour || (now.getHours() === resetHour && now.getMinutes() >= resetMinute)) &&
+          (lastCheck.getHours() < resetHour || (lastCheck.getHours() === resetHour && lastCheck.getMinutes() < resetMinute))
+        ) {
+          reset();
+        }
+      }
+
+      /*==============================*
+       *         CHARGEMENT           *
+       *==============================*/
+      document.addEventListener('DOMContentLoaded', function () {
+        const userData = getUserData();
+        if (userData.version !== game_version) {
+          window.location.href = "mise_a_jour.html";
+          return;
+        }
+        resetDoubleXPIfNeeded();
+        if (userData.recompense > 0 || userData.perso_recompense > 0) {
+          window.location.href = "recompenses.html";
+          return;
+        }
+        if (userData.fin_partie) { /* Action à définir... */}
+      });
+
+      // Fonction qui demande et enregistre le pseudo si nécessaire
+      function checkAndAskForUsername() {
+        let userData = getUserData();
+        let pseudo = userData.pseudo;
+        while (!pseudo || pseudo.length > 13) {
+          pseudo = prompt("Veuillez entrer votre pseudo (maximum 13 caractères) :");
+          if (pseudo && pseudo.length <= 13) {
+            userData.pseudo = pseudo;
+            saveUserData(userData);
+            // Met à jour userData après la sauvegarde
+            userData = getUserData();
+          }
+        }
+      }
+      checkAndAskForUsername();
+      displayUserInfo();
+      trophyVerif();
+      updateStats();
       // Éviter de forcer une sauvegarde finale inutile
       // saveUserData(getUserData());
-  </script>
+
+
+      let musicWindow;
+
+      // Vérifier si une fenêtre de musique est déjà ouverte
+      if (!localStorage.getItem('musicWindowOpened')) {
+        // Ouvrir une fenêtre invisible pour la musique
+        musicWindow = window.open('music.html', 'musicWindow', 'width=300,height=100,top=-1000,left=-1000');
+        localStorage.setItem('musicWindowOpened', 'true');
+      }
+
+      // Quand on quitte le site, on ferme la fenêtre musicale
+      window.addEventListener('beforeunload', () => {
+        if (musicWindow && !musicWindow.closed) {
+          musicWindow.close();
+          localStorage.removeItem('musicWindowOpened');
+        }
+      });
+
+    </script>
+
 
 </body>
 

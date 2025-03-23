@@ -2,11 +2,12 @@
 <html lang="fr">
 
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sélection de personnage</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     body {
       text-align: center;
@@ -26,42 +27,57 @@
       /* Permet le défilement vertical */
       height: 100vh;
       /* Occupe toute la hauteur de la fenêtre */
-      padding-top: 80px; /* Espace pour le titre et le filtre fixés en haut */
+      padding-top: 80px;
+      /* Espace pour le titre et le filtre fixés en haut */
       -webkit-overflow-scrolling: touch;
       /* Assure le défilement fluide sur les appareils tactiles */
     }
 
     h2 {
-      font-size: 24px; /* Réduit la taille du titre */
-      margin: 0; /* Supprime la marge autour du titre */
-      text-shadow: 1px 1px 2px #000000; /* Réduit l'ombre du texte */
+      font-size: 24px;
+      /* Réduit la taille du titre */
+      margin: 0;
+      /* Supprime la marge autour du titre */
+      text-shadow: 1px 1px 2px #000000;
+      /* Réduit l'ombre du texte */
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      background: rgba(0, 0, 0); /* Fond semi-transparent */
+      background: rgba(0, 0, 0);
+      /* Fond semi-transparent */
       padding: 10px 0;
-      z-index: 1000; /* Assure que le titre est au-dessus des autres éléments */
+      z-index: 1000;
+      /* Assure que le titre est au-dessus des autres éléments */
     }
 
     .sort-menu {
       margin: 0 auto;
-      width: 60%; /* Ajuste la largeur du filtre */
-      max-width: 300px; /* Définit une largeur maximale pour le filtre */
-      text-align: center; /* Centre le filtre */
+      width: 60%;
+      /* Ajuste la largeur du filtre */
+      max-width: 300px;
+      /* Définit une largeur maximale pour le filtre */
+      text-align: center;
+      /* Centre le filtre */
       position: fixed;
-      top: 35px; /* Positionne le filtre juste en dessous du titre */
-      margin-bottom: 20px; /* Ajoute un espace entre le titre et le filtre */
+      top: 35px;
+      /* Positionne le filtre juste en dessous du titre */
+      margin-bottom: 20px;
+      /* Ajoute un espace entre le titre et le filtre */
       left: 0;
       right: 0;
-      background: rgba(0, 0, 0); /* Fond semi-transparent pour le filtre */
+      background: rgba(0, 0, 0);
+      /* Fond semi-transparent pour le filtre */
       padding: 10px 0;
-      z-index: 1000; /* Assure que le filtre est au-dessus des autres éléments */
+      z-index: 1000;
+      /* Assure que le filtre est au-dessus des autres éléments */
     }
 
     .sort-menu select {
-      padding: 5px 15px; /* Réduit le padding pour un aspect plus compact */
-      font-size: 14px; /* Réduit la taille de la police */
+      padding: 5px 15px;
+      /* Réduit le padding pour un aspect plus compact */
+      font-size: 14px;
+      /* Réduit la taille de la police */
       border: 1px solid #ccc;
       border-radius: 5px;
       background-color: #fff;
@@ -181,6 +197,7 @@
       background-color: #28a428;
       transform: scale(1.05);
     }
+
     .boutons {
       margin-bottom: 100px;
       margin-top: 20px;
@@ -200,7 +217,8 @@
 
       h2 {
         color: #e0e0e0;
-        text-shadow: 1px 1px 2px #000000; /* Réduit l'ombre du texte en mode sombre */
+        text-shadow: 1px 1px 2px #000000;
+        /* Réduit l'ombre du texte en mode sombre */
       }
 
       .character-button {
@@ -266,8 +284,6 @@
       -ms-overflow-style: none;
       /* Pour Internet Explorer et Edge */
     }
-
-
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -293,7 +309,7 @@
       <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
     </div>
   </div>
-    <script>
+  <script>
 
     // Configuration Firebase
     const firebaseConfig = {
@@ -314,7 +330,7 @@
     const database = firebase.database();
 
     const maintenanceStartRef = database.ref('maintenance/start');
-    const maintenanceEndRef = database.ref('maintenance/end'); 
+    const maintenanceEndRef = database.ref('maintenance/end');
 
 
     function checkMaintenance() {
@@ -336,8 +352,21 @@
 
     checkMaintenance();
 
+    function getUserData() {
+      return JSON.parse(localStorage.getItem('userData'));
+    }
+
     // Vérifier la maintenance toutes les 10 secondes
     setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
+    function StartedGame() {
+      const userData = getUserData();
+      if (userData.partie_commencee) {
+        window.location.href = "../combat.html";
+      } else if (userData.partie_commencee_weekend) {
+        window.location.href = "../combat-weekend.html";
+      }
+    }
+    StartedGame();
     document.addEventListener('DOMContentLoaded', function () {
       // Récupérer les données utilisateur depuis localStorage
       const userData = getUserData();
@@ -491,79 +520,18 @@
 
         // Ajouter la classe show pour déclencher l'animation
         statsDiv.classList.add('show');
-      }
 
-      window.chooseCharacter = function (name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale) {
-        const now = new Date().getTime();
 
-        // Vérifier si le joueur est bloqué
-        if (userData.ban_until && now < userData.ban_until) {
-          const remainingTime = userData.ban_until - now;
-          const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-          const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+        window.chooseCharacter = function (name, pv, attaque, defense, spe, argent, pv_max, attaque_originale, defense_originale) {
+          const now = new Date().getTime();
 
-          alert(`Vous êtes bloqué pendant encore ${hours} heures ${minutes} minutes ${seconds} secondes.`);
-          return; // Empêcher le démarrage de la partie
-        }
-
-        if (userData.partie_commencee) {
-          userData.fraude = (userData.fraude || 0) + 1;
-          userData.partie_commencee = false;
-          sessionStorage.removeItem('playerCharacter');
-          sessionStorage.removeItem('opponentCharacter');
-          let banDuration = 0;
-
-          // Définir les durées de bannissement en millisecondes
-          switch (userData.fraude) {
-            case 2:
-              banDuration = 15 * 60 * 1000; // 15 minutes
-              break;
-            case 3:
-              banDuration = 45 * 60 * 1000; // 45 minutes
-              break;
-            case 4:
-              banDuration = 1 * 60 * 60 * 1000; // 1 heure
-              break;
-            case 5:
-              banDuration = 3 * 60 * 60 * 1000; // 3 heures
-              break;
-            case 6:
-              banDuration = 5 * 60 * 60 * 1000; // 5 heures
-              break;
-            case 7:
-              banDuration = 10 * 60 * 60 * 1000; // 10 heures
-              break;
-            case 8:
-              banDuration = 20 * 60 * 60 * 1000; // 20 heures
-              break;
-            case 9:
-              banDuration = 24 * 60 * 60 * 1000; // 1 journée (24 heures)
-              break;
-            default:
-              if (userData.fraude > 9) {
-                banDuration = 24 * 60 * 60 * 1000; // 1 journée (24 heures) pour les fraudes suivantes
-                userData.trophees -= 5; // Retirer 5 trophées après la 9ème fraude
-              }
-              break;
-          }
-          if (banDuration > 0) {
-            userData.ban_until = now + banDuration;
-            localStorage.setItem('userData', JSON.stringify(userData));
-            alert(`Vous avez été bloqué pendant ${Math.floor(banDuration / (60 * 1000))} minutes en raison de fraudes répétées.`);
-            return; // Empêcher le démarrage de la partie
-          }
-
-          localStorage.setItem('userData', JSON.stringify(userData));
-          alert("Il est interdit de quitter une partie sous peine d'interdiction de jouer pendant un certain temps.");
-          // Vous pouvez ajouter une redirection ou logique ici si nécessaire
-          startGame();
-        } else {
           startGame();
         }
       }
+
 
       function startGame() {
+        // Sauvegarde des informations du personnage joueur dans la session
         sessionStorage.setItem('playerCharacter', JSON.stringify({
           name: playerCharacter.name,
           pv: playerCharacter.pv,
@@ -581,20 +549,39 @@
         const randomIndex = Math.floor(Math.random() * remainingCharacters.length);
         const opponentCharacter = remainingCharacters[randomIndex];
 
-        // Déterminer le niveau de l'adversaire aléatoirement entre (player level - 1) et (player level + 2)
+        // Déterminer le niveau de l'adversaire aléatoirement entre (niveau du joueur - 1) et (niveau du joueur + 2)
         const levelKey = playerCharacter.name + '_Level';
         const playerLevel = userData[levelKey];
-        const minOpponentLevel = Math.max(1, playerLevel - 1); // Le niveau de l'adversaire ne peut pas être inférieur à 1
+        const minOpponentLevel = Math.max(1, playerLevel - 1); // le niveau ne peut être inférieur à 1
         const maxOpponentLevel = playerLevel + 2;
-        const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel)) + minOpponentLevel;
+        const opponentLevel = Math.floor(Math.random() * (maxOpponentLevel - minOpponentLevel + 1)) + minOpponentLevel;
 
-        // Calculer les statistiques de l'adversaire basées sur son niveau
-        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
-        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
-        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
-        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
-        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + ((0.01 * opponentLevel) - 0.01) * 4.8));
+        // Calcul des points d'amélioration totaux : chaque niveau donne 4 points
+        let improvementPoints = opponentLevel * 4;
+        let pvPoints = 0, attaquePoints = 0, defensePoints = 0;
 
+        // Répartition aléatoire des points d'amélioration parmi PV, attaque et défense
+        for (let i = 0; i < improvementPoints; i++) {
+          const randomStat = Math.floor(Math.random() * 3);
+          if (randomStat === 0) {
+            pvPoints++;
+          } else if (randomStat === 1) {
+            attaquePoints++;
+          } else {
+            defensePoints++;
+          }
+        }
+
+        // Application des améliorations : chaque point ajoute 2% à la statistique correspondante
+        let increasedOpponentPV = Math.round(opponentCharacter.pv * (1 + (0.02 * pvPoints)));
+        let increasedOpponentAttaque = Math.round(opponentCharacter.attaque * (1 + (0.02 * attaquePoints)));
+        let increasedOpponentDefense = Math.round(opponentCharacter.defense * (1 + (0.02 * defensePoints)));
+
+        // On applique la même amélioration aux valeurs originales d'attaque et de défense
+        let increasedattaque_originale = Math.round(opponentCharacter.attaque_originale * (1 + (0.02 * attaquePoints)));
+        let increaseddefense_originale = Math.round(opponentCharacter.defense_originale * (1 + (0.02 * defensePoints)));
+
+        // Sauvegarde des informations de l'adversaire dans la session
         sessionStorage.setItem('opponentCharacter', JSON.stringify({
           name: opponentCharacter.name,
           pv: increasedOpponentPV,
@@ -607,6 +594,7 @@
           defense_originale: increaseddefense_originale
         }));
 
+        // Redirection vers la page de combat
         window.location.href = "combat-weekend.html";
       }
 

@@ -2,11 +2,12 @@
 <html lang="fr">
 
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sélection de personnage</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     body {
       text-align: center;
@@ -353,6 +354,15 @@
     setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
     document.addEventListener('DOMContentLoaded', function () {
       // Fonction pour récupérer les données utilisateur depuis localStorage
+      function StartedGame() {
+        const userData = getUserData();
+        if (userData.partie_commencee) {
+          window.location.href="../combat.html";
+        }  else if (userData.partie_commencee_weekend) {
+          window.location.href="../combat-weekend.html";
+        }
+      }
+      StartedGame();
       function getUserData() {
         let userData = localStorage.getItem('userData');
         userData = JSON.parse(userData) || {};

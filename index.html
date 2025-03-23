@@ -2,11 +2,12 @@
 <html lang="fr">
 
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Animation Logo</title>
+  <title>Willy0's Parallel Arena</title>
   <!-- Préchargement des images -->
   <link rel="prefetch" href="/settings-icon.heic">
   <link rel="prefetch" href="/icon.png">
@@ -230,19 +231,21 @@
       if (event.animationName === 'fadeAndLift') {
         window.location.href = 'maintenance.html';
       } else {
-      // Rediriger vers le menu principal si la maintenance n'est pas active ou l'heure est passée
-      document.getElementById('container').addEventListener('animationend', function (event) {
-        if (event.animationName === 'fadeAndLift') {
-          window.location.href = 'menu_principal.html';
-        }
-      });
-    }});
-  
+        // Rediriger vers le menu principal si la maintenance n'est pas active ou l'heure est passée
+        document.getElementById('container').addEventListener('animationend', function (event) {
+          if (event.animationName === 'fadeAndLift') {
+            window.location.href = 'menu_principal.html';
+          }
+        });
+      }
+    });
+
     const rulesContainer = document.getElementById('rules-container');
     const startGameButton = document.getElementById('start-game');
     const acceptRulesCheckbox = document.getElementById('accept-rules');
     const gameContainer = document.getElementById('container');
 
+    // Vérifier si l'utilisateur a déjà accepté les règles
     // Vérifier si l'utilisateur a déjà accepté les règles
     const rulesAccepted = localStorage.getItem('rulesAccepted');
 
@@ -254,7 +257,20 @@
       // Sinon, afficher les règles
       rulesContainer.style.display = 'flex';
       gameContainer.style.display = 'none';
+
+      // Ajouter un écouteur d'événements pour l'acceptation des règles
+      acceptRulesCheckbox.addEventListener('change', function () {
+        if (acceptRulesCheckbox.checked) {
+          // Si les règles sont acceptées, enregistrer l'acceptation dans localStorage
+          localStorage.setItem('rulesAccepted', 'true');
+          startGameButton.disabled = false; // Activer le bouton pour commencer
+        } else {
+          localStorage.removeItem('rulesAccepted');
+          startGameButton.disabled = true; // Désactiver le bouton si les règles ne sont pas acceptées
+        }
+      });
     }
+
 
     acceptRulesCheckbox.addEventListener('change', function () {
       startGameButton.disabled = !this.checked;
@@ -281,7 +297,9 @@
   </script>
   <script>
 
-    
+
+
+
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -293,24 +311,16 @@
       });
     }
 
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("firebase-messaging-sw.js")
-            .then((registration) => {
-                console.log("✅ Service Worker enregistré :", registration);
-            })
-            .catch((error) => {
-                console.error("❌ Erreur Service Worker :", error);
-            });
-    }
 
-    
+
+
 
     function getAIData() {
       let AIData_weekend = localStorage.getItem('historicalData_weekend');
-      
+
       let AIData = localStorage.getItem('historicalData');
       if (!AIData) {
-        AIData = [[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,1,0,100],[0,1,100,2,1,0,80],[0,1,100,0,1,0,80],[0,1,100,0,1,0,80],[0,0,100,0,0,0,80],[1,0,80,0,0,0,80],[1,0,80,0,0,0,60],[0,0,80,2,0,0,60],[0,0,80,0,1,0,60],[0,1,80,1,1,0,60],[0,1,80,0,1,0,40],[0,1,80,0,1,0,40],[0,1,60,0,1,0,40],[1,1,60,0,1,0,40],[0,1,60,1,1,0,40],[1,1,60,0,1,0,40],[0,1,60,2,1,0,20],[0,1,60,0,1,0,20],[0,1,60,0,1,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,0,0,100],[0,1,100,2,0,0,100],[0,1,100,0,0,0,80],[0,1,100,0,0,0,80],[0,1,100,1,1,0,80],[0,1,100,0,0,0,80],[0,1,80,0,0,0,80],[1,1,80,0,0,0,80],[0,0,80,2,0,0,60],[0,0,80,0,1,0,60],[0,0,80,0,0,0,60],[0,0,60,0,0,0,60],[1,0,60,0,0,4,60],[1,0,60,0,0,4,60],[0,1,60,1,1,0,60],[1,1,60,0,1,0,60],[0,1,60,2,1,0,40],[0,1,60,0,1,0,40],[0,1,40,0,1,0,40],[0,0,40,0,0,0,40],[1,0,40,0,0,0,20],[0,0,40,2,0,0,20],[0,0,40,0,0,0,20],[0,1,20,1,1,0,20],[0,1,20,0,0,0,20],[0,1,20,0,0,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,0,0,100],[0,1,100,2,0,0,80],[0,1,100,0,0,0,80],[0,1,100,0,0,0,80],[0,1,80,1,1,0,80],[0,1,80,0,1,0,80],[0,1,80,0,1,0,80],[1,1,80,0,1,0,60],[0,1,80,1,1,0,60],[1,1,80,0,1,0,60],[0,1,60,2,1,0,60],[0,1,60,0,1,0,40],[0,1,60,0,1,0,40],[0,1,60,1,1,0,40],[0,1,60,0,1,0,40],[0,1,60,0,1,0,40],[1,1,40,0,0,0,40],[0,0,40,2,0,0,20],[0,0,40,0,0,0,20],[0,0,40,0,0,4,20],[0,0,40,0,0,2,20],[0,1,20,1,1,1,20],[0,1,20,0,1,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,1,0,100],[1,1,100,0,1,0,100],[0,1,100,2,1,0,80],[0,0,100,0,1,0,80],[0,1,80,1,1,0,80],[0,1,80,0,1,0,80],[0,1,80,0,1,0,80],[0,1,80,0,1,0,80],[1,0,80,0,0,0,80],[0,0,80,2,0,0,60],[0,0,60,0,0,0,60],[0,0,60,0,0,4,60],[0,0,60,0,0,2,60],[0,1,60,1,1,1,60],[0,1,60,0,1,0,60],[1,1,60,0,1,0,40],[0,1,60,2,0,0,40],[0,0,40,0,0,0,40],[0,0,40,0,0,0,40],[0,0,40,0,0,0,20],[0,1,40,1,1,0,20],[0,1,40,0,0,0,20],[1,1,40,0,0,0,20],[0,0,100,0,0,0,100],[1,0,100,0,0,0,100],[0,1,100,1,1,0,100],[1,1,100,0,0,0,100],[0,1,100,2,0,0,100],[0,0,100,0,0,0,80],[0,0,100,0,0,4,100],[0,0,100,0,0,2,80],[0,1,80,1,1,1,80],[0,1,80,0,1,0,80],[1,1,80,0,1,0,80],[0,1,80,2,0,0,60],[0,1,80,0,0,0,60],[0,0,60,0,0,0,60],[0,0,60,0,0,4,60],[1,0,60,0,0,1,60],[0,1,60,1,0,0,60],[1,1,60,0,1,0,60],[0,1,60,2,1,0,40],[0,1,60,0,1,0,40],[0,1,60,0,1,0,40],[0,1,40,0,0,0,40],[1,0,40,0,0,0,40],[0,0,40,2,0,0,20],[0,0,40,0,0,0,20],[0,1,40,1,1,0,20],[0,1,40,0,0,0,20],[0,1,20,0,0,0,20]];
+        AIData = [[0, 0, 100, 0, 0, 0, 100], [1, 0, 100, 0, 0, 0, 100], [0, 1, 100, 1, 1, 0, 100], [1, 1, 100, 0, 1, 0, 100], [0, 1, 100, 2, 1, 0, 80], [0, 1, 100, 0, 1, 0, 80], [0, 1, 100, 0, 1, 0, 80], [0, 0, 100, 0, 0, 0, 80], [1, 0, 80, 0, 0, 0, 80], [1, 0, 80, 0, 0, 0, 60], [0, 0, 80, 2, 0, 0, 60], [0, 0, 80, 0, 1, 0, 60], [0, 1, 80, 1, 1, 0, 60], [0, 1, 80, 0, 1, 0, 40], [0, 1, 80, 0, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [1, 1, 60, 0, 1, 0, 40], [0, 1, 60, 1, 1, 0, 40], [1, 1, 60, 0, 1, 0, 40], [0, 1, 60, 2, 1, 0, 20], [0, 1, 60, 0, 1, 0, 20], [0, 1, 60, 0, 1, 0, 20], [0, 0, 100, 0, 0, 0, 100], [1, 0, 100, 0, 0, 0, 100], [0, 1, 100, 1, 1, 0, 100], [1, 1, 100, 0, 0, 0, 100], [0, 1, 100, 2, 0, 0, 100], [0, 1, 100, 0, 0, 0, 80], [0, 1, 100, 0, 0, 0, 80], [0, 1, 100, 1, 1, 0, 80], [0, 1, 100, 0, 0, 0, 80], [0, 1, 80, 0, 0, 0, 80], [1, 1, 80, 0, 0, 0, 80], [0, 0, 80, 2, 0, 0, 60], [0, 0, 80, 0, 1, 0, 60], [0, 0, 80, 0, 0, 0, 60], [0, 0, 60, 0, 0, 0, 60], [1, 0, 60, 0, 0, 4, 60], [1, 0, 60, 0, 0, 4, 60], [0, 1, 60, 1, 1, 0, 60], [1, 1, 60, 0, 1, 0, 60], [0, 1, 60, 2, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [0, 1, 40, 0, 1, 0, 40], [0, 0, 40, 0, 0, 0, 40], [1, 0, 40, 0, 0, 0, 20], [0, 0, 40, 2, 0, 0, 20], [0, 0, 40, 0, 0, 0, 20], [0, 1, 20, 1, 1, 0, 20], [0, 1, 20, 0, 0, 0, 20], [0, 1, 20, 0, 0, 0, 20], [0, 0, 100, 0, 0, 0, 100], [1, 0, 100, 0, 0, 0, 100], [0, 1, 100, 1, 1, 0, 100], [1, 1, 100, 0, 0, 0, 100], [0, 1, 100, 2, 0, 0, 80], [0, 1, 100, 0, 0, 0, 80], [0, 1, 100, 0, 0, 0, 80], [0, 1, 80, 1, 1, 0, 80], [0, 1, 80, 0, 1, 0, 80], [0, 1, 80, 0, 1, 0, 80], [1, 1, 80, 0, 1, 0, 60], [0, 1, 80, 1, 1, 0, 60], [1, 1, 80, 0, 1, 0, 60], [0, 1, 60, 2, 1, 0, 60], [0, 1, 60, 0, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [0, 1, 60, 1, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [1, 1, 40, 0, 0, 0, 40], [0, 0, 40, 2, 0, 0, 20], [0, 0, 40, 0, 0, 0, 20], [0, 0, 40, 0, 0, 4, 20], [0, 0, 40, 0, 0, 2, 20], [0, 1, 20, 1, 1, 1, 20], [0, 1, 20, 0, 1, 0, 20], [0, 0, 100, 0, 0, 0, 100], [1, 0, 100, 0, 0, 0, 100], [0, 1, 100, 1, 1, 0, 100], [1, 1, 100, 0, 1, 0, 100], [1, 1, 100, 0, 1, 0, 100], [0, 1, 100, 2, 1, 0, 80], [0, 0, 100, 0, 1, 0, 80], [0, 1, 80, 1, 1, 0, 80], [0, 1, 80, 0, 1, 0, 80], [0, 1, 80, 0, 1, 0, 80], [0, 1, 80, 0, 1, 0, 80], [1, 0, 80, 0, 0, 0, 80], [0, 0, 80, 2, 0, 0, 60], [0, 0, 60, 0, 0, 0, 60], [0, 0, 60, 0, 0, 4, 60], [0, 0, 60, 0, 0, 2, 60], [0, 1, 60, 1, 1, 1, 60], [0, 1, 60, 0, 1, 0, 60], [1, 1, 60, 0, 1, 0, 40], [0, 1, 60, 2, 0, 0, 40], [0, 0, 40, 0, 0, 0, 40], [0, 0, 40, 0, 0, 0, 40], [0, 0, 40, 0, 0, 0, 20], [0, 1, 40, 1, 1, 0, 20], [0, 1, 40, 0, 0, 0, 20], [1, 1, 40, 0, 0, 0, 20], [0, 0, 100, 0, 0, 0, 100], [1, 0, 100, 0, 0, 0, 100], [0, 1, 100, 1, 1, 0, 100], [1, 1, 100, 0, 0, 0, 100], [0, 1, 100, 2, 0, 0, 100], [0, 0, 100, 0, 0, 0, 80], [0, 0, 100, 0, 0, 4, 100], [0, 0, 100, 0, 0, 2, 80], [0, 1, 80, 1, 1, 1, 80], [0, 1, 80, 0, 1, 0, 80], [1, 1, 80, 0, 1, 0, 80], [0, 1, 80, 2, 0, 0, 60], [0, 1, 80, 0, 0, 0, 60], [0, 0, 60, 0, 0, 0, 60], [0, 0, 60, 0, 0, 4, 60], [1, 0, 60, 0, 0, 1, 60], [0, 1, 60, 1, 0, 0, 60], [1, 1, 60, 0, 1, 0, 60], [0, 1, 60, 2, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [0, 1, 60, 0, 1, 0, 40], [0, 1, 40, 0, 0, 0, 40], [1, 0, 40, 0, 0, 0, 40], [0, 0, 40, 2, 0, 0, 20], [0, 0, 40, 0, 0, 0, 20], [0, 1, 40, 1, 1, 0, 20], [0, 1, 40, 0, 0, 0, 20], [0, 1, 20, 0, 0, 0, 20]];
         localStorage.setItem('historicalData', JSON.stringify(AIData));
       }
     }
@@ -318,7 +328,7 @@
 
 
     function getUserData() {
-      let userData = localStorage.getItem('userData');
+      let userData = JSON.parse(localStorage.getItem('userData'));
       if (!userData) {
         // Initialiser les données utilisateur si elles n'existent pas encore
         userData = {
@@ -337,7 +347,7 @@
           trophees: 0,
           argent: 0,
           VICTOIRE: false,
-          version: '2.5',
+          version: 'B2.1.0.00',
           recompense: 0,
           perso_recompense: 0,
           xp_du_jour: 0,
@@ -406,55 +416,47 @@
           lastDoubleXPCheck: 0,
           lastFraudeReset: 0,
           boutique_recompense: false,
-
           semaine1: false,
-
-
           semaine2: false,
-
-
           semaine3: false,
-
-
           semaine4: false,
-
-
-
           semaine5: false,
-
           semaine6: false,
-
           crystaux_parrallels: 0,
-
           quetes_jour: false,
-
           quete1_type: "",
           quete1_text: "",
           quete1_total: "",
           quete1_current: "",
           quete1_character: "",
-
           quete2_type: "",
           quete2_text: "",
           quete2_total: "",
           quete2_current: "",
           quete2_character: "",
-
           quete3_type: "",
           quete3_text: "",
           quete3_total: "",
           quete3_current: "",
           quete3_character: "",
-
           partie_commencee: false,
           parties_test: 0,
           parties_weekend_test: 0,
+          difficulty: "hard",
         };
-
         localStorage.setItem('userData', JSON.stringify(userData));
       }
-    };
+    }
+
     getUserData();
+
+
+    
+
+
+
+
+
   </script>
 
 

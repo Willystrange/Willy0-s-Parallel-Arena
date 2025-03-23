@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="fr">
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Loading Page</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     body {
       background-color: black;
@@ -16,12 +16,10 @@
       height: 100vh;
       margin: 0;
     }
-
     .loading-container {
       text-align: center;
       color: white;
     }
-
     .loader {
       width: 50px;
       height: 50px;
@@ -31,18 +29,14 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 20px;
     }
-
     @keyframes spin {
-      100% {
-        transform: rotate(360deg);
-      }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
-
 <body>
   <div class="loading-container">
-    <!-- Ajout de l'élément "S" qui tourne -->
+    <!-- Élément "loader" animé -->
     <div class="loader"></div>
     <div class="loading-text" id="loadingText">Mise à jour en cours...</div>
   </div>
@@ -62,43 +56,42 @@
     ];
 
     const loadingTextElement = document.getElementById('loadingText');
-
     function updateLoadingText() {
       const randomIndex = Math.floor(Math.random() * loadingPhrases.length);
       loadingTextElement.textContent = loadingPhrases[randomIndex];
     }
-
-    // Mettre à jour le texte de chargement toutes les 3 secondes (3000 ms)
     setInterval(updateLoadingText, 3000);
+    setTimeout(() => { window.location.href = "index.html"; }, 10000);
 
-    // Redirection vers index.html après 10 secondes (10000 ms)
-    setTimeout(function () {
-      window.location.href = "index.html";
-    }, 10000);
-
+    // Récupération et sauvegarde des données utilisateur dans le localStorage
     function getUserData() {
-      // Fonction pour récupérer les données utilisateur depuis le localStorage (à adapter selon votre besoin)
       return JSON.parse(localStorage.getItem('userData')) || {};
     }
-
     function saveUserData(userData) {
-      // Fonction pour sauvegarder les données utilisateur dans le localStorage (à adapter selon votre besoin)
       localStorage.setItem('userData', JSON.stringify(userData));
     }
+
+    // Comparaison des numéros de version en ne conservant que les chiffres et les points
     function versionCompare(v1, v2) {
-      const v1Parts = v1.split('.').map(Number);
-      const v2Parts = v2.split('.').map(Number);
+      // Nettoyage des versions pour retirer tout caractère non numérique (sauf le point)
+      const cleanVersion = v => v.replace(/[^0-9.]/g, '');
+      const v1Parts = cleanVersion(v1).split('.').map(Number);
+      const v2Parts = cleanVersion(v2).split('.').map(Number);
       for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-        if ((v1Parts[i] || 0) > (v2Parts[i] || 0)) return 1;
-        if ((v1Parts[i] || 0) < (v2Parts[i] || 0)) return -1;
+        const num1 = v1Parts[i] || 0;
+        const num2 = v2Parts[i] || 0;
+        if (num1 > num2) return 1;
+        if (num1 < num2) return -1;
       }
       return 0;
     }
 
     function mise_a_jour() {
       const userData = getUserData();
+      // Version actuelle du jeu
+      const currentVersion = 'B2.1.0.00';
 
-      // Définition des valeurs par défaut
+      // Valeurs par défaut pour les données utilisateur
       const defaultUserData = {
         pass_premium: false,
         pass_XP: 0,
@@ -117,7 +110,7 @@
         tropheesMax: 0,
         argent: 0,
         VICTOIRE: false,
-        version: '2.5',
+        version: currentVersion,
         recompense: 0,
         perso_recompense: 0,
         xp_du_jour: 0,
@@ -186,55 +179,36 @@
         lastDoubleXPCheck: 0,
         lastFraudeReset: 0,
         boutique_recompense: false,
-
         semaine1: false,
-
-
         semaine2: false,
-
-
         semaine3: false,
-
-
         semaine4: false,
-
-
-
         semaine5: false,
-
         semaine6: false,
-
         crystaux_parrallels: 0,
-
         quetes_jour: false,
-
         quete1_type: "",
         quete1_text: "",
         quete1_total: "",
         quete1_current: "",
         quete1_character: "",
-
         quete2_type: "",
         quete2_text: "",
         quete2_total: "",
         quete2_current: "",
         quete2_character: "",
-
         quete3_type: "",
         quete3_text: "",
         quete3_total: "",
         quete3_current: "",
         quete3_character: "",
-
         partie_commencee: false,
       };
 
-      const reference_version = '2.5.1';
-
-      if (versionCompare(userData.version || '0.0.0', reference_version) < 0) {
-        // Suppression des données hebdomadaires si la version est inférieure à la version de référence
+      // Si la version enregistrée est antérieure à la version actuelle,
+      // on effectue les mises à jour spécifiques (exemple : suppression des anciennes données hebdomadaires)
+      if (versionCompare(userData.version || '0.0.0', currentVersion) < 0) {
         userData.quetes_genere = false;
-        
         const semainesToRemove = [
           'Semaine1_1', 'Semaine1_2', 'Semaine1_3', 'Semaine1_4', 'Semaine1_5',
           'Semaine2_1', 'Semaine2_2', 'Semaine2_3', 'Semaine2_4', 'Semaine2_5',
@@ -242,7 +216,6 @@
           'Semaine4_1', 'Semaine4_2', 'Semaine4_3', 'Semaine4_4', 'Semaine4_5',
           'Semaine5_1', 'Semaine5_2', 'Semaine5_3', 'Semaine5_4', 'Semaine5_5',
         ];
-
         semainesToRemove.forEach(sem => {
           delete userData[`${sem}_completed`];
           delete userData[`${sem}_current`];
@@ -250,27 +223,24 @@
           delete userData[`${sem}_text`];
           delete userData[`${sem}_total`];
         });
-
-        saveUserData(userData);
       }
 
-      // Vérification et initialisation des valeurs manquantes ou incorrectes
+      // Vérification et ajout des clés manquantes avec leur valeur par défaut
       for (const key in defaultUserData) {
         if (!userData.hasOwnProperty(key)) {
           userData[key] = defaultUserData[key];
         }
       }
 
-      // Assure que la version dans userData est toujours la dernière version du jeu
-      userData.version = '2.5';
+      // On s'assure que la version est toujours à jour
+      userData.version = currentVersion;
 
-      // Sauvegarder les données mises à jour dans localStorage
+      // Sauvegarde des données mises à jour
       saveUserData(userData);
     }
 
-    // Appel de la fonction mise_a_jour au chargement de la page
+    // Exécution de la mise à jour dès le chargement de la page
     mise_a_jour();
   </script>
 </body>
-
 </html>

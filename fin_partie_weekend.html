@@ -236,7 +236,7 @@
   <script>
     function afficherDonnees() {
       const userData = JSON.parse(localStorage.getItem('userData'));
-      userData.partie_commencee = false;
+      userData.partie_commencee_weekend = false;
       
       localStorage.setItem('userData', JSON.stringify(userData));
 

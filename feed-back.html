@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="description" content="Formulaire de feedback">
-  <title>Formulaire de Feedback</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     /* Style général */
     body {
@@ -219,6 +220,16 @@
       }
       checkMaintenance();
       setInterval(checkMaintenance, 10000);
+
+      function StartedGame() {
+        const userData = getUserData();
+        if (userData.partie_commencee) {
+          window.location.href="../combat.html";
+        }  else if (userData.partie_commencee_weekend) {
+          window.location.href="../combat-weekend.html";
+        }
+      }
+      StartedGame();
 
       // Gestion de l'envoi du formulaire avec animation et feedback visuel
       const feedbackForm = document.getElementById('feedbackForm');

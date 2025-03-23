@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Patch Notes</title>
-  <link rel="icon" href="icon.png" type="image/png">
+  <title>Willy0's Parallel Arena</title>
+  <link rel="icon" type="image/png" href="icon.png">
   <style>
-    /* Styles pour le mode clair (déjà défini) */
+    /* Styles généraux */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -17,7 +16,6 @@
       background-color: #f4f4f4;
       color: #333;
     }
-
     .container {
       max-width: 800px;
       margin: 20px auto;
@@ -26,13 +24,10 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
     h1 {
-      color: #444;
       cursor: pointer;
       margin: 0;
     }
-
     .note-list {
       margin: 20px 0;
       padding: 0;
@@ -41,18 +36,15 @@
       overflow: hidden;
       transition: max-height 0.5s ease-out;
     }
-
     .note-list.open {
       max-height: 6000px;
     }
-
     .note-list li {
       margin-bottom: 10px;
       padding: 10px;
       background: #f9f9f9;
       border-left: 5px solid #007bff;
     }
-
     .back-button {
       display: inline-block;
       margin: 20px 0;
@@ -64,453 +56,77 @@
       text-align: center;
       font-weight: bold;
     }
-
     .back-button:hover {
       background-color: #0056b3;
     }
-
-    /* Styles pour le mode sombre */
+    /* Styles pour chaque bloc de mise à jour */
+    .update-block {
+      margin-bottom: 20px;
+      padding: 10px;
+      border-left: 5px solid transparent; /* valeur par défaut */
+    }
+    /* Couleurs selon le type de mise à jour */
+    .update-block[data-type="BM"] {
+      border-left-color: #000000; /* Noir : Énorme maj */
+    }
+    .update-block[data-type="HM"] {
+      border-left-color: #003366; /* Bleu foncé : Grosse maj */
+    }
+    .update-block[data-type="MM"] {
+      border-left-color: #0000FF; /* Bleu : Moyenne maj */
+    }
+    .update-block[data-type="LM"] {
+      border-left-color: #ADD8E6; /* Bleu clair : Mini maj */
+    }
+    /* Affichage de la date et heure */
+    .update-meta {
+      font-size: 0.9em;
+      color: #666;
+      margin: 5px 0 15px 0;
+    }
+    /* Mode sombre */
     @media (prefers-color-scheme: dark) {
       body {
         background-color: #333;
         color: #ddd;
       }
-
       .container {
         background: #444;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
       }
-
       h1 {
         color: #ddd;
       }
-
       .note-list li {
         background: #555;
         border-left: 5px solid #1e90ff;
       }
-
       .back-button {
         background-color: #1e90ff;
         color: #fff;
       }
-
       .back-button:hover {
         background-color: #0056b3;
       }
-
       .mail {
         color: white;
       }
     }
   </style>
+  <!-- Bibliothèques tierces -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
 </head>
-
 <body>
   <div class="container">
-    <h1 id="version-25">Note de mise à jour - Version 2.5</h1>
-    <ul id="notes-25" class="note-list">
-      <li><strong>Nouveautés du Passe de Combat :</strong>
-        <ul>
-          <li><strong>Parallel Pass 3</strong> : Découvrez les nouvelles récompenses et défis de cette saison !</li>
-          <li><strong>Arrivée du Parallel Pass 3 Premium</strong> : Disponible pour 1050 points, ce pass premium propose
-            encore
-            plus de récompenses exclusives dont un personange épique !</li>
-        </ul>
-      </li>
-      <li><strong>Corrections générales :</strong>
-        <ul>
-          <li>De nombreux bugs ont été corrigés.</li>
-          <li>Correction d’un problème empêchant les personnages <strong>Rosalie</strong> et <strong>Sboonie</strong>
-            d'être améliorés dans la page d'amélioration.</li>
-          <li>Adaptation de plusieurs pages au mode paysage :
-            <ul>
-              <li><strong>Passe de combat</strong></li>
-              <li><strong>Menu principal</strong></li>
-              <li><strong>Page d’amélioration</strong> : ajout d'une barre de recherche pour trouver facilement un
-                personnage. La fenêtre d’un personnage est désormais intégralement visible sans défilement nécessaire.
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><strong>Équilibrage des personnages :</strong>
-        <ul>
-          <li><strong>Diva</strong>
-            <ul>
-              <li><strong>Attaque</strong> : Augmentée à 475 (au lieu de 449).</li>
-              <li><strong>Capacité spéciale</strong> : Réduction de l'attaque de l'adversaire portée à 25% pour les
-                trois prochains tours.</li>
-            </ul>
-          </li>
-          <li><strong>Sboonie</strong>
-            <ul>
-              <li><strong>PV</strong> : Augmentés à 10,200 (au lieu de 9,900).</li>
-              <li><strong>Capacité spéciale</strong> :
-                <ul>
-                  <li>Régénération augmentée à 8% de ses PV maximum (au lieu de 5%).</li>
-                  <li>Ajout d'une capacité offensive infligeant 50 points de dégâts à l'adversaire.</li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li><strong>Cocobi</strong>
-            <ul>
-              <li><strong>PV</strong> : Augmentés à 11,000 (au lieu de 10,800).</li>
-              <li><strong>Défense</strong> : Maintenue à 115.</li>
-              <li><strong>Capacité spéciale</strong> : Réduction des PV de l'adversaire portée à 12% de ses PV maximum
-                (au lieu de 10%).</li>
-            </ul>
-          </li>
-          <li><strong>L’Inconnu</strong>
-            <ul>
-              <li><strong>Mode Survie</strong> : Les boosts d'attaque et de défense sont limités à 4, soit +100
-                d'attaque et de défense. Au-delà, les boosts n'auront pas d'effet.</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><strong>Corrections spécifiques :</strong>
-        <ul>
-          <li>Correction d’un bug où la capacité spéciale de <strong>Sboonie</strong> retirait 25% de l'attaque de
-            l'adversaire au lieu de 15%.</li>
-          <li>Correction d’un bug où le super de <strong>Cocobi</strong> retirait seulement 8% des PV max de
-            l'adversaire au lieu de 10%.</li>
-          <li><strong>Mode Classique</strong> : réduction de la difficulté des adversaires à des niveaux élevés pour les
-            rendre plus abordables.</li>
-          <li>Résolution du problème d'affichage de nombres décimaux dans les PV en mode Classique et Survie.</li>
-        </ul>
-      </li>
-      <li><strong>Ajouts d’objets :</strong>
-        <ul>
-          <li><strong>Cape de l'ombre</strong>
-            <ul>
-              <li><strong>Prix</strong> : 55 points.</li>
-              <li><strong>Effet</strong> : Ignore tous les dégâts de la prochaine attaque directe de l'adversaire.</li>
-              <li><strong>Utilisation</strong> : 2 fois par partie maximum.</li>
-            </ul>
-          </li>
-          <li><strong>Cristal de renouveau</strong>
-            <ul>
-              <li><strong>Prix</strong> : 50 points.</li>
-              <li><strong>Effet</strong> : Recharge instantanément 0.8 points de capacité spéciale.</li>
-              <li><strong>Utilisation</strong> : 2 fois par partie.</li>
-            </ul>
-          </li>
-          <li>Ajout des nouveaux objets dans les récompenses aléatoires.</li>
-          <li>Correction de l’attribution des boucliers dans les récompenses aléatoires.</li>
-          <li>Correction d’un bug pouvant afficher un message d'erreur au lieu de donner une récompense aléatoire,
-            entraînant parfois le plantage du jeu.</li>
-        </ul>
-      </li>
-      <li><strong>Modifications de la boutique :</strong>
-        <ul>
-          <li>La boutique a été retravaillée pour un affichage plus clair sans options de quantité directement visibles
-            (x1, x3, x5). Désormais, la quantité d'un objet se sélectionne dans une section dédiée sous l’affichage du
-            stock.
-            <ul>
-              <li><strong>Promotions</strong> :
-                <ul>
-                  <li>-8% pour 3 unités</li>
-                  <li>-13% pour 5 unités</li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li>Ajout d'une barre de recherche pour trouver plus facilement un objet dans la boutique.</li>
-        </ul>
-      </li>
-      <li><strong>Utilisation des objets en combat :</strong>
-        <ul>
-          <li><strong>Règles d’utilisation</strong> :
-            <ul>
-              <li>Un seul objet peut être utilisé par tour.</li>
-              <li>Limite d’utilisation par partie :
-                <ul>
-                  <li><strong>Amulette de régénération</strong> : 1 utilisation.</li>
-                  <li><strong>Armure de fer</strong> : 2 utilisations.</li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li>L’interface affiche désormais un maximum de 3 objets par tour.</li>
-        </ul>
-      </li>
-      <li><strong>⚠️Attention⚠️</strong>
-        <ul>
-          <li>Nous envisageons de supprimer les fonctionnalités « Sauvegarder les données » et « Importer une sauvegarde
-            ». Nous vous invitons à partager votre opinion sur cette modification en nous contactant via la section «
-            Contacter le développeur » ou par email à l'adresse suivante : <a
-              href="mailto:willyxstrange@gmail.com">willyxstrange@gmail.com</a>. Si ce changement venait à arriver, il
-            arriverais avec la prochaine mise à jour et vous serez averti au moins 3 jours avant dans la section «
-            actualité » du menu principal. Nous apprécions vos retours et vos suggestions concernant notre jeu, et nous
-            serions ravis de bénéficier de votre aide pour l'améliorer !</li>
-        </ul>
-      </li>
-    </ul>
-    <h1 id="version-2421">Note de mise à jour - Version 2.4.2.1</h1>
-    <ul id="notes-2421" class="note-list">
-      <li><strong>Corrections :</strong>
-        <ul>
-          <li>Correction du bug qui affichait les mêmes quêtes que lors du précédent pass. Les quêtes ont été
-            réinitialisées et une compensation de 1000 XP sera attribuée pour le pass après la mise à jour.</li>
-          <li>Correction du bug qui permettait d'utiliser la défense même avec 0 énergie spéciale en mode classique.
-          </li>
-        </ul>
-      </li>
-    </ul>
-    <h1 id="version-242">Note de mise à jour - Version 2.4.2</h1>
-    <ul id="notes-242" class="note-list">
-      <li><strong>Corrections et améliorations :</strong>
-        <ul>
-          <li>Correction d’un bug dans la boutique, la page d'amélioration, et la page des statistiques des personnages
-            où le cercle d’indication de navigation n’apparaissait pas.</li>
-          <li>Correction d’un problème d’actualisation des objets dans la boutique après achat.</li>
-        </ul>
-      </li>
-      <li><strong>Nouvelles fonctionnalités :</strong>
-        <ul>
-          <li><strong>Parallel Pass 2 :</strong> Le Parallel Pass 2 remplace le précédent et sera disponible du 05
-            octobre au 09 novembre 2024. Ce Pass ne contient pas de personnage en raison d’une réduction de notre rythme
-            de développement liée à la reprise de nos études.</li>
-          <li><strong>Affichage de la rareté :</strong> La rareté des personnages est désormais visible dans la case des
-            statistiques, aussi bien sur la page de sélection que sur celle des personnages.</li>
-          <li><strong>Filtre par rareté :</strong> Un filtre « rareté » a été ajouté sur la page de sélection des
-            personnages.</li>
-          <li><strong>Création de compte :</strong> Il est désormais possible de créer un compte pour synchroniser votre
-            progression sur différents appareils.</li>
-          <li><strong>Sauvegarde automatique :</strong> Les données de jeu sont désormais sauvegardées automatiquement à
-            chaque session.</li>
-        </ul>
-      </li>
-      <li><strong>Modifications et ajustements :</strong>
-        <ul>
-          <li><strong>Défense en mode classique :</strong> Lorsqu’un joueur se défend, il perd désormais 0,1 point de
-            charge de capacité spéciale au lieu d’en gagner.</li>
-          <li><strong>Rééquilibrage des statistiques :</strong> Les changements de statistiques liés au niveau du joueur
-            ou de l’adversaire sont moins significatifs pour maintenir un certain équilibre.</li>
-          <li><strong>Interface améliorée :</strong> La page des paramètres a été retravaillée pour offrir une meilleure
-            expérience visuelle.</li>
-          <li><strong>Ajustements mineurs :</strong> Divers ajustements ont été réalisés pour améliorer l'affichage et
-            la fluidité.</li>
-        </ul>
-      </li>
-      <li><strong>Gestion des comptes :</strong>
-        <ul>
-          <li><strong>Suppression de données :</strong> La suppression des données n’est plus possible directement
-            depuis la page des statistiques.</li>
-          <li><strong>Gestion des infractions :</strong> Nous nous réservons le droit de suspendre ou supprimer tout
-            compte en cas de violation des règles ou sur demande.</li>
-        </ul>
-      </li>
-    </ul>
-    <h1 id="version-241">Note de mise à jour - Version 2.4.1</h1>
-    <ul id="notes-241" class="note-list">
-      <li><strong>Améliorations générales :</strong>
-        <ul>
-          <li>Les récompenses obtenues s'affichent désormais une par une. À chaque clic, une nouvelle récompense
-            apparaît (si plusieurs sont disponibles). Lorsque toutes les récompenses sont affichées, l'utilisateur est
-            automatiquement redirigé vers le menu principal.</li>
-          <li>Ajout d'une page de maintenance activée avant chaque mise à jour, afin de garantir une transition sans
-            problème.</li>
-        </ul>
-      </li>
-      <li><strong>Corrections de bugs :</strong>
-        <ul>
-          <li>Correction d'un bug de longue date qui empêchait le logo de se centrer correctement lors du lancement du
-            jeu.</li>
-          <li>Résolution d'un problème qui empêchait la mise à jour des niveaux de Rosalie et Sboonie sur la page des
-            statistiques des personnages.</li>
-          <li>Correction d'un bug qui ne permettait pas l'affichage du bouclier solide dans les récompenses aléatoires.
-          </li>
-          <li>Le bug d'affichage du compte à rebours des quêtes hebdomadaires a été corrigé.</li>
-          <li>Sur la version iOS de l'application web, suppression de la barre d'onglets affichée par erreur dans le
-            Parallel Pass ou sur la page d'actualités.</li>
-          <li>Correction d'un bug au niveau 5 de Rosalie ou Sboonie qui provoquait un plantage et empêchait l'affichage
-            de la page d'amélioration.</li>
-          <li>Résolution d'un bogue qui permettait de récupérer plus d'attaque que Sboonie n'en retirait lors de la
-            réinitialisation de l'effet.</li>
-          <li>Correction d'un bug sur la page des statistiques des personnages qui n'affichait pas correctement la
-            défense en fonction du niveau actuel, contrairement aux autres statistiques.</li>
-        </ul>
-      </li>
-      <li><strong>Améliorations de l'expérience utilisateur :</strong>
-        <ul>
-          <li>Ajout de plusieurs animations pour fluidifier le jeu :
-            <ul>
-              <li>Dans le menu principal pour la fenêtre de sélection des modes.</li>
-              <li>Sur la page des statistiques des personnages lors de l'affichage des statistiques d'un personnage
-                (glisser vers le bas pour supprimer l'affichage).</li>
-            </ul>
-          </li>
-          <li>Dans le Parallel Pass, suppression du message de confirmation lors de la récupération d'une récompense.
-          </li>
-          <li>Désormais, si une récompense ne peut pas être obtenue dans le Parallel Pass, la case concernée tremble et
-            un message d'erreur s'affiche en rouge en bas de celle-ci.</li>
-          <li>Si une récompense déjà obtenue est sélectionnée dans le Parallel Pass, aucune action ne sera effectuée.
-          </li>
-          <li>La quantité minimale d'XP de personnage dans les récompenses aléatoires est désormais fixée à 5.</li>
-          <li>La réduction d'attaque causée par la capacité spéciale de Sboonie est augmentée de 15 % à 25 %.</li>
-        </ul>
-      </li>
-      <li><strong>Modifications d'équilibrage :</strong>
-        <ul>
-          <li>La plage de défense dans les modes classique et survie a été ajustée de 85%-115% à 90%-110%.</li>
-          <li>Ajustement du nombre de manches de survie nécessaires pour accomplir les quêtes quotidiennes afin de
-            réduire le temps requis.</li>
-        </ul>
-      </li>
-      <li><strong>Mises à jour des statistiques des personnages :</strong>
-        <ul>
-          <li><strong>Baleine</strong> :
-            <ul>
-              <li>PV : 10 500 → 10 200 (≈ -3 %)</li>
-              <li>Attaque : 430 → 435 (≈ +1 %)</li>
-              <li>Défense : 115 → 105 (≈ -9 %)</li>
-            </ul>
-          </li>
-          <li><strong>Willy</strong> :
-            <ul>
-              <li>PV : 11 200 → 11 100 (≈ -1 %)</li>
-              <li>Attaque : 470 → 463 (≈ -1,4 %)</li>
-              <li>Défense : 80 → 86 (≈ +7,5 %)</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ul>
-    <h1 id="version-24">Note de mise à jour - Version 2.4</h1>
-    <ul id="notes-24" class="note-list">
-      <li><strong>Nouveautés :</strong>
-        <ul>
-          <li><strong>Parallel Pass :</strong> Introduction d'un Passe de Combat entièrement gratuit avec 60 niveaux et
-            de
-            nombreuses récompenses. La mention « Double XP » a été supprimée du menu principal.</li>
-          <li><strong>Nouveau personnage (Parallel Pass) :</strong>
-            <ul>
-              <li><strong>Nom :</strong> Rosalie</li>
-              <li><strong>PV :</strong> 10 500</li>
-              <li><strong>Attaque :</strong> 460</li>
-              <li><strong>Défense :</strong> 85</li>
-              <li><strong>Spécialité :</strong> Inflige des dégâts équivalents à 2 fois son attaque et invoque un
-                tourbillon avec 50% de chance d'immobiliser l'adversaire pour un tour.</li>
-              <li><strong>Rareté :</strong> Épique</li>
-              <li>Disponible uniquement dans le Parallel Pass jusqu'au prochain Pass, puis dans les récompenses.</li>
-            </ul>
-          </li>
-          <li><strong>Nouveau personnage (Récompenses) :</strong>
-            <ul>
-              <li><strong>Nom :</strong> Sboonie</li>
-              <li><strong>PV :</strong> 9 900</li>
-              <li><strong>Attaque :</strong> 410</li>
-              <li><strong>Défense :</strong> 95</li>
-              <li><strong>Spécial :</strong> Régénère 5% de ses PV maximum et réduit l'attaque de l'adversaire de 15%
-                pour
-                le prochain tour.</li>
-              <li><strong>Rareté :</strong> Commun</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><strong>Boutique :</strong>
-        <ul>
-          <li><strong>Nouvelle catégorie :</strong> Ajout de la catégorie "Défense" avec le Bouclier solide disponible
-            en
-            trois offres : x1, x3, et x5.</li>
-        </ul>
-      </li>
-      <li><strong>Modifications des objets :</strong>
-        <ul>
-          <li><strong>Durée des effets :</strong> Les effets des objets durent maintenant toute la partie.</li>
-          <li><strong>Amulette de régénération :</strong> Régénère 2% des PV maximum par tour.</li>
-          <li><strong>Épée tranchante :</strong> Augmente l'attaque du joueur de 5%.</li>
-          <li><strong>Élixir de puissance :</strong> Augmente l'attaque de 50 points.</li>
-          <li><strong>Armure de fer :</strong> Réduit les dégâts reçus de 10%.</li>
-        </ul>
-      </li>
-      <li><strong>Corrections de bogues :</strong>
-        <ul>
-          <li>Divers bogues concernant les objets en jeu et la boutique.</li>
-          <li>Correction d’un bogue avec l’adversaire « StormBringer » en mode survie.</li>
-          <li>Correction d'un bogue permettant de recharger la défense de 10% supplémentaire chaque tour en mode
-            classique.</li>
-          <li>Correction de divers problèmes avec le système de défense en mode classique.</li>
-          <li>Correction d'un bug en mode survie concernant l'affichage de la vague à la défaite.</li>
-          <li>Correction d’un bug de perte excessive de trophées lors d’une défaite.</li>
-        </ul>
-      </li>
-      <li><strong>Quêtes :</strong>
-        <ul>
-          <li>Ajout de trois nouvelles quêtes quotidiennes. Chaque quête offre une récompense aléatoire. En
-            accomplissant
-            les trois quêtes, une quatrième récompense est accordée.</li>
-          <li>Les quêtes hebdomadaires offrent désormais une récompense aléatoire et 250 XP pour le Parallel Pass.</li>
-        </ul>
-      </li>
-      <li><strong>Réorganisation du menu principal :</strong>
-        <ul>
-          <li>Déplacement du bouton « Quêtes ».</li>
-          <li>Ajustement de la taille des boutons pour uniformiser leur apparence.</li>
-          <li>Suppression de l'icône des paramètres remplacée par l'icône du Parallel Pass.</li>
-          <li>Suppression de l'icône des quêtes remplacée par l'icône des paramètres.</li>
-        </ul>
-      </li>
-      <li><strong>Modifications des modes de jeu :</strong>
-        <ul>
-          <li><strong>Mode classique :</strong>
-            <ul>
-              <li>L'adversaire peut désormais avoir jusqu'à deux niveaux de plus que le personnage joué par le joueur.
-              </li>
-              <li>L'adversaire peut également se défendre.</li>
-            </ul>
-          </li>
-          <li><strong>Mode survie :</strong>
-            <ul>
-              <li>La fonction « se défendre » bloque 80% des dégâts de l’adversaire (bloque toujours entièrement les
-                super
-                attaques).</li>
-              <li>Interface ajustée pour ressembler à celle du mode classique.</li>
-              <li>Les effets infligés respectent désormais les durées et effets prévus.</li>
-              <li>Correction de nombreux bogues, avec des améliorations continues.</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><strong>Intelligence artificielle :</strong>
-        <ul>
-          <li>Amélioration de l'intelligence de l'adversaire en mode classique.</li>
-        </ul>
-      </li>
-      <li><strong>Chat de combat :</strong>
-        <ul>
-          <li>Introduction de différentes couleurs pour les actions effectuées.</li>
-        </ul>
-      </li>
-      <li><strong>Système de blocage des parties :</strong>
-        <ul>
-          <li>Blocage de la possibilité de jouer après avoir quitté une partie, avec des périodes croissantes allant de
-            15
-            minutes à 1 jour, et perte de 5 trophées après 10 infractions.</li>
-        </ul>
-      </li>
-      <li><strong>Gestion des fraudes :</strong>
-        <ul>
-          <li>Une fraude supprimée chaque jour à 9h si vous vous connectez dans la journée.</li>
-        </ul>
-      </li>
-      <li><strong>Optimisations diverses :</strong>
-        <ul>
-          <li>Corrections de nombreux autres bogues et optimisations supplémentaires.</li>
-        </ul>
-      </li>
-    </ul>
+    aucune note de mise à jour disponible pour l'instant !
   </div>
+
   <script>
+    // Initialisation Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
       authDomain: "willy0s-parallel-arena.firebaseapp.com",
@@ -521,69 +137,67 @@
       appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
       measurementId: "G-85B8R4NKNM"
     };
-
-
     firebase.initializeApp(firebaseConfig);
-
-
     const database = firebase.database();
-
-
     const maintenanceStartRef = database.ref('maintenance/start');
-    const maintenanceEndRef = database.ref('maintenance/end');
+    const maintenanceEndRef   = database.ref('maintenance/end');
 
-
-    function checkMaintenance() {
-      Promise.all([maintenanceStartRef.once('value'), maintenanceEndRef.once('value')])
-        .then(([startSnapshot, endSnapshot]) => {
-          const maintenanceStart = new Date(startSnapshot.val()); // Convertir la date de début
-          const maintenanceEnd = new Date(endSnapshot.val()); // Convertir la date de fin
-          const currentTime = new Date(); // Heure actuelle
-
-          // Vérifier si la maintenance est active
-          if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
-            window.location.href = 'maintenance.html'; // Rediriger vers maintenance.html si la maintenance est active
-          }
-        })
-        .catch(error => {
-          console.error("Erreur lors de la récupération des données de maintenance:", error);
-        });
+    // Vérification de la maintenance avec async/await
+    async function checkMaintenance() {
+      try {
+        const [startSnapshot, endSnapshot] = await Promise.all([
+          maintenanceStartRef.once('value'),
+          maintenanceEndRef.once('value')
+        ]);
+        const maintenanceStart = new Date(startSnapshot.val());
+        const maintenanceEnd   = new Date(endSnapshot.val());
+        const currentTime      = new Date();
+        if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
+          window.location.href = 'maintenance.html';
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données de maintenance:", error);
+      }
     }
-
     checkMaintenance();
+    setInterval(checkMaintenance, 10000);
 
-    // Vérifier la maintenance toutes les 10 secondes
-    setInterval(checkMaintenance, 10000); // Appelle la fonction toutes les 10 secondes
+    // Fonction de récupération (logique inchangée)
     function getUserData() {
-      const userData = JSON.parse(localStorage.getItem('userData'));
-      return userData;
+      return JSON.parse(localStorage.getItem('userData'));
     }
-    getUserData();
-    document.addEventListener('DOMContentLoaded', function () {
-      const versions = document.querySelectorAll('h1');
+    function StartedGame() {
+      const userData = getUserData();
+      if (userData.partie_commencee) {
+        window.location.href="../combat.html";
+      }  else if (userData.partie_commencee_weekend) {
+        window.location.href="../combat-weekend.html";
+      }
+    }
+    StartedGame();
+    
 
-      versions.forEach(version => {
-        version.addEventListener('click', function () {
-          const notesId = `notes-${this.id.split('-').pop()}`;
-          const notes = document.getElementById(notesId);
-
+    // Gestion des clics sur les titres via délégation d'événements
+    document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.matches('h1[id^="version-"]')) {
+          // Le dernier segment de l'id permet de retrouver la liste correspondante
+          const version = target.id.split('-').pop();
+          const notes = document.getElementById(`notes-${version}`);
           if (!notes) {
-            console.error(`Élément avec l'id ${notesId} non trouvé.`);
+            console.error(`Élément avec l'id notes-${version} non trouvé.`);
             return;
           }
-
           if (notes.classList.contains('open')) {
             notes.classList.remove('open');
           } else {
-            document.querySelectorAll('.note-list.open').forEach(openList => {
-              openList.classList.remove('open');
-            });
+            document.querySelectorAll('.note-list.open').forEach(list => list.classList.remove('open'));
             notes.classList.add('open');
           }
-        });
+        }
       });
     });
   </script>
 </body>
-
 </html>

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Récompense XP - Willy0's Parallel Arena</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     /* Style général */
     body {
@@ -76,6 +76,15 @@
   </div>
 
   <script>
+    function StartedGame() {
+      const userData = getUserData();
+      if (userData.partie_commencee) {
+        window.location.href="../combat.html";
+      }  else if (userData.partie_commencee_weekend) {
+        window.location.href="../combat-weekend.html";
+      }
+    }
+    StartedGame();
     // Ajoute 1000 XP à l'utilisateur dans le localStorage
     function updateXP() {
       let userData = JSON.parse(localStorage.getItem('userData'));

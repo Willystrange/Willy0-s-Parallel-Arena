@@ -2,22 +2,20 @@
 <html lang="fr">
 
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <title>Combat</title>
-  <script src="quest.js"></script>
+  <title>Willy0's Parallel Arena</title>
   <style>
-    
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #333;
       transition: background-color 0.3s, color 0.3s;
@@ -186,22 +184,30 @@
 
     /* Mode sombre */
     @media (prefers-color-scheme: dark) {
-      body, .top-bar, .combat-actions-wrapper, #combat-log, #item-selection {
+
+      body,
+      .top-bar,
+      .combat-actions-wrapper,
+      #combat-log,
+      #item-selection {
         background-color: #333;
         color: #e0e0e0;
       }
 
-      #combat-log, #item-selection {
+      #combat-log,
+      #item-selection {
         border-color: #444;
       }
 
-      .combat-actions button, #item-selection button {
+      .combat-actions button,
+      #item-selection button {
         background-color: #444;
         color: #e0e0e0;
         border-color: #555;
       }
 
-      .combat-actions button:hover, #item-selection button:hover {
+      .combat-actions button:hover,
+      #item-selection button:hover {
         background-color: #555;
       }
     }
@@ -241,7 +247,6 @@
       font-weight: bold;
       color: #4CAF50;
     }
-
   </style>
 </head>
 
@@ -274,9 +279,12 @@
 
     <div class="combat-actions-wrapper">
       <div class="combat-actions">
-        <button id="attack-button" onclick="handleAttack(playerCharacter, opponentCharacter, true);"></button>
-        <button id="defense-button" onclick="handleDefense(playerCharacter, opponentCharacter, true);"></button>
-        <button id="special-button" onclick="useSpecialAbility(playerCharacter, opponentCharacter, true);"></button>
+        <button id="attack-button"
+          onclick="updateTour(), handleAttack(playerCharacter, opponentCharacter, true);"></button>
+        <button id="defense-button"
+          onclick="updateTour(), handleDefense(playerCharacter, opponentCharacter, true);"></button>
+        <button id="special-button"
+          onclick="updateTour(), useSpecialAbility(playerCharacter, opponentCharacter, true);"></button>
         <button id="items-button" onclick="showItemSelection()"></button>
       </div>
       <div id="item-selection">
@@ -342,14 +350,14 @@
     let playerCharacter = null;
     let opponentCharacter = null;
     let specialAbility = 0;
-    
+
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
       document.body.classList.add('web-app');
     } else {
       document.body.classList.add('normal-app');
     }
 
-    
+
 
     const events = [
       "PV égaux",
@@ -446,10 +454,11 @@
 
       console.log("Partie chargée avec succès !");
       updateUI(); // Mise à jour de l'interface après chargement
+      alert("Vous ne pouvez pas abandonner une partie !")
     }
 
     // Si une partie a déjà commencé et qu'une sauvegarde existe, on la charge
-    if (userData.partie_commencee && sauvegarde) {
+    if (userData.partie_commencee_weekend && sauvegarde) {
       chargerPartie();
     } else {
       spinEventWheel();
@@ -491,12 +500,13 @@
         playerCharacter.crystalUses = 0;
         playerCharacter.inconnu_super = 0;
         playerCharacter.last_action = 0;
-        
+
         playerCharacter.chargement2 = false;
         playerCharacter.nodefense = false;
         playerCharacter.points2 = false;
         playerCharacter.xp2 = false;
         playerCharacter.noobject = false;
+        playerCharacter.tourTT = 0;
       } else {
         // Rediriger vers index.html si les données du joueur ne sont pas trouvées
         window.location.href = 'index.html';
@@ -521,6 +531,7 @@
         opponentCharacter.next_choice = "0";
         opponentCharacter.chargement2 = false;
         opponentCharacter.nodefense = false;
+        opponentCharacter.isDefending = false;
       } else {
         // Rediriger vers index.html si les données de l'adversaire ne sont pas trouvées
         window.location.href = 'index.html';
@@ -529,6 +540,7 @@
 
     console.log('Player Character :', playerCharacter);
     console.log('Opponent Character :', opponentCharacter);
+    sauvegarderPartie(playerCharacter, opponentCharacter)
 
 
     // Empêcher le retour en arrière vers la page précédente
@@ -607,6 +619,16 @@
         playerCharacter.xp2 = true;
         playerCharacter.partie_mode = 5;
       }
+
+    }
+
+    function updateTour() {
+      const logColor = "grey";
+      playerCharacter.tourTT += 1;
+      console.log("Tour ", playerCharacter.tourTT);
+      let specialLogMessage = "";
+      specialLogMessage = 'Tour ' + playerCharacter.tourTT;
+      addCombatLog(specialLogMessage, logColor, "milieu");
 
     }
 
@@ -896,21 +918,30 @@
       // Masquer la sélection des objets
       hideItemSelection();
 
+      const logColor = 'white';
+
       // Ajoute une entrée dans le journal de combat
-      const combatLog = document.getElementById('combat-log');
-      const itemLogEntry = document.createElement('p');
-      itemLogEntry.textContent = `${itemName} utilisé !`;
-      combatLog.appendChild(itemLogEntry);
+
+      specialLogMessage = `${itemName} utilisé !`;
+      addCombatLog(specialLogMessage, logColor, 'milieu');
 
       scrollToBottom(); // Assurez-vous que la vue défile vers le bas
     }
 
     // Fonction utilitaire pour ajouter un message dans le journal de combat
-    function addCombatLog(message, color = "#9966CC") {
-      const combatLog = document.getElementById("combat-log");
-      const logEntry = document.createElement("p");
+    function addCombatLog(message, color, isPlayer) {
+      const combatLog = document.getElementById('combat-log');
+      const logEntry = document.createElement('p');
       logEntry.textContent = message;
       logEntry.style.color = color;
+      // Définir l'alignement selon l'origine de l'action
+      if (isPlayer === true) {
+        logEntry.style.textAlign = "left";     // Action du joueur → à gauche
+      } else if (isPlayer === false) {
+        logEntry.style.textAlign = "right";    // Action de l'adversaire → à droite
+      } else {
+        logEntry.style.textAlign = "center";   // Sinon → au centre
+      }
       combatLog.appendChild(logEntry);
     }
 
@@ -928,201 +959,287 @@
     // 1. useSpecialAbility
     //
     function useSpecialAbility(character, opponent, isPlayer) {
-      if (character.spe < 1) return;
-
-      // Décrément de la ressource spéciale
-      character.spe -= 1;
-      if (isPlayer) {
-        specialAbility -= 1;
-        character.capacite_partie += 1;
-        character.last_action = 2;
-      }
-
-      let specialLogMessage = "";
-
-      // Cas d'annulation de l'action
-      if (character.immobilisation >= 1) {
-        specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'a immobilisé, donc l'attaque échoue et rien ne se passe.`;
-        addCombatLog(specialLogMessage);
-        // On ne fait rien de plus (opponent.pv reste inchangé)
-      } else if (opponent.defense_bouton === 1) {
-        opponent.defense_bouton = 0;
-        specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'en empêche, donc l'attaque échoue et rien ne se passe.`;
-        addCombatLog(specialLogMessage);
-      } else if (character.inconnu_super >= 1) {
-        specialLogMessage = `${character.name} ne peut pas utiliser sa capacité spéciale, car ${character.name} la bloqué pour encore ${character.inconnu_super} tours.`;
-        // Remboursement du spe consommé
-        character.spe += 1;
-        addCombatLog(specialLogMessage);
+      if (character.spe < 1) {
+        const specialLogMessage = `${character.name} à tenté d'utiliser sa capacité spéciale, mais n'avait pas assez d'énergie, il va donc attaquer`;
+        addCombatLog(specialLogMessage, "white", isPlayer);
         handleAttack(character, opponent, isPlayer);
-        updateDisplay(isPlayer, character);
-        return;
-      } else {
-        // Action spécifique en fonction du personnage
-        switch (character.name) {
-          case "Diva": {
-            opponent.attaque *= 0.75;
-            character.spe -= 0.25;
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! L'attaque de ${opponent.name} est réduite à ${Math.round(opponent.attaque.toFixed(2))} pour les 3 prochains tours.`;
-            opponent.perte_att += (isPlayer ? 3 : 4);
-            addCombatLog(specialLogMessage);
-            handleAttack(character, opponent, isPlayer);
-            break;
-          }
-          case "Willy": {
-            character.spe -= 0.25;
-            specialAbility -= 0.25;
-            const opponentDefenseModifiee = 0.9 + Math.random() * 0.2; // Entre 0.9 et 1.1
-            const opponentDefensee = Math.round(opponent.defense * opponentDefenseModifiee);
-            opponent.pv += 2 * (opponentDefensee - character.attaque);
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il effectue 3 attaques !\n\n${character.name} attaque ${opponent.name} et inflige ${Math.round(2 * (character.attaque - opponentDefensee))} points de dégâts.`;
-            character.degats_partie += 2 * (character.attaque - opponentDefensee);
-            addCombatLog(specialLogMessage);
-            handleAttack(character, opponent, isPlayer);
-            break;
-          }
-          case "Baleine": {
-            if (character.defense < 29) {
-              specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
-              addCombatLog(specialLogMessage);
-              handleAttack(character, opponent, isPlayer);
-            } else {
-              specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 15 de défense et gagne 1000 PV !";
+      } else if (character.spe === 1) {
+        // Décrémente la quantité de la capacité spéciale utilisée
+        console.log(character.spe);
+        character.spe -= 1;
+        console.log(character.spe);
+        if (isPlayer) {
+          specialAbility -= 1;
+          character.capacite_partie += 1;
+          character.last_action = 2;
+        }
+
+        // Choix de la couleur du log en fonction du joueur ou de l'adversaire
+        const logColor = 'white';
+        let specialLogMessage = "";
+
+        if (character.immobilisation >= 1) {
+          specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'a immobilisé, donc l'attaque échoue et rien ne se passe.`;
+          opponent.pv -= 0;
+          addCombatLog(specialLogMessage, logColor, isPlayer);
+        } else if (opponent.defense_bouton === 1) {
+          opponent.defense_bouton = 0;
+          specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'en empêche, donc l'attaque échoue et rien ne se passe.`;
+          opponent.pv -= 0;
+          addCombatLog(specialLogMessage, logColor, isPlayer);
+        } else if (character.inconnu_super >= 1) {
+          specialLogMessage = `${character.name} ne peut pas utiliser sa capacité spéciale, car ${opponent.name} l'a bloqué pour encore ${character.inconnu_super} tours.`;
+          character.spe += 1;
+          addCombatLog(specialLogMessage, logColor, isPlayer);
+          handleAttack(character, opponent, isPlayer);
+        } else if (isPlayer && opponent.nextAction === "se défendre") {
+          specialLogMessage = `${character.name} utilise sa capacité spéciale ! Mais ${opponent.name} l'en empêche !`;
+          
+          addCombatLog(specialLogMessage, logColor, isPlayer)
+          opponentTurn();
+        } else {
+          switch (character.name) {
+            case "Diva":
+              opponent.attaque *= 0.75;
               character.spe -= 0.25;
-              if (isPlayer) specialAbility -= 0.25;
-              character.defense -= 15;
-              character.pv += 1000;
-              addCombatLog(specialLogMessage);
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! L'attaque de ${opponent.name} est réduite à ${Math.round(opponent.attaque.toFixed(2))} pour les 3 prochains tours.`;
+              opponent.perte_att += 3;
+              if (!isPlayer) {
+                opponent.perte_att += 1;
+              }
+              addCombatLog(specialLogMessage, logColor, isPlayer);
               handleAttack(character, opponent, isPlayer);
-            }
-            break;
-          }
-          case "Doudou": {
-            character.spe -= 0.25;
-            let regeneratedAmount = character.pv < (character.pv_max / 2)
-              ? Math.ceil(character.pv * 0.15)
-              : Math.ceil(character.pv * 0.05);
-            specialLogMessage = `${character.name} régénère ${Math.round(regeneratedAmount)} PV.`;
-            character.pv = Math.min(character.pv + regeneratedAmount, character.pv_max);
-            addCombatLog(specialLogMessage);
-            handleAttack(character, opponent, isPlayer);
-            break;
-          }
-          case "Cocobi": {
-            const reductionAmount = Math.ceil(opponent.pv_maximum * 0.12);
-            opponent.pv = Math.max(opponent.pv - reductionAmount, 0);
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! ${opponent.name} perd ${Math.round(reductionAmount)} PV.`;
-            character.degats_partie += reductionAmount;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Coeur": {
-            const specialDamage = Math.round(character.attaque * 1.5);
-            const absorbedHealth = Math.round(specialDamage * (character.pv > (character.pv_max / 2) ? 0.1 : 0.15));
-            opponent.pv = Math.max(opponent.pv - specialDamage, 0);
-            character.pv = Math.min(character.pv + absorbedHealth, character.pv_max);
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(specialDamage)} points de dégâts et récupère ${Math.round(absorbedHealth)} PV.`;
-            character.degats_partie += specialDamage;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Grours": {
-            const Damage = 500 + character.attaque;
-            const defenseValue = Math.round(opponent.defense * 0.5);
-            const netDamage = Math.round(Damage - defenseValue);
-            opponent.pv -= netDamage;
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${netDamage} points de dégâts à ${opponent.name}, ignorant le bouclier.`;
-            character.degats_partie += netDamage;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Poulpy": {
-            const poulpyDamage = Math.round(character.attaque * 1.75);
-            const effectiveDefense = Math.round(opponent.defense * 0.6);
-            const netDamage = Math.max(0, poulpyDamage - effectiveDefense);
-            opponent.pv -= netDamage;
-            opponent.defense *= 0.85;
-            opponent.poulpy_att += 3;
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(netDamage)} points de dégâts à ${opponent.name}, ignore 50% de sa défense et réduit sa défense de 15% pour les 2 prochains tours.`;
-            character.degats_partie += netDamage;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Oiseau": {
-            const DamageOiseau = character.attaque * 2.5;
-            character.defense += 20;
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(DamageOiseau)} points de dégâts et gagne 20 de défense.`;
-            opponent.pv -= DamageOiseau;
-            character.Oiseaudefense += 2;
-            character.degats_partie += DamageOiseau;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Colorina": {
-            const colorinaDamage = Math.round(character.attaque * 0.85);
-            opponent.pv -= colorinaDamage;
-            opponent.defense *= 0.85;
-            opponent.perte_defense_colorina += 4;
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(colorinaDamage)} points de dégâts et réduit la défense de ${opponent.name} de 15% pour les 3 prochains tours.`;
-            character.degats_partie += colorinaDamage;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Rosalie": {
-            const rosalieDamage = Math.round(character.attaque * 2);
-            if (Math.random() < 0.25) {
-              opponent.immobilisation = 1;
-              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle inflige ${rosalieDamage} points de dégâts et immobilise ${opponent.name} pour un tour.`;
-            } else {
-              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle inflige ${rosalieDamage} points de dégâts.`;
-            }
-            opponent.pv = Math.max(opponent.pv - rosalieDamage, 0);
-            character.degats_partie += rosalieDamage;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Sboonie": {
-            const pvsupp = Math.round(character.pv_max * 0.08);
-            character.pv += pvsupp;
-            opponent.pv -= 50;
-            opponent.attaque = Math.round(opponent.attaque * 0.85);
-            opponent.sboonie_attaque += (isPlayer ? 1 : 2);
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il régénère ${Math.round(pvsupp)} PV, inflige 50 de dégâts et réduit de 15% l'attaque de ${opponent.name} pour le prochain tour.`;
-            addCombatLog(specialLogMessage);
-            break;
-          }
-          case "Inconnu": {
-            opponent.inconnu_super += (isPlayer ? 4 : 3);
-            character.attaque += 25;
-            character.defense += 25;
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il augmente son attaque et sa défense de 15 et empêche ${opponent.name} d'utiliser sa capacité spéciale pendant 3 tours.`;
-            addCombatLog(specialLogMessage);
-            handleAttack(character, opponent, isPlayer);
-            break;
-          }
-          default: {
-            specialLogMessage = `${character.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
-            addCombatLog(specialLogMessage);
+              break;
+
+            case "Willy":
+              character.spe -= 0.25;
+              specialAbility -= 0.25;
+              const opponentDefenseModifiee = 0.9 + Math.random() * 0.2; // Entre 0.9 et 1.1
+              const opponentDefensee = Math.round(opponent.defense * opponentDefenseModifiee);
+              opponent.pv += (2 * (opponentDefensee - character.attaque));
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il effectue 3 attaques !\n\n${character.name} attaque ${opponent.name} et inflige ${Math.round(2 * (character.attaque - opponentDefensee))} points de dégâts.`;
+              character.degats_partie += (2 * (character.attaque - opponentDefensee));
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              handleAttack(character, opponent, isPlayer);
+              character.last_action = 2;
+              break;
+
+            case "Baleine":
+              if (character.defense < 29) {
+                specialLogMessage = "Baleine n'a plus assez de défense pour utiliser sa capacité spéciale, il va donc attaquer.";
+
+                addCombatLog(specialLogMessage, logColor, isPlayer);
+
+                handleAttack(character, opponent, isPlayer);
+              } else {
+                specialLogMessage = "Baleine utilise sa capacité spéciale ! Il perd 15 de défense et gagne 1000 PV !";
+                addCombatLog(specialLogMessage, logColor, isPlayer);
+                character.spe -= 0.25;
+                if (isPlayer) {
+                  specialAbility -= 0.25;
+                }
+                character.defense -= 15;
+                character.pv += 1000;
+
+
+
+                handleAttack(character, opponent, isPlayer);
+              }
+              break;
+
+            case "Doudou":
+              character.spe -= 0.25;
+              let regeneratedAmount;
+              if (character.pv < (character.pv_max / 2)) {
+                regeneratedAmount = Math.ceil(character.pv * 0.15);
+                specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle régénère ${Math.round(regeneratedAmount)} PV.`;
+                character.pv += regeneratedAmount;
+                if (character.pv > character.pv_max) {
+                  character.pv = character.pv_max;
+                }
+                addCombatLog(specialLogMessage, logColor, isPlayer);
+                handleAttack(character, opponent, isPlayer);
+                updateSpecialBar(playerCharacter, 'player-special-bar');
+                updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+              } else {
+                regeneratedAmount = Math.ceil(character.pv * 0.05);
+                specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle régénère ${Math.round(regeneratedAmount)} PV.`;
+                character.pv += regeneratedAmount;
+                if (character.pv > character.pv_max) {
+                  character.pv = character.pv_max;
+                }
+                addCombatLog(specialLogMessage, logColor, isPlayer);
+                handleAttack(character, opponent, isPlayer);
+                updateSpecialBar(playerCharacter, 'player-special-bar');
+                updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+              }
+              break;
+
+            case "Cocobi":
+              const reductionAmount = Math.ceil(opponent.pv_maximum * 0.12);
+              opponent.pv -= reductionAmount;
+              if (opponent.pv < 0) {
+                opponent.pv = 0;
+              }
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! ${opponent.name} perd ${Math.round(reductionAmount)} PV.`;
+              character.degats_partie += reductionAmount;
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+
+              break;
+
+            case "Coeur":
+              const specialDamage = Math.round(character.attaque * 1.5);
+              const absorbedHealth = Math.round(specialDamage * (character.pv > (character.pv_max / 2) ? 0.1 : 0.15));
+              opponent.pv -= specialDamage;
+              character.pv += absorbedHealth;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(specialDamage)} points de dégâts et récupère ${Math.round(absorbedHealth)} PV.`;
+              character.degats_partie += specialDamage;
+              if (opponent.pv < 0) opponent.pv = 0;
+              if (character.pv > character.pv_max) character.pv = character.pv_max;
+
+              // Ajouter le message au journal
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              break;
+
+            case "Grours":
+              const Damage = 500 + character.attaque;
+              const defense = Math.round(opponent.defense * 0.5);
+              opponent.pv -= (Damage - defense);
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(Damage - defense)} points de dégâts à ${opponent.name}, ignorant le bouclier.`;
+              character.degats_partie += (Damage - defense);
+
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              break;
+
+            case "Poulpy":
+              const poulpyDamage = Math.round(character.attaque * 1.75);
+              const effectiveDefense = Math.round(opponent.defense * 0.6);
+              const netDamage = Math.max(0, poulpyDamage - effectiveDefense);
+              opponent.pv -= netDamage;
+              opponent.defense *= 0.85;
+              opponent.poulpy_att += 3;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(netDamage)} points de dégâts à ${opponent.name}, ignore 50% de sa défense et réduit sa défense de 15% pour les 2 prochains tours.`;
+              character.degats_partie += netDamage;
+
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              break;
+
+            case "Oiseau":
+              const DamageOiseau = character.attaque * 2.5;
+              character.defense += 20;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(DamageOiseau)} points de dégâts et gagne 20 de défense.`;
+              opponent.pv -= DamageOiseau;
+              character.Oiseaudefense += 2;
+              character.degats_partie += DamageOiseau;
+
+              // Ajouter le message au journal
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              break;
+
+            case "Colorina":
+              const colorinaDamage = Math.round(character.attaque * 0.85);
+              opponent.pv -= colorinaDamage;
+              opponent.defense *= 0.85;
+              opponent.perte_defense_colorina += 4;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il inflige ${Math.round(colorinaDamage)} points de dégâts et réduit la défense de ${opponent.name} de 15% pour les 3 prochains tours.`;
+              character.degats_partie += colorinaDamage;
+
+              // Ajouter le message au journal
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              break;
+            case "Rosalie":
+              const rosalieDamage = Math.round(character.attaque * 2);
+              const immobilizationChance = Math.random();
+              if (immobilizationChance < 0.25) {
+                opponent.immobilisation = 1; // Marque l'adversaire comme immobilisé
+                specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle inflige ${Math.round(rosalieDamage)} points de dégâts et immobilise ${opponent.name} pour un tour.`;
+              } else {
+                specialLogMessage = `${character.name} utilise sa capacité spéciale ! Elle inflige ${Math.round(rosalieDamage)} points de dégâts.`;
+              }
+              opponent.pv -= rosalieDamage;
+              if (opponent.pv < 0) opponent.pv = 0;
+              character.degats_partie += rosalieDamage;
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+
+              break;
+            case "Sboonie":
+              pvsupp = Math.round(character.pv_max * 0.08)
+              character.pv += pvsupp;
+              opponent.pv -= 50;
+              opponent.attaque = Math.round(opponent.attaque * 0.85);
+              if (!isPlayer) {
+                opponent.sboonie_attaque += 1;
+              }
+              opponent.sboonie_attaque += 1;
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Il régénère ${Math.round(pvsupp)} PV, inflige 50 de dégâts et reduit de 15% l'attaque de ${opponent.name} pour le prochain tour.`;
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+
+              break;
+
+            case 'Inconnu':
+              character.spe -= 0.25;
+              opponent.inconnu_super += 3;
+              if (isPlayer) {
+                opponent.inconnu_super += 1;
+              }
+              character.attaque += 25;
+              character.defense += 25;
+              specialLogMessage = `${character.name} utilise sa capacité spécial, il augmente son attaque et sa défense de 15 et ${opponent.name} ne peut pas utiliser sa capacité spéciale pendant 3 tours !`;
+              addCombatLog(specialLogMessage, logColor, isPlayer);
+              handleAttack(character, opponent, isPlayer);
+              break;
+
+            default:
+              specialLogMessage = `${character.name} utilise sa capacité spéciale ! Effet spécifique à définir.`;
+              addCombatLog(specialLogMessage, logColor, isPlayer);
           }
         }
-      }
 
-      updateDisplay(isPlayer, character);
-      // Si le personnage joueur ne fait pas partie de certains cas spéciaux,
-      // on lance le tour de l'adversaire
-      if (isPlayer && !["Diva", "Willy", "Baleine", "Doudou"].includes(character.name)) {
-        opponentTurn();
+        // Met à jour l'affichage des PV du joueur ou de l'adversaire
+        document.getElementById(isPlayer ? 'player-pv' : 'opponent-pv').textContent = `PV: ${character.pv}`;
+
+        // Met à jour le bouton après l'utilisation si c'est le joueur
+        character.last_action = 2;
+        updateDisplay(isPlayer, character);
+        updateSpecialButton();
+        updateSpecialBar(playerCharacter, 'player-special-bar');
+        updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+        updateUI();
+
+        scrollToBottom();
+        if (isPlayer && character.name != "Diva" && character.name != "Willy" && character.name != "Baleine" && character.name != "Doudou") {
+          opponentTurn();
+        }
       }
     }
 
     //
     // 2. opponentTurn
     //
-    // ---------------------------------------
-    // Fonctions utilitaires
-    // ---------------------------------------
+    // --------------------------
+    // Fonctions utilitaires déjà existantes
+    // --------------------------
+
 
     // Calcule la distance de Manhattan entre deux tableaux numériques
+
+
+    // Historique des actions du joueur (ordre chronologique)
+    function loadPlayerActionHistory() {
+      const data = localStorage.getItem("playerActionHistoryWeekend");
+      return data ? JSON.parse(data) : [];
+    }
+
+    // Fonction pour sauvegarder l'historique des actions du joueur dans le localStorage
+    function savePlayerActionHistory(history) {
+      localStorage.setItem("playerActionHistoryWeekend", JSON.stringify(history));
+    }
+
+    // Historique des actions du joueur (ordre chronologique)
+    // On vérifie s'il existe déjà dans le localStorage ; sinon, on initialise un tableau vide.
+    let playerActionHistory = loadPlayerActionHistory();
+
+
     function manhattanDistance(arr1, arr2) {
       let distance = 0;
       for (let i = 0; i < arr1.length; i++) {
@@ -1131,7 +1248,7 @@
       return distance;
     }
 
-    // Sélection aléatoire pondérée parmi un tableau d'actions avec leurs occurrences
+    // Sélection aléatoire pondérée parmi un objet d'actions et d'occurrences
     function weightedRandomAction(actionCounts) {
       const total = Object.values(actionCounts).reduce((sum, count) => sum + count, 0);
       let rand = Math.random() * total;
@@ -1144,203 +1261,429 @@
       return null;
     }
 
-    // ---------------------------------------
-    // Système d'historique et prédiction
-    // ---------------------------------------
+    // Recherche des états similaires dans l'historique (on ignore l'action du joueur, index 3)
+    // Dictionnaire de correspondance pour l'action du joueur
+    const actionMapping = {
+      "attacker": 0,
+      "se défendre": 1,
+      "utiliser capacité spéciale": 2
+    };
 
-    // Recherche des états similaires dans l'historique en utilisant la distance de Manhattan
-    function findSimilarData(currentState, data) {
-      console.log("Recherche de données similaires...");
-      // Reconstruction de l'état en excluant l'action du joueur (index 3)
-      const stateToMatch = [...currentState.slice(0, 3), ...currentState.slice(4)];
+    // Transforme un état en remplaçant l'action (index 3) par sa valeur numérique
+    function transformState(state) {
+      // Copie de l'état
+      let newState = state.slice();
+      // On remplace la valeur à l'index 3 si c'est une chaîne et qu'on a une correspondance
+      if (typeof newState[3] === "string" && actionMapping[newState[3]] !== undefined) {
+        newState[3] = actionMapping[newState[3]];
+      } else {
+        newState[3] = 0; // valeur par défaut en cas de problème
+      }
+      return newState;
+    }
 
-      // Seuil de similarité (à ajuster selon la granularité souhaitée)
-      const SIMILARITY_THRESHOLD = 2;
-      const similarData = data.filter((row) => {
-        const rowState = [...row.slice(0, 3), ...row.slice(4)];
-        const distance = manhattanDistance(stateToMatch, rowState);
-        return distance <= SIMILARITY_THRESHOLD;
+    // Version améliorée de findSimilarData qui inclut l'action du joueur
+    function findSimilarData(currentState, data, similarityThreshold = 2) {
+      const stateToMatch = transformState(currentState);
+      return data.filter(row => {
+        const rowState = transformState(row);
+        return manhattanDistance(stateToMatch, rowState) <= similarityThreshold;
       });
-
-      console.log("Données similaires trouvées :", similarData);
-      return similarData;
     }
 
-    // Détermine l'action la plus probable (pondérée) parmi les données similaires
+
+    // Retourne l'action la plus probable à partir d'un ensemble de données similaires
     function mostProbableAction(data) {
-      console.log("Choix de l'action la plus probable...");
-      if (data.length === 0) return null; // Aucun historique trouvé
+      // Tente de prédire via la séquence d'actions (ordre 2 ici, ajustable)
+      let sequencePrediction = predictPlayerNextActionBySequence(2);
+      if (sequencePrediction !== null) {
+        console.log("Prédiction par séquence trouvée :", sequencePrediction);
+        return sequencePrediction;
+      }
 
-      // Extraire les actions (situées à l'index 3)
-      const actions = data.map(row => row[3]);
-
-      // Compter les occurrences de chaque action
-      const actionCounts = actions.reduce((counts, action) => {
-        counts[action] = (counts[action] || 0) + 1;
-        return counts;
+      // Sinon, utilise la méthode actuelle basée sur la pondération des actions dans les états similaires
+      if (data.length === 0) return null;
+      const actions = data.map(row => row[3]); // l'action du joueur à l'index 3
+      const counts = actions.reduce((acc, action) => {
+        acc[action] = (acc[action] || 0) + 1;
+        return acc;
       }, {});
-
-      console.log("Occurrences des actions :", actionCounts);
-      return weightedRandomAction(actionCounts);
+      return weightedRandomAction(counts);
     }
 
-    // Sauvegarde l'historique dans le localStorage
+    // Sauvegarde et chargement de l'historique via localStorage
     function saveHistoricalData(data) {
       localStorage.setItem("historicalData_weekend", JSON.stringify(data));
     }
 
-    // Chargement des données historiques depuis le localStorage
     function loadHistoricalData() {
       const data = localStorage.getItem("historicalData_weekend");
       return data ? JSON.parse(data) : [];
     }
 
     // Chargement initial de l'historique
-    const savedData = localStorage.getItem("historicalData_weekend");
-    const historicalData = savedData ? JSON.parse(savedData) : [];
+    const historicalData = loadHistoricalData();
 
-    // ---------------------------------------
-    // Logique de l'IA et gestion des tours
-    // ---------------------------------------
+    // ---------------------------------------------------------------------
+    // Gestion adaptative par situation : statistiques par situation/action
+    // ---------------------------------------------------------------------
+    //
+    // Pour chaque situation, nous enregistrons l'efficacité de chaque action
+    // sous forme de delta (variation des points de vie du joueur et de l'IA).
+    //
+    // La situation est identifiée par les indicateurs suivants extraits de l'état :
+    // - Disponibilité de la capacité spéciale du joueur (Jcs)
+    // - Possibilité de se défendre du joueur (Jdefense)
+    // - Indicateur de défense active (playerIsDefending)
+    // - Pourcentage de vie du joueur (Jpv)
+    // - Disponibilité de la capacité spéciale de l'IA (IAcs)
+    // - Pourcentage de vie de l'IA (IApv)
+    //
+    const situationStats = {}; // Structure : { situationKey: { action: { totalDelta, count } } }
+    let lastState = null;          // État du tour précédent (tableau)
+    let lastAIAction = null;       // Action exécutée lors du tour précédent
+    let lastSituationKey = null;   // Clé de situation du tour précédent
 
-    // Tour de l'IA avec adaptation dynamique de la difficulté
-    function iaTurn(IA, playerCharacter) {
-      console.log("L'IA réfléchit...");
+    // Pour calculer le delta effectif, nous utilisons également les PV réels
+    let lastPlayerHP = null;
+    let lastAIHP = null;
 
-      // Récupération de l'action prédite
-      let choice = opponentCharacter.next_choice;
-      if (choice === null) {
-        console.log("Aucune action prédite, choix aléatoire !");
-        const possibleActions = ["attacker", "utiliser capacité spéciale", "se défendre"];
-        choice = possibleActions[Math.floor(Math.random() * possibleActions.length)];
-      }
-      console.log("Action choisie :", choice);
-
-      // ---------------------------------------
-      // Calcul des modificateurs pour ajuster la stratégie
-      // ---------------------------------------
-
-      // 1. Adaptation dynamique en fonction de la vie du joueur
-      const playerHPPercentage = Math.min(Math.ceil((playerCharacter.pv / playerCharacter.pv_max) * 100 / 20) * 20, 100);
-      let dynamicModifier = 0;
-      if (playerHPPercentage >= 80) {
-        // Le joueur est en bonne santé, l'IA est plus prudente
-        dynamicModifier = -0.2;
-      } else if (playerHPPercentage <= 40) {
-        // Le joueur est vulnérable, l'IA peut se montrer plus agressive
-        dynamicModifier = 0.2;
-      }
-
-      // 2. Réglage global selon la difficulté choisie par l'utilisateur
-      // userData.difficulty doit être défini dans votre contexte (par exemple "Easy", "Medium", "Hard")
-      let difficultyFactor = 0;
-      if (userData.difficulty === "Easy") {
-        difficultyFactor = -0.2; // IA moins forte
-      } else if (userData.difficulty === "Hard") {
-        difficultyFactor = 0.2;  // IA plus forte
-      } else {
-        difficultyFactor = 0;    // Niveau moyen
-      }
-
-      // Fusion des deux modificateurs
-      const finalModifier = dynamicModifier + difficultyFactor;
-      console.log("Modificateur dynamique =", dynamicModifier, "et modificateur global =", difficultyFactor, "soit final =", finalModifier);
-
-      // Fonction utilitaire pour choisir aléatoirement une action parmi un ensemble
-      function getRandomAction(actions) {
-        return actions[Math.floor(Math.random() * actions.length)];
-      }
-
-      // ---------------------------------------
-      // Décision de l'IA en fonction de sa capacité spéciale et du modificateur final
-      // ---------------------------------------
-      if (IA.spe === 1) { // Capacité spéciale disponible
-        // En présence de la capacité spéciale, l'IA choisit entre attaquer et utiliser sa capacité spéciale.
-        // On compare une valeur aléatoire au seuil ajusté par finalModifier.
-        if (choice === "attacker" || (choice === "0" && Math.random() > 0.5 + finalModifier)) {
-          console.log("L'IA attaque.");
-          handleAttack(IA, playerCharacter, false);
-        } else {
-          console.log("L'IA utilise sa capacité spéciale.");
-          useSpecialAbility(IA, playerCharacter, false);
-        }
-      } else { // Capacité spéciale non disponible
-        // Choix entre attaquer et se défendre
-        if (choice === "se défendre" || (choice === "2" && Math.random() < 0.5 - finalModifier)) {
-          console.log("L'IA se défend.");
-          opponentDefense();
-        } else {
-          console.log("L'IA attaque.");
-          handleAttack(IA, playerCharacter, false);
-        }
-      }
-
-      console.log("Le tour de l'IA est terminé.");
+    // Construit une clé de situation à partir de l'état et de l'information de défense active du joueur
+    function getSituationKey(state, playerIsDefending) {
+      // state = [Jcs, Jdefense, Jpv, Jaction, IAcs, IAdefense, IApv]
+      // Pour l'enregistrement de la situation, on retire les informations sur les PV (Jpv et IApv)
+      // On conserve ainsi uniquement : Jcs, Jdefense, activeDef, IAcs et IAdefense.
+      return `Jcs:${state[0]}_Jdef:${state[1]}_activeDef:${playerIsDefending ? 1 : 0}_IAcs:${state[4]}_IAdef:${state[5]}`;
     }
 
-    // Fonction principale du tour de l'adversaire
+
+    // --------------------------
+    // Système de décision de l'IA (évaluation) avec données détaillées
+    // --------------------------
+
+    /*
+     * La fonction evaluateAction attribue un score à une option (action)
+     * en fonction de l'état courant, d'une éventuelle action prédite du joueur,
+     * du modificateur de difficulté et de l'état défensif du joueur.
+     *
+     * L'état est un tableau : [Jcs, Jdefense, Jpv, Jaction, IAcs, IAdefense, IApv]
+     *
+     * Ici, nous ajoutons également les données réelles (charge spéciale, attaque de base,
+     * pourcentage précis de vie) pour affiner l'analyse.
+     */
+    function evaluateAction(state, action, predictedPlayerAction, difficultyModifier, playerIsDefending) {
+      // Déstructuration de l'état normalisé
+      const [Jcs, Jdefense, Jpv, JlastAction, IAcs, IAdefense, IApv] = state;
+      let score = 0;
+
+      // Récupération des données détaillées (inchangées)
+      const JpvPrecise = Math.round((playerCharacter.pv / playerCharacter.pv_max) * 100);
+      const IApvPrecise = Math.round((opponentCharacter.pv / opponentCharacter.pv_max) * 100);
+      const playerAttack = playerCharacter.attaque;
+      const opponentAttack = opponentCharacter.attaque;
+      const playerSpecialCharge = playerCharacter.spe;
+      const opponentSpecialCharge = opponentCharacter.spe;
+
+      // --- Évaluation de l'action "attacker" ---
+      if (action === "attacker") {
+        score += (100 - JpvPrecise) * 0.2;
+        if (predictedPlayerAction === "attacker") {
+          score += 5;
+          score -= playerAttack * 0.1;
+        }
+        if (predictedPlayerAction === "utiliser capacité spéciale") {
+          score -= 15;
+        }
+        if (difficultyModifier > 0) {
+          if (Jdefense === 1) score -= 10;
+          if (predictedPlayerAction === "se défendre" && IApv > 50) score += 5;
+          if (JlastAction === "utiliser capacité spéciale") score += 5;
+        }
+        score += opponentAttack * 0.05;
+      }
+      // --- Évaluation de l'action "utiliser capacité spéciale" ---
+      else if (action === "utiliser capacité spéciale") {
+        score += (100 - JpvPrecise) * 0.35;
+        score += opponentSpecialCharge * 10;
+        if (playerSpecialCharge < 0.2) {
+          score += 5;
+        } else {
+          score -= playerSpecialCharge * 5;
+        }
+        if (predictedPlayerAction === "se défendre") {
+          score -= 20;
+        }
+        if (difficultyModifier > 0) {
+          if (Jdefense === 1 || predictedPlayerAction === "se défendre") score -= 25;
+          if (playerCharacter.specialCharge && playerCharacter.specialCharge > 0.25) score -= 15;
+          if (JlastAction === "utiliser capacité spéciale") score -= 5;
+        }
+        score += opponentAttack * 0.2;
+      }
+      // --- Évaluation de l'action "se défendre" ---
+      else if (action === "se défendre") {
+        if (predictedPlayerAction === "attacker") {
+          score += 12;
+          score += playerAttack * 0.2;
+        }
+        if (predictedPlayerAction === "utiliser capacité spéciale") {
+          score += 35;
+        }
+        // *** BONUS AJOUTÉ : Si le joueur peut utiliser sa capacité spéciale (Jcs === 1),
+        // l'IA renforce la défense car il y a de fortes chances que le joueur l'utilise.
+        if (Jcs === 1) {
+          score += 30;
+          console.log("Bonus défense car le joueur peut utiliser sa capacité spéciale");
+        }
+        score += JpvPrecise * 0.1;
+        if (difficultyModifier > 0) {
+          if (Jcs === 0 && playerCharacter.specialCharge && playerCharacter.specialCharge > 0.5 && IApv > 30) score -= 20;
+          if (JlastAction === "attacker" && Jpv > 60) score -= 10;
+          if (IApv < 30) score += 15;
+          if (JlastAction === "se défendre") score -= 5;
+        }
+      }
+
+      score += difficultyModifier * 10;
+      if (IApv < 50 && action === "se défendre") {
+        score += 12;
+      }
+
+      // Bonus adaptatif en fonction de la situation (inchangé)
+      const situationKey = getSituationKey(state, playerIsDefending);
+      if (situationStats[situationKey] &&
+        situationStats[situationKey][action] &&
+        situationStats[situationKey][action].count > 0) {
+        let avgDelta = situationStats[situationKey][action].totalDelta / situationStats[situationKey][action].count;
+        // On augmente le coefficient pour un impact plus fort :
+        score += avgDelta * 0.5;
+        console.log(`Bonus adaptatif pour l'action "${action}" dans la situation ${situationKey}: avgDelta = ${avgDelta}, bonus = ${avgDelta * 0.5}`);
+      }
+
+      return score;
+    }
+
+    /*
+     * Choisit la meilleure action possible.
+     * Sur Easy, une part d'aléatoire est introduite pour simuler une IA moins prévisible.
+     */
+    function chooseBestAction(IA, state, predictedPlayerAction, difficultyModifier, playerIsDefending) {
+      const possibleActions = ["attacker"];
+      // Ici, on utilise la charge spéciale réelle pour décider si l'IA peut utiliser sa capacité spéciale
+      if (opponentCharacter.spe === 1) {
+        possibleActions.push("utiliser capacité spéciale");
+      }
+      if (!opponentCharacter.defenseCooldown || opponentCharacter.defenseCooldown === 0 && opponentCharacter.spe >= 0.1) {
+        possibleActions.push("se défendre");
+      }
+
+      let bestAction = possibleActions[0];
+      let bestScore = -Infinity;
+      possibleActions.forEach(action => {
+        const score = evaluateAction(state, action, predictedPlayerAction, difficultyModifier, playerIsDefending);
+        console.log(`Action "${action}" -> score ${score}`);
+        if (score > bestScore) {
+          bestScore = score;
+          bestAction = action;
+        }
+      });
+
+      if (userData.difficulty === "Easy" && Math.random() < 0.3) {
+        bestAction = possibleActions[Math.floor(Math.random() * possibleActions.length)];
+        console.log("Difficulté Easy : choix aléatoire de l'action", bestAction);
+      }
+
+      return bestAction;
+    }
+
+    // --------------------------
+    // Exécution du tour de l'IA avec une action prédéfinie
+    // --------------------------
+
+    function executeAITurn(chosenAction) {
+      const delay = Math.floor(Math.random() * 2000) + 1000; // Génère un délai entre 1000ms (1s) et 3000ms (3s)
+
+      setTimeout(() => {
+        console.log("L'IA exécute l'action planifiée :", chosenAction);
+        if (chosenAction === "attacker") {
+          handleAttack(opponentCharacter, playerCharacter, false);
+        } else if (chosenAction === "utiliser capacité spéciale" && opponentCharacter.spe === 1) {
+          useSpecialAbility(opponentCharacter, playerCharacter, false);
+
+        } else if (chosenAction === "se défendre") {
+          opponentDefense();
+          opponentCharacter.defenseCooldown = 3;
+        } else {
+          handleAttack(opponentCharacter, playerCharacter, false);
+        }
+        document.getElementById('attack-button').disabled = false;
+        document.getElementById('special-button').disabled = false;
+        document.getElementById('defense-button').disabled = false;
+        document.getElementById('items-button').disabled = false;
+        sauvegarderPartie(playerCharacter, opponentCharacter);
+      }, delay);
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function predictPlayerNextActionBySequence(order = 2) {
+      // Si l'historique des actions est trop court, on ne peut pas prédire
+      if (playerActionHistory.length < order) return null;
+      // Récupère les 'order' dernières actions du joueur
+      const sequence = playerActionHistory.slice(-order);
+      const counts = {};
+
+      // On parcourt l'historique (historicalData) qui contient les états chronologiques
+      // Chaque état est un tableau où l'action du joueur est à l'index 3.
+      for (let i = 0; i <= historicalData.length - order - 1; i++) {
+        // Extrait la séquence d'actions de longueur 'order' à partir de l'historique
+        let histSequence = [];
+        for (let j = 0; j < order; j++) {
+          histSequence.push(historicalData[i + j][3]);
+        }
+        // Compare la séquence extraite à celle courante
+        if (arraysEqual(histSequence, sequence)) {
+          // Si possible, récupère l'action qui suit cette séquence
+          if (i + order < historicalData.length) {
+            let nextAction = historicalData[i + order][3];
+            counts[nextAction] = (counts[nextAction] || 0) + 1;
+          }
+        }
+      }
+
+      if (Object.keys(counts).length === 0) return null;
+      return weightedRandomAction(counts);
+    }
+
+    // --------------------------
+    // Gestion des tours de l'adversaire (IA)
+    // --------------------------
+
     function opponentTurn() {
-      // État actuel du joueur
-      let Jdefense = playerCharacter.defense_droit;
-      if (playerCharacter.defense_droit > 0 && playerCharacter.defense_droit < 1) {
-        Jdefense = 0;
-      } else if (playerCharacter.defense_droit >= 1) {
-        Jdefense = 1;
+
+      document.getElementById('attack-button').disabled = true;
+      document.getElementById('special-button').disabled = true;
+      document.getElementById('defense-button').disabled = true;
+      document.getElementById('items-button').disabled = true;
+
+
+      // Gestion du cooldown de défense pour l'IA (inchangé)
+      if (typeof opponentCharacter.defenseCooldown === 'undefined') {
+        opponentCharacter.defenseCooldown = 0;
+      } else if (opponentCharacter.defenseCooldown > 0) {
+        opponentCharacter.defenseCooldown--;
       }
-      let Jcs = playerCharacter.spe;
-      if (playerCharacter.spe > 0 && playerCharacter.spe < 1) {
-        Jcs = 0;
-      } else if (playerCharacter.spe >= 1) {
-        Jcs = 1;
-      }
+
+      // Construction de l'état courant (inchangé)
+      let Jdefense = (playerCharacter.defense_droit >= 1) ? 1 : 0;
+      let Jcs = (playerCharacter.spe >= 1) ? 1 : 0;
       let Jpv = Math.min(Math.ceil((playerCharacter.pv / playerCharacter.pv_max) * 100 / 20) * 20, 100);
       let Jaction = playerCharacter.last_action;
-      console.log("Action du joueur :", Jaction);
-
-      // Nouvelle donnée : mode de partie (valeur entre 1 et 5)
-      let partieMode = playerCharacter.partie_mode;
-
-      // État actuel de l'IA
-      let IAdefense = opponentCharacter.defense_droit;
-      if (opponentCharacter.defense_droit > 0 && opponentCharacter.defense_droit < 1) {
-        IAdefense = 0;
-      }
-      let IAcs = opponentCharacter.spe;
-      if (opponentCharacter.spe > 0 && opponentCharacter.spe < 1) {
-        IAcs = 0;
-      } else if (opponentCharacter.spe >= 1) {
-        IAcs = 1;
-      }
+      let IAdefense = (opponentCharacter.defense_droit >= 1) ? 1 : 0;
+      let IAcs = (opponentCharacter.spe >= 1) ? 1 : 0;
       let IApv = Math.min(Math.ceil((opponentCharacter.pv / opponentCharacter.pv_max) * 100 / 20) * 20, 100);
-
-      // Constitution de l'état courant :
-      // [Jcs, Jdefense, Jpv, Jaction, partieMode, IAcs, IAdefense, IApv]
-      const currentState = [Jcs, Jdefense, Jpv, Jaction, partieMode, IAcs, IAdefense, IApv];
+      playerActionHistory.push(Jaction);
+      // On conserve uniquement les 30 dernières actions
+      if (playerActionHistory.length > 30) {
+        playerActionHistory = playerActionHistory.slice(-30);
+      }
+      savePlayerActionHistory(playerActionHistory);
+      const currentState = [Jcs, Jdefense, Jpv, Jaction, IAcs, IAdefense, IApv];
       console.log("État courant :", currentState);
 
-      // Recherche dans l'historique en ignorant l'action du joueur (index 3)
-      const similarData = findSimilarData(currentState, historicalData);
+      const playerIsDefending = (playerCharacter.defense_droit === 4);
+      const currentSituationKey = getSituationKey(currentState, playerIsDefending);
 
-      // Prédiction de l'action probable du joueur
-      const predictedAction = mostProbableAction(similarData);
-      console.log("Action prédite :", predictedAction);
-      opponentCharacter.next_choice = predictedAction;
+      // Mise à jour des statistiques de la situation précédente (inchangé)
+      let currentPlayerHP = playerCharacter.pv;
+      let currentAIHP = opponentCharacter.pv;
+      if (
+        lastSituationKey !== null &&
+        lastAIAction !== null &&
+        lastState !== null &&
+        lastPlayerHP !== null &&
+        lastAIHP !== null
+      ) {
+        let deltaPlayer = lastPlayerHP - currentPlayerHP;
+        let deltaAI = lastAIHP - currentAIHP;
+        let effectiveDelta = deltaPlayer - deltaAI;
+        if (Math.abs(effectiveDelta) < 100) {
+          effectiveDelta = 0;
+        }
+        if (!situationStats[lastSituationKey]) {
+          situationStats[lastSituationKey] = {
+            "attacker": {totalDelta: 0, count: 0},
+            "utiliser capacité spéciale": {totalDelta: 0, count: 0},
+            "se défendre": {totalDelta: 0, count: 0}
+          };
+        }
+        situationStats[lastSituationKey][lastAIAction].totalDelta += effectiveDelta;
+        situationStats[lastSituationKey][lastAIAction].count++;
+        console.log(`Mise à jour de l'efficacité pour l'action "${lastAIAction}" dans la situation ${lastSituationKey} : deltaPlayer = ${deltaPlayer}, deltaAI = ${deltaAI}, effectiveDelta = ${effectiveDelta}, nouvelle moyenne = ${situationStats[lastSituationKey][lastAIAction].totalDelta / situationStats[lastSituationKey][lastAIAction].count}`);
+      }
 
-      // Ajout du tour actuel à l'historique
+      // Choix de l'action planifiée pour ce tour (inchangé)
+      let currentAction = opponentCharacter.nextAction;
+      if (!currentAction) {
+        const possibleActions = ["attacker"];
+        if (opponentCharacter.spe >= 0.8) possibleActions.push("utiliser capacité spéciale");
+        if (!opponentCharacter.defenseCooldown || opponentCharacter.defenseCooldown === 0) possibleActions.push("se défendre");
+        currentAction = possibleActions[Math.floor(Math.random() * possibleActions.length)];
+      }
+      console.log("Action planifiée pour ce tour :", currentAction);
+      executeAITurn(currentAction);
+
+      // Mise à jour de l'historique (inchangé)
       historicalData.push(currentState);
       saveHistoricalData(historicalData);
 
-      // Exécution du tour de l'IA
-      iaTurn(opponentCharacter, playerCharacter);
+      // Paramètres de difficulté (inchangé)
+      let difficultyModifier = 0;
+      let predictionAccuracy = 0.75;
+      if (userData.difficulty === "Easy") {
+        difficultyModifier = -0.2;
+        predictionAccuracy = 0.5;
+      } else if (userData.difficulty === "Hard") {
+        difficultyModifier = 0.2;
+        predictionAccuracy = 1;
+      }
 
-      // Passage aux tours suivants après un délai (mise à jour de l'UI, barres spéciales, etc.)
-      setTimeout(() => {
-        adversairepasser_tour();
-        joueurpasser_tour();
-        updateSpecialBar(playerCharacter, 'player-special-bar');
-        updateSpecialBar(opponentCharacter, 'opponent-special-bar');
-        updateUI();
-      }, 1000);
+      // --- Prédiction de l'action du joueur ---
+      const similarData = findSimilarData(currentState, historicalData);
+      let predictedPlayerAction = mostProbableAction(similarData);
+      if (Math.random() > predictionAccuracy) {
+        predictedPlayerAction = null;
+        console.log("Prédiction ignorée (difficulté moindre)");
+      }
+      // *** Modification : Si le joueur peut utiliser sa capacité spéciale (Jcs === 1),
+      // on force la prédiction pour indiquer qu'il utilisera sa capacité spéciale.
+
+      console.log("Action prédite du joueur pour le prochain tour :", predictedPlayerAction);
+
+      // Planification du prochain coup de l'IA
+      const nextAction = chooseBestAction(opponentCharacter, currentState, predictedPlayerAction, difficultyModifier, playerIsDefending);
+      console.log("Action planifiée pour le prochain tour :", nextAction);
+      opponentCharacter.nextAction = nextAction;
+
+      // Stockage de l'état, de la situation et des PV réels pour la prochaine mise à jour
+      lastState = currentState;
+      lastAIAction = currentAction;
+      lastSituationKey = currentSituationKey;
+      lastPlayerHP = currentPlayerHP;
+      lastAIHP = currentAIHP;
+
+      // Passage au tour suivant après un délai (inchangé)
+      adversairepasser_tour();
+      joueurpasser_tour();
+      updateSpecialBar(playerCharacter, 'player-special-bar');
+      updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+      updateUI();
     }
 
 
@@ -1350,42 +1693,60 @@
     // 3. opponentDefense
     //
     function opponentDefense() {
-      opponentCharacter.defense_bouton = 1;
+      opponentCharacter.isDefending = true;
+      console.log("l'adversaire se défend");
+      opponentCharacter.spe -= 0.1;
       opponentCharacter.defense_droit = 4;
       // Soin basé sur 80% des dégâts subis
+      attaque = opponentCharacter.attaque;
+      opponentCharacter.attaque = Math.round(opponentCharacter.attaque * 0.8);
       const soin = Math.round(opponentCharacter.degats_subit * 0.8);
       opponentCharacter.pv += soin;
-      addCombatLog(`${opponentCharacter.name} se défend de la dernière attaque de ${playerCharacter.name}.`, "#6699CC");
+      specialLogMessage = `${opponentCharacter.name} se defend de la dernière attaque de ${playerCharacter.name}.`;
+      logColor = 'white';
+      updateSpecialBar(playerCharacter, 'player-special-bar');
+      updateSpecialBar(opponentCharacter, 'opponent-special-bar');
+      addCombatLog(specialLogMessage, logColor, false);
       scrollToBottom();
       handleAttack(opponentCharacter, playerCharacter, false);
+      opponentCharacter.attaque = attaque;
     }
 
     //
     // 4. handleDefense
     //
     function handleDefense(character, opponent, isPlayer) {
+
+
+      const logColor = 'white';
       if (character.defense_droit === 0) {
         if (character.spe >= 0.1) {
           character.spe -= 0.1;
           character.defense_bouton = 1;
           character.defense_droit = 4;
-          addCombatLog(`${character.name} se défend contre la prochaine attaque de ${opponent.name}.`, "#6699CC");
+          specialLogMessage = `${character.name} se defend contre la prochaine attaque de ${opponent.name}.`;
+          addCombatLog(specialLogMessage, logColor, isPlayer);
           if (isPlayer) {
-            character.defense_partie += 1;
             character.last_action = 1;
+            character.defense_partie += 1;
             opponentTurn();
           }
         } else {
-          addCombatLog(`${character.name} n'a pas assez d'énergie spéciale pour se défendre !`, "#6699CC");
-          handleAttack(character, opponent, true);
+          specialLogMessage = `${character.name} n'a pas assez d'énergie spéciale pour se défendre !`;
+          addCombatLog(specialLogMessage, logColor, isPlayer);
+          handleAttack(character, opponent, true)
         }
-      } else {
-        addCombatLog(`${character.name} ne peut pas se défendre avant dans ${character.defense_droit} tours.`, "#6699CC");
-        if (isPlayer) handleAttack(character, opponent, true);
-      }
 
-      updateSpecialBar(playerCharacter, "player-special-bar");
-      updateSpecialBar(opponentCharacter, "opponent-special-bar");
+      } else if (isPlayer) {
+        specialLogMessage = `${character.name} ne peut pas se défendre avant dans ${character.defense_droit} tours.`;
+        addCombatLog(specialLogMessage, logColor, isPlayer);
+        handleAttack(character, opponent, true)
+      } else if (!isPlayer) {
+        specialLogMessage = `${character.name} ne peut pas se défendre avant dans ${character.defense_droit} tours.`;
+        addCombatLog(specialLogMessage, logColor, isPlayer);
+      }
+      updateSpecialBar(playerCharacter, 'player-special-bar');
+      updateSpecialBar(opponentCharacter, 'opponent-special-bar');
       updateUI();
     }
 
@@ -1394,12 +1755,34 @@
     //
     function handleAttack(attacker, defender, isPlayerAttacking) {
       // Gestion de l'augmentation du spe selon le personnage
+      let gainSpe;
+      console.log(opponentCharacter.isDefending)
+      const isPlayer = isPlayerAttacking;
+      const logColor = 'white';
       if (["Doudou", "Diva", "Cocobi"].includes(attacker.name)) {
         attacker.spe += 0.20;
-        if (attacker.chargement2) attacker.spe -= 0.10;
+        gainSpe = 0.20;
+        if (attacker.chargement2) {
+          attacker.spe -= 0.10;
+          gainSpe = 0.10
+        }
+        if (!isPlayer && attacker.isDefending) {
+          console.log("L'adversaire se défend, il perd plus de spe");
+          attacker.spe -= gainSpe;
+          attacker.isDefending = false;
+        }
       } else {
         attacker.spe += 0.25;
-        if (attacker.chargement2) attacker.spe -= 0.125;
+        gainSpe = 0.25;
+        if (attacker.chargement2) {
+          attacker.spe -= 0.125;
+          gainSpe = 0.125;
+        }
+        if (!isPlayer && attacker.isDefending) {
+          console.log("l'adversaire se défend, il perd plus de spe");
+          attacker.spe -= gainSpe;
+          attacker.isDefending = false;
+        }
       }
       if (isPlayerAttacking) {
         specialAbility = attacker.spe;
@@ -1410,19 +1793,15 @@
       }
       if (attacker.spe >= 1) attacker.spe = 1;
 
-      const logColor = "#CC3333"; // couleur rouge brique pour l'attaque
-      let damage;
-      const combatLog = document.getElementById("combat-log");
-
       // Cas où l'attaquant est immobilisé
       if (attacker.immobilisation > 0) {
         damage = 0;
-        addCombatLog(`${defender.name} a immobilisé ${attacker.name} ! Il ne peut donc pas attaquer.`, logColor);
-      }
-      // Cas où le défenseur utilise sa cape
-      else if (defender.cape) {
+        specialLogMessage = `${defender.name} à immobilisé ${attacker.name} ! il ne peut donc pas attaquer.`;
+        addCombatLog(specialLogMessage, logColor, isPlayer);
+      } else if (defender.cape) {
         damage = 0;
-        addCombatLog(`${defender.name} a utilisé une cape de l'ombre, ${attacker.name} ne l'a donc pas atteint !`, logColor);
+        specialLogMessage = `${defender.name} à utilisé une cape de l'ombre, ${attacker.name} ne l'as donc pas atteint !`;
+        addCombatLog(specialLogMessage, logColor, isPlayer);
       }
       else {
         // Calcul de la défense modifiée (entre 90% et 1.1 fois la défense)
@@ -1443,12 +1822,13 @@
 
         // Affichage du message d'attaque
         if (isPlayerAttacking) {
-          addCombatLog(`Vous attaquez et infligez ${damage} points de dégâts à ${defender.name}.`, logColor);
-          document.getElementById("opponent-pv").textContent = `PV: ${defender.pv}`;
+          specialLogMessage = `Vous attaquez et infligez ${damage} points de dégâts à ${defender.name}.`;
+          document.getElementById('opponent-pv').textContent = `PV: ${opponentCharacter.pv}`;
         } else {
-          addCombatLog(`${attacker.name} attaque et inflige ${damage} points de dégâts.`, logColor);
-          document.getElementById("player-pv").textContent = `PV: ${defender.pv}`;
+          specialLogMessage = `${attacker.name} attaque et inflige ${damage} points de dégâts.`;
+          document.getElementById('player-pv').textContent = `PV: ${playerCharacter.pv}`;
         }
+        addCombatLog(specialLogMessage, logColor, isPlayer);
 
         if (isPlayerAttacking) {
           playerCharacter.degats_partie += damage;
@@ -1521,16 +1901,20 @@
 
         // Affichage du résultat de la défaite ou de la victoire
         if (isPlayerAttacking) {
-          combatLog.innerHTML += `<p>${defender.name} a été vaincu !</p>`;
+          specialLogMessage = `${defender.name} a été vaincu !`;
+          addCombatLog(specialLogMessage, logColor, "milieu");
           userData.gagnant = attacker.name;
           userData.fin_xp = gain_XP;
           userData.fin_argent = gain_argent;
+          saveUserData(userData);
         } else {
-          combatLog.innerHTML += `<p>${attacker.name} vous a vaincu !</p>`;
+          specialLogMessage = `${attacker.name} vous a vaincu !`;
+          addCombatLog(specialLogMessage, logColor, "milieu");
           userData.gagnant = attacker.name;
           userData.fin_xp = gain_XP;
           userData.fin_argent = gain_argent;
           userData.fin_trophee = -perteTrophees;
+          saveUserData(userData);
         }
         saveUserData(userData);
 
@@ -1613,10 +1997,10 @@
 
         // Fin de partie après 2 secondes
         setTimeout(() => {
-          localStorage.removeItem("historicalData_weekend");
+          localStorage.removeItem("savepartie_weekend");
           sessionStorage.removeItem("playerCharacter");
           sessionStorage.removeItem("opponentCharacter");
-          window.location.href = "fin_partie.html";
+          window.location.href = "fin_partie_weekend.html";
         }, 2000);
       } else if (isPlayerAttacking) {
         // Si le défenseur n'est pas vaincu, on passe au tour adverse
@@ -1732,7 +2116,8 @@
           points2: playerCharacter.points2,
           xp2: playerCharacter.xp2,
           noobject: playerCharacter.noobject,
-          
+          tourTT: playerCharacter.tourTT,
+
         },
         opponentCharacter: {
           name: opponentCharacter.name,
@@ -1757,14 +2142,15 @@
           next_choice: opponentCharacter.next_choice || "0",
           chargement2: opponentCharacter.chargement2,
           nodefense: opponentCharacter.nodefense,
+          isDefending: opponentCharacter.isDefending || false,
         }
       };
 
       localStorage.setItem("savepartie_weekend", JSON.stringify(sauvegarde));
     }
 
-    
-    userData.partie_commencee = true;
+
+    userData.partie_commencee_weekend = true;
     saveUserData(userData);
 
   </script>

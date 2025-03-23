@@ -2,11 +2,12 @@
 <html lang="fr">
 
 <head>
+  <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Boutique de Jeux</title>
+  <title>Willy0's Parallel Arena</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -377,12 +378,12 @@
   <div class="header">
     <div class="balance" id="balance">Solde : 0</div>
     <input type="text" id="search-bar" placeholder="Rechercher un objet" class="search-bar">
-    <div id="search-results" class="search-results"></div> <!-- Conteneur pour les résultats -->
+    <div id="search-results" class="search-results"></div>
   </div>
   <div class="scroll-container">
     <div class="content">
       <h1>Bienvenue dans la Boutique de Jeux</h1>
-      <h2>Offres Journalières</h2>
+      <h2 id="dailyoffers">Offres Journalières</h2>
       <div id="daily-timer" class="timer"></div>
       <div class="category-wrapper">
         <div class="category" id="category-daily">
@@ -391,14 +392,14 @@
       </div>
 
       <!-- Catégorie XP -->
-      <h2>Catégorie XP</h2>
+      <h2 id="xptitle">Catégorie XP</h2>
       <div class="category-wrapper">
         <div class="category" id="category-xp">
           <div class="bonus-item" id="xp-2">
             <img src="XP_2.png" alt="Double XP Bonus">
             <h2>Double XP</h2>
             <p>Profitez du double XP lors de vos combats !</p>
-            <p>En stock : <span id="stock-xp"></span></p>
+            <p><span class="stock-label"></span><span id="stock-xp"></span></p>
             <select class="quantity-select">
               <option value="1">1 (15 points)</option>
               <option value="3">3 (41 points)</option>
@@ -411,14 +412,14 @@
       </div>
 
       <!-- Catégorie Soins -->
-      <h2>Catégorie Soins</h2>
+      <h2 id="soinstitle">Catégorie Soins</h2>
       <div class="category-wrapper">
         <div class="category" id="category-soins">
           <div class="bonus-item" id="potion">
             <img src="Potion-1.png" alt="Potion de Santé">
             <h2>Potion de Santé</h2>
             <p>Augmente les PV du joueur de 1100.</p>
-            <p>En stock : <span id="stock-potion"></span></p>
+            <p><span class="stock-label"></span><span id="stock-potion"></span></p>
             <select class="quantity-select">
               <option value="1">1 (10 points)</option>
               <option value="3">3 (28 points)</option>
@@ -431,7 +432,7 @@
             <img src="Amulette-1.png" alt="Amulette de Régénération">
             <h2>Amulette de Régénération</h2>
             <p>Régénère 2% des PV max par tour.</p>
-            <p>En stock : <span id="stock-amulette"></span></p>
+            <p><span class="stock-label"></span><span id="stock-amulette"></span></p>
             <select class="quantity-select">
               <option value="1">1 (28 points)</option>
               <option value="3">3 (77 points)</option>
@@ -444,14 +445,14 @@
       </div>
 
       <!-- Catégorie Attaque -->
-      <h2>Catégorie Attaque</h2>
+      <h2 id="attaquetitle">Catégorie Attaque</h2>
       <div class="category-wrapper">
         <div class="category" id="category-attaque">
           <div class="bonus-item" id="epee">
             <img src="epee-1.png" alt="Épée Tranchante">
             <h2>Épée Tranchante</h2>
             <p>Augmente l'attaque du joueur de 5%.</p>
-            <p>En stock : <span id="stock-epee"></span></p>
+            <p><span class="stock-label"></span><span id="stock-epee"></span></p>
             <select class="quantity-select">
               <option value="1">1 (15 points)</option>
               <option value="3">3 (41 points)</option>
@@ -464,7 +465,7 @@
             <img src="elixir-1.png" alt="Élixir de Puissance">
             <h2>Élixir de Puissance</h2>
             <p>Augmente l'attaque de 50 points.</p>
-            <p>En stock : <span id="stock-elixir"></span></p>
+            <p><span class="stock-label"></span><span id="stock-elixir"></span></p>
             <select class="quantity-select">
               <option value="1">1 (20 points)</option>
               <option value="3">3 (55 points)</option>
@@ -474,19 +475,17 @@
             <p class="error-message"></p>
           </div>
         </div>
-
-
       </div>
 
       <!-- Catégorie Défense -->
-      <h2>Catégorie Défense</h2>
+      <h2 id="defensetitle">Catégorie Défense</h2>
       <div class="category-wrapper">
         <div class="category" id="category-defense">
           <div class="bonus-item" id="bouclier">
             <img src="bouclier.png" alt="Bouclier solide">
             <h2>Bouclier solide</h2>
             <p>Augmente la défense de 15 points.</p>
-            <p>En stock: <span id="stock-bouclier"></span></p>
+            <p><span class="stock-label"></span><span id="stock-bouclier"></span></p>
             <select class="quantity-select">
               <option value="1">1 (13 points)</option>
               <option value="3">3 (36 points)</option>
@@ -500,7 +499,7 @@
             <img src="Cape_de_l'ombre.png" alt="Cape de l'ombre">
             <h2>Cape de l'ombre</h2>
             <p>Ignore les dégâts subit par la prochaine attaque directe de l'adversaire.</p>
-            <p>En stock : <span id="stock-cape"></span></p>
+            <p><span class="stock-label"></span><span id="stock-cape"></span></p>
             <select class="quantity-select">
               <option value="1">1 (55 points)</option>
               <option value="3">3 (152 points)</option>
@@ -513,14 +512,14 @@
       </div>
 
       <!-- Catégorie Autre -->
-      <h2>Catégorie Autre</h2>
+      <h2 id="autretitle">Catégorie Autre</h2>
       <div class="category-wrapper">
         <div class="category" id="category-autre">
           <div class="bonus-item" id="armure">
             <img src="armure-1.png" alt="Armure de Fer">
             <h2>Armure de Fer</h2>
             <p>Réduit les dégâts reçus de 10%.</p>
-            <p>En stock : <span id="stock-armure"></span></p>
+            <p><span class="stock-label"></span><span id="stock-armure"></span></p>
             <select class="quantity-select">
               <option value="1">1 (22 points)</option>
               <option value="3">3 (61 points)</option>
@@ -534,7 +533,7 @@
             <img src="Crystale.png" alt="Crystal de renouveau">
             <h2>Crystal de renouveau</h2>
             <p>Recharge instantanément 0.8 points de la capacité spéciale.</p>
-            <p>En stock : <span id="stock-crystal"></span></p>
+            <p><span class="stock-label"></span><span id="stock-crystal"></span></p>
             <select class="quantity-select">
               <option value="1">1 (50 points)</option>
               <option value="3">3 (138 points)</option>
@@ -546,8 +545,7 @@
         </div>
       </div>
 
-    <div class="footer">
-
+      <div class="footer">
         <button class="footer-icon perso-icon" onclick="viewCharacters()" id="perso-icon">
           <img src="Characters.svg" alt="Personnages">
         </button>
@@ -561,480 +559,505 @@
           <img src="Shop.svg" alt="Boutique">
         </button>
       </div>
-
     </div>
-    <script>
+  </div>
 
-      // Configuration Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-        authDomain: "willy0s-parallel-arena.firebaseapp.com",
-        databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-        projectId: "willy0s-parallel-arena",
-        storageBucket: "willy0s-parallel-arena.appspot.com",
-        messagingSenderId: "683284732830",
-        appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-        measurementId: "G-85B8R4NKNM"
-      };
+  <script>
+    /* ===================== CONFIGURATION FIREBASE ===================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+      authDomain: "willy0s-parallel-arena.firebaseapp.com",
+      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
+      projectId: "willy0s-parallel-arena",
+      storageBucket: "willy0s-parallel-arena.appspot.com",
+      messagingSenderId: "683284732830",
+      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
+      measurementId: "G-85B8R4NKNM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const perf = firebase.performance();
 
-      // Initialisation de Firebase
-      const app = firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const database = firebase.database();
-      const perf = firebase.performance();
-      if ('PerformanceObserver' in window) {
-        // Créer un observateur pour les entrées de type "paint" (pour FCP)
-        const paintObserver = new PerformanceObserver((list) => {
-          const entries = list.getEntriesByName('first-contentful-paint');
-          if (entries.length > 0) {
-            const fcp = entries[0].startTime;
-            console.log('First Contentful Paint (FCP):', fcp, 'ms');
-          }
-        });
+    function viewCharacters() {
+      window.location.href = "perso_stats.html";
+    }
+    function goToPasse() {
+      window.location.href = "passe_de_combat.html";
+    }
+    function showMainMenu() {
+      window.location.href = "menu_principal.html";
+    }
 
-        // Observer les événements de type "paint"
-        paintObserver.observe({type: 'paint', buffered: true});
+    /* ===================== CONFIGURATION DE LA LANGUE ===================== */
+    // On fixe la langue en français
+    let lang = 'fr';
+    document.documentElement.lang = lang;
 
-        // Créer un observateur pour les entrées de type "first-input" (pour FID)
-        const fidObserver = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          entries.forEach((entry) => {
-            if (entry.entryType === 'first-input') {
-              const fid = entry.processingStart - entry.startTime;
-              console.log('First Input Delay (FID):', fid, 'ms');
-            }
-          });
-        });
-
-        // Observer les événements de type "first-input"
-        fidObserver.observe({type: 'first-input', buffered: true});
+    // Dictionnaire de traductions pour la page Boutique (uniquement en français)
+    const translations = {
+      fr: {
+        balance: "Solde : ",
+        searchPlaceholder: "Rechercher un objet",
+        mainTitle: "Bienvenue dans la Boutique de Jeux",
+        dailyOffersTitle: "Offres Journalières",
+        xptitle: "Catégorie XP",
+        soinstitle: "Catégorie Soins",
+        attaquetitle: "Catégorie Attaque",
+        defensetitle: "Catégorie Défense",
+        autretitle: "Catégorie Autre",
+        insufficientBalance: "Solde insuffisant !",
+        buy: "Acheter",
+        dailyFreeRewardTitle: "Récompense Gratuite",
+        dailyFreeRewardDescription: "Profitez d'une récompense gratuite aujourd'hui !",
+        dailyFreeRewardPrice: "Prix : 0 Points",
+        dailyClaim: "Réclamer",
+        dailyFreeRewardClaimed: "Déjà pris",
+        offerNormalPrice: "Prix normal : ",
+        offerDiscountedPrice: "Prix réduit : ",
+        footerPersoAlt: "Personnages",
+        footerMenuAlt: "Menu Principal",
+        footerPassAlt: "Passe de combat",
+        footerShopAlt: "Boutique",
+        points: "points",
+        dailyoffers: "Offres Journalières",
+        stock: "En stock : "
       }
+    };
 
-      // Référence à l'état de maintenance dans la base de données
-      const maintenanceRef = firebase.database().ref('maintenance');
+    // Dictionnaire de traductions pour les bonus (uniquement en français)
+    const bonusTranslations = {
+      xp_2: {
+        alt: {fr: "Double XP Bonus"},
+        title: {fr: "Double XP"},
+        description: {fr: "Profitez du double XP lors de vos combats !"}
+      },
+      potion: {
+        alt: {fr: "Potion de Santé"},
+        title: {fr: "Potion de Santé"},
+        description: {fr: "Augmente les PV du joueur de 1100."}
+      },
+      amulette: {
+        alt: {fr: "Amulette de Régénération"},
+        title: {fr: "Amulette de Régénération"},
+        description: {fr: "Régénère 2% des PV max par tour."}
+      },
+      epee: {
+        alt: {fr: "Épée Tranchante"},
+        title: {fr: "Épée Tranchante"},
+        description: {fr: "Augmente l'attaque du joueur de 5%."}
+      },
+      elixir: {
+        alt: {fr: "Élixir de Puissance"},
+        title: {fr: "Élixir de Puissance"},
+        description: {fr: "Augmente l'attaque de 50 points."}
+      },
+      bouclier: {
+        alt: {fr: "Bouclier solide"},
+        title: {fr: "Bouclier solide"},
+        description: {fr: "Augmente la défense de 15 points."}
+      },
+      cape: {
+        alt: {fr: "Cape de l'ombre"},
+        title: {fr: "Cape de l'ombre"},
+        description: {fr: "Ignore les dégâts subit par la prochaine attaque directe de l'adversaire."}
+      },
+      armure: {
+        alt: {fr: "Armure de Fer"},
+        title: {fr: "Armure de Fer"},
+        description: {fr: "Réduit les dégâts reçus de 10%."}
+      },
+      crystal: {
+        alt: {fr: "Crystal de renouveau"},
+        title: {fr: "Crystal de renouveau"},
+        description: {fr: "Recharge instantanément 0.8 points de la capacité spéciale."}
+      }
+    };
 
-      // Écoute des changements de l'état de maintenance
-      maintenanceRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        const maintenanceActive = data.active === 'oui';
-        const maintenanceTime = data.heure;
+    // À placer après la mise à jour des textes statiques (par exemple, juste après updateStaticOptions())
+    document.querySelectorAll('.stock-label').forEach(el => {
+      el.textContent = translations[lang].stock;
+    });
 
-        if (maintenanceActive && maintenanceTime) {
-          const [maintenanceHour, maintenanceMinute] = maintenanceTime.split(':').map(Number);
-          const currentTime = new Date();
-          const currentHour = currentTime.getHours();
-          const currentMinute = currentTime.getMinutes();
-
-          // Vérifier si l'heure de maintenance est plus tard que l'heure actuelle
-          if (maintenanceHour > currentHour || (maintenanceHour === currentHour && maintenanceMinute > currentMinute)) {
-            window.location.href = 'maintenance.html';
-          }
+    /* ===================== MISE À JOUR DES TEXTES STATIQUES ===================== */
+    // Mise à jour de la barre de solde et du placeholder de la barre de recherche
+    document.getElementById('balance').textContent = translations[lang].balance + (JSON.parse(localStorage.getItem('userData'))?.argent || 0);
+    document.getElementById('search-bar').placeholder = translations[lang].searchPlaceholder;
+    document.getElementById('dailyoffers').textContent = translations[lang].dailyoffers;
+    // Mise à jour du titre principal et des catégories (h1 et h2)
+    const content = document.querySelector('.content');
+    if (content) {
+      content.querySelector('h1').textContent = translations[lang].mainTitle;
+      document.getElementById('xptitle').textContent = translations[lang].xptitle;
+      document.getElementById('soinstitle').textContent = translations[lang].soinstitle;
+      document.getElementById('attaquetitle').textContent = translations[lang].attaquetitle;
+      document.getElementById('defensetitle').textContent = translations[lang].defensetitle;
+      document.getElementById('autretitle').textContent = translations[lang].autretitle;
+    }
+    // Mise à jour des bonus statiques par catégorie
+    function updateBonusText(id, bonusKey) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.querySelector('img').alt = bonusTranslations[bonusKey].alt[lang];
+        el.querySelector('h2').textContent = bonusTranslations[bonusKey].title[lang];
+        const ps = el.querySelectorAll('p');
+        if (ps.length > 0) {
+          ps[0].textContent = bonusTranslations[bonusKey].description[lang];
         }
+      }
+    }
+    updateBonusText('xp-2', 'xp_2');
+    updateBonusText('potion', 'potion');
+    updateBonusText('amulette', 'amulette');
+    updateBonusText('epee', 'epee');
+    updateBonusText('elixir', 'elixir');
+    updateBonusText('bouclier', 'bouclier');
+    updateBonusText('cape', 'cape');
+    updateBonusText('armure', 'armure');
+    updateBonusText('crystal', 'crystal');
+
+    // Mise à jour des alt des icônes du footer
+    const footerImgs = document.querySelectorAll('.footer img');
+    if (footerImgs.length >= 4) {
+      footerImgs[0].alt = translations[lang].footerPersoAlt;
+      footerImgs[1].alt = translations[lang].footerMenuAlt;
+      footerImgs[2].alt = translations[lang].footerPassAlt;
+      footerImgs[3].alt = translations[lang].footerShopAlt;
+    }
+
+    // MISE À JOUR DES BOUTONS "ACHETER" STATIQUES
+    function updateStaticBuyButtons() {
+      document.querySelectorAll('.bonus-item .buyButton').forEach(button => {
+        button.textContent = translations[lang].buy;
       });
-      function goToPasse() {
-        window.location.href = 'passe_de_combat.html';
-      }
-      function viewCharacters() {
-        window.location.href = "perso_stats.html";
-      }
-
-      function viewShop() {
-        window.location.href = "boutique.html";
-      }
-
-      function viewUpgrades() {
-        window.location.href = "amelioration.html";
-      }
-
-      function showMainMenu() {
-        window.location.href = "menu_principal.html";
-      }
-
-      const searchBar = document.getElementById('search-bar');
-      const items = document.querySelectorAll('.bonus-item');
-      const searchResults = document.getElementById('search-results');
-
-      function normalizeString(str) {
-        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); // Enlève les accents et met en minuscule
-      }
-
-      function isSimilar(str1, str2) {
-        let diffCount = 0;
-        const maxLen = Math.max(str1.length, str2.length);
-        const minLen = Math.min(str1.length, str2.length);
-
-        // Compte le nombre de différences entre les deux chaînes
-        for (let i = 0; i < minLen; i++) {
-          if (str1[i] !== str2[i]) {
-            diffCount++;
-            if (diffCount > 2) return false; // Si plus d'une différence, retourne false
-          }
-        }
-
-        return diffCount <= 2 || (maxLen - minLen <= 1); // Si une différence ou une lettre ajoutée/enlevée
-      }
-
-      function similarityScore(query, itemName) {
-        const normalizedQuery = normalizeString(query);
-        const normalizedItemName = normalizeString(itemName);
-
-        // Si la chaîne d'item commence par la requête, donner un score élevé
-        if (normalizedItemName.startsWith(normalizedQuery)) {
-          return 3; // Score élevé pour correspondance parfaite au début
-        }
-
-        // Si la chaîne d'item contient la requête, donner un score moyen
-        if (normalizedItemName.includes(normalizedQuery)) {
-          return 2; // Score moyen pour correspondance partielle
-        }
-
-        // Vérifier la similarité d'une lettre
-        if (isSimilar(normalizedItemName, normalizedQuery)) {
-          return 1; // Score faible pour similarité d'une lettre
-        }
-
-        return 0; // Aucune correspondance
-      }
-
-      // Écouteur d'événement pour la barre de recherche
-      searchBar.addEventListener('input', function () {
-        const query = searchBar.value; // Garder la chaîne originale pour l'affichage
-        searchResults.innerHTML = ''; // Vider les résultats précédents
-
-        if (query) {
-          const results = [];
-
-          items.forEach(item => {
-            const itemName = item.querySelector('h2').textContent; // Nom de l'élément
-
-            const score = similarityScore(query, itemName); // Évaluer la similarité
-            if (score > 0) {
-              results.push({element: item, score}); // Ajouter à la liste avec le score
-            }
-          });
-
-          // Trier les résultats par score décroissant
-          results.sort((a, b) => b.score - a.score);
-
-          // Afficher les résultats triés
-          results.forEach(result => {
-            const resultDiv = document.createElement('div');
-            resultDiv.textContent = result.element.querySelector('h2').textContent; // Afficher le nom de l'élément original
-
-            // Récupérer l'ID de l'élément correspondant
-            const itemId = result.element.id;
-
-            resultDiv.onclick = function () {
-              const targetItem = document.getElementById(itemId);
-              if (targetItem) {
-                // Faire défiler la page jusqu'à l'élément
-                targetItem.scrollIntoView({behavior: 'smooth', block: 'center'});
-              }
-              searchBar.value = ''; // Réinitialiser la barre de recherche
-              searchResults.innerHTML = ''; // Vider les résultats
-            };
-
-            searchResults.appendChild(resultDiv); // Ajouter à la liste des résultats
-          });
-        }
+    }
+    // MISE À JOUR DES OPTIONS DES SELECT (traduction du mot "points")
+    function updateStaticOptions() {
+      document.querySelectorAll('.quantity-select option').forEach(option => {
+        option.textContent = option.textContent.replace(/points/gi, translations[lang].points);
       });
+    }
+    updateStaticBuyButtons();
+    updateStaticOptions();
 
-      // Fonction pour mettre à jour le minuteur
-      function updateDailyTimer() {
-        const now = new Date();
-        const resetHour = 9; // Heure à laquelle les offres journalières changent (0h)
-        const nextReset = new Date();
-        nextReset.setHours(resetHour, 0, 0, 0); // 00:00:00 de demain
-
-        if (now > nextReset) {
-          nextReset.setDate(nextReset.getDate() + 1); // Passer au jour suivant
-        }
-
-        const timeLeft = nextReset - now; // Temps restant en millisecondes
-
-        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-        document.getElementById('daily-timer').textContent = `- ${hours}h ${minutes}m ${seconds}s`;
-
-        // Mettre à jour le minuteur toutes les secondes
-        setTimeout(updateDailyTimer, 1000);
-      }
-
-      // Initialiser le minuteur au chargement
-      updateDailyTimer();
-      function getUserData() {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        if (userData && userData.theme) {
-          document.body.classList.add('dark-theme');
-        }
-        return userData
-      }
-
-      // Fonction pour sauvegarder les données utilisateur dans le stockage local
-      function saveUserData(userData) {
-        const connection = JSON.parse(localStorage.getItem('connection')); // Récupère l'état de connexion
-        localStorage.setItem('userData', JSON.stringify(userData)); // Sauvegarde locale
-
-        if (connection && connection.est_connecte) { // Vérifie si l'utilisateur est connecté
-          const userId = connection.userid;
-          const userRef = database.ref(`users/${userId}/userData`);
-          userRef.set(userData, (error) => {
-            if (error) {
-              console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
-            } else {
-              console.log('Données utilisateur sauvegardées dans Firebase');
-            }
-          });
-        }
-      }
-
-      // Fonction pour générer un nombre entier aléatoire
-      function getRandomInt(max) {
-        return Math.floor(Math.random() * max);
-      }
-
-      // Fonction pour appliquer une réduction sur le prix
-      function applyDiscount(price) {
-        return Math.round(price * 0.8); // Appliquer une réduction de 20%
-      }
-
-      // Fonction pour générer les offres journalières
-      function generateDailyOffers() {
-        const today = new Date().toDateString();
-        let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
-
-        if (dailyOffers.date === today) {
-          // Les offres journalières ont déjà été générées pour aujourd'hui
-          return dailyOffers;
-        }
-
-        // Générer de nouvelles offres journalières
-        const dailyCategory = document.getElementById('category-daily');
-        dailyCategory.innerHTML = ''; // Clear previous offers
-
-        const rewardItem = document.createElement('div');
-        rewardItem.classList.add('bonus-item');
-        rewardItem.innerHTML = `
-              <img src="recompense.png" alt="Récompense gratuite">
-              <h2>Récompense Gratuite</h2>
-              <p>Profitez d'une récompense gratuite aujourd'hui !</p>
-              <p>Prix : 0 Points</p>
-              <button class="claimButton">Réclamer</button>
-              <p class="error-message"></p>
-          `;
-        dailyCategory.appendChild(rewardItem);
-
-        const items = [
-          {img: "XP_2.png", title: "Double XP x3", description: "Profitez du double XP lors de vos 3 prochains combats !", price: 30, type: "xp", quantity: 3},
-          {img: "XP_2.png", title: "Double XP MAX", description: "Obtenez le double XP pour les 5 prochains combats !", price: 45, type: "xp", quantity: 5},
-          {img: "Potion-1.png", title: "Potion de Santé x1", description: "Augmente les PV du joueur de 1100.", price: 20, type: "potion", quantity: 1},
-          {img: "Potion-1.png", title: "Potion de Santé x3", description: "Augmente les PV du joueur de 1100.", price: 54, type: "potion", quantity: 3},
-          {img: "Potion-1.png", title: "Potion de Santé x5", description: "Augmente les PV du joueur de 1100.", price: 80, type: "potion", quantity: 5},
-          {img: "Amulette-1.png", title: "Amulette de Régénération x1", description: "Régénère 2% des PV max par tour.", price: 56, type: "amulette", quantity: 1},
-          {img: "Amulette-1.png", title: "Amulette de Régénération x3", description: "Régénère 2% des PV max par tour.", price: 162, type: "amulette", quantity: 3},
-          {img: "Amulette-1.png", title: "Amulette de Régénération x5", description: "Régénère 2% des PV max par tour.", price: 230, type: "amulette", quantity: 5},
-          {img: "epee-1.png", title: "Épée Tranchante x1", description: "Augmente l'attaque du joueur de 5%.", price: 15, type: "epee", quantity: 1},
-          {img: "epee-1.png", title: "Épée Tranchante x3", description: "Augmente l'attaque du joueur de 5%.", price: 42, type: "epee", quantity: 3},
-          {img: "epee-1.png", title: "Épée Tranchante x5", description: "Augmente l'attaque du joueur de 5%.", price: 65, type: "epee", quantity: 5},
-          {img: "elixir-1.png", title: "Élixir de Puissance x1", description: "Augmente l'attaque de 50 points.", price: 20, type: "elixir", quantity: 1},
-          {img: "elixir-1.png", title: "Élixir de Puissance x3", description: "Augmente l'attaque de 50 points.", price: 57, type: "elixir", quantity: 3},
-          {img: "elixir-1.png", title: "Élixir de Puissance x5", description: "Augmente l'attaque de 50 points.", price: 80, type: "elixir", quantity: 5},
-          {img: "armure-1.png", title: "Réduit les dégâts reçus de 10%.", price: 22, type: "armure", quantity: 1},
-          {img: "armure-1.png", title: "Armure de Fer x3", price: 63, description: "Réduit les dégâts reçus de 10%.", type: "armure", quantity: 3},
-          {img: "bouclier.png", title: "Bouclier solide x1", price: 13, description: "Augmente la défense de 15 points.", type: "bouclier", quantity: 1},
-          {img: "bouclier.png", title: "Bouclier solide x3", price: 36, description: "Augmente la défense de 15 points.", type: "bouclier", quantity: 3},
-          {img: "bouclier.png", title: "Bouclier solide x5", price: 55, description: "Augmente la défense de 15 points.", type: "bouclier", quantity: 5},
-          {img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x1", price: 55, description: "Ignore les dégâts subit par la prochaine attaque directe de l'adversaire.", type: "cape", quantity: 1},
-          {img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x3", price: 152, description: "Ignore les dégâts subit par la prochaine attaque directe de l'adversaire.", type: "cape", quantity: 3},
-          {img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x5", price: 239, description: "Ignore les dégâts subit par la prochaine attaque directe de l'adversaire.", type: "cape", quantity: 5},
-          {img: "Crystale.png", title: "Crystale de renouveau x1", price: 50, description: "Recharge instantanément 0.8 points de la capacité spéciale.", type: "crystale", quantity: 1},
-          {img: "Crystale.png", title: "Crystale de renouveau x3", price: 138, description: "Recharge instantanément 0.8 points de la capacité spéciale.", type: "crystale", quantity: 3},
-          {img: "Crystale.png", title: "Crystale de renouveau x5", price: 218, description: "Recharge instantanément 0.8 points de la capacité spéciale.", type: "crystale", quantity: 5},];
-
-        const randomIndex = getRandomInt(items.length);
-        const item = items[randomIndex];
-        items.splice(randomIndex, 1);
-
-        const discountedPrice = applyDiscount(item.price);
-
-        const offerItem = document.createElement('div');
-        offerItem.classList.add('bonus-item');
-        offerItem.innerHTML = `
-              <img src="${item.img}" alt="${item.title}">
-              <h2>${item.title}</h2>
-              <p>${item.description}</p>
-              <p>Prix normal : ${item.price} Points</p>
-              <p>Prix réduit : ${discountedPrice} Points</p>
-              <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
-              <p class="error-message"></p>
-          `;
-        dailyCategory.appendChild(offerItem);
-
-        dailyOffers = {date: today, item: {img: item.img, title: item.title, description: item.description, price: item.price, discountedPrice, type: item.type, quantity: item.quantity}};
-        localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
-        saveUserData(userData);
-
+    /* ===================== FONCTIONS D'OFFRES JOURNALIÈRES ===================== */
+    function applyDiscount(price) {
+      return Math.round(price * 0.8); // Réduction de 20%
+    }
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * max);
+    }
+    function generateDailyOffers() {
+      const today = new Date().toDateString();
+      let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
+      const dailyCategory = document.getElementById('category-daily');
+      if (dailyOffers.date === today) {
         return dailyOffers;
       }
+      // Efface les anciennes offres
+      dailyCategory.innerHTML = '';
+      // Ajoute la récompense gratuite
+      const rewardItem = document.createElement('div');
+      rewardItem.classList.add('bonus-item');
+      rewardItem.innerHTML = `
+          <img src="recompense.png" alt="${translations[lang].dailyFreeRewardTitle}">
+          <h2>${translations[lang].dailyFreeRewardTitle}</h2>
+          <p>${translations[lang].dailyFreeRewardDescription}</p>
+          <p>${translations[lang].dailyFreeRewardPrice}</p>
+          <button class="claimButton">${translations[lang].dailyClaim}</button>
+          <p class="error-message"></p>
+        `;
+      dailyCategory.appendChild(rewardItem);
 
-      // Fonction pour afficher les offres journalières
-      function displayDailyOffers() {
-        const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
-        const dailyCategory = document.getElementById('category-daily');
-        if (!dailyOffers) return;
-
-        const today = new Date().toDateString();
-        if (dailyOffers.date !== today) {
-          generateDailyOffers();
-          return;
-        }
-
-        dailyCategory.innerHTML = ''; // Clear previous offers
-
-        const rewardItem = document.createElement('div');
-        rewardItem.classList.add('bonus-item');
-        rewardItem.innerHTML = `
-              <img src="gratuite-rec.png" alt="Récompense gratuite">
-              <h2>Récompense Gratuite</h2>
-              <p>Profitez d'une récompense gratuite aujourd'hui !</p>
-              <p>Prix : 0 Points</p>
-              <button class="claimButton"${userData.boutique_recompense ? ' disabled' : ''}>${userData.boutique_recompense ? 'Déjà pris' : 'Réclamer'}</button>
-              <p class="error-message"></p>
-          `;
-        dailyCategory.appendChild(rewardItem);
-
-        const item = dailyOffers.item;
-        const offerItem = document.createElement('div');
-        offerItem.classList.add('bonus-item');
-        offerItem.innerHTML = `
-              <img src="${item.img}" alt="${item.title}">
-              <h2>${item.title}</h2>
-              <p>${item.description}</p>
-              <p>Prix normal : ${item.price} Points</p>
-              <p>Prix réduit : ${item.discountedPrice} Points</p>
-              <button class="buyButton" data-type="${item.type}" data-price="${item.discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
-              <p class="error-message"></p>
-          `;
-        dailyCategory.appendChild(offerItem);
-
-        // Mettre à jour les boutons
-        document.querySelectorAll('.claimButton').forEach(button => {
-          button.addEventListener('click', handleClaimButtonClick);
-        });
-
-        document.querySelectorAll('.buyButton').forEach(button => {
-          button.addEventListener('click', handleBuyButtonClick);
-        });
+      // Tableau d'items pour l'offre journalière
+      const items = [
+        {img: "XP_2.png", title: bonusTranslations.xp_2.title[lang] + " x1", description: bonusTranslations.xp_2.description[lang], price: 15, type: "xp", quantity: 1},
+        {img: "XP_2.png", title: bonusTranslations.xp_2.title[lang] + " x3", description: bonusTranslations.xp_2.description[lang], price: 41, type: "xp", quantity: 3},
+        {img: "XP_2.png", title: bonusTranslations.xp_2.title[lang] + " x5", description: bonusTranslations.xp_2.description[lang], price: 65, type: "xp", quantity: 5},
+        {img: "Potion-1.png", title: bonusTranslations.potion.title[lang] + " x1", description: bonusTranslations.potion.description[lang], price: 10, type: "potion", quantity: 1},
+        {img: "Potion-1.png", title: bonusTranslations.potion.title[lang] + " x3", description: bonusTranslations.potion.description[lang], price: 28, type: "potion", quantity: 3},
+        {img: "Potion-1.png", title: bonusTranslations.potion.title[lang] + " x5", description: bonusTranslations.potion.description[lang], price: 44, type: "potion", quantity: 5},
+        {img: "Amulette-1.png", title: bonusTranslations.amulette.title[lang] + " x1", description: bonusTranslations.amulette.description[lang], price: 28, type: "amulette", quantity: 1},
+        {img: "Amulette-1.png", title: bonusTranslations.amulette.title[lang] + " x3", description: bonusTranslations.amulette.description[lang], price: 77, type: "amulette", quantity: 3},
+        {img: "Amulette-1.png", title: bonusTranslations.amulette.title[lang] + " x5", description: bonusTranslations.amulette.description[lang], price: 122, type: "amulette", quantity: 5},
+        {img: "epee-1.png", title: bonusTranslations.epee.title[lang] + " x1", description: bonusTranslations.epee.description[lang], price: 15, type: "epee", quantity: 1},
+        {img: "epee-1.png", title: bonusTranslations.epee.title[lang] + " x3", description: bonusTranslations.epee.description[lang], price: 41, type: "epee", quantity: 3},
+        {img: "epee-1.png", title: bonusTranslations.epee.title[lang] + " x5", description: bonusTranslations.epee.description[lang], price: 65, type: "epee", quantity: 5},
+        {img: "elixir-1.png", title: bonusTranslations.elixir.title[lang] + " x1", description: bonusTranslations.elixir.description[lang], price: 20, type: "elixir", quantity: 1},
+        {img: "elixir-1.png", title: bonusTranslations.elixir.title[lang] + " x3", description: bonusTranslations.elixir.description[lang], price: 55, type: "elixir", quantity: 3},
+        {img: "elixir-1.png", title: bonusTranslations.elixir.title[lang] + " x5", description: bonusTranslations.elixir.description[lang], price: 87, type: "elixir", quantity: 5},
+        {img: "bouclier.png", title: bonusTranslations.bouclier.title[lang] + " x1", description: bonusTranslations.bouclier.description[lang], price: 13, type: "bouclier", quantity: 1},
+        {img: "bouclier.png", title: bonusTranslations.bouclier.title[lang] + " x3", description: bonusTranslations.bouclier.description[lang], price: 36, type: "bouclier", quantity: 3},
+        {img: "bouclier.png", title: bonusTranslations.bouclier.title[lang] + " x5", description: bonusTranslations.bouclier.description[lang], price: 57, type: "bouclier", quantity: 5},
+        {img: "Cape_de_l'ombre.png", title: bonusTranslations.cape.title[lang] + " x1", description: bonusTranslations.cape.description[lang], price: 55, type: "cape", quantity: 1},
+        {img: "Cape_de_l'ombre.png", title: bonusTranslations.cape.title[lang] + " x3", description: bonusTranslations.cape.description[lang], price: 152, type: "cape", quantity: 3},
+        {img: "Cape_de_l'ombre.png", title: bonusTranslations.cape.title[lang] + " x5", description: bonusTranslations.cape.description[lang], price: 239, type: "cape", quantity: 5}
+      ];
+      const randomIndex = getRandomInt(items.length);
+      const item = items[randomIndex];
+      items.splice(randomIndex, 1);
+      const discountedPrice = applyDiscount(item.price);
+      const offerItem = document.createElement('div');
+      offerItem.classList.add('bonus-item');
+      offerItem.innerHTML = `
+          <img src="${item.img}" alt="${item.title}">
+          <h2>${item.title}</h2>
+          <p>${item.description}</p>
+          <p>${translations[lang].offerNormalPrice}${item.price} ${translations[lang].points}</p>
+          <p>${translations[lang].offerDiscountedPrice}${discountedPrice} ${translations[lang].points}</p>
+          <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">${translations[lang].buy}</button>
+          <p class="error-message"></p>
+        `;
+      dailyCategory.appendChild(offerItem);
+      dailyOffers = {date: today, item: {img: item.img, title: item.title, description: item.description, price: item.price, discountedPrice, type: item.type, quantity: item.quantity}};
+      localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
+      saveUserData(JSON.parse(localStorage.getItem('userData')) || {});
+      return dailyOffers;
+    }
+    function displayDailyOffers() {
+      const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
+      const dailyCategory = document.getElementById('category-daily');
+      if (!dailyOffers) return;
+      const today = new Date().toDateString();
+      if (dailyOffers.date !== today) {
+        generateDailyOffers();
+        return;
       }
+      dailyCategory.innerHTML = '';
+      const rewardItem = document.createElement('div');
+      rewardItem.classList.add('bonus-item');
+      rewardItem.innerHTML = `
+          <img src="gratuite-rec.png" alt="${translations[lang].dailyFreeRewardTitle}">
+          <h2>${translations[lang].dailyFreeRewardTitle}</h2>
+          <p>${translations[lang].dailyFreeRewardDescription}</p>
+          <p>${translations[lang].dailyFreeRewardPrice}</p>
+          <button class="claimButton"${(JSON.parse(localStorage.getItem('userData')) || {}).boutique_recompense ? ' disabled' : ''}>${(JSON.parse(localStorage.getItem('userData')) || {}).boutique_recompense ? translations[lang].dailyFreeRewardClaimed : translations[lang].dailyClaim}</button>
+          <p class="error-message"></p>
+        `;
+      dailyCategory.appendChild(rewardItem);
+      const item = dailyOffers.item;
+      const offerItem = document.createElement('div');
+      offerItem.classList.add('bonus-item');
+      offerItem.innerHTML = `
+          <img src="${item.img}" alt="${item.title}">
+          <h2>${item.title}</h2>
+          <p>${item.description}</p>
+          <p>${translations[lang].offerNormalPrice}${item.price} ${translations[lang].points}</p>
+          <p>${translations[lang].offerDiscountedPrice}${item.discountedPrice} ${translations[lang].points}</p>
+          <button class="buyButton" data-type="${item.type}" data-price="${item.discountedPrice}" data-quantity="${item.quantity}">${translations[lang].buy}</button>
+          <p class="error-message"></p>
+        `;
+      dailyCategory.appendChild(offerItem);
+      document.querySelectorAll('.claimButton').forEach(button => {
+        button.addEventListener('click', handleClaimButtonClick);
+      });
+      document.querySelectorAll('.buyButton').forEach(button => {
+        button.addEventListener('click', handleBuyButtonClick);
+      });
+    }
 
-      function updateStockDisplay() {
-        document.getElementById('stock-xp').textContent = userData.Double_XP_acheté;
-        document.getElementById('stock-potion').textContent = userData.Potion_de_Santé_acheté;
-        document.getElementById('stock-amulette').textContent = userData.Amulette_de_Régénération_acheté;
-        document.getElementById('stock-epee').textContent = userData.epee_tranchante_acheté;
-        document.getElementById('stock-elixir').textContent = userData.elixir_puissance_acheté;
-        document.getElementById('stock-armure').textContent = userData.armure_fer_acheté;
-        document.getElementById('stock-bouclier').textContent = userData.bouclier_solide_acheté;
-        document.getElementById('stock-cape').textContent = userData.Cape_acheté;
-        document.getElementById('stock-crystal').textContent = userData.crystal_acheté;
-      }
-      function handleBuyButtonClick(event) {
-        const prixUnitaire = parseInt(event.target.dataset.price);
-        const type = event.target.dataset.type;
-        const errorMessage = event.target.nextElementSibling;
-
-        // Récupérer l'élément select pour la quantité
-        const quantitySelect = event.target.previousElementSibling; // Le select est juste avant le bouton
-        const quantity = parseInt(quantitySelect.value); // Obtenir la quantité sélectionnée
-
-        // Calcul du prix total avec promotions
-        let prixTotal = prixUnitaire * quantity;
-
-        // Appliquer les promotions
-        if (quantity === 3) {
-          prixTotal *= 0.92; // 8% de réduction
-        } else if (quantity === 5) {
-          prixTotal *= 0.87; // 13% de réduction
-        }
-
-        // Arrondir le prix total
-        prixTotal = Math.round(prixTotal);
-
-        if (userData.argent >= prixTotal) { // Vérifier si le solde est suffisant pour la quantité demandée
-          userData.argent -= prixTotal; // Déduire le montant total
-          // Mettre à jour les données en fonction du type d'objet
-          if (type === 'xp') {
-            userData.Double_XP_acheté += quantity;
-          } else if (type === 'potion') {
-            userData.Potion_de_Santé_acheté += quantity;
-          } else if (type === 'amulette') {
-            userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + quantity;
-          } else if (type === 'epee') {
-            userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + quantity;
-          } else if (type === 'elixir') {
-            userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + quantity;
-          } else if (type === 'armure') {
-            userData.armure_fer_acheté += quantity;
-          } else if (type === 'bouclier') {
-            userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + quantity;
-          } else if (type === 'cape') {
-            userData.Cape_acheté = (userData.Cape_acheté || 0) + quantity;
-          } else if (type === 'crystal') {
-            userData.crystal_acheté = (userData.crystal_acheté || 0) + quantity;
-          }
-
-          saveUserData(userData); // Sauvegarder les données utilisateur
-          const argent = userData.argent;
-          document.getElementById('balance').textContent = `Solde : ${argent}`; // Mettre à jour le solde
-          errorMessage.textContent = ''; // Effacer le message d'erreur
-          updateStockDisplay(); // Mettre à jour l'affichage des stocks
-        } else {
-          errorMessage.textContent = 'Solde insuffisant !'; // Message d'erreur si le solde est insuffisant
-        }
-      }
-
-      // Fonction pour gérer les clics sur le bouton de réclamation de la récompense
-      function handleClaimButtonClick(event) {
-        const button = event.target;
-        button.disabled = true; // Désactiver le bouton
-        button.textContent = 'Déjà pris'; // Changer le texte du bouton
-        button.nextElementSibling.textContent = ''; // Effacer les messages d'erreur éventuels
-
-        // Mettre à jour les données utilisateur
-        if (!userData.boutique_recompense) {
-          userData.recompense = (userData.recompense || 0) + 1;
-          userData.boutique_recompense = true;
-          saveUserData(userData);
-
-          // Rediriger vers recompenses.html
-          window.location.href = 'recompenses.html';
-        }
-
-
-      }
-
-      // Initialisation
-      const userData = getUserData();
-      saveUserData(userData);
-      generateDailyOffers();
-      displayDailyOffers();
-      argent = Math.round(userData.argent);
-      document.getElementById('balance').textContent = `Solde : ${argent}`;
+    /* ===================== AUTRES FONCTIONS ===================== */
+    function updateStockDisplay() {
+      const userData = JSON.parse(localStorage.getItem('userData')) || {};
       document.getElementById('stock-xp').textContent = userData.Double_XP_acheté;
       document.getElementById('stock-potion').textContent = userData.Potion_de_Santé_acheté;
       document.getElementById('stock-amulette').textContent = userData.Amulette_de_Régénération_acheté;
       document.getElementById('stock-epee').textContent = userData.epee_tranchante_acheté;
       document.getElementById('stock-elixir').textContent = userData.elixir_puissance_acheté;
       document.getElementById('stock-armure').textContent = userData.armure_fer_acheté;
-
       document.getElementById('stock-bouclier').textContent = userData.bouclier_solide_acheté;
       document.getElementById('stock-cape').textContent = userData.Cape_acheté;
       document.getElementById('stock-crystal').textContent = userData.crystal_acheté;
+    }
+    function handleBuyButtonClick(event) {
+      const button = event.target;
+      const type = button.dataset.type;
+      const errorMessage = button.nextElementSibling;
+      let quantity, prixTotal;
 
+      // Si un sélecteur précède le bouton, le prix affiché est unitaire
+      const previous = button.previousElementSibling;
+      if (previous && previous.tagName.toLowerCase() === 'select') {
+        quantity = parseInt(previous.value);
+        const prixUnitaire = parseInt(button.dataset.price);
+        prixTotal = prixUnitaire * quantity;
+        // Application des coefficients selon la quantité
+        if (quantity === 1) {
+          prixTotal = Math.round(prixTotal * 0.96);
+        } else if (quantity === 3) {
+          prixTotal = Math.round(prixTotal * 0.92);
+        } else if (quantity === 5) {
+          prixTotal = Math.round(prixTotal * 0.87);
+        }
+      } else {
+        // Si pas de sélecteur, c'est une offre pack où le prix affiché est déjà le prix total
+        quantity = parseInt(button.dataset.quantity) || 1;
+        prixTotal = parseInt(button.dataset.price);
+      }
 
-    </script>
+      let userData = JSON.parse(localStorage.getItem('userData')) || {};
+      if (userData.argent >= prixTotal) {
+        userData.argent -= prixTotal;
+        if (type === 'xp') {
+          userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + quantity;
+        } else if (type === 'potion') {
+          userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + quantity;
+        } else if (type === 'amulette') {
+          userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + quantity;
+        } else if (type === 'epee') {
+          userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + quantity;
+        } else if (type === 'elixir') {
+          userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + quantity;
+        } else if (type === 'armure') {
+          userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + quantity;
+        } else if (type === 'bouclier') {
+          userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + quantity;
+        } else if (type === 'cape') {
+          userData.Cape_acheté = (userData.Cape_acheté || 0) + quantity;
+        } else if (type === 'crystal') {
+          userData.crystal_acheté = (userData.crystal_acheté || 0) + quantity;
+        }
+        saveUserData(userData);
+        document.getElementById('balance').textContent = translations[lang].balance + userData.argent;
+        errorMessage.textContent = '';
+        updateStockDisplay();
+      } else {
+        errorMessage.textContent = translations[lang].insufficientBalance;
+      }
+    }
+
+    function handleClaimButtonClick(event) {
+      const button = event.target;
+      button.disabled = true;
+      button.textContent = translations[lang].dailyFreeRewardClaimed;
+      button.nextElementSibling.textContent = '';
+      let userData = JSON.parse(localStorage.getItem('userData')) || {};
+      if (!userData.boutique_recompense) {
+        userData.recompense = (userData.recompense || 0) + 1;
+        userData.boutique_recompense = true;
+        saveUserData(userData);
+        window.location.href = 'recompenses.html';
+      }
+    }
+
+    userData = JSON.parse(localStorage.getItem('userData'));
+
+    let User = false;
+    let userId = null;
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        console.log("Utilisateur authentifié avec UID :", user.uid);
+        User = true;
+        userId = user.uid;
+        saveUserData(userData);
+      } else {
+        console.log("Aucun utilisateur authentifié");
+      }
+    });
+
+    function saveUserData(userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+      if (User) {
+        const userRef = database.ref(`users/${userId}/userData`);
+        userRef.set(userData, (error) => {
+          if (error) {
+            console.error("Erreur lors de l'enregistrement dans Firebase:", error);
+          } else {
+            console.log('Données utilisateur sauvegardées dans Firebase');
+          }
+        });
+      }
+    }
+
+    /* ===================== MINUTERIE OFFRES JOURNALIÈRES ===================== */
+    function updateDailyTimer() {
+      const now = new Date();
+      const resetHour = 9;
+      const nextReset = new Date();
+      nextReset.setHours(resetHour, 0, 0, 0);
+      if (now > nextReset) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
+      const timeLeft = nextReset - now;
+      const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      document.getElementById('daily-timer').textContent = `- ${hours}h ${minutes}m ${seconds}s`;
+      setTimeout(updateDailyTimer, 1000);
+    }
+    updateDailyTimer();
+
+    /* ===================== FONCTION DE RECHERCHE ===================== */
+    const searchBar = document.getElementById('search-bar');
+    const items = document.querySelectorAll('.bonus-item');
+    const searchResults = document.getElementById('search-results');
+    function normalizeString(str) {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+    function isSimilar(str1, str2) {
+      let diffCount = 0;
+      const maxLen = Math.max(str1.length, str2.length);
+      const minLen = Math.min(str1.length, str2.length);
+      for (let i = 0; i < minLen; i++) {
+        if (str1[i] !== str2[i]) {
+          diffCount++;
+          if (diffCount > 2) return false;
+        }
+      }
+      return diffCount <= 2 || (maxLen - minLen <= 1);
+    }
+    function similarityScore(query, itemName) {
+      const normalizedQuery = normalizeString(query);
+      const normalizedItemName = normalizeString(itemName);
+      if (normalizedItemName.startsWith(normalizedQuery)) {
+        return 3;
+      }
+      if (normalizedItemName.includes(normalizedQuery)) {
+        return 2;
+      }
+      if (isSimilar(normalizedItemName, normalizedQuery)) {
+        return 1;
+      }
+      return 0;
+    }
+    searchBar.addEventListener('input', function () {
+      const query = searchBar.value;
+      searchResults.innerHTML = '';
+      if (query) {
+        const results = [];
+        items.forEach(item => {
+          const itemName = item.querySelector('h2').textContent;
+          const score = similarityScore(query, itemName);
+          if (score > 0) {
+            results.push({element: item, score});
+          }
+        });
+        results.sort((a, b) => b.score - a.score);
+        results.forEach(result => {
+          const resultDiv = document.createElement('div');
+          resultDiv.textContent = result.element.querySelector('h2').textContent;
+          const itemId = result.element.id;
+          resultDiv.onclick = function () {
+            const targetItem = document.getElementById(itemId);
+            if (targetItem) {
+              targetItem.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }
+            searchBar.value = '';
+            searchResults.innerHTML = '';
+          };
+          searchResults.appendChild(resultDiv);
+        });
+      }
+    });
+
+    /* ===================== INITIALISATION ===================== */
+    // Sauvegarde initiale et affichage
+    generateDailyOffers();
+    displayDailyOffers();
+    updateStockDisplay();
+  </script>
+
 </body>
 
 </html>

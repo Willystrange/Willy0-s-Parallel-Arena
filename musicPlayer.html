@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Music Player</title>
+</head>
+<body>
+  <script>
+    let musicEnabled = false;
+    const audioFiles = ['B1.mp3', 'B2.mp3'];
+    let currentTrack = 0;
+    const audio = new Audio();
+    audio.loop = false;
+
+    // Lorsqu'un morceau se termine, passe au suivant en boucle si la musique est activée
+    audio.addEventListener('ended', () => {
+      currentTrack = (currentTrack + 1) % audioFiles.length;
+      if (musicEnabled) {
+        audio.src = audioFiles[currentTrack];
+        audio.play();
+      }
+    });
+
+    // Fonction pour activer/désactiver la musique
+    function toggleMusic() {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        currentTrack = 0;
+        audio.src = audioFiles[currentTrack];
+        audio.play();
+      } else {
+        audio.pause();
+      }
+      return musicEnabled;
+    }
+    // Expose la fonction afin qu'elle soit accessible depuis la page parente
+    window.toggleMusic = toggleMusic;
+  </script>
+</body>
+</html>
