@@ -8,370 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Willy0's Parallel Arena</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-      padding-top: 50px;
-      /* Ajustez pour le header fixe */
-      overflow: hidden;
-      /* Masque les barres de défilement */
-      height: 100vh;
-    }
 
-    .scroll-container {
-      overflow: auto;
-      /* Permet le défilement dans le conteneur */
-      height: 100%;
-      width: 100%;
-    }
-
-    .scroll-container::-webkit-scrollbar {
-      display: none;
-      /* Pour les navigateurs basés sur Webkit */
-    }
-
-    .header {
-      position: fixed;
-      /* Fixe la barre du haut */
-      top: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px;
-      background-color: #f0f0f0;
-      color: #fff;
-      z-index: 1000;
-      /* Assure que la barre reste au-dessus des autres éléments */
-    }
-
-    .header .balance {
-      font-weight: bold;
-      margin-right: 20px;
-      color: #000;
-    }
-
-    .content {
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding-bottom: 200px;
-    }
-
-    .category-wrapper {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-      /* Cache les éléments qui dépassent */
-    }
-
-    .category {
-      display: flex;
-      align-items: center;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding: 20px 0;
-    }
-
-    .category::before,
-    .category::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      width: 40px;
-      height: 100%;
-      background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .category::before {
-      left: 0;
-    }
-
-    .category::after {
-      right: 0;
-      background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
-    }
-
-    .bonus-item {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 10px;
-      text-align: center;
-      margin: 0 15px;
-      flex-shrink: 0;
-      width: 150px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .bonus-item img {
-      width: 50px;
-      /* Ajuster la taille des images pour qu'elles s'adaptent bien */
-      height: auto;
-      border-radius: 8px;
-    }
-
-    .bonus-item h2 {
-      font-size: 16px;
-      /* Ajuster la taille du texte */
-      margin: 5px 0;
-      color: #333;
-      overflow: hidden;
-      /* Empêcher le texte de déborder */
-      text-overflow: ellipsis;
-      /* Ajouter des points de suspension si le texte est trop long */
-    }
-
-    .bonus-item p {
-      font-size: 14px;
-      /* Ajuster la taille du texte */
-      color: #555;
-      margin: 2px 0;
-      overflow: hidden;
-      /* Empêcher le texte de déborder */
-      text-overflow: ellipsis;
-      /* Ajouter des points de suspension si le texte est trop long */
-    }
-
-    .bonus-item button {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-size: 14px;
-      /* Ajuster la taille du texte du bouton */
-      padding: 5px 10px;
-    }
-
-    .bonus-item button:hover {
-      background-color: #0056b3;
-    }
-
-    .error-message {
-      color: red;
-      font-weight: bold;
-    }
-
-    .footer {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0;
-      background-color: #f0f0f0;
-      /* Couleur de fond */
-      position: fixed;
-      /* Fixe la barre au bas de l'Ã©cran */
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      /* Prend toute la largeur */
-      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-      /* Ombre optionnelle */
-      z-index: 1000;
-      /* Toujours au-dessus des autres Ã©lÃ©ments */
-    }
-
-    .footer-icon {
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .footer-icon img {
-      width: 50px;
-      height: 50px;
-    }
-
-    .footer-icon:hover {
-      opacity: 0.8;
-    }
-
-    .boutique-icon img {
-      border: 2px solid #ff4500;
-      /* Bordure colorée autour de l'icône */
-      border-radius: 50%;
-      /* Bordure arrondie */
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      /* Ombre autour de l'icône */
-    }
-
-    .boutique-icon:hover img {
-      opacity: 1;
-      /* Assure que l'icône reste visible au survol */
-    }
-
-    /* Styles pour le mode sombre */
-    .search-bar {
-      width: 200px;
-      /* Ajustez la largeur selon vos besoins */
-      margin-bottom: 5px;
-      /* Espace entre la barre de recherche et les résultats */
-      margin-right: 30px;
-    }
-
-    .search-results {
-      position: absolute;
-      /* Positionnement absolu par rapport à .header */
-      top: 100%;
-      /* Positionner juste en dessous de la barre de recherche */
-      left: 0;
-      /* Aligné à gauche */
-      color: black;
-      background: white;
-      /* Couleur de fond */
-      border: 1px solid #ccc;
-      /* Bordure */
-      border-radius: 4px;
-      /* Coins arrondis */
-      max-height: 100px;
-      /* Hauteur maximale */
-      overflow-y: auto;
-      /* Barre de défilement si trop d'éléments */
-      z-index: 1000;
-      /* Pour s'assurer qu'il est au-dessus des autres éléments */
-      width: 100%;
-      /* Largeur égale à celle de la barre de recherche */
-    }
-
-    .search-results div {
-      padding: 1px;
-      cursor: pointer;
-    }
-
-    .search-results div:hover {
-      background-color: #f0f0f0;
-      /* Changement de couleur au survol */
-    }
-
-    .quantity-select {
-      margin: 10px 0;
-      padding: 5px;
-
-      border: 0.1px solid #ccc;
-      border-radius: 5px;
-      width: 90px;
-      /* Largeur fixe pour le sélecteur */
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #121212;
-        color: #e0e0e0;
-      }
-
-      .quantity-select {
-        background-color: #1e1e1e;
-        color: white;
-      }
-
-      .search-results {
-        background-color: black;
-        color: white;
-        border: black;
-      }
-
-      .search-results div:hover {
-        background-color: #444;
-        /* Changement de couleur au survol */
-      }
-
-      .header {
-        background-color: #1c1c1c;
-        color: #e0e0e0;
-      }
-
-      .header .balance {
-        color: #fff;
-      }
-
-      .category {
-        background-color: #1e1e1e;
-      }
-
-      .bonus-item {
-        background-color: #1e1e1e;
-        color: #e0e0e0;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-      }
-
-      .bonus-item h2 {
-        color: #e0e0e0;
-      }
-
-      .bonus-item p {
-        color: #b0b0b0;
-      }
-
-      .bonus-item button {
-        background-color: #0056b3;
-        color: #fff;
-      }
-
-      .bonus-item button:hover {
-        background-color: #003d7a;
-      }
-
-      .error-message {
-        color: #ff4d4d;
-      }
-
-      .category::before {
-        background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
-      }
-
-      .category::after {
-        background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
-      }
-
-      .footer {
-        background-color: #333333;
-        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.5);
-      }
-
-      .boutique-icon img {
-        border: 2px solid #2C3E50;
-      }
-
-      .footer-icon img {
-        filter: brightness(0.8);
-      }
-
-      .scroll-container::-webkit-scrollbar {
-        width: 12px;
-      }
-
-      .scroll-container::-webkit-scrollbar-track {
-        background: #333;
-      }
-
-      .scroll-container::-webkit-scrollbar-thumb {
-        background: #555;
-      }
-
-      .scroll-container::-webkit-scrollbar-thumb:hover {
-        background: #777;
-      }
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="scripts/app.js"></script>
 </head>
 
 <body>
@@ -401,11 +39,12 @@
             <p>Profitez du double XP lors de vos combats !</p>
             <p><span class="stock-label"></span><span id="stock-xp"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (15 points)</option>
-              <option value="3">3 (41 points)</option>
-              <option value="5">5 (65 points)</option>
+              <option value="1" data-price="15">1 (15 points)</option>
+              <option value="3" data-price="41">3 (41 points)</option>
+              <option value="5" data-price="65">5 (65 points)</option>
             </select>
-            <button class="buyButton" data-type="xp" data-price="15">Acheter</button>
+            <!-- On n'attribue plus le prix sur le bouton, il sera mis à jour dynamiquement -->
+            <button class="buyButton" data-type="xp">Acheter</button>
             <p class="error-message"></p>
           </div>
         </div>
@@ -421,11 +60,11 @@
             <p>Augmente les PV du joueur de 1100.</p>
             <p><span class="stock-label"></span><span id="stock-potion"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (10 points)</option>
-              <option value="3">3 (28 points)</option>
-              <option value="5">5 (44 points)</option>
+              <option value="1" data-price="10">1 (10 points)</option>
+              <option value="3" data-price="28">3 (28 points)</option>
+              <option value="5" data-price="44">5 (44 points)</option>
             </select>
-            <button class="buyButton" data-type="potion" data-price="10">Acheter</button>
+            <button class="buyButton" data-type="potion">Acheter</button>
             <p class="error-message"></p>
           </div>
           <div class="bonus-item" id="amulette">
@@ -434,11 +73,11 @@
             <p>Régénère 2% des PV max par tour.</p>
             <p><span class="stock-label"></span><span id="stock-amulette"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (28 points)</option>
-              <option value="3">3 (77 points)</option>
-              <option value="5">5 (122 points)</option>
+              <option value="1" data-price="28">1 (28 points)</option>
+              <option value="3" data-price="77">3 (77 points)</option>
+              <option value="5" data-price="122">5 (122 points)</option>
             </select>
-            <button class="buyButton" data-type="amulette" data-price="28">Acheter</button>
+            <button class="buyButton" data-type="amulette">Acheter</button>
             <p class="error-message"></p>
           </div>
         </div>
@@ -454,11 +93,11 @@
             <p>Augmente l'attaque du joueur de 5%.</p>
             <p><span class="stock-label"></span><span id="stock-epee"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (15 points)</option>
-              <option value="3">3 (41 points)</option>
-              <option value="5">5 (65 points)</option>
+              <option value="1" data-price="15">1 (15 points)</option>
+              <option value="3" data-price="41">3 (41 points)</option>
+              <option value="5" data-price="65">5 (65 points)</option>
             </select>
-            <button class="buyButton" data-type="epee" data-price="15">Acheter</button>
+            <button class="buyButton" data-type="epee">Acheter</button>
             <p class="error-message"></p>
           </div>
           <div class="bonus-item" id="elixir">
@@ -467,11 +106,11 @@
             <p>Augmente l'attaque de 50 points.</p>
             <p><span class="stock-label"></span><span id="stock-elixir"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (20 points)</option>
-              <option value="3">3 (55 points)</option>
-              <option value="5">5 (87 points)</option>
+              <option value="1" data-price="20">1 (20 points)</option>
+              <option value="3" data-price="55">3 (55 points)</option>
+              <option value="5" data-price="87">5 (87 points)</option>
             </select>
-            <button class="buyButton" data-type="elixir" data-price="20">Acheter</button>
+            <button class="buyButton" data-type="elixir">Acheter</button>
             <p class="error-message"></p>
           </div>
         </div>
@@ -487,11 +126,11 @@
             <p>Augmente la défense de 15 points.</p>
             <p><span class="stock-label"></span><span id="stock-bouclier"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (13 points)</option>
-              <option value="3">3 (36 points)</option>
-              <option value="5">5 (57 points)</option>
+              <option value="1" data-price="13">1 (13 points)</option>
+              <option value="3" data-price="36">3 (36 points)</option>
+              <option value="5" data-price="57">5 (57 points)</option>
             </select>
-            <button class="buyButton" data-type="bouclier" data-price="13">Acheter</button>
+            <button class="buyButton" data-type="bouclier">Acheter</button>
             <p class="error-message"></p>
           </div>
 
@@ -501,11 +140,11 @@
             <p>Ignore les dégâts subit par la prochaine attaque directe de l'adversaire.</p>
             <p><span class="stock-label"></span><span id="stock-cape"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (55 points)</option>
-              <option value="3">3 (152 points)</option>
-              <option value="5">5 (239 points)</option>
+              <option value="1" data-price="55">1 (55 points)</option>
+              <option value="3" data-price="152">3 (152 points)</option>
+              <option value="5" data-price="239">5 (239 points)</option>
             </select>
-            <button class="buyButton" data-type="cape" data-price="55">Acheter</button>
+            <button class="buyButton" data-type="cape">Acheter</button>
             <p class="error-message"></p>
           </div>
         </div>
@@ -521,11 +160,11 @@
             <p>Réduit les dégâts reçus de 10%.</p>
             <p><span class="stock-label"></span><span id="stock-armure"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (22 points)</option>
-              <option value="3">3 (61 points)</option>
-              <option value="5">5 (96 points)</option>
+              <option value="1" data-price="22">1 (22 points)</option>
+              <option value="3" data-price="61">3 (61 points)</option>
+              <option value="5" data-price="96">5 (96 points)</option>
             </select>
-            <button class="buyButton" data-type="armure" data-price="22">Acheter</button>
+            <button class="buyButton" data-type="armure">Acheter</button>
             <p class="error-message"></p>
           </div>
 
@@ -535,594 +174,31 @@
             <p>Recharge instantanément 0.8 points de la capacité spéciale.</p>
             <p><span class="stock-label"></span><span id="stock-crystal"></span></p>
             <select class="quantity-select">
-              <option value="1">1 (50 points)</option>
-              <option value="3">3 (138 points)</option>
-              <option value="5">5 (218 points)</option>
+              <option value="1" data-price="50">1 (50 points)</option>
+              <option value="3" data-price="138">3 (138 points)</option>
+              <option value="5" data-price="218">5 (218 points)</option>
             </select>
-            <button class="buyButton" data-type="crystal" data-price="50">Acheter</button>
+            <button class="buyButton" data-type="crystal">Acheter</button>
             <p class="error-message"></p>
           </div>
         </div>
       </div>
-      <audio id="bg-music">
-        <source src="B1.mp3" type="audio/mpeg">
-        Votre navigateur ne supporte pas l'audio.
-      </audio>
-
       <div class="footer">
-        <button class="footer-icon perso-icon" onclick="viewCharacters()" id="perso-icon">
+        <button class="footer-icon perso-icon" onclick="App.viewCharacters()" id="perso-icon">
           <img src="Characters.svg" alt="Personnages">
         </button>
-        <button class="footer-icon main-menu-icon" onclick="showMainMenu()">
+        <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
           <img src="Menu.svg" alt="Menu Principal">
         </button>
-        <button class="footer-icon pass-icon" onclick="goToPasse()">
+        <button class="footer-icon pass-icon" onclick="App.goToPasse()">
           <img src="Pass.svg" alt="Passe de combat">
         </button>
-        <button class="footer-icon boutique-icon" onclick="viewShop()">
+        <button class="footer-icon boutique-icon" onclick="App.viewShop()">
           <img src="Shop.svg" alt="Boutique">
         </button>
       </div>
     </div>
   </div>
-
-  <script>
-    /* ===================== CONFIGURATION FIREBASE ===================== */
-    const firebaseConfig = {
-      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-      authDomain: "willy0s-parallel-arena.firebaseapp.com",
-      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-      projectId: "willy0s-parallel-arena",
-      storageBucket: "willy0s-parallel-arena.appspot.com",
-      messagingSenderId: "683284732830",
-      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-      measurementId: "G-85B8R4NKNM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
-    const perf = firebase.performance();
-
-    function viewCharacters() {
-      window.location.href = "perso_stats.html";
-    }
-    function goToPasse() {
-      window.location.href = "passe_de_combat.html";
-    }
-    function showMainMenu() {
-      window.location.href = "menu_principal.html";
-    }
-
-    /* ===================== CONFIGURATION DE LA LANGUE ===================== */
-    // On fixe la langue en français
-    let lang = 'fr';
-    document.documentElement.lang = lang;
-
-    // Dictionnaire de traductions pour la page Boutique (uniquement en français)
-    const translations = {
-      fr: {
-        balance: "Solde : ",
-        searchPlaceholder: "Rechercher un objet",
-        mainTitle: "Bienvenue dans la Boutique de Jeux",
-        dailyOffersTitle: "Offres Journalières",
-        xptitle: "Catégorie XP",
-        soinstitle: "Catégorie Soins",
-        attaquetitle: "Catégorie Attaque",
-        defensetitle: "Catégorie Défense",
-        autretitle: "Catégorie Autre",
-        insufficientBalance: "Solde insuffisant !",
-        buy: "Acheter",
-        dailyFreeRewardTitle: "Récompense Gratuite",
-        dailyFreeRewardDescription: "Profitez d'une récompense gratuite aujourd'hui !",
-        dailyFreeRewardPrice: "Prix : 0 Points",
-        dailyClaim: "Réclamer",
-        dailyFreeRewardClaimed: "Déjà pris",
-        offerNormalPrice: "Prix normal : ",
-        offerDiscountedPrice: "Prix réduit : ",
-        footerPersoAlt: "Personnages",
-        footerMenuAlt: "Menu Principal",
-        footerPassAlt: "Passe de combat",
-        footerShopAlt: "Boutique",
-        points: "points",
-        dailyoffers: "Offres Journalières",
-        stock: "En stock : "
-      }
-    };
-
-    // Dictionnaire de traductions pour les bonus (uniquement en français)
-    const bonusTranslations = {
-      xp_2: {
-        alt: {fr: "Double XP Bonus"},
-        title: {fr: "Double XP"},
-        description: {fr: "Profitez du double XP lors de vos combats !"}
-      },
-      potion: {
-        alt: {fr: "Potion de Santé"},
-        title: {fr: "Potion de Santé"},
-        description: {fr: "Augmente les PV du joueur de 1100."}
-      },
-      amulette: {
-        alt: {fr: "Amulette de Régénération"},
-        title: {fr: "Amulette de Régénération"},
-        description: {fr: "Régénère 2% des PV max par tour."}
-      },
-      epee: {
-        alt: {fr: "Épée Tranchante"},
-        title: {fr: "Épée Tranchante"},
-        description: {fr: "Augmente l'attaque du joueur de 5%."}
-      },
-      elixir: {
-        alt: {fr: "Élixir de Puissance"},
-        title: {fr: "Élixir de Puissance"},
-        description: {fr: "Augmente l'attaque de 50 points."}
-      },
-      bouclier: {
-        alt: {fr: "Bouclier solide"},
-        title: {fr: "Bouclier solide"},
-        description: {fr: "Augmente la défense de 15 points."}
-      },
-      cape: {
-        alt: {fr: "Cape de l'ombre"},
-        title: {fr: "Cape de l'ombre"},
-        description: {fr: "Ignore les dégâts subit par la prochaine attaque directe de l'adversaire."}
-      },
-      armure: {
-        alt: {fr: "Armure de Fer"},
-        title: {fr: "Armure de Fer"},
-        description: {fr: "Réduit les dégâts reçus de 10%."}
-      },
-      crystal: {
-        alt: {fr: "Crystal de renouveau"},
-        title: {fr: "Crystal de renouveau"},
-        description: {fr: "Recharge instantanément 0.8 points de la capacité spéciale."}
-      }
-    };
-
-    // À placer après la mise à jour des textes statiques (par exemple, juste après updateStaticOptions())
-    document.querySelectorAll('.stock-label').forEach(el => {
-      el.textContent = translations[lang].stock;
-    });
-
-    /* ===================== MISE À JOUR DES TEXTES STATIQUES ===================== */
-    // Mise à jour de la barre de solde et du placeholder de la barre de recherche
-    document.getElementById('balance').textContent = translations[lang].balance + (JSON.parse(localStorage.getItem('userData'))?.argent || 0);
-    document.getElementById('search-bar').placeholder = translations[lang].searchPlaceholder;
-    document.getElementById('dailyoffers').textContent = translations[lang].dailyoffers;
-    // Mise à jour du titre principal et des catégories (h1 et h2)
-    const content = document.querySelector('.content');
-    if (content) {
-      content.querySelector('h1').textContent = translations[lang].mainTitle;
-      document.getElementById('xptitle').textContent = translations[lang].xptitle;
-      document.getElementById('soinstitle').textContent = translations[lang].soinstitle;
-      document.getElementById('attaquetitle').textContent = translations[lang].attaquetitle;
-      document.getElementById('defensetitle').textContent = translations[lang].defensetitle;
-      document.getElementById('autretitle').textContent = translations[lang].autretitle;
-    }
-    // Mise à jour des bonus statiques par catégorie
-    function updateBonusText(id, bonusKey) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.querySelector('img').alt = bonusTranslations[bonusKey].alt[lang];
-        el.querySelector('h2').textContent = bonusTranslations[bonusKey].title[lang];
-        const ps = el.querySelectorAll('p');
-        if (ps.length > 0) {
-          ps[0].textContent = bonusTranslations[bonusKey].description[lang];
-        }
-      }
-    }
-    updateBonusText('xp-2', 'xp_2');
-    updateBonusText('potion', 'potion');
-    updateBonusText('amulette', 'amulette');
-    updateBonusText('epee', 'epee');
-    updateBonusText('elixir', 'elixir');
-    updateBonusText('bouclier', 'bouclier');
-    updateBonusText('cape', 'cape');
-    updateBonusText('armure', 'armure');
-    updateBonusText('crystal', 'crystal');
-
-    // Mise à jour des alt des icônes du footer
-    const footerImgs = document.querySelectorAll('.footer img');
-    if (footerImgs.length >= 4) {
-      footerImgs[0].alt = translations[lang].footerPersoAlt;
-      footerImgs[1].alt = translations[lang].footerMenuAlt;
-      footerImgs[2].alt = translations[lang].footerPassAlt;
-      footerImgs[3].alt = translations[lang].footerShopAlt;
-    }
-
-    // MISE À JOUR DES BOUTONS "ACHETER" STATIQUES
-    function updateStaticBuyButtons() {
-      document.querySelectorAll('.bonus-item .buyButton').forEach(button => {
-        button.textContent = translations[lang].buy;
-      });
-    }
-    // MISE À JOUR DES OPTIONS DES SELECT (traduction du mot "points")
-    function updateStaticOptions() {
-      document.querySelectorAll('.quantity-select option').forEach(option => {
-        option.textContent = option.textContent.replace(/points/gi, translations[lang].points);
-      });
-    }
-    updateStaticBuyButtons();
-    updateStaticOptions();
-
-    /* ===================== FONCTIONS D'OFFRES JOURNALIÈRES ===================== */
-    function applyDiscount(price) {
-      return Math.round(price * 0.8); // Réduction de 20%
-    }
-    function getRandomInt(max) {
-      return Math.floor(Math.random() * max);
-    }
-    function generateDailyOffers() {
-      const today = new Date().toDateString();
-      let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
-      const dailyCategory = document.getElementById('category-daily');
-      if (dailyOffers.date === today) {
-        return dailyOffers;
-      }
-      // Efface les anciennes offres
-      dailyCategory.innerHTML = '';
-      // Ajoute la récompense gratuite
-      const rewardItem = document.createElement('div');
-      rewardItem.classList.add('bonus-item');
-      rewardItem.innerHTML = `
-          <img src="recompense.png" alt="${translations[lang].dailyFreeRewardTitle}">
-          <h2>${translations[lang].dailyFreeRewardTitle}</h2>
-          <p>${translations[lang].dailyFreeRewardDescription}</p>
-          <p>${translations[lang].dailyFreeRewardPrice}</p>
-          <button class="claimButton">${translations[lang].dailyClaim}</button>
-          <p class="error-message"></p>
-        `;
-      dailyCategory.appendChild(rewardItem);
-
-      // Tableau d'items pour l'offre journalière
-      const items = [
-        {img: "XP_2.png", title: bonusTranslations.xp_2.title[lang] + " x1", description: bonusTranslations.xp_2.description[lang], price: 15, type: "xp", quantity: 1},
-        {img: "XP_2.png", title: bonusTranslations.xp_2.title[lang] + " x3", description: bonusTranslations.xp_2.description[lang], price: 41, type: "xp", quantity: 3},
-        {img: "XP_2.png", title: bonusTranslations.xp_2.title[lang] + " x5", description: bonusTranslations.xp_2.description[lang], price: 65, type: "xp", quantity: 5},
-        {img: "Potion-1.png", title: bonusTranslations.potion.title[lang] + " x1", description: bonusTranslations.potion.description[lang], price: 10, type: "potion", quantity: 1},
-        {img: "Potion-1.png", title: bonusTranslations.potion.title[lang] + " x3", description: bonusTranslations.potion.description[lang], price: 28, type: "potion", quantity: 3},
-        {img: "Potion-1.png", title: bonusTranslations.potion.title[lang] + " x5", description: bonusTranslations.potion.description[lang], price: 44, type: "potion", quantity: 5},
-        {img: "Amulette-1.png", title: bonusTranslations.amulette.title[lang] + " x1", description: bonusTranslations.amulette.description[lang], price: 28, type: "amulette", quantity: 1},
-        {img: "Amulette-1.png", title: bonusTranslations.amulette.title[lang] + " x3", description: bonusTranslations.amulette.description[lang], price: 77, type: "amulette", quantity: 3},
-        {img: "Amulette-1.png", title: bonusTranslations.amulette.title[lang] + " x5", description: bonusTranslations.amulette.description[lang], price: 122, type: "amulette", quantity: 5},
-        {img: "epee-1.png", title: bonusTranslations.epee.title[lang] + " x1", description: bonusTranslations.epee.description[lang], price: 15, type: "epee", quantity: 1},
-        {img: "epee-1.png", title: bonusTranslations.epee.title[lang] + " x3", description: bonusTranslations.epee.description[lang], price: 41, type: "epee", quantity: 3},
-        {img: "epee-1.png", title: bonusTranslations.epee.title[lang] + " x5", description: bonusTranslations.epee.description[lang], price: 65, type: "epee", quantity: 5},
-        {img: "elixir-1.png", title: bonusTranslations.elixir.title[lang] + " x1", description: bonusTranslations.elixir.description[lang], price: 20, type: "elixir", quantity: 1},
-        {img: "elixir-1.png", title: bonusTranslations.elixir.title[lang] + " x3", description: bonusTranslations.elixir.description[lang], price: 55, type: "elixir", quantity: 3},
-        {img: "elixir-1.png", title: bonusTranslations.elixir.title[lang] + " x5", description: bonusTranslations.elixir.description[lang], price: 87, type: "elixir", quantity: 5},
-        {img: "bouclier.png", title: bonusTranslations.bouclier.title[lang] + " x1", description: bonusTranslations.bouclier.description[lang], price: 13, type: "bouclier", quantity: 1},
-        {img: "bouclier.png", title: bonusTranslations.bouclier.title[lang] + " x3", description: bonusTranslations.bouclier.description[lang], price: 36, type: "bouclier", quantity: 3},
-        {img: "bouclier.png", title: bonusTranslations.bouclier.title[lang] + " x5", description: bonusTranslations.bouclier.description[lang], price: 57, type: "bouclier", quantity: 5},
-        {img: "Cape_de_l'ombre.png", title: bonusTranslations.cape.title[lang] + " x1", description: bonusTranslations.cape.description[lang], price: 55, type: "cape", quantity: 1},
-        {img: "Cape_de_l'ombre.png", title: bonusTranslations.cape.title[lang] + " x3", description: bonusTranslations.cape.description[lang], price: 152, type: "cape", quantity: 3},
-        {img: "Cape_de_l'ombre.png", title: bonusTranslations.cape.title[lang] + " x5", description: bonusTranslations.cape.description[lang], price: 239, type: "cape", quantity: 5}
-      ];
-      const randomIndex = getRandomInt(items.length);
-      const item = items[randomIndex];
-      items.splice(randomIndex, 1);
-      const discountedPrice = applyDiscount(item.price);
-      const offerItem = document.createElement('div');
-      offerItem.classList.add('bonus-item');
-      offerItem.innerHTML = `
-          <img src="${item.img}" alt="${item.title}">
-          <h2>${item.title}</h2>
-          <p>${item.description}</p>
-          <p>${translations[lang].offerNormalPrice}${item.price} ${translations[lang].points}</p>
-          <p>${translations[lang].offerDiscountedPrice}${discountedPrice} ${translations[lang].points}</p>
-          <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">${translations[lang].buy}</button>
-          <p class="error-message"></p>
-        `;
-      dailyCategory.appendChild(offerItem);
-      dailyOffers = {date: today, item: {img: item.img, title: item.title, description: item.description, price: item.price, discountedPrice, type: item.type, quantity: item.quantity}};
-      localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
-      saveUserData(JSON.parse(localStorage.getItem('userData')) || {});
-      return dailyOffers;
-    }
-    function displayDailyOffers() {
-      const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
-      const dailyCategory = document.getElementById('category-daily');
-      if (!dailyOffers) return;
-      const today = new Date().toDateString();
-      if (dailyOffers.date !== today) {
-        generateDailyOffers();
-        return;
-      }
-      dailyCategory.innerHTML = '';
-      const rewardItem = document.createElement('div');
-      rewardItem.classList.add('bonus-item');
-      rewardItem.innerHTML = `
-          <img src="gratuite-rec.png" alt="${translations[lang].dailyFreeRewardTitle}">
-          <h2>${translations[lang].dailyFreeRewardTitle}</h2>
-          <p>${translations[lang].dailyFreeRewardDescription}</p>
-          <p>${translations[lang].dailyFreeRewardPrice}</p>
-          <button class="claimButton"${(JSON.parse(localStorage.getItem('userData')) || {}).boutique_recompense ? ' disabled' : ''}>${(JSON.parse(localStorage.getItem('userData')) || {}).boutique_recompense ? translations[lang].dailyFreeRewardClaimed : translations[lang].dailyClaim}</button>
-          <p class="error-message"></p>
-        `;
-      dailyCategory.appendChild(rewardItem);
-      const item = dailyOffers.item;
-      const offerItem = document.createElement('div');
-      offerItem.classList.add('bonus-item');
-      offerItem.innerHTML = `
-          <img src="${item.img}" alt="${item.title}">
-          <h2>${item.title}</h2>
-          <p>${item.description}</p>
-          <p>${translations[lang].offerNormalPrice}${item.price} ${translations[lang].points}</p>
-          <p>${translations[lang].offerDiscountedPrice}${item.discountedPrice} ${translations[lang].points}</p>
-          <button class="buyButton" data-type="${item.type}" data-price="${item.discountedPrice}" data-quantity="${item.quantity}">${translations[lang].buy}</button>
-          <p class="error-message"></p>
-        `;
-      dailyCategory.appendChild(offerItem);
-      document.querySelectorAll('.claimButton').forEach(button => {
-        button.addEventListener('click', handleClaimButtonClick);
-      });
-      document.querySelectorAll('.buyButton').forEach(button => {
-        button.addEventListener('click', handleBuyButtonClick);
-      });
-    }
-
-    /* ===================== AUTRES FONCTIONS ===================== */
-    function updateStockDisplay() {
-      const userData = JSON.parse(localStorage.getItem('userData')) || {};
-      document.getElementById('stock-xp').textContent = userData.Double_XP_acheté;
-      document.getElementById('stock-potion').textContent = userData.Potion_de_Santé_acheté;
-      document.getElementById('stock-amulette').textContent = userData.Amulette_de_Régénération_acheté;
-      document.getElementById('stock-epee').textContent = userData.epee_tranchante_acheté;
-      document.getElementById('stock-elixir').textContent = userData.elixir_puissance_acheté;
-      document.getElementById('stock-armure').textContent = userData.armure_fer_acheté;
-      document.getElementById('stock-bouclier').textContent = userData.bouclier_solide_acheté;
-      document.getElementById('stock-cape').textContent = userData.Cape_acheté;
-      document.getElementById('stock-crystal').textContent = userData.crystal_acheté;
-    }
-    function handleBuyButtonClick(event) {
-      const button = event.target;
-      const type = button.dataset.type;
-      const errorMessage = button.nextElementSibling;
-      let quantity, prixTotal;
-
-      // Si un sélecteur précède le bouton, le prix affiché est unitaire
-      const previous = button.previousElementSibling;
-      if (previous && previous.tagName.toLowerCase() === 'select') {
-        quantity = parseInt(previous.value);
-        const prixUnitaire = parseInt(button.dataset.price);
-        prixTotal = prixUnitaire * quantity;
-        // Application des coefficients selon la quantité
-        if (quantity === 1) {
-          prixTotal = Math.round(prixTotal * 0.96);
-        } else if (quantity === 3) {
-          prixTotal = Math.round(prixTotal * 0.92);
-        } else if (quantity === 5) {
-          prixTotal = Math.round(prixTotal * 0.87);
-        }
-      } else {
-        // Si pas de sélecteur, c'est une offre pack où le prix affiché est déjà le prix total
-        quantity = parseInt(button.dataset.quantity) || 1;
-        prixTotal = parseInt(button.dataset.price);
-      }
-
-      let userData = JSON.parse(localStorage.getItem('userData')) || {};
-      if (userData.argent >= prixTotal) {
-        userData.argent -= prixTotal;
-        if (type === 'xp') {
-          userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + quantity;
-        } else if (type === 'potion') {
-          userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + quantity;
-        } else if (type === 'amulette') {
-          userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + quantity;
-        } else if (type === 'epee') {
-          userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + quantity;
-        } else if (type === 'elixir') {
-          userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + quantity;
-        } else if (type === 'armure') {
-          userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + quantity;
-        } else if (type === 'bouclier') {
-          userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + quantity;
-        } else if (type === 'cape') {
-          userData.Cape_acheté = (userData.Cape_acheté || 0) + quantity;
-        } else if (type === 'crystal') {
-          userData.crystal_acheté = (userData.crystal_acheté || 0) + quantity;
-        }
-        saveUserData(userData);
-        document.getElementById('balance').textContent = translations[lang].balance + userData.argent;
-        errorMessage.textContent = '';
-        updateStockDisplay();
-      } else {
-        errorMessage.textContent = translations[lang].insufficientBalance;
-      }
-    }
-
-    function handleClaimButtonClick(event) {
-      const button = event.target;
-      button.disabled = true;
-      button.textContent = translations[lang].dailyFreeRewardClaimed;
-      button.nextElementSibling.textContent = '';
-      let userData = JSON.parse(localStorage.getItem('userData')) || {};
-      if (!userData.boutique_recompense) {
-        userData.recompense = (userData.recompense || 0) + 1;
-        userData.boutique_recompense = true;
-        saveUserData(userData);
-        window.location.href = 'recompenses.html';
-      }
-    }
-
-    userData = JSON.parse(localStorage.getItem('userData'));
-
-    let User = false;
-    let userId = null;
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        console.log("Utilisateur authentifié avec UID :", user.uid);
-        User = true;
-        userId = user.uid;
-        saveUserData(userData);
-      } else {
-        console.log("Aucun utilisateur authentifié");
-      }
-    });
-
-    function saveUserData(userData) {
-      localStorage.setItem('userData', JSON.stringify(userData));
-      if (User) {
-        const userRef = database.ref(`users/${userId}/userData`);
-        userRef.set(userData, (error) => {
-          if (error) {
-            console.error("Erreur lors de l'enregistrement dans Firebase:", error);
-          } else {
-            console.log('Données utilisateur sauvegardées dans Firebase');
-          }
-        });
-      }
-    }
-
-    /* ===================== MINUTERIE OFFRES JOURNALIÈRES ===================== */
-    function updateDailyTimer() {
-      const now = new Date();
-      const resetHour = 9;
-      const nextReset = new Date();
-      nextReset.setHours(resetHour, 0, 0, 0);
-      if (now > nextReset) {
-        nextReset.setDate(nextReset.getDate() + 1);
-      }
-      const timeLeft = nextReset - now;
-      const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-      document.getElementById('daily-timer').textContent = `- ${hours}h ${minutes}m ${seconds}s`;
-      setTimeout(updateDailyTimer, 1000);
-    }
-    updateDailyTimer();
-
-    /* ===================== FONCTION DE RECHERCHE ===================== */
-    const searchBar = document.getElementById('search-bar');
-    const items = document.querySelectorAll('.bonus-item');
-    const searchResults = document.getElementById('search-results');
-    function normalizeString(str) {
-      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    }
-    function isSimilar(str1, str2) {
-      let diffCount = 0;
-      const maxLen = Math.max(str1.length, str2.length);
-      const minLen = Math.min(str1.length, str2.length);
-      for (let i = 0; i < minLen; i++) {
-        if (str1[i] !== str2[i]) {
-          diffCount++;
-          if (diffCount > 2) return false;
-        }
-      }
-      return diffCount <= 2 || (maxLen - minLen <= 1);
-    }
-    function similarityScore(query, itemName) {
-      const normalizedQuery = normalizeString(query);
-      const normalizedItemName = normalizeString(itemName);
-      if (normalizedItemName.startsWith(normalizedQuery)) {
-        return 3;
-      }
-      if (normalizedItemName.includes(normalizedQuery)) {
-        return 2;
-      }
-      if (isSimilar(normalizedItemName, normalizedQuery)) {
-        return 1;
-      }
-      return 0;
-    }
-    searchBar.addEventListener('input', function () {
-      const query = searchBar.value;
-      searchResults.innerHTML = '';
-      if (query) {
-        const results = [];
-        items.forEach(item => {
-          const itemName = item.querySelector('h2').textContent;
-          const score = similarityScore(query, itemName);
-          if (score > 0) {
-            results.push({element: item, score});
-          }
-        });
-        results.sort((a, b) => b.score - a.score);
-        results.forEach(result => {
-          const resultDiv = document.createElement('div');
-          resultDiv.textContent = result.element.querySelector('h2').textContent;
-          const itemId = result.element.id;
-          resultDiv.onclick = function () {
-            const targetItem = document.getElementById(itemId);
-            if (targetItem) {
-              targetItem.scrollIntoView({behavior: 'smooth', block: 'center'});
-            }
-            searchBar.value = '';
-            searchResults.innerHTML = '';
-          };
-          searchResults.appendChild(resultDiv);
-        });
-      }
-    });
-
-    /* ===================== INITIALISATION ===================== */
-    // Sauvegarde initiale et affichage
-    generateDailyOffers();
-    displayDailyOffers();
-    updateStockDisplay();
-  document.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem('autoplayEnabled') === 'true') {
-        playMusic();
-      }
-    });
-  </script>
-  <script>
-    // Récupération de l'élément audio
-    const audio = document.getElementById('bg-music');
-    // Liste des pistes à jouer en séquence
-    const tracks = ['B1.mp3', 'B2.mp3'];
-    // Récupère l'indice de la piste en cours depuis le localStorage, ou démarre à 0
-    let currentTrack = parseInt(localStorage.getItem('currentTrack')) || 0;
-    audio.src = tracks[currentTrack];
-
-    // Si une position a été enregistrée pour cette piste, la restaurer
-    let savedTime = parseFloat(localStorage.getItem('currentTime'));
-    if (!isNaN(savedTime)) { audio.currentTime = savedTime; }
-
-    // Variable pour limiter l'enregistrement à une mise à jour par seconde
-    let lastTimeUpdate = 0;
-
-    // Fonction pour lancer la musique
-    function playMusic() {
-      audio.play().catch(() => {
-        console.log("La lecture automatique est bloquée par le navigateur.");
-      });
-    }
-
-    // Fonction qui active l'autoplay et mémorise l'autorisation
-    function enableAutoplay() {
-      playMusic();
-      localStorage.setItem('autoplayEnabled', 'true');
-    }
-
-    // À la fin de la piste, passe à la suivante et réinitialise la position sauvegardée
-    audio.addEventListener('ended', () => {
-      currentTrack = (currentTrack + 1) % tracks.length;
-      localStorage.setItem('currentTrack', currentTrack);
-      localStorage.removeItem('currentTime'); // Réinitialise pour la nouvelle piste
-      audio.src = tracks[currentTrack];
-      playMusic();
-    });
-
-    // Enregistre la position actuelle dans le localStorage, au moins une fois par seconde
-    audio.addEventListener('timeupdate', () => {
-      let now = Math.floor(audio.currentTime);
-      if (now !== lastTimeUpdate) {
-        lastTimeUpdate = now;
-        localStorage.setItem('currentTime', audio.currentTime);
-      }
-    });
-
-    // Fallback pour activer la lecture sur les interactions tactiles ou clic si besoin
-    function autoPlayFallback() {
-      playMusic();
-    }
-    if (localStorage.getItem('autoplayEnabled') === 'true') {
-      document.addEventListener('touchstart', autoPlayFallback, { once: true });
-      document.addEventListener('click', autoPlayFallback, { once: true });
-    }
-  </script>
-
 </body>
 
 </html>
