@@ -1,0 +1,171 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #e9ecef;
+  color: #343a40;
+  overflow: hidden;
+}
+.content {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  animation: fadeIn 0.5s ease-in-out;
+}
+.content::-webkit-scrollbar {
+  display: none;
+}
+.container {
+  width: 80%;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.5s ease-out;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  color : #ff4500;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+.form-group textarea {
+  resize: vertical;
+}
+.form-group button {
+  background-color: #ff4500;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+.form-group button:hover {
+  background-color: #ff3500;
+}
+.form-group button:focus {
+  outline: none;
+}
+/* Étoiles de notation */
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.rating input {
+  display: none;
+}
+.rating label {
+  font-size: 24px;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.rating input:checked ~ label {
+  color: #f39c12;
+}
+.rating input:checked ~ label ~ label {
+  color: #ddd;
+}
+.rating label:hover,
+.rating label:hover ~ label {
+  color: #f39c12;
+}
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+/* Message de confirmation */
+#confirmationMessage {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ff4500;
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 1000;
+}
+#confirmationMessage.show {
+  opacity: 1;
+}
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  .content {
+    background-color: #121212;
+  }
+  .container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  h1 {
+    color: #e0e0e0;
+  }
+  .form-group label {
+    color: #b0b0b0;
+  }
+  .form-group input[type="text"],
+  .form-group textarea,
+  .form-group select {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+  }
+  .form-group button {
+    background-color: #555;
+    color: #e0e0e0;
+  }
+  .form-group button:hover {
+    background-color: #666;
+  }
+  .rating label {
+    color: #444;
+  }
+  .rating input:checked ~ label {
+    color: #f39c12;
+  }
+  .rating label:hover,
+  .rating label:hover ~ label {
+    color: #f39c12;
+  }
+  #confirmationMessage {
+    background: #333;
+  }
+}

@@ -1,0 +1,379 @@
+/* ======================= GLOBAL ======================= */
+html, body {
+  font-family: Arial, sans-serif;
+  background-size: cover;
+  background-position: center -50px;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+  overscroll-behavior: none;
+  background-color: rgba(255, 255, 255, 0); /* transparent */
+}
+.hidden { display: none; }
+
+/* ======================= HEADER ======================= */
+h1 {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff; /* opaque */
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  margin: 0;
+  color: #333;
+  z-index: 10;
+  font-size: 1em;
+}
+
+/* ======================= PLAYER INFO ======================= */
+.player-info {
+  position: relative;
+  top: 10px;
+  left: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  z-index: 9;
+}
+.player-info .level-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8em;
+}
+.player-info .level-info .level,
+.player-info .level-info .next-level { flex: 1; }
+.player-info .xp { flex: 2; text-align: center; font-size: 0.8em; }
+
+/* ======================= XP BAR ======================= */
+.xp-progress-container {
+  width: 50%;
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 20px;
+  height: 15px;
+  position: relative;
+  overflow: hidden;
+}
+.xp-progress-bar {
+  height: 100%;
+  width: 0;
+  background-color: #ddd;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+#xp-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+  font-size: 0.8em;
+  z-index: 1;
+}
+
+/* ======================= CONTAINER ET PAGES ======================= */
+.container {
+  max-width: 800px;
+  margin: 10px auto 20px;
+  padding: 20px;
+  position: relative;
+  height: auto;
+  overflow: hidden;
+}
+.page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 90%;
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  position: absolute;
+  width: 100%;
+}
+.page.active {
+  opacity: 1;
+  position: relative;
+}
+
+/* ======================= RECOMPENSES ======================= */
+.reward {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  font-size: 0.8em;
+  height: 80px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.reward.redeemed { background-color: #e0e0e0; }
+.reward .badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #c2c2c2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.reward.redeemed .badge { background-color: #474747; }
+.error-message {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 5px;
+  text-align: center;
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+.shake { animation: shake 0.5s; }
+
+/* ======================= CONTROLES ======================= */
+.controls {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+.controls .control-buttons { margin-bottom: 20px; }
+.controls .button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.controls button,
+.button-container button {
+  background-color: #FF4500;
+  color: #fff;
+  border: none;
+  font-size: 1em;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.controls button:hover,
+.button-container button:hover { background-color: #FF4500; }
+
+/* ======================= FOOTER ======================= */
+.footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0;
+  background-color: #f0f0f0; /* opaque */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+.footer-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.footer-icon img {
+  width: 50px;
+  height: 50px;
+}
+.footer-icon:hover { opacity: 0.8; }
+.pass-icon img {
+  border: 2px solid #ff4500;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+.pass-icon:hover img { opacity: 1; }
+
+/* ======================= POPUPS ======================= */
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+  z-index: 1001;
+}
+.popup button {
+  background-color: #FF4500;
+  color: #fff;
+  border: none;
+  font-size: 1em;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 5px;
+  transition: background-color 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+.popup button:hover { background-color: #FF4500; }
+
+.loading-popup {
+  display: none;
+  position: fixed;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1002;
+  transition: bottom 2s ease;
+}
+.loading-popup.active {
+  bottom: 50%;
+  transform: translate(-50%, 50%);
+}
+.loading-spinner {
+  border: 5px solid #ddd;
+  border-top: 5px solid orangered;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ======================= MEDIA QUERIES ======================= */
+@media (orientation: landscape) {
+  body { padding: 10px; }
+  .test { margin-bottom: 10px; }
+  .container {
+    max-width: 100%;
+    padding: 10px;
+    margin: 10px auto 10px;
+  }
+  .player-info { top: 40px; font-size: 0.7em; }
+  .level-info { align-items: center; }
+  .xp-progress-container { width: 70%; height: 10px; }
+  .page {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: auto;
+    overflow-y: auto;
+  }
+  .reward { height: 60px; font-size: 0.7em; padding: 5px; }
+  .reward .badge { width: 25px; height: 25px; }
+  .controls { margin-top: 40px; }
+  .controls button { font-size: 0.8em; padding: 8px 16px; margin-top: 20px; }
+  .footer { padding: 1px; }
+}
+
+/* ======================= TITRE SECTIONS ======================= */
+.rewards-title {
+  font-size: 1.2em;
+  text-align: center;
+  color: #333;
+  margin: 10px 0;
+  background-color: rgba(240, 240, 240, 0.8);
+  padding: 5px;
+  border-radius: 5px;
+}
+
+/* ======================= CATÉGORIES RECOMPENSES ======================= */
+.free-rewards { width: 100%; margin-right: 1%; }
+.premium-rewards { width: 100%; margin-left: 1%; }
+.free-rewards .reward { background-color: rgba(255, 255, 255, 0.2); }
+.premium-rewards .reward { background-color: rgb(255, 255, 68, 0.3); }
+
+/* ======================= DARK MODE ======================= */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+  }
+  h1 {
+    background-color: #1e1e1e; /* opaque */
+    border-bottom: 1px solid #333;
+    color: #f5f5f5;
+  }
+  .player-info {
+    background-color: rgba(30, 30, 30, 0.8);
+    border-bottom: 1px solid #333;
+    color: #f5f5f5;
+  }
+  .page {
+    background-color: rgba(30, 30, 30, 0.3);
+    box-shadow: 0 2px 4px rgba(255,255,255,0.1);
+  }
+  .reward {
+    background-color: rgba(50, 50, 50, 0.8);
+    border: 1px solid #444;
+    color: #f5f5f5;
+  }
+  .reward.redeemed { background-color: #333; }
+  .reward .badge { background-color: #444; }
+  .reward.redeemed .badge { background-color: #000; }
+  .controls button {
+    background-color: #444;
+    color: #fff;
+  }
+  .controls button:hover { background-color: #555; }
+  .footer {
+    background-color: #333333; /* opaque */
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.5);
+  }
+  .footer-icon img { filter: brightness(0.8); }
+  .pass-icon img { border-color: #2C3E50; }
+  .xp-progress-container { background-color: #444; }
+  .xp-progress-bar { background-color: #333; }
+  #xp-progress-text { color: #fff; }
+  .popup {
+    background-color: rgba(50, 50, 50, 0.8);
+    border: 1px solid #444;
+  }
+  .popup button { background-color: #444; }
+}
+
+/* ======================= TITRE PREMIUM ======================= */
+.premiumA {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}

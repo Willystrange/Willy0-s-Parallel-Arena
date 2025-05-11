@@ -1,0 +1,106 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h1 {
+  cursor: pointer;
+  margin: 0;
+}
+.note-list {
+  margin: 20px 0;
+  padding: 0;
+  list-style-type: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+.note-list.open {
+  max-height: 6000px;
+}
+.note-list li {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-left: 5px solid #007bff;
+}
+.back-button {
+  display: block;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: 10px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+.back-button:hover {
+  background-color: #0056b3;
+}
+/* Styles pour chaque bloc de mise à jour */
+.update-block {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-left: 5px solid transparent; /* valeur par défaut */
+}
+/* Couleurs selon le type de mise à jour */
+.update-block[data-type="BM"] {
+  border-left-color: #000000; /* Noir : Énorme maj */
+}
+.update-block[data-type="HM"] {
+  border-left-color: #003366; /* Bleu foncé : Grosse maj */
+}
+.update-block[data-type="MM"] {
+  border-left-color: #0000FF; /* Bleu : Moyenne maj */
+}
+.update-block[data-type="LM"] {
+  border-left-color: #ADD8E6; /* Bleu clair : Mini maj */
+}
+/* Affichage de la date et heure */
+.update-meta {
+  font-size: 0.9em;
+  color: #666;
+  margin: 5px 0 15px 0;
+}
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #333;
+    color: #ddd;
+  }
+  .container {
+    background: #444;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  h1 {
+    color: #ddd;
+  }
+  .note-list li {
+    background: #555;
+    border-left: 5px solid #1e90ff;
+  }
+  .back-button {
+    background-color: #333;
+  }
+
+  .back-button:hover {
+    background-color: #555;
+  }
+  .mail {
+    color: white;
+  }
+}
