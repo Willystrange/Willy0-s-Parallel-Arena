@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="app.js"></script>
+  <link rel="stylesheet" href="styles/intro.css">
+  <link rel="manifest" href="/manifest.json">
+  <title>Willy0's Parallel Arena</title>
+  <!-- Firebase et CryptoJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+</head>
+
+<body>
+  <!-- Formulaire des règles -->
+  <div id="rules-container">
+    <div class="rules-box">
+      <h2>Règles de Willy0’s Parallel Arena</h2>
+      <p>Veuillez lire et accepter les règles avant de jouer :</p>
+      <ul>
+        <li><strong>Accès au jeu :</strong> Willy0’s Parallel Arena est un jeu de combat au tour par tour totalement
+          gratuit. Il est accessible à tous, sans achats intégrés.</li>
+        <li><strong>Utilisation du compte : </strong>Chaque joueur est responsable de la sécurité de son compte. Ne
+          partagez pas vos informations de connexion.</li>
+        <li><strong>Fair-play : </strong>Il est strictement interdit de tricher ou d'exploiter des failles du jeu pour
+          obtenir un
+          avantage injuste. Toute utilisation de logiciels tiers, bots, ou scripts automatisés est interdite.</li>
+        <li><strong>Mises à jour : </strong>Le jeu est régulièrement mis à jour afin d'améliorer l'expérience et de
+          corriger les
+          bugs. Veuillez vous assurer que vous utilisez toujours la dernière version du jeu.</li>
+        <li><strong>Boutique : </strong>Bien que le jeu dispose d'une boutique, tous les contenus disponibles sont
+          gratuits et ne
+          nécessitent aucun achat.</li>
+        <li><strong>Respect des règles du jeu : </strong>Même s'il n'y a pas d'interactions avec d'autres joueurs pour
+          le moment,
+          il est important de respecter le déroulement naturel des combats contre les bots.</li>
+        <li><strong>Collecte de données : </strong>Nous collectons les données de performanced pour améliorer votre
+          expérience de jeu et à
+          des fins de statistiques. Ces données sont recueillies dans le respect de votre vie privée et conformément à
+          notre politique de confidentialité.</li>
+        <li><strong>Sanctions : </strong>Tout manquement aux présentes règles peut entraîner des avertissements, des
+          suspensions
+          temporaires ou permanentes du compte.</li>
+      </ul>
+      <label>
+        <input type="checkbox" id="accept-rules" /> J'accepte les règles.
+      </label>
+      <br />
+      <button id="start-game" disabled>Commencer</button>
+    </div>
+  </div>
+
+  <!-- Animation initiale (logo) -->
+  <div id="container">
+    <div id="logo">S</div>
+  </div>
+
+  <!-- Écran gris avec le texte animé "Toucher pour commencer" -->
+  <div id="touch-screen">
+    <span id="touch-text">Toucher pour commencer</span>
+  </div>
+
+  <!-- Inclusion des scripts -->
+  <script src="scripts/loadPage.js"></script>
+  <script src="scripts/intro.js"></script>
+  <script src="localStorage.js"></script>
+</body>
+
+</html>

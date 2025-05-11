@@ -1,268 +1,108 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Willy0's Parallel Arena</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <style>
-    /* Styles généraux */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-    .container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      cursor: pointer;
-      margin: 0;
-    }
-    .note-list {
-      margin: 20px 0;
-      padding: 0;
-      list-style-type: none;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s ease-out;
-    }
-    .note-list.open {
-      max-height: 6000px;
-    }
-    .note-list li {
-      margin-bottom: 10px;
-      padding: 10px;
-      background: #f9f9f9;
-      border-left: 5px solid #007bff;
-    }
-    .back-button {
-      display: inline-block;
-      margin: 20px 0;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .back-button:hover {
-      background-color: #0056b3;
-    }
-    /* Styles pour chaque bloc de mise à jour */
-    .update-block {
-      margin-bottom: 20px;
-      padding: 10px;
-      border-left: 5px solid transparent; /* valeur par défaut */
-    }
-    /* Couleurs selon le type de mise à jour */
-    .update-block[data-type="BM"] {
-      border-left-color: #000000; /* Noir : Énorme maj */
-    }
-    .update-block[data-type="HM"] {
-      border-left-color: #003366; /* Bleu foncé : Grosse maj */
-    }
-    .update-block[data-type="MM"] {
-      border-left-color: #0000FF; /* Bleu : Moyenne maj */
-    }
-    .update-block[data-type="LM"] {
-      border-left-color: #ADD8E6; /* Bleu clair : Mini maj */
-    }
-    /* Affichage de la date et heure */
-    .update-meta {
-      font-size: 0.9em;
-      color: #666;
-      margin: 5px 0 15px 0;
-    }
-    /* Mode sombre */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #333;
-        color: #ddd;
-      }
-      .container {
-        background: #444;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      }
-      h1 {
-        color: #ddd;
-      }
-      .note-list li {
-        background: #555;
-        border-left: 5px solid #1e90ff;
-      }
-      .back-button {
-        background-color: #1e90ff;
-        color: #fff;
-      }
-      .back-button:hover {
-        background-color: #0056b3;
-      }
-      .mail {
-        color: white;
-      }
-    }
-  </style>
-  <!-- Bibliothèques tierces -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-performance-compat.js"></script>
+  <title>Note de mise à jour – Version B.2.1.0.00</title>
+  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="scripts/app.js"></script>
 </head>
+
 <body>
   <div class="container">
-    aucune note de mise à jour disponible pour l'instant !
+    <!-- Mise à jour Version B.2.1.0.01 -->
+    <div class="update-block" data-type="LM" data-datetime="2025-07-23T10:00">
+      <h1 id="version-B.2.1.0.01">Note de mise à jour - Version B.2.1.0.01</h1>
+      <p class="update-meta">Publié le 23/07/2025 à 10:00</p>
+      <ul id="notes-B.2.1.0.01" class="note-list">
+        <li><strong>Interface et navigation :</strong>
+          <ul>
+            <li>Ajout d’un bouton « Retour » dans la page de présentation du Parallel Pass Premium.</li>
+            <li>Correction des couleurs dans la même page pour un meilleur contraste.</li>
+          </ul>
+        </li>
+        <li><strong>Modes de jeu :</strong>
+          <ul>
+            <li>Ajout d’un minuteur indiquant le temps restant avant la fin du mode Week-end.</li>
+            <li>Correction d’un bug empêchant l’apparition du mode Week-end le dimanche.</li>
+            <li>Correction du tri par rareté dans la sélection de personnage du mode Week-end.</li>
+          </ul>
+        </li>
+        <li><strong>Corrections diverses :</strong>
+          <ul>
+            <li>Correction d’un problème d’affichage avec le Parallel Pass.</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <!-- Mise à jour Version B.2.1.0.00 (BM : Énorme maj – Noir) -->
+    <div class="update-block" data-type="BM" data-datetime="2025-07-16T09:30">
+      <h1 id="version-B.2.1.0.00">Note de mise à jour - Version B.2.1.0.00</h1>
+      <p class="update-meta">Publié le 16/07/2025 à 09:30</p>
+      <ul id="notes-B.2.1.0.00" class="note-list">
+        <li><strong>Interface et navigation :</strong>
+          <ul>
+            <li>Refonte complète de la page d’accueil : ergonomie et accès davantage intuitifs.</li>
+            <li>Refonte de la page des personnages : fiches et compétences restructurées.</li>
+            <li>Parcours d’achat optimisé dans la boutique.</li>
+          </ul>
+        </li>
+        <li><strong>Performances et sécurité :</strong>
+          <ul>
+            <li>Nouvelle architecture : temps de chargement réduits, efficacité et sécurité renforcées.</li>
+            <li>Activation automatique d’une musique d’ambiance.</li>
+          </ul>
+        </li>
+        <li><strong>Système de progression :</strong>
+          <ul>
+            <li>Module d’amélioration : choix libre des attributs (PV, attaque, défense).</li>
+            <li>Bouton de stats en combat : accès direct aux PV, attaque et défense.</li>
+          </ul>
+        </li>
+        <li><strong>Combats et modes de jeu :</strong>
+          <ul>
+            <li>Interface de combat épurée pour une meilleure lisibilité.</li>
+            <li>Mode Week-end (samedi 09:00 → lundi 09:00) : bonus/malus aléatoires (double XP, chargement × ½, points
+              doublés, PV équilibrés).</li>
+            <li>Quêtes du week-end : trois missions temporaires, jusqu’à 100 pièces à collecter.</li>
+          </ul>
+        </li>
+        <li><strong>Quêtes et récompenses :</strong>
+          <ul>
+            <li>Quêtes quotidiennes : 10 points par jour.</li>
+            <li>Quêtes hebdomadaires : 200 XP + récompense aléatoire (Parallel Pass inclus).</li>
+            <li>Parallel Pass : durée doublée, tarif premium réduit (incompatible avec certains bloqueurs).</li>
+          </ul>
+        </li>
+        <li><strong>Actualités et documentation :</strong>
+          <ul>
+            <li>Refonte du système d’actualités pour plus de transparence et de réactivité.</li>
+            <li>Page des notes de mise à jour réorganisée pour une meilleure lisibilité.</li>
+          </ul>
+        </li>
+        <li><strong>Corrections de bugs :</strong>
+          <ul>
+            <li>Corrections en combat : quêtes, attaques et capacités spéciales.</li>
+            <li>Correction d'énormément de bogues dans toute l'application</li>
+          </ul>
+        </li>
+        <li><strong>Amusez-vous !</strong>
+          <ul>
+            <li>Nous espèrons que vous vous amuserez sur cette seconde bêta de Willy0's Parallel Arena</li>
+            <li>Si vous avez un problème, une idée ou une suggestion nous redtons accessible via la section «contacter
+              le developpeur» dans les paramètres, nous vous répondrons avec plaisir !</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <button class="back-button" onclick="loadPage('parametres')">Retour</button>
   </div>
-  <audio id="bg-music">
-    <source src="B1.mp3" type="audio/mpeg">
-    Votre navigateur ne supporte pas l'audio.
-  </audio>
-
-  <script>
-    // Initialisation Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-      authDomain: "willy0s-parallel-arena.firebaseapp.com",
-      databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-      projectId: "willy0s-parallel-arena",
-      storageBucket: "willy0s-parallel-arena.appspot.com",
-      messagingSenderId: "683284732830",
-      appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-      measurementId: "G-85B8R4NKNM"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const maintenanceStartRef = database.ref('maintenance/start');
-    const maintenanceEndRef   = database.ref('maintenance/end');
-
-    // Vérification de la maintenance avec async/await
-    async function checkMaintenance() {
-      try {
-        const [startSnapshot, endSnapshot] = await Promise.all([
-          maintenanceStartRef.once('value'),
-          maintenanceEndRef.once('value')
-        ]);
-        const maintenanceStart = new Date(startSnapshot.val());
-        const maintenanceEnd   = new Date(endSnapshot.val());
-        const currentTime      = new Date();
-        if (maintenanceStart && maintenanceEnd && currentTime >= maintenanceStart && currentTime <= maintenanceEnd) {
-          window.location.href = 'maintenance.html';
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données de maintenance:", error);
-      }
-    }
-    checkMaintenance();
-    setInterval(checkMaintenance, 10000);
-
-    // Fonction de récupération (logique inchangée)
-    function getUserData() {
-      return JSON.parse(localStorage.getItem('userData'));
-    }
-    function StartedGame() {
-      const userData = getUserData();
-      if (userData.partie_commencee) {
-        window.location.href="../combat.html";
-      }  else if (userData.partie_commencee_weekend) {
-        window.location.href="../combat-weekend.html";
-      }
-    }
-    StartedGame();
-    
-
-    // Gestion des clics sur les titres via délégation d'événements
-    document.addEventListener('DOMContentLoaded', () => {
-      document.addEventListener('click', (e) => {
-        const target = e.target;
-        if (target.matches('h1[id^="version-"]')) {
-          // Le dernier segment de l'id permet de retrouver la liste correspondante
-          const version = target.id.split('-').pop();
-          const notes = document.getElementById(`notes-${version}`);
-          if (!notes) {
-            console.error(`Élément avec l'id notes-${version} non trouvé.`);
-            return;
-          }
-          if (notes.classList.contains('open')) {
-            notes.classList.remove('open');
-          } else {
-            document.querySelectorAll('.note-list.open').forEach(list => list.classList.remove('open'));
-            notes.classList.add('open');
-          }
-        }
-      });
-    });
-  document.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem('autoplayEnabled') === 'true') {
-        playMusic();
-      }
-    });
-  </script>
-  <script>
-    // Récupération de l'élément audio
-    const audio = document.getElementById('bg-music');
-    // Liste des pistes à jouer en séquence
-    const tracks = ['B1.mp3', 'B2.mp3'];
-    // Récupère l'indice de la piste en cours depuis le localStorage, ou démarre à 0
-    let currentTrack = parseInt(localStorage.getItem('currentTrack')) || 0;
-    audio.src = tracks[currentTrack];
-
-    // Si une position a été enregistrée pour cette piste, la restaurer
-    let savedTime = parseFloat(localStorage.getItem('currentTime'));
-    if (!isNaN(savedTime)) { audio.currentTime = savedTime; }
-
-    // Variable pour limiter l'enregistrement à une mise à jour par seconde
-    let lastTimeUpdate = 0;
-
-    // Fonction pour lancer la musique
-    function playMusic() {
-      audio.play().catch(() => {
-        console.log("La lecture automatique est bloquée par le navigateur.");
-      });
-    }
-
-    // Fonction qui active l'autoplay et mémorise l'autorisation
-    function enableAutoplay() {
-      playMusic();
-      localStorage.setItem('autoplayEnabled', 'true');
-    }
-
-    // À la fin de la piste, passe à la suivante et réinitialise la position sauvegardée
-    audio.addEventListener('ended', () => {
-      currentTrack = (currentTrack + 1) % tracks.length;
-      localStorage.setItem('currentTrack', currentTrack);
-      localStorage.removeItem('currentTime'); // Réinitialise pour la nouvelle piste
-      audio.src = tracks[currentTrack];
-      playMusic();
-    });
-
-    // Enregistre la position actuelle dans le localStorage, au moins une fois par seconde
-    audio.addEventListener('timeupdate', () => {
-      let now = Math.floor(audio.currentTime);
-      if (now !== lastTimeUpdate) {
-        lastTimeUpdate = now;
-        localStorage.setItem('currentTime', audio.currentTime);
-      }
-    });
-
-    // Fallback pour activer la lecture sur les interactions tactiles ou clic si besoin
-    function autoPlayFallback() {
-      playMusic();
-    }
-    if (localStorage.getItem('autoplayEnabled') === 'true') {
-      document.addEventListener('touchstart', autoPlayFallback, { once: true });
-      document.addEventListener('click', autoPlayFallback, { once: true });
-    }
-  </script>
 </body>
+
+
+
 </html>
