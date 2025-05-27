@@ -1,0 +1,347 @@
+body {
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  background-size: cover;
+  color: #000000;
+  margin: 0;
+  padding: 0;
+}
+
+.content {
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+  /* Ajustement pour exclure la barre de navigation */
+  padding: 20px 10px;
+}
+
+.title {
+  font-size: 32px;
+  margin-bottom: 15px;
+  padding-top: 10px;
+  text-shadow: 2px 2px 4px #000000;
+}
+
+.character-container {
+  display: flex;
+  flex-direction: column;
+  /* Empile verticalement */
+  gap: 15px;
+  margin-bottom: 20px;
+  overflow-y: auto;
+}
+
+
+.character {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  margin-bottom: 0;
+}
+
+.character.unlocked {
+  background-color: rgba(255, 69, 0, 1);
+}
+
+.character:hover {
+  transform: scale(1.05);
+}
+
+.stats {
+  position: relative;
+  /* on la positionne par rapport à .character */
+  text-align: left;
+
+  /* un peu de marge intérieure gauche/droite */
+  padding: 1em 1.2em;
+  /* … et à droite */
+  top: 100%;
+  /* juste sous le .character */
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-radius: 0 0 8px 8px;
+  /* arrondir uniquement le bas */
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  z-index: 10;
+  /* au‑dessus du reste si besoin */
+}
+
+.stats.show {
+  /* la hauteur sera positionnée en JS via scrollHeight */
+}
+
+
+.stats.hide {
+  animation: slideDown 5s forwards;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0;
+  background-color: #f0f0f0;
+  /* Couleur de fond */
+  position: fixed;
+  /* Fixe la barre au bas de l'Ã©cran */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* Prend toute la largeur */
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  /* Ombre optionnelle */
+  z-index: 1000;
+  /* Toujours au-dessus des autres Ã©lÃ©ments */
+}
+
+.character .char-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.level-circle {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+}
+
+.char-name {
+  font-size: 16px;
+}
+
+
+.footer-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.footer-icon img {
+  width: 50px;
+  height: 50px;
+}
+
+.footer-icon:hover {
+  opacity: 0.8;
+}
+
+.perso-icon img {
+  border: 2px solid #ff4500;
+  /* Bordure colorée autour de l'icône */
+  border-radius: 50%;
+  /* Bordure arrondie */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  /* Ombre autour de l'icône */
+}
+
+.perso-icon:hover img {
+  opacity: 1;
+  /* Assure que l'icône reste visible au survol */
+}
+
+.button-improve {
+  background-color: #ff4500;
+  /* Couleur orange */
+  color: #ffffff;
+  /* Texte blanc */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+
+.button-improve:hover {
+  background-color: #ff6347;
+  /* Couleur plus claire au survol */
+  transform: scale(1.05);
+  /* Effet d'agrandissement */
+}
+
+/* Bouton dans le mode sombre */
+@media (prefers-color-scheme: dark) {
+  .button-improve {
+    background-color: #333333;
+    /* Gris foncé */
+    color: #e0e0e0;
+    /* Texte gris clair */
+    border: 1px solid #444444;
+    /* Bordure pour le contraste */
+  }
+
+  .button-improve:hover {
+    background-color: #444444;
+    /* Couleur plus claire au survol */
+  }
+}
+.filters {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.filters select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+  color: #000000;
+  background: rgb(255, 255, 255,0.6);
+  padding: 4px 6px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.filters select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  color: #000000;
+  border: none;
+  padding: 2px 6px;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+}
+
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  .perso-icon img {
+    border: 2px solid #2C3E50;
+    /* Bordure colorée autour de l'icône */
+  }
+  .filters {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .filters select {
+    color: #fff;
+  }
+
+  body {
+    background-color: #000000;
+    color: #e0e0e0;
+  }
+
+  .character {
+    background-color: #222;
+    color: #e0e0e0;
+  }
+
+  .character.unlocked {
+    background-color: #2C3E50;
+  }
+
+  .stats {
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #e0e0e0;
+  }
+
+  .footer {
+    background-color: #333333;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .footer-icon img {
+    filter: brightness(0.8);
+  }
+}
+
+.content {
+  overflow-y: auto;
+  overflow-x: hidden;      /* plus de scroll horizontal */
+  height: calc(100vh - 60px);
+  padding: 20px 10px;
+}
+
+.character-container {
+  /* on retire le overflow-y ici */
+  overflow: visible;       /* laisse tout s'afficher mais sans scroll interne */
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+
+
+/* conteneur titre + filtres */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 5px;
+}
+
+/* titre reste inchangé sauf un petit allègement */
+.title {
+  font-size: 28px;
+  margin: 0;
+  padding: 0;
+  text-shadow: 1px 1px 3px #000;
+}
+
+/* style général des filtres */
+
+
+/* selects ultra‐compacts, texte blanc, arrow par défaut */
+
+
+/* pour masquer le petit arrow IE */
+.filters select::-ms-expand {
+  display: none;
+}
+
+/* focus léger */
+.filters select:focus {
+  outline: 1px dotted #fff;
+}
+
+/* flèche CSS (optionnel) */
+.group-header {
+  width: 100%;
+  padding: 4px 8px;
+  margin: 12px 0 4px;
+  background: rgba(255, 69, 0, 0.8);
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+  .group-header {
+    background: rgba(255, 69, 0, 0.6);
+    color: #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+}

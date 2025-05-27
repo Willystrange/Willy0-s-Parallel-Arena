@@ -1,0 +1,111 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  position: relative;
+}
+.content {
+  overflow: auto;
+  height: 100vh;
+}
+.back-button {
+  display: inline-block;
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #ff4500;
+  text-decoration: none;
+  border-radius: 5px;
+  position: relative;
+  margin-bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: background-color 0.3s;
+}
+.back-button:hover {
+  background-color: #ff5500;
+}
+.dark-mode .back-button {
+  background-color: #333;
+  color: #e0e0e0;
+}
+.dark-mode .back-button:hover {
+  background-color: #555;
+}
+h1 { text-align: center; }
+.semaine { margin-bottom: 40px; }
+.semaine h2 {
+  background-color: #ddd;
+  padding: 10px;
+  border-radius: 5px;
+}
+.quêtes {
+  list-style-type: none;
+  padding: 0;
+}
+.quêtes li {
+  background-color: #fff;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+.progress-bar-container {
+  margin-top: 10px;
+  position: relative;
+  height: 30px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background-color: #555;
+  width: 0;
+  border-radius: 5px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.3s;
+}
+.progress-bar-text {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  line-height: 30px;
+  color: white;
+  font-weight: bold;
+}
+/* Style pour l'affichage de la récompense */
+.reward-info {
+  font-style: italic;
+  color: #777;
+  margin: 5px 0;
+}
+.hidden { display: none; }
+@media (prefers-color-scheme: dark) {
+  body { background-color: #121212; color: #e0e0e0; }
+  .back-button { background-color: #333; color: #e0e0e0; }
+  .back-button:hover { background-color: #555; }
+  .semaine h2 { background-color: #333; color: #e0e0e0; }
+  .quêtes li {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+  }
+  .progress-bar-container { background-color: #555; }
+  .progress-bar { background-color: #888; }
+  .reward-info { color: #ccc; }
+}
+/* Masquer les barres de défilement */
+.content::-webkit-scrollbar { display: none; }
+.content { scrollbar-width: none; -ms-overflow-style: none; }
+
+.countdown {
+  text-align: center;
+  font-size: 1.1em;
+  margin: 0.5em 0 1em;
+  color: #777;
+}
