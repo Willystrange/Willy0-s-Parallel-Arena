@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture Audio Automatique</title>
+</head>
+<body>
+
+    <button id="playButton">Jouer la musique</button>
+
+    <audio id="audioB1" src="B1.mp3" loop></audio>
+    <audio id="audioB2" src="B2.mp3" loop></audio>
+
+    <script>
+        const audioB1 = document.getElementById("audioB1");
+        const audioB2 = document.getElementById("audioB2");
+        const playButton = document.getElementById("playButton");
+
+        function startMusic() {
+            audioB1.play()
+                .then(() => {
+                    localStorage.setItem("musicAllowed", "true");
+                    playButton.style.display = "none";
+                    audioB1.onended = () => {
+                        audioB2.play();
+                    };
+                })
+                .catch(error => {
+                    console.log("Autoplay bloqué, interaction requise.");
+                });
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("musicAllowed") === "true") {
+                audioB1.play().catch(error => console.log("Lecture B1 bloquée."));
+                audioB1.onended = () => {
+                    audioB2.play();
+                };
+                playButton.style.display = "none";
+            }
+        });
+
+        playButton.addEventListener("click", startMusic);
+    </script>
+
+</body>
+</html>

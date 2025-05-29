@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Willy0's Parallel Arena</title>
+  <script src="scripts/app.js"></script>
+</head>
+<body>
+  <!-- Place ce DIV tout en haut de ton HTML, juste après <body> -->
+  <div id="adblock-overlay" style="
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      color: #fff;
+      z-index: 9999;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 0 20px;
+  ">
+    <div id="adblock-message" style="
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        line-height: 1.5;
+        font-size: 1em;
+    ">
+      Vous utilisez un bloqueur de publicité.<br>
+      Vous ne pouvez donc ni interragir avec cette page ni obtenir les récompenses de celle-ci avant de l'avoir désactivé.<br>
+      Nous vous rappelons que nous ne mettons pas de publicité tiers sur ce site. Vous pouvez donc le mettre sur la liste blanche de votre bloqueur.<br>
+      <br>
+      (Touchez l’écran pour revenir au menu principal)
+    </div>
+  </div>
+
+  <h1 class="premiumA">
+    <span class="base">Parallel Pass</span
+  </h1>
+  <div class="player-info">
+    <div class="level-info">
+      <div class="level" id="current-level"></div>
+      <div class="xp-progress-container">
+        <div class="xp-progress-bar">
+          <span id="xp-progress-text"></span>
+        </div>
+      </div>
+      <div class="next-level" id="next-level"></div>
+    </div>
+  </div>
+  <div class="container" id="album-container">
+    <!-- Les pages seront créées dynamiquement -->
+    <div class="controls">
+      <div class="control-buttons">
+        <button id="prevPage">Page Précédente</button>
+        <button id="nextPage">Page Suivante</button>
+      </div>
+    </div>
+    <div class="Dates">Le Parallel Pass 4 durera du 16 juillet au 20 septembre 2025.</div>
+  </div>
+  <div class="footer">
+    <button class="footer-icon perso-icon" onclick="App.viewCharacters()" id="perso-icon">
+      <img src="Characters.svg" alt="Personnages">
+    </button>
+    <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
+      <img src="Menu.svg" alt="Menu Principal">
+    </button>
+    <button class="footer-icon pass-icon" onclick="App.goToPasse()">
+      <img src="Pass.svg" alt="Passe de combat">
+    </button>
+    <button class="footer-icon" onclick="App.viewShop()">
+      <img src="Shop.svg" alt="Boutique">
+    </button>
+  </div>
+  <div class="popup" id="ad-popup">
+    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+      Parallel Pass 4 Premium
+      <img src="Parallel-Pass-3-premium.png" alt="Icône Parallel Pass 3 Premium" style="width: 80px; height: 80px; margin-left: 10px;">
+    </h2>
+    <p>Obtenez des récompenses bonus dont le personnage "Boompy" au niveau 60 pour 850 points !</p>
+    <div>
+      <button onclick="App.hidePopup()">Annuler</button>
+      <button onclick="App.handlePurchase()">Acheter</button>
+      <button onclick="loadPage('pass_promotion')"; App.hidePopup();'>Inspecter</button>
+    </div>
+  </div>
+  <audio id="bg-music">
+    <source src="B1.mp3" type="audio/mpeg">
+    Votre navigateur ne supporte pas l'audio.
+  </audio>
+  <div class="loading-popup" id="loading-popup">
+    <div class="loading-spinner"></div>
+    <p>Achat en cours...</p>
+  </div>
+  <script src="localStorage.js"></script>
+</body>
+</html>

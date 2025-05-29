@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Willy0's Parallel Arena</title>
+  
+  <script src="scripts/app.js"></script>
+</head>
+
+<body>
+  <div class="content">
+    <div class="title">
+      <span>Amélioration de Poulpy</span>
+    </div>
+    <div class="data-container">
+      <div id="characters-unlocked"></div>
+    </div>
+    <audio id="bg-music">
+      <source src="B1.mp3" type="audio/mpeg">
+      Votre navigateur ne supporte pas l'audio.
+    </audio>
+
+    <div class="footer">
+
+      <button class="footer-icon" onclick="App.viewCharacters()">
+        <img src="../Characters.svg" alt="Personnages">
+      </button>
+      <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
+        <img src="../Menu.svg" alt="Menu Principal">
+      </button>
+      <button class="footer-icon" onclick="App.goToPasse()">
+        <img src="../Pass.svg" alt="Passe de combat">
+      </button>
+      <button class="footer-icon" onclick="App.viewShop()">
+        <img src="../Shop.svg" alt="Boutique">
+      </button>
+    </div>
+  </div>
+</body>
+
+</html>

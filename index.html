@@ -1,16 +1,34 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <meta charset="UTF-8">
+  <title>Willy0's Parallel Arena</title>
+  <!-- Feuille de style principale pour la structure et les éléments persistants -->
+  <!-- DANS index.html UNIQUEMENT -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-performance-compat.js"></script>
+  <link rel="stylesheet" href="intro.css">
+  <link rel="stylesheet" href="quetes.css">
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-</body>
+  <!-- Zone de l'application : éléments persistants et contenu dynamique -->
+  <audio id="background-music-1" loop>
+    <source src="../B1.mp3" type="audio/mp3">
+    Votre navigateur ne supporte pas l'élément audio.
+  </audio>
+  <audio id="background-music-2" loop>
+    <source src="../B2.mp3" type="audio/mp3">
+    Votre navigateur ne supporte pas l'élément audio.
+  </audio>
+  <div id="app">
+  </div>
 
+  <!-- Inclusion du script principal de la SPA -->
+  <script src="localStorage.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
 </html>

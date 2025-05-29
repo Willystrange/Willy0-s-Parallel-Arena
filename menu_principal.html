@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  
+  <script src="scripts/app.js" defer></script>
+
+  <!-- Le script principal est chargé en différé -->
+  <script src="localStorage.js"></script>
+  <script src="scripts/menu_principal.js" defer></script>
+  <!-- Inclure Firebase -->
+  
+  <title>Willy0's Parallel Arena</title>
+</head>
+
+  
+
+<body>
+  <!-- En-tête -->
+  <div id="app"></div>
+  <header id="header">
+    <div class="top-bar">
+      <div class="title" id="pseudoTitle"><span></span></div>
+      <div class="icons">
+        <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Email Icon" onclick="App.goToActualites()" />
+        <img src="https://cdn-icons-png.flaticon.com/512/126/126472.png" alt="Icône Réglages" onclick="App.goToSettings()" />
+      </div>
+    </div>
+    <div class="bottom-bar"></div>
+    <div class="interaction-zone"></div>
+    <!-- Statistiques -->
+    <div class="stats">
+      <div class="stat">Trophées actuels: <span id="currentTrophies">0</span></div>
+      <div class="stat">Trophées maximum: <span id="maxTrophies">0</span></div>
+      <div class="stat">Parties gagnées en classique: <span id="classicWins">0</span></div>
+      <div class="stat">Manches maximum gagnées en survie: <span id="survivalWins">0</span></div>
+      <div class="stat">Parties lancées en classique: <span id="classicGames">0</span></div>
+      <div class="stat">Parties lancées en survie: <span id="survivalGames">0</span></div>
+      <div class="stat">
+        Progression des trophées:
+        <div class="trophies-bar">
+          <div id="trophiesProgressFill"></div>
+        </div>
+        <div id="nextRewards"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu principal -->
+  <div class="buttons-container">
+    <!-- Élément audio unique pour l'auto player -->
+    <audio id="bg-music">
+      <source src="B1.mp3" type="audio/mpeg">
+      Votre navigateur ne supporte pas l'audio.
+    </audio>
+    <button class="button" id="playButton" onclick="App.showModeSelection()">Jouer</button>
+    <button class="button" id="questsButton" onclick="App.viewQuests()">Quêtes</button>
+  </div>
+  <!-- Calendrier de connexion quotidienne -->
+  <div id="daily-login-calendar" class="daily-calendar" style="display: none;">
+    <h3>Récompenses de connexion</h3>
+    <div id="calendar-grid" class="calendar-grid"></div>
+    <button id="close-calendar" class="button">Fermer</button>
+  </div>
+
+  <!-- Overlay plein écran pour la récompense -->
+  <div id="reward-overlay" class="reward-overlay" style="display: none;">
+    <div class="reward-content">
+      <div id="reward-icon" class="reward-icon"></div>
+      <div id="reward-text" class="reward-text"></div>
+      <button id="close-reward" class="button">Fermer</button>
+    </div>
+  </div>
+
+  <!-- Bannière de rappel -->
+  <div id="daily-login-banner" class="daily-login-banner minimized">
+    <div class="banner-content">Récompense quotidienne disponible</div>
+    <div class="banner-handle">&gt;</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="footer-icon" onclick="App.viewCharacters()">
+      <img src="Characters.svg" alt="Personnages" />
+    </button>
+    <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
+      <img src="Menu.svg" alt="Menu Principal" />
+    </button>
+    <button class="footer-icon" onclick="App.goToPasse()">
+      <img src="Pass.svg" alt="Passe de combat" />
+    </button>
+    <button class="footer-icon" onclick="App.viewShop()">
+      <img src="Shop.svg" alt="Boutique" />
+    </button>
+  </div>
+
+  <!-- Dialogue de sélection du mode de jeu -->
+  <div class="dialog-overlay" id="modeDialog">
+    <div class="dialog">
+      <h2>Choisissez le mode de jeu</h2>
+      <button class="mode-button" onclick="App.startGame('classique')">Classique</button>
+      <button class="mode-button" onclick="App.startGame('survie')">Survie</button>
+      <button class="mode-button" id="weekendButton" onclick="App.startGame('classique-weeknd')">
+        Classique Weekend
+        <div class="weekend-timer" id="weekendTimer" style="display: none;">
+          <span id="countdown"></span>
+        </div>
+      </button>
+      <button class="cancel-button" onclick="App.closeModeSelection()">Annuler</button>
+    </div>
+  </div>
+</body>
+</html>

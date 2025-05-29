@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Willy0's Parallel Arena</title>
+  <script src="app.js"></script>
+</head>
+
+<body>
+  <div class="content">
+    <h2>Choisissez un personnage</h2>
+    <div class="sort-menu">
+      <label for="sort">Trier par:</label>
+      <select id="sort">
+        <option value="alphabetical">Ordre alphabétique</option>
+        <option value="level_asc">Niveau croissant</option>
+        <option value="level_desc">Niveau décroissant</option>
+        <option value="rarity_asc">Rareté croissante</option>
+        <option value="rarity_desc">Rareté décroissante</option>
+      </select>
+    </div>
+    <div class="boutons" id="character-list">
+      <!-- Les boutons des personnages seront ajoutés dynamiquement ici -->
+    </div>
+  </div>
+</body>
+
+</html>

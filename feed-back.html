@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="Formulaire de feedback">
+  <title>Willy0's Parallel Arena</title>
+
+  <script src="scripts/app.js"></script>
+</head>
+
+<body>
+  <div id="confirmationMessage"></div>
+  <div class="content">
+    <div class="container">
+      <h1>Formulaire de Feedback</h1>
+      <form id="feedbackForm">
+        <!-- Catégorie -->
+        <div class="form-group">
+          <label for="category">Catégorie</label>
+          <select id="category" name="category" required>
+            <option value="">Sélectionnez une catégorie</option>
+            <option value="fonctionnalite">Fonctionnalité</option>
+            <option value="design">Design</option>
+            <option value="performance">Performance</option>
+            <option value="securite">Sécurité</option>
+            <option value="gameplay">Gameplay</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <!-- Importance -->
+        <div class="form-group">
+          <label>Importance</label>
+          <div class="rating">
+            <input type="radio" id="star10" name="importance" value="10">
+            <label for="star10" aria-label="10 étoiles">☆</label>
+            <input type="radio" id="star9" name="importance" value="9">
+            <label for="star9" aria-label="9 étoiles">☆</label>
+            <input type="radio" id="star8" name="importance" value="8">
+            <label for="star8" aria-label="8 étoiles">☆</label>
+            <input type="radio" id="star7" name="importance" value="7">
+            <label for="star7" aria-label="7 étoiles">☆</label>
+            <input type="radio" id="star6" name="importance" value="6">
+            <label for="star6" aria-label="6 étoiles">☆</label>
+            <input type="radio" id="star5" name="importance" value="5">
+            <label for="star5" aria-label="5 étoiles">☆</label>
+            <input type="radio" id="star4" name="importance" value="4">
+            <label for="star4" aria-label="4 étoiles">☆</label>
+            <input type="radio" id="star3" name="importance" value="3">
+            <label for="star3" aria-label="3 étoiles">☆</label>
+            <input type="radio" id="star2" name="importance" value="2">
+            <label for="star2" aria-label="2 étoiles">☆</label>
+            <input type="radio" id="star1" name="importance" value="1">
+            <label for="star1" aria-label="1 étoile">☆</label>
+          </div>
+        </div>
+        <!-- Remarques -->
+        <div class="form-group">
+          <label for="comments">Vos remarques :</label>
+          <textarea id="comments" name="comments" rows="5" placeholder="Écrivez ici vos remarques"></textarea>
+        </div>
+        <!-- Bouton d'envoi -->
+        <div class="form-group">
+          <button type="submit">Envoyer</button>
+        </div>
+      </form>
+      <!-- Bouton Retour -->
+      <div class="form-group">
+        <button type="button" id="goBackButton">Retour</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

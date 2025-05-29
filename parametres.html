@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="localStorage.js"></script>
+  <script src="scripts/app.js"></script>
+  <title>Willy0's Parallel Arena</title>
+    
+</head>
+<body>
+  <div class="content">
+    <div class="container">
+      <h1>Paramètres</h1>
+      <a class="button" href="#" id="importBackup">Importer une sauvegarde</a>
+      <a class="button" href="#" id="downloadBackup">Sauvegarder les données</a>
+      <a class="button" href="#" id="updateBackup">Sauver la sauvegarde</a>
+      <a class="button" href=# id="contactDev">Contactez le développeur</a>
+      <a class="button" id="loginButton" onclick="loadPage('connection')">Se connecter</a>
+      <a class="button" id="logoutButton" onclick="loadPage('connection')" style="display:none;">Se déconnecter</a>
+      
+      <!-- Système audio pour la Web App (lecture séquentielle sans attribut loop) -->
+
+      <!-- Bouton d'activation du son. Si l'autorisation a déjà été donnée sur une autre page, ce bouton sera caché -->
+      <button class="button" id="musicToggleButton">Activer le son</button>
+      
+      <a class="back-button" onclick="loadPage('menu_principal')">Retour au menu principal</a>
+      <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
+    </div>
+    <a id="versionInfo" class="version-info" onclick="loadPage('patch_note')" title="Voir les notes de mise à jour"></a>
+  </div>
+  <script>
+      
+    
+  </script>
+</body>
+</html>

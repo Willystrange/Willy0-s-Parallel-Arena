@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Willy0's Parallel Arena</title>
+  <script src="app.js"></script>
+</head>
+
+<body>
+  <div class="top-bar">
+    <div class="header-info">
+      <h3 id="player-name"></h3>
+      <p id="player-pv"></p>
+      <div id="player-special-bar" class="special-bar">
+        <div id="player-special-fill" class="special-fill"></div>
+      </div>
+      <p id="player-attack"></p>
+      <p id="player-defense"></p>
+    </div>
+    <div class="header-info">
+      <h3 id="opponent-name"></h3>
+      <p id="opponent-pv"></p>
+      <div id="opponent-special-bar" class="special-bar">
+        <div id="opponent-special-fill" class="special-fill"></div>
+      </div>
+      <p id="opponent-attack"></p>
+      <p id="opponent-defense"></p>
+    </div>
+  </div>
+  <div id="overlay"></div>
+  <div id="upgrade-options">
+    <button onclick="App.upgradeStat('attack')">Améliorer Attaque</button>
+    <button onclick="App.upgradeStat('defense')">Améliorer Défense</button>
+    <button onclick="App.closeUpgradeOptions()">Fermer</button>
+  </div>
+
+  <div class="content">
+    <div class="combat-container">
+      <div id="combat-log"></div>
+    </div>
+    <div class="combat-actions-wrapper">
+      <div class="combat-actions">
+        <button id="attack-button" onclick="App.playerAttack(); startMusicC();">Attaquer</button>
+        <button id="special-button"
+          onclick="App.useSpecialAbility(App.playerCharacter, App.opponentCharacter, true)">Capacité
+          spéciale</button>
+        <button id="items-button" onclick="App.showItemSelection(); startMusicC();">Objets</button>
+      </div>
+      <div id="item-selection">
+        <button onclick="App.hideItemSelection()">Annuler</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

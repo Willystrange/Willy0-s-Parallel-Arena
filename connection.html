@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="scripts/app.js">
+  </script>
+  <title>Willy0's Parallel Arena</title>
+  <script>
+    // Initialisation de Firebase
+  </script>
+</head>
+<div class="container">
+  <form id="loginForm" onsubmit="event.preventDefault(); App.login();">
+    <h1>Connexion</h1>
+    <div class="input-group">
+      <label for="email">Email:</label>
+      <input type="email" id="email" required>
+    </div>
+    <div class="input-group">
+      <label for="password">Mot de passe:</label>
+      <input type="password" id="password" required>
+    </div>
+    <button type="submit">Se connecter</button>
+    <button type="button" onclick="App.showRegisterForm()">Créer un compte</button>
+    <button type="button" onclick="App.googleSignIn()">Connexion avec Google</button>
+    <button type="button" onclick="loadPage('menu_principal')">Jouer sans se connecter</button>
+  </form>
+
+  <form id="registerForm" class="hidden" onsubmit="event.preventDefault(); App.register();">
+    <h1>Inscription</h1>
+    <div class="input-group">
+      <label for="registerEmail">Email:</label>
+      <input type="email" id="registerEmail" required>
+    </div>
+    <div class="input-group">
+      <label for="registerPassword">Mot de passe:</label>
+      <input type="password" id="registerPassword" required>
+    </div>
+    <button type="submit">S'inscrire</button>
+    <button type="button" onclick="App.showLoginForm()">Déjà un compte ?</button>
+    <button type="button" onclick="loadPage('menu_principal')">Jouer sans se connecter</button>
+  </form>
+</div>
+</body>
+
+</html>

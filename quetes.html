@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Willy0's Parallel Arena</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <script src="scripts/app.js"></script>
+</head>
+
+<body>
+  <h1>Quêtes quotidiennes</h1>
+  <div class="countdown" id="daily-countdown"></div>
+  <div class="semaine" id="daily-quests">
+    <ul class="quêtes" id="quete1"><!-- Quêtes ajoutées dynamiquement --></ul>
+    <ul class="quêtes" id="quete2"></ul>
+    <ul class="quêtes" id="quete3"></ul>
+  </div>
+  <h1>Quetes de l'été</h1>
+  <!-- Ajoute ce bloc là où tu veux afficher les quêtes d’été -->
+  <div id="summer">
+    <div id="summer-countdown">Prochaines quêtes dans : --</div>
+    <ul id="summer-quests" class="quêtes"></ul>
+  </div>
+
+
+  <h1>Quêtes du Week-end</h1>
+  <div class="countdown" id="weekend-countdown"></div>
+  <div class="semaine" id="weekend-quests">
+    <ul class="quêtes" id="weekend-quete1"></ul>
+    <ul class="quêtes" id="weekend-quete2"></ul>
+    <ul class="quêtes" id="weekend-quete3"></ul>
+  </div>
+  <h1>Quêtes Hebdomadaires</h1>
+  <div class="countdown" id="weekly-countdown"></div>
+  <div id="quests-container">
+    <div id="weeks"><!-- Les sections des semaines générées par JS --></div>
+  </div>
+  <a onclick="App.clearQuestPage();loadPage('menu_principal'); " class="back-button" id="back-button">Retour au menu
+    principal</a>
+</body>
+
+</html>
