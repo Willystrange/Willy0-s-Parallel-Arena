@@ -80,7 +80,7 @@ function resumeBaseMusic() {
 
 function startMusicC() {
   if (hasStartedC) return;
-  const userData = getUserData();
+  userData = getUserData();
   if (userData.music) {
     hasStartedC = true;
 
@@ -121,6 +121,8 @@ const firebaseConfig = {
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.initializeApp(firebaseConfig);
 }
 
 const database = firebase.database();
@@ -156,8 +158,8 @@ function checkMaintenance() {
     database.ref('maintenance/end').once('value')
   ]).then(([startSnap, endSnap]) => {
     const maintenanceStart = new Date(startSnap.val());
-    const maintenanceEnd = new Date(endSnap.val());
-    const now = new Date();
+    const maintenanceEnd   = new Date(endSnap.val());
+    const now              = new Date();
 
     const dansLaFenetre = now >= maintenanceStart && now <= maintenanceEnd;
 
@@ -361,7 +363,10 @@ function saveUserData(userData) {
  */
 // 0) table de correspondance page → pages probables à visiter
 const likelyNextPages = {
-  intro: ['menu_principal', 'connection'],
+  intro: ['connection', 'menu_principal'],
+  connection: ['menu_principal'],
+  menu_principal: ['quetes', 'perso_stats', 'passe_de_combat', 'boutique'],
+  amelioration: ['combat', 'characters']
 };
 // Table page → liste d’URLs d’images à précharger
 const imagesToPreload = {
@@ -387,15 +392,7 @@ function preloadImages(page) {
   });
 }
 // fonction de préchargement
-function preloadPage(pageOrPages) {
-  console.log('⏳ preloadPage appelé avec →', pageOrPages);
-  if (Array.isArray(pageOrPages)) {
-    pageOrPages.forEach(preloadPage);
-    return;
-  }
-  const page = pageOrPages;
-  // … reste de la fonction inchangé …
-
+function preloadPage(page) {
   // 1) précharger HTML si pas déjà en cache
   if (!cache.html.has(page)) {
     fetch(page + '.html')
@@ -408,8 +405,7 @@ function preloadPage(pageOrPages) {
       })
       .catch(console.warn);
   }
-
-  // 2) précharger script JS
+  // 2) précharger script JS (ajoute un <link rel="prefetch"> pour le navigateur)
   if (!cache.script.has(page)) {
     const link = document.createElement('link');
     link.rel = 'prefetch';
@@ -418,14 +414,13 @@ function preloadPage(pageOrPages) {
     document.head.appendChild(link);
     cache.script.add(page);
   }
-
-  // 3) précharger les images pour **toutes** les pages
-  preloadImages(page);
+  // après avoir déclenché preloadPage pour le HTML/JS…
+  if (page === "intro") {
+    preloadImages(page);
+  }
 }
 
 // fonction principale de chargement
-const pageContainers = new Map(); // nouveau cache local DOM
-
 function loadPage(page) {
   resetApp();
 
@@ -436,35 +431,22 @@ function loadPage(page) {
   });
   document.body.classList.add(page);
 
-  const app = document.getElementById('app');
-
-  // 2) masquer tous les conteneurs sauf celui de la page demandée
-  pageContainers.forEach((container, name) => {
-    container.style.display = (name === page) ? 'block' : 'none';
-  });
-
-  // 3) si la page est déjà montée, ne rien faire de plus
-  if (pageContainers.has(page)) return;
-
-  // 4) sinon, charger HTML puis JS
+  // 2) charger HTML + JS
+  // -- si on a déjà préchargé le HTML, on l'utilise
   const htmlPromise = cache.html.has(page)
     ? Promise.resolve(cache.html.get(page))
     : fetch(page + '.html')
-        .then(res => {
-          if (!res.ok) throw new Error('Erreur de chargement de ' + page + '.html');
-          return res.text();
-        })
-        .then(html => {
-          cache.html.set(page, html);
-          return html;
-        });
+      .then(res => {
+        if (!res.ok) throw new Error('Erreur de chargement de ' + page + '.html');
+        return res.text();
+      });
 
   htmlPromise.then(html => {
+    const app = document.getElementById('app');
+    app.innerHTML = '';
     const container = document.createElement('div');
     container.innerHTML = html;
-    container.style.display = 'block';
     app.appendChild(container);
-    pageContainers.set(page, container);
 
     // charger dynamiquement le script
     const script = document.createElement('script');
@@ -473,16 +455,21 @@ function loadPage(page) {
     document.body.appendChild(script);
 
     // une fois la page chargée, précharger les suivantes
-})}
+    const nexts = likelyNextPages[page] || [];
+    nexts.forEach(preloadPage);
+  })
+    .catch(err => console.error(err));
+  // après avoir déclenché preloadPage pour le HTML/JS…
+}
+
+
+
 
 
 
 document.addEventListener('DOMContentLoaded', function() {
   loadPage('intro');
-  // déclenche le préchargement des deux pages
-  preloadPage(likelyNextPages['intro']);
 });
-
 
 setTimeout(() => {
   initMusicPlayerC();
