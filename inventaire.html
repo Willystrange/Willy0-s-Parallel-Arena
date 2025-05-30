@@ -17,6 +17,12 @@
 <body>
   <div class="header">
     <h1>Mon Inventaire</h1>
+    <div class="sort-controls">
+      <label>Trier par :</label>
+      <button class="sort-btn active" onclick="App.sortInventory('category')">Catégorie</button>
+      <button class="sort-btn" onclick="App.sortInventory('name')">Nom</button>
+      <button class="sort-btn" onclick="App.sortInventory('quantity')">Quantité</button>
+    </div>
   </div>
   
   <div class="scroll-container">

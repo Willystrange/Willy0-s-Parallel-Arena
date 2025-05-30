@@ -76,6 +76,121 @@ App.toggleCategoryVisibility = function() {
   });
 }
 
+/* ===================== FONCTIONS DE TRI ===================== */
+App.sortInventory = function(sortType) {
+  // Mettre à jour l'apparence des boutons
+  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  const content = document.querySelector('.content');
+  const sections = Array.from(content.querySelectorAll('.category-section'));
+  
+  // Sauvegarder l'état actuel pour la restauration
+  if (!App.originalOrder) {
+    App.originalOrder = sections.map(section => section.cloneNode(true));
+  }
+  
+  if (sortType === 'category') {
+    // Tri par catégorie (ordre original)
+    App.restoreOriginalOrder();
+  } else if (sortType === 'name') {
+    // Tri alphabétique par nom d'objet
+    App.sortByName(sections);
+  } else if (sortType === 'quantity') {
+    // Tri par quantité (décroissant)
+    App.sortByQuantity(sections);
+  }
+}
+
+App.restoreOriginalOrder = function() {
+  const content = document.querySelector('.content');
+  content.innerHTML = '';
+  App.originalOrder.forEach(section => {
+    content.appendChild(section.cloneNode(true));
+  });
+}
+
+App.sortByName = function(sections) {
+  const content = document.querySelector('.content');
+  content.innerHTML = '';
+  
+  // Créer une section unique pour tous les objets triés par nom
+  const sortedSection = document.createElement('div');
+  sortedSection.className = 'category-section';
+  sortedSection.innerHTML = '<h2>Objets triés par nom</h2><div class="category" id="sorted-items"></div>';
+  
+  const sortedContainer = sortedSection.querySelector('.category');
+  
+  // Collecter tous les objets visibles
+  const allItems = [];
+  sections.forEach(section => {
+    const items = section.querySelectorAll('.inventory-item');
+    items.forEach(item => {
+      if (item.style.display !== 'none') {
+        const name = item.querySelector('h3').textContent;
+        allItems.push({
+          element: item.cloneNode(true),
+          name: name
+        });
+      }
+    });
+  });
+  
+  // Trier par nom
+  allItems.sort((a, b) => a.name.localeCompare(b.name));
+  
+  // Ajouter les objets triés
+  allItems.forEach(item => {
+    sortedContainer.appendChild(item.element);
+  });
+  
+  if (allItems.length > 0) {
+    content.appendChild(sortedSection);
+  }
+}
+
+App.sortByQuantity = function(sections) {
+  const content = document.querySelector('.content');
+  content.innerHTML = '';
+  
+  // Créer une section unique pour tous les objets triés par quantité
+  const sortedSection = document.createElement('div');
+  sortedSection.className = 'category-section';
+  sortedSection.innerHTML = '<h2>Objets triés par quantité</h2><div class="category" id="sorted-items"></div>';
+  
+  const sortedContainer = sortedSection.querySelector('.category');
+  
+  // Collecter tous les objets visibles avec leur quantité
+  const allItems = [];
+  sections.forEach(section => {
+    const items = section.querySelectorAll('.inventory-item');
+    items.forEach(item => {
+      if (item.style.display !== 'none') {
+        const name = item.querySelector('h3').textContent;
+        const quantityText = item.querySelector('.quantity span').textContent;
+        const quantity = parseInt(quantityText);
+        allItems.push({
+          element: item.cloneNode(true),
+          name: name,
+          quantity: quantity
+        });
+      }
+    });
+  });
+  
+  // Trier par quantité (décroissant)
+  allItems.sort((a, b) => b.quantity - a.quantity);
+  
+  // Ajouter les objets triés
+  allItems.forEach(item => {
+    sortedContainer.appendChild(item.element);
+  });
+  
+  if (allItems.length > 0) {
+    content.appendChild(sortedSection);
+  }
+}
+
 /* ===================== INITIALISATION ===================== */
 App.init = function() {
   App.updateInventoryDisplay();
