@@ -20,8 +20,10 @@ body {
 .header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  padding: 20px;
-  text-align: center;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
@@ -33,47 +35,30 @@ body {
   font-size: 28px;
   font-weight: bold;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
+  margin: 0;
 }
 
-.sort-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.sort-controls label {
-  color: #2c3e50;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.sort-btn {
-  background: linear-gradient(145deg, #ffffff, #f8f9fa);
-  border: 2px solid #ddd;
-  border-radius: 20px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.sort-btn:hover {
-  background: linear-gradient(145deg, #3498db, #2980b9);
-  color: white;
-  border-color: #3498db;
-  transform: translateY(-2px);
-}
-
-.sort-btn.active {
+.sort-cycle-btn {
   background: linear-gradient(145deg, #ff7b54, #ff9a76);
   color: white;
-  border-color: #ff7b54;
+  border: 2px solid #ff7b54;
+  border-radius: 25px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  font-weight: 600;
   box-shadow: 0 4px 8px rgba(255, 123, 84, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-cycle-btn:hover {
+  background: linear-gradient(145deg, #e67e22, #d35400);
+  border-color: #e67e22;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 123, 84, 0.4);
 }
 
 /* === CONTAINER PRINCIPAL === */
@@ -283,23 +268,17 @@ body {
     font-size: 13px;
   }
   
+  .header {
+    padding: 12px 15px;
+  }
+  
   .header h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
+    font-size: 22px;
   }
   
-  .sort-controls {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .sort-controls label {
+  .sort-cycle-btn {
+    padding: 8px 16px;
     font-size: 14px;
-  }
-  
-  .sort-btn {
-    padding: 6px 12px;
-    font-size: 12px;
   }
   
   .category-section h2 {
@@ -325,21 +304,15 @@ body {
     color: #ecf0f1;
   }
   
-  .sort-btn {
-    background: linear-gradient(145deg, #34495e, #2c3e50);
-    color: #ecf0f1;
-    border-color: #34495e;
-  }
-  
-  .sort-btn:hover {
-    background: linear-gradient(145deg, #3498db, #2980b9);
-    border-color: #3498db;
-  }
-  
-  .sort-btn.active {
+  .sort-cycle-btn {
     background: linear-gradient(145deg, #e67e22, #d35400);
     border-color: #e67e22;
     box-shadow: 0 4px 8px rgba(230, 126, 34, 0.3);
+  }
+  
+  .sort-cycle-btn:hover {
+    background: linear-gradient(145deg, #f39c12, #e67e22);
+    border-color: #f39c12;
   }
   
   .category-section {

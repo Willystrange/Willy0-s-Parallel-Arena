@@ -77,11 +77,29 @@ App.toggleCategoryVisibility = function() {
 }
 
 /* ===================== FONCTIONS DE TRI ===================== */
-App.sortInventory = function(sortType) {
-  // Mettre à jour l'apparence des boutons
-  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+App.currentSortMode = 'category';
+App.sortModes = [
+  { type: 'category', icon: '📂', label: 'Catégorie' },
+  { type: 'name', icon: '🔤', label: 'Nom' },
+  { type: 'quantity', icon: '🔢', label: 'Quantité' }
+];
+
+App.cycleSortMode = function() {
+  const currentIndex = App.sortModes.findIndex(mode => mode.type === App.currentSortMode);
+  const nextIndex = (currentIndex + 1) % App.sortModes.length;
+  const nextMode = App.sortModes[nextIndex];
   
+  App.currentSortMode = nextMode.type;
+  App.sortInventory(nextMode.type);
+  
+  // Mettre à jour le bouton
+  const sortBtn = document.getElementById('sort-btn');
+  if (sortBtn) {
+    sortBtn.innerHTML = `${nextMode.icon} ${nextMode.label}`;
+  }
+}
+
+App.sortInventory = function(sortType) {
   const content = document.querySelector('.content');
   const sections = Array.from(content.querySelectorAll('.category-section'));
   
