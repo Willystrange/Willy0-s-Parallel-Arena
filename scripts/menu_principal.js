@@ -253,6 +253,7 @@ App.goToSettings = function() { loadPage('parametres'); };
 App.goToActualites = function() { loadPage('actualites'); };
 App.viewCharacters = function() { loadPage('perso_stats'); };
 App.viewShop = function() { loadPage('boutique'); };
+App.viewInventory = function() { loadPage('inventaire'); };
 App.showMainMenu = function() { loadPage('menu_principal'); };
 
 

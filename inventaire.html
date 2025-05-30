@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Willy0's Parallel Arena</title>
+
+  <script src="scripts/app.js"></script>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Mon Inventaire</h1>
+  </div>
+  
+  <div class="scroll-container">
+    <div class="content">
+      
+      <!-- Catégorie XP -->
+      <div class="category-section">
+        <h2>Expérience</h2>
+        <div class="category" id="category-xp-inv">
+          <div class="inventory-item" id="inv-xp">
+            <img src="XP_2.png" alt="Double XP">
+            <div class="item-info">
+              <h3>Double XP</h3>
+              <p>Profitez du double XP lors de vos combats !</p>
+              <p class="quantity">Quantité : <span id="stock-xp-inv">0</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catégorie Soins -->
+      <div class="category-section">
+        <h2>Soins</h2>
+        <div class="category" id="category-soins-inv">
+          <div class="inventory-item" id="inv-potion">
+            <img src="Potion-1.png" alt="Potion de Santé">
+            <div class="item-info">
+              <h3>Potion de Santé</h3>
+              <p>Augmente les PV du joueur de 1100.</p>
+              <p class="quantity">Quantité : <span id="stock-potion-inv">0</span></p>
+            </div>
+          </div>
+          
+          <div class="inventory-item" id="inv-amulette">
+            <img src="Amulette-1.png" alt="Amulette de Régénération">
+            <div class="item-info">
+              <h3>Amulette de Régénération</h3>
+              <p>Régénère 2% des PV max par tour.</p>
+              <p class="quantity">Quantité : <span id="stock-amulette-inv">0</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catégorie Attaque -->
+      <div class="category-section">
+        <h2>Attaque</h2>
+        <div class="category" id="category-attaque-inv">
+          <div class="inventory-item" id="inv-epee">
+            <img src="epee-1.png" alt="Épée Tranchante">
+            <div class="item-info">
+              <h3>Épée Tranchante</h3>
+              <p>Augmente l'attaque du joueur de 5%.</p>
+              <p class="quantity">Quantité : <span id="stock-epee-inv">0</span></p>
+            </div>
+          </div>
+          
+          <div class="inventory-item" id="inv-elixir">
+            <img src="elixir-1.png" alt="Élixir de Puissance">
+            <div class="item-info">
+              <h3>Élixir de Puissance</h3>
+              <p>Augmente l'attaque de 50 points.</p>
+              <p class="quantity">Quantité : <span id="stock-elixir-inv">0</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catégorie Défense -->
+      <div class="category-section">
+        <h2>Défense</h2>
+        <div class="category" id="category-defense-inv">
+          <div class="inventory-item" id="inv-bouclier">
+            <img src="bouclier.png" alt="Bouclier solide">
+            <div class="item-info">
+              <h3>Bouclier solide</h3>
+              <p>Augmente la défense de 15 points.</p>
+              <p class="quantity">Quantité : <span id="stock-bouclier-inv">0</span></p>
+            </div>
+          </div>
+          
+          <div class="inventory-item" id="inv-cape">
+            <img src="Cape_de_l'ombre.png" alt="Cape de l'ombre">
+            <div class="item-info">
+              <h3>Cape de l'ombre</h3>
+              <p>Ignore les dégâts subis par la prochaine attaque directe.</p>
+              <p class="quantity">Quantité : <span id="stock-cape-inv">0</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catégorie Autre -->
+      <div class="category-section">
+        <h2>Autre</h2>
+        <div class="category" id="category-autre-inv">
+          <div class="inventory-item" id="inv-armure">
+            <img src="armure-1.png" alt="Armure de Fer">
+            <div class="item-info">
+              <h3>Armure de Fer</h3>
+              <p>Réduit les dégâts reçus de 10%.</p>
+              <p class="quantity">Quantité : <span id="stock-armure-inv">0</span></p>
+            </div>
+          </div>
+          
+          <div class="inventory-item" id="inv-crystal">
+            <img src="Crystale.png" alt="Crystal de renouveau">
+            <div class="item-info">
+              <h3>Crystal de renouveau</h3>
+              <p>Recharge 0.8 points de la capacité spéciale.</p>
+              <p class="quantity">Quantité : <span id="stock-crystal-inv">0</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="footer-icon" onclick="App.viewCharacters()">
+      <img src="Characters.svg" alt="Personnages">
+    </button>
+    <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
+      <img src="Menu.svg" alt="Menu Principal">
+    </button>
+    <button class="footer-icon" onclick="App.goToPasse()">
+      <img src="Pass.svg" alt="Passe de combat">
+    </button>
+    <button class="footer-icon" onclick="App.viewShop()">
+      <img src="Shop.svg" alt="Boutique">
+    </button>
+  </div>
+</body>
+
+</html>
