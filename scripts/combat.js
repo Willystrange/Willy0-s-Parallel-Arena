@@ -3,6 +3,7 @@ window.App = window.App || {};
 userData = getUserData();
 
 
+
 App.updateSpecialBar = function(character, elementId) {
   const specialBar = document.getElementById(elementId);
   if (!specialBar) return;
@@ -12,7 +13,6 @@ App.updateSpecialBar = function(character, elementId) {
   const widthPercentage = (character.spe / maxSpecialAbility) * 100;
   fillElement.style.width = `${widthPercentage}%`;
 };
-
 // Déclaration globale des variables dans le namespace app
 App.playerCharacter = null;
 App.opponentCharacter = null;

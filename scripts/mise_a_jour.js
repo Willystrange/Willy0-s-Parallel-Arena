@@ -40,7 +40,7 @@ App.versionCompare = function(v1, v2) {
 App.mise_a_jour = function() {
   const userData = getUserData();
   // Version actuelle du jeu
-  const currentVersion = 'B2.1.0.02';
+  const currentVersion = 'B2.1.1.00';
 
   // Valeurs par défaut pour les données utilisateur
   const defaultUserData = {

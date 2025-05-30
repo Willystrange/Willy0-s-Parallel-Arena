@@ -60,7 +60,7 @@ App.assignRandomQuest = () => {
           questElement.innerHTML = `
           <li>
             <p>${questText}</p>
-            <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} d'argent</p>
+            <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} Points</p>
             <div class="progress-bar-container">
               <div class="progress-bar" id="${id}-bar"></div>
               <div class="progress-bar-text" id="${id}-text">Quête terminée</div>
@@ -72,7 +72,7 @@ App.assignRandomQuest = () => {
           questElement.innerHTML = `
           <li>
             <p>${questText}</p>
-            <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} d'argent</p>
+            <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} Points</p>
             <div class="progress-bar-container">
               <div class="progress-bar" id="${id}-bar"></div>
               <div class="progress-bar-text" id="${id}-text">${questCurrent} / ${questTotal}</div>
@@ -153,12 +153,14 @@ App.assignRandomQuest = () => {
     const questElement = document.getElementById(id);
     if (questElement) {
       questElement.innerHTML = `
+      <li>
         <p>${quest.text}</p>
-        <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} d'argent</p>
+        <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} Points</p>
         <div class="progress-bar-container">
           <div class="progress-bar" id="${id}-bar"></div>
           <div class="progress-bar-text" id="${id}-text">${quest.current} / ${quest.total}</div>
         </div>
+        </li>
       `;
       const barEl = document.getElementById(`${id}-bar`);
       const textEl = document.getElementById(`${id}-text`);

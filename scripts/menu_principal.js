@@ -316,6 +316,8 @@ App.StartedGame = function() {
     loadPage('combat');
   } else if (userData.partie_commencee_weekend) {
     loadPage('combat-weekend');
+  } else if (userData.partie_commencee_survie) {
+    loadPage('combat-survie');
   }
 };
 

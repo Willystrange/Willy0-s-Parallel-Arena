@@ -23,6 +23,9 @@
       <p id="player-attack"></p>
       <p id="player-defense"></p>
     </div>
+    <div class="header-info stats-toggle">
+      <span id="toggle-stats" role="button" title="Afficher/Masquer les stats">^</span>
+    </div>
     <div class="header-info">
       <h3 id="opponent-name"></h3>
       <p id="opponent-pv"></p>
@@ -31,6 +34,12 @@
       </div>
       <p id="opponent-attack"></p>
       <p id="opponent-defense"></p>
+    </div>
+    <div id="stats-panel" class="stats-panel inactive">
+      <h4>Statistiques détaillées</h4>
+      <div id="detailed-stats-content">
+        <!-- Injecté par JS -->
+      </div>
     </div>
   </div>
   <div id="overlay"></div>
@@ -47,9 +56,9 @@
     <div class="combat-actions-wrapper">
       <div class="combat-actions">
         <button id="attack-button" onclick="App.playerAttack(); startMusicC();">Attaquer</button>
-        <button id="special-button"
-          onclick="App.useSpecialAbility(App.playerCharacter, App.opponentCharacter, true)">Capacité
-          spéciale</button>
+        <button id="defense-button"
+          onclick="App.handleDefense(App.playerCharacter, App.opponentCharacter, true);startMusicC();"></button>
+        <button id="special-button" onclick="App.useSpecialAbility(App.playerCharacter, App.opponentCharacter, true)">Capacité spéciale</button>
         <button id="items-button" onclick="App.showItemSelection(); startMusicC();">Objets</button>
       </div>
       <div id="item-selection">

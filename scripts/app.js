@@ -224,7 +224,7 @@ function getUserData() {
       trophees: 0,
       argent: 100,
       VICTOIRE: false,
-      version: 'B2.1.0.02',
+      version: 'B2.1.1.00',
       recompense: 0,
       perso_recompense: 0,
       xp_du_jour: 0,

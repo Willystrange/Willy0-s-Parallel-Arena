@@ -109,9 +109,9 @@ body.quetes {
 .quetes .hidden { display: none; }
 @media (prefers-color-scheme: dark) {
   body.quetes  { background-color: #121212; color: #e0e0e0; }
-  .quetes .back-button { background-color: #333; color: #e0e0e0; }
+  .quetes .back-button { background-color: #2C3E50; color: #e0e0e0; }
   .quetes .back-button:hover { background-color: #555; }
-  .quetes .semaine h2 { background-color: #333; color: #e0e0e0; }
+  .quetes .semaine h2 { background-color: #232F4A; color: #e0e0e0; }
   .quetes .quêtes li {
     background-color: #1e1e1e;
     color: #e0e0e0;
@@ -232,7 +232,7 @@ body.menu_principal  {
   transform: translate(-50%, -50%);
 }
 .menu_principal .button {
-  background-color: #ff4500;
+  background-color: #999;
   color: white;
   border: none;
   border-radius: 8px;
@@ -291,7 +291,7 @@ body.menu_principal  {
 .menu_principal .footer-icon img { width: 50px; height: 50px; }
 .menu_principal .footer-icon:hover { opacity: 0.8; }
 .menu_principal .main-menu-icon img {
-  border: 2px solid #ff4500;
+  border: 2px solid #999;
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
@@ -339,12 +339,12 @@ body.menu_principal  {
   font-size: 16px;
   cursor: pointer;
   border: none;
-  background-color: #ff4500;
+  background-color: #999;
   color: #ffffff;
   border-radius: 5px;
   margin: 5px;
 }
-.menu_principal .mode-button:hover { background-color: #e03e00; }
+.menu_principal .mode-button:hover { background-color: #aaa; }
 .menu_principal .cancel-button {
   padding: 10px 20px;
   font-size: 16px;
@@ -817,7 +817,7 @@ body.connection {
 .connection button {
   width: 100%;
   padding: 10px;
-  background-color: #ff4500;
+  background-color: #999;
   color: white;
   border: none;
   border-radius: 4px;
@@ -827,7 +827,7 @@ body.connection {
 }
 
 .connection button:hover {
-  background-color: #ff3500;
+  background-color: #aaa;
 }
 
 .connection .hidden {
@@ -1658,12 +1658,12 @@ body.boutique {
   }
 
   .boutique .bonus-item button {
-    background-color: #0056b3;
+    background-color: #2C3E50;
     color: #fff;
   }
 
   .boutique .bonus-item button:hover {
-    background-color: #003d7a;
+    background-color: #232F3A;
   }
 
   .boutique .error-message {
@@ -1891,7 +1891,7 @@ body.characters {
   }
 
   .characters .character-button:hover {
-    background-color: #555;
+    background-color: #232F4A;
   }
 
   .characters .character-button.disabled {
@@ -1903,13 +1903,13 @@ body.characters {
   }
 
   .characters .choose-button {
-    background-color: #333;
+    background-color: #2c3e50;
     color: #e0e0e0;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
   }
 
   .characters .choose-button:hover {
-    background-color: #444;
+    background-color: #232F4A;
   }
 
   .characters .stats {
@@ -2611,10 +2611,10 @@ body.mise_a_jour {
   --color-text-dark: #e0e0e0;
   --color-container-light: #fff;
   --color-container-dark: #1e1e1e;
-  --button-bg: #ff4500;
-  --button-bg-hover: #e03e00;
-  --back-button-bg: #ff4500;
-  --back-button-bg-hover: #ff5000;
+  --button-bg: #999999;
+  --button-bg-hover: #aaaaaa;
+  --back-button-bg: #999;
+  --back-button-bg-hover: #aaa;
 }
 
 body.parametres {
@@ -2919,7 +2919,7 @@ body.perso_stats {
 }
 
 .perso_stats .character {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #333;
   padding: 10px;
   border-radius: 8px;
   cursor: pointer;
@@ -2928,7 +2928,7 @@ body.perso_stats {
 }
 
 .perso_stats .character.unlocked {
-  background-color: rgba(255, 69, 0, 1);
+  background-color: #999;
 }
 
 .perso_stats .character:hover {
@@ -3011,7 +3011,7 @@ body.perso_stats {
 }
 
 .perso_stats .perso-icon img {
-  border: 2px solid #ff4500;
+  border: 2px solid #999;
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
@@ -3021,7 +3021,7 @@ body.perso_stats {
 }
 
 .perso_stats .button-improve {
-  background-color: #ff4500;
+  background-color: #999;
   color: #ffffff;
   border: none;
   padding: 10px 20px;
@@ -3038,13 +3038,13 @@ body.perso_stats {
 
 @media (prefers-color-scheme: dark) {
   .perso_stats .button-improve {
-    background-color: #333333;
+    background-color: #2C3E50;
     color: #e0e0e0;
-    border: 1px solid #444444;
+    border: 1px solid #2C3E50;
   }
 
   .perso_stats .button-improve:hover {
-    background-color: #444444;
+    background-color: #232F3A;
   }
 
   .perso_stats .perso-icon img {
@@ -3092,6 +3092,10 @@ body.perso_stats {
     background: rgba(255, 69, 0, 0.6);
     color: #e0e0e0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+
+  .perso_stats .level-circle {
+    background-color: #232F3A;
   }
 }
 
@@ -3948,10 +3952,10 @@ body.passe_de_combat {
   .passe_de_combat .reward .badge { background-color: #444; }
   .passe_de_combat .reward.redeemed .badge { background-color: #000; }
   .passe_de_combat .controls button {
-    background-color: #444;
+    background-color: #2C3E50;
     color: #fff;
   }
-  .passe_de_combat .controls button:hover { background-color: #555; }
+  .passe_de_combat .controls button:hover { background-color: #232F3A;}
   .passe_de_combat .footer {
     background-color: #333333;
     box-shadow: 0 -2px 4px rgba(0,0,0,0.5);
