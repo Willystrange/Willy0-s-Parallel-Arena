@@ -1,6 +1,4 @@
-/* === STYLES POUR LA PAGE INTRO === */
-
-/* Reset et styles de base */
+/* === RESET ET STYLES DE BASE === */
 * {
   margin: 0;
   padding: 0;
@@ -20,7 +18,7 @@ body.intro {
   align-items: center;
   height: 100vh;
   margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #7b68ee 100%);
+  background: linear-gradient(135deg, #ff7b54 0%, #ff9a76 50%, #ffa726 100%);
   background-attachment: fixed;
   perspective: 1000px;
   color: #fff;
@@ -34,12 +32,11 @@ body.intro {
   left: 0;
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(15px);
   z-index: 10;
   overflow-y: auto;
   padding: 2rem 1rem;
-  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -47,44 +44,44 @@ body.intro {
 .intro .rules-box {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 25px;
   width: 90%;
-  max-width: 600px;
+  max-width: 650px;
   max-height: 85vh;
   margin: 0 auto;
   padding: 2.5rem;
   overflow-y: auto;
   text-align: left;
   color: #2c3e50;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: slideInUp 0.6s ease-out;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(50px);
+    transform: translateY(50px) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 .intro .rules-box h2 {
-  color: #667eea;
-  font-size: 1.8rem;
+  color: #ff7b54;
+  font-size: 2rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .intro .rules-box p {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
   color: #34495e;
 }
 
@@ -94,23 +91,25 @@ body.intro {
 }
 
 .intro .rules-box li {
-  background: rgba(102, 126, 234, 0.1);
-  margin: 0.8rem 0;
-  padding: 1rem;
-  border-radius: 10px;
-  border-left: 4px solid #667eea;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  transition: transform 0.2s ease;
+  background: linear-gradient(145deg, rgba(255, 123, 84, 0.1), rgba(255, 154, 118, 0.05));
+  margin: 1rem 0;
+  padding: 1.2rem;
+  border-radius: 15px;
+  border-left: 5px solid #ff7b54;
+  font-size: 1rem;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(255, 123, 84, 0.1);
 }
 
 .intro .rules-box li:hover {
-  transform: translateX(5px);
-  background: rgba(102, 126, 234, 0.15);
+  transform: translateX(8px);
+  background: linear-gradient(145deg, rgba(255, 123, 84, 0.15), rgba(255, 154, 118, 0.1));
+  box-shadow: 0 6px 12px rgba(255, 123, 84, 0.2);
 }
 
 .intro .rules-box strong {
-  color: #667eea;
+  color: #ff7b54;
   font-weight: 600;
 }
 
@@ -118,43 +117,48 @@ body.intro {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 1.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 500;
+  margin: 2rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #2c3e50;
   cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.intro .rules-box label:hover {
+  color: #ff7b54;
 }
 
 .intro .rules-box input[type="checkbox"] {
-  margin-right: 10px;
-  transform: scale(1.2);
-  accent-color: #667eea;
+  margin-right: 12px;
+  transform: scale(1.3);
+  accent-color: #ff7b54;
 }
 
 .intro #start-game {
   display: block;
   width: 100%;
-  margin-top: 1.5rem;
-  padding: 15px 25px;
-  background: linear-gradient(145deg, #667eea, #764ba2);
+  margin-top: 2rem;
+  padding: 18px 30px;
+  background: linear-gradient(145deg, #ff7b54, #ff9a76);
   color: white;
   border: none;
   border-radius: 25px;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(255, 123, 84, 0.4);
 }
 
 .intro #start-game:hover:not(:disabled) {
-  background: linear-gradient(145deg, #5a67d8, #6b46c1);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 20px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(145deg, #e67e22, #d35400);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(255, 123, 84, 0.6);
 }
 
 .intro #start-game:disabled {
-  background: #bdc3c7;
+  background: linear-gradient(145deg, #bdc3c7, #95a5a6);
   cursor: not-allowed;
   transform: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -162,28 +166,27 @@ body.intro {
 
 /* === ANIMATION DU LOGO === */
 .intro #container {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
   backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: drop 1.2s ease forwards, fadeAndLift 2.5s ease 3s forwards;
+  animation: drop 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards, fadeAndLift 3s ease 4s forwards;
   transform-origin: center;
-  border-radius: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  display: none;
+  border-radius: 35px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
 }
 
 .intro #logo {
-  font-size: 120px;
+  font-size: 140px;
   color: #fff;
   font-weight: bold;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   transform: scale(0);
-  animation: growAndShine 2.5s ease forwards 1.2s;
+  animation: growAndShine 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards 1.5s;
 }
 
 /* === ÉCRAN DE DÉMARRAGE === */
@@ -194,7 +197,7 @@ body.intro {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #7b68ee 100%);
+  background: linear-gradient(135deg, #ff7b54 0%, #ff9a76 50%, #ffa726 100%);
   z-index: 20;
   justify-content: center;
   align-items: center;
@@ -202,71 +205,73 @@ body.intro {
 }
 
 .intro #touch-text {
-  font-size: 2.5em;
+  font-size: 2.8em;
   color: #fff;
-  font-weight: 600;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  animation: breathe 2s ease-in-out infinite;
-  padding: 20px 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 700;
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  animation: breathe 2.5s ease-in-out infinite;
+  padding: 25px 50px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+  border-radius: 25px;
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .intro #touch-text:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* === ANIMATIONS === */
 @keyframes drop {
   0% {
-    transform: translateY(-100vh) scale(0.3) rotateX(90deg);
+    transform: translateY(-120vh) scale(0.2) rotateX(180deg);
     opacity: 0;
     box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   }
   50% {
-    transform: translateY(0) scale(1.1) rotateX(45deg);
+    transform: translateY(20px) scale(1.15) rotateX(45deg);
     opacity: 1;
-    box-shadow: 0 30px 50px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 35px 60px rgba(0, 0, 0, 0.5);
   }
   100% {
     transform: translateY(0) scale(1) rotateX(0);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
   }
 }
 
 @keyframes growAndShine {
   0% {
-    transform: scale(0);
+    transform: scale(0) rotate(-180deg);
     filter: brightness(1);
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   }
   50% {
-    transform: scale(1.2);
-    filter: brightness(1.5);
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    transform: scale(1.3) rotate(0deg);
+    filter: brightness(1.8);
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
     filter: brightness(1);
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   }
 }
 
 @keyframes fadeAndLift {
   0% {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   100% {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
     opacity: 0;
-    transform: translateY(-200px);
+    transform: translateY(-250px) scale(0.8);
   }
 }
 
@@ -276,21 +281,52 @@ body.intro {
     filter: brightness(1);
   }
   50% {
-    transform: scale(1.05);
-    filter: brightness(1.1);
+    transform: scale(1.08);
+    filter: brightness(1.15);
   }
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .intro .rules-box {
-    padding: 1.5rem;
+    padding: 2rem;
     margin: 1rem;
     max-height: 90vh;
   }
 
   .intro .rules-box h2 {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
+  }
+
+  .intro #container {
+    width: 180px;
+    height: 180px;
+  }
+
+  .intro #logo {
+    font-size: 100px;
+  }
+
+  .intro #touch-text {
+    font-size: 2.2em;
+    padding: 20px 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .intro .rules-box {
+    padding: 1.5rem;
+    margin: 0.5rem;
+  }
+
+  .intro .rules-box li {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .intro #touch-text {
+    font-size: 1.8em;
+    padding: 15px 25px;
   }
 
   .intro #container {
@@ -301,28 +337,6 @@ body.intro {
   .intro #logo {
     font-size: 80px;
   }
-
-  .intro #touch-text {
-    font-size: 1.8em;
-    padding: 15px 30px;
-  }
-}
-
-@media (max-width: 480px) {
-  .intro .rules-box {
-    padding: 1rem;
-    margin: 0.5rem;
-  }
-
-  .intro .rules-box li {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .intro #touch-text {
-    font-size: 1.5em;
-    padding: 12px 24px;
-  }
 }
 
 /* === MODE SOMBRE === */
@@ -332,13 +346,13 @@ body.intro {
   }
 
   .intro #rules-container {
-    background: linear-gradient(135deg, rgba(44, 62, 80, 0.95) 0%, rgba(52, 73, 94, 0.95) 100%);
+    background: rgba(0, 0, 0, 0.9);
   }
 
   .intro .rules-box {
     background: rgba(30, 30, 30, 0.95);
     color: #ecf0f1;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.15);
   }
 
   .intro .rules-box h2 {
@@ -350,13 +364,15 @@ body.intro {
   }
 
   .intro .rules-box li {
-    background: rgba(52, 152, 219, 0.1);
+    background: linear-gradient(145deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05));
     border-left-color: #3498db;
     color: #ecf0f1;
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.1);
   }
 
   .intro .rules-box li:hover {
-    background: rgba(52, 152, 219, 0.15);
+    background: linear-gradient(145deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.1));
+    box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2);
   }
 
   .intro .rules-box strong {
@@ -367,19 +383,23 @@ body.intro {
     color: #ecf0f1;
   }
 
+  .intro .rules-box label:hover {
+    color: #3498db;
+  }
+
   .intro #start-game {
     background: linear-gradient(145deg, #3498db, #2980b9);
-    box-shadow: 0 8px 15px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
   }
 
   .intro #start-game:hover:not(:disabled) {
     background: linear-gradient(145deg, #2980b9, #1f4e79);
-    box-shadow: 0 12px 20px rgba(52, 152, 219, 0.6);
+    box-shadow: 0 12px 25px rgba(52, 152, 219, 0.6);
   }
 
   .intro #container {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border-color: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
   .intro #touch-screen {
@@ -387,465 +407,45 @@ body.intro {
   }
 
   .intro #touch-text {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .intro #touch-text:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-/* === SCROLLBAR CUSTOM === */
-.intro .rules-box::-webkit-scrollbar {
-  width: 8px;
-}
-
-.intro .rules-box::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-
-.intro .rules-box::-webkit-scrollbar-thumb {
-  background: linear-gradient(145deg, #667eea, #764ba2);
-  border-radius: 10px;
-}
-
-.intro .rules-box::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(145deg, #5a67d8, #6b46c1);
-}
-
-@media (prefers-color-scheme: dark) {
-  .intro .rules-box::-webkit-scrollbar-thumb {
-    background: linear-gradient(145deg, #3498db, #2980b9);
-  }
-
-  .intro .rules-box::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(145deg, #2980b9, #1f4e79);
-  }
-}
-
-/* Reset et styles de base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  font-family: 'Arial', sans-serif;
-}
-
-body.intro {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #7b68ee 100%);
-  background-attachment: fixed;
-  perspective: 1000px;
-  color: #fff;
-}
-
-/* === CONTENEUR DES RÈGLES === */
-.intro #rules-container {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-  backdrop-filter: blur(15px);
-  z-index: 10;
-  overflow-y: auto;
-  padding: 2rem 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.intro .rules-box {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 85vh;
-  margin: 0 auto;
-  padding: 2.5rem;
-  overflow-y: auto;
-  text-align: left;
-  color: #2c3e50;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: slideInUp 0.6s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.intro .rules-box h2 {
-  color: #667eea;
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.intro .rules-box p {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  color: #34495e;
-}
-
-.intro .rules-box ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.intro .rules-box li {
-  background: rgba(102, 126, 234, 0.1);
-  margin: 0.8rem 0;
-  padding: 1rem;
-  border-radius: 10px;
-  border-left: 4px solid #667eea;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  transition: transform 0.2s ease;
-}
-
-.intro .rules-box li:hover {
-  transform: translateX(5px);
-  background: rgba(102, 126, 234, 0.15);
-}
-
-.intro .rules-box strong {
-  color: #667eea;
-  font-weight: 600;
-}
-
-.intro .rules-box label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 1.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #2c3e50;
-  cursor: pointer;
-}
-
-.intro .rules-box input[type="checkbox"] {
-  margin-right: 10px;
-  transform: scale(1.2);
-  accent-color: #667eea;
-}
-
-.intro #start-game {
-  display: block;
-  width: 100%;
-  margin-top: 1.5rem;
-  padding: 15px 25px;
-  background: linear-gradient(145deg, #667eea, #764ba2);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
-}
-
-.intro #start-game:hover:not(:disabled) {
-  background: linear-gradient(145deg, #5a67d8, #6b46c1);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 20px rgba(102, 126, 234, 0.6);
-}
-
-.intro #start-game:disabled {
-  background: #bdc3c7;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* === ANIMATION DU LOGO === */
-.intro #container {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: drop 1.2s ease forwards, fadeAndLift 2.5s ease 3s forwards;
-  transform-origin: center;
-  border-radius: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  display: none;
-}
-
-.intro #logo {
-  font-size: 120px;
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  transform: scale(0);
-  animation: growAndShine 2.5s ease forwards 1.2s;
-}
-
-/* === ÉCRAN DE DÉMARRAGE === */
-.intro #touch-screen {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #7b68ee 100%);
-  z-index: 20;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(10px);
-}
-
-.intro #touch-text {
-  font-size: 2.5em;
-  color: #fff;
-  font-weight: 600;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  animation: breathe 2s ease-in-out infinite;
-  padding: 20px 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.intro #touch-text:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* === ANIMATIONS === */
-@keyframes drop {
-  0% {
-    transform: translateY(-100vh) scale(0.3) rotateX(90deg);
-    opacity: 0;
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  }
-  50% {
-    transform: translateY(0) scale(1.1) rotateX(45deg);
-    opacity: 1;
-    box-shadow: 0 30px 50px rgba(0, 0, 0, 0.4);
-  }
-  100% {
-    transform: translateY(0) scale(1) rotateX(0);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  }
-}
-
-@keyframes growAndShine {
-  0% {
-    transform: scale(0);
-    filter: brightness(1);
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  }
-  50% {
-    transform: scale(1.2);
-    filter: brightness(1.5);
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-  }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  }
-}
-
-@keyframes fadeAndLift {
-  0% {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-    opacity: 0;
-    transform: translateY(-200px);
-  }
-}
-
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  50% {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-  }
-}
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  .intro .rules-box {
-    padding: 1.5rem;
-    margin: 1rem;
-    max-height: 90vh;
-  }
-
-  .intro .rules-box h2 {
-    font-size: 1.5rem;
-  }
-
-  .intro #container {
-    width: 150px;
-    height: 150px;
-  }
-
-  .intro #logo {
-    font-size: 80px;
-  }
-
-  .intro #touch-text {
-    font-size: 1.8em;
-    padding: 15px 30px;
-  }
-}
-
-@media (max-width: 480px) {
-  .intro .rules-box {
-    padding: 1rem;
-    margin: 0.5rem;
-  }
-
-  .intro .rules-box li {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .intro #touch-text {
-    font-size: 1.5em;
-    padding: 12px 24px;
-  }
-}
-
-/* === MODE SOMBRE === */
-@media (prefers-color-scheme: dark) {
-  body.intro {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
-  }
-
-  .intro #rules-container {
-    background: linear-gradient(135deg, rgba(44, 62, 80, 0.95) 0%, rgba(52, 73, 94, 0.95) 100%);
-  }
-
-  .intro .rules-box {
-    background: rgba(30, 30, 30, 0.95);
-    color: #ecf0f1;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .intro .rules-box h2 {
-    color: #3498db;
-  }
-
-  .intro .rules-box p {
-    color: #bdc3c7;
-  }
-
-  .intro .rules-box li {
-    background: rgba(52, 152, 219, 0.1);
-    border-left-color: #3498db;
-    color: #ecf0f1;
-  }
-
-  .intro .rules-box li:hover {
-    background: rgba(52, 152, 219, 0.15);
-  }
-
-  .intro .rules-box strong {
-    color: #3498db;
-  }
-
-  .intro .rules-box label {
-    color: #ecf0f1;
-  }
-
-  .intro #start-game {
-    background: linear-gradient(145deg, #3498db, #2980b9);
-    box-shadow: 0 8px 15px rgba(52, 152, 219, 0.4);
-  }
-
-  .intro #start-game:hover:not(:disabled) {
-    background: linear-gradient(145deg, #2980b9, #1f4e79);
-    box-shadow: 0 12px 20px rgba(52, 152, 219, 0.6);
-  }
-
-  .intro #container {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .intro #touch-screen {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
-  }
-
-  .intro #touch-text {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
   .intro #touch-text:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
   }
 }
 
 /* === SCROLLBAR CUSTOM === */
 .intro .rules-box::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .intro .rules-box::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  border-radius: 15px;
 }
 
 .intro .rules-box::-webkit-scrollbar-thumb {
-  background: linear-gradient(145deg, #667eea, #764ba2);
-  border-radius: 10px;
+  background: linear-gradient(145deg, #ff7b54, #ff9a76);
+  border-radius: 15px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 .intro .rules-box::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(145deg, #5a67d8, #6b46c1);
+  background: linear-gradient(145deg, #e67e22, #d35400);
+  background-clip: content-box;
 }
 
 @media (prefers-color-scheme: dark) {
   .intro .rules-box::-webkit-scrollbar-thumb {
     background: linear-gradient(145deg, #3498db, #2980b9);
+    background-clip: content-box;
   }
 
   .intro .rules-box::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(145deg, #2980b9, #1f4e79);
+    background-clip: content-box;
   }
 }
