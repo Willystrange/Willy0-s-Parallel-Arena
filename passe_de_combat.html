@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,9 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Willy0's Parallel Arena</title>
   <script src="scripts/app.js"></script>
-  <link rel="stylesheet" href="styles/passe_de_combat.css"></link>
+  <link rel="stylesheet" href="styles/passe_de_combat.css">
 </head>
-<body>
+<body class="passe_de_combat">
   <!-- Place ce DIV tout en haut de ton HTML, juste après <body> -->
   <div id="adblock-overlay" style="
       display: none;
@@ -34,34 +35,48 @@
       Vous ne pouvez donc ni interragir avec cette page ni obtenir les récompenses de celle-ci avant de l'avoir désactivé.<br>
       Nous vous rappelons que nous ne mettons pas de publicité tiers sur ce site. Vous pouvez donc le mettre sur la liste blanche de votre bloqueur.<br>
       <br>
-      (Touchez l’écran pour revenir au menu principal)
+      (Touchez l'écran pour revenir au menu principal)
     </div>
   </div>
 
-  <h1 class="premiumA">
-    <span class="base">Parallel Pass</span
-  </h1>
+  <!-- Header avec titre centré -->
+  <div class="header">
+    <h1 class="premiumA">
+      <span class="base">Parallel Pass</span>
+    </h1>
+  </div>
+
+  <!-- Informations du joueur et barre XP -->
   <div class="player-info">
     <div class="level-info">
       <div class="level" id="current-level"></div>
-      <div class="xp-progress-container">
-        <div class="xp-progress-bar">
-          <span id="xp-progress-text"></span>
-        </div>
-      </div>
+      <div class="xp" id="xp-display">XP: 0 / 100</div>
       <div class="next-level" id="next-level"></div>
     </div>
-  </div>
-  <div class="container" id="album-container">
-    <!-- Les pages seront créées dynamiquement -->
-    <div class="controls">
-      <div class="control-buttons">
-        <button id="prevPage">Page Précédente</button>
-        <button id="nextPage">Page Suivante</button>
+    <div class="xp-progress-container">
+      <div class="xp-progress-bar">
+        <span id="xp-progress-text">XP: 0 / 100</span>
       </div>
+    </div>
+  </div>
+
+  <!-- Controles de navigation -->
+  <div class="controls">
+    <div class="button-container">
+      <button id="prevPage">◀ Précédent</button>
+      <button id="nextPage">Suivant ▶</button>
+    </div>
+  </div>
+
+  <!-- Container principal avec scroll -->
+  <div class="scroll-container">
+    <div class="container" id="album-container">
+      <!-- Les pages seront créées dynamiquement -->
     </div>
     <div class="Dates">Le Parallel Pass 4 durera du 16 juillet au 20 septembre 2025.</div>
   </div>
+
+  <!-- Footer -->
   <div class="footer">
     <button class="footer-icon perso-icon" onclick="App.viewCharacters()" id="perso-icon">
       <img src="Characters.svg" alt="Personnages">
@@ -76,6 +91,8 @@
       <img src="Shop.svg" alt="Boutique">
     </button>
   </div>
+
+  <!-- Popups -->
   <div class="popup" id="ad-popup">
     <h2 style="display: flex; justify-content: space-between; align-items: center;">
       Parallel Pass 4 Premium
@@ -85,17 +102,21 @@
     <div>
       <button onclick="App.hidePopup()">Annuler</button>
       <button onclick="App.handlePurchase()">Acheter</button>
-      <button onclick="loadPage('pass_promotion')"; App.hidePopup();'>Inspecter</button>
+      <button onclick="loadPage('pass_promotion'); App.hidePopup();">Inspecter</button>
     </div>
   </div>
+
   <audio id="bg-music">
     <source src="B1.mp3" type="audio/mpeg">
     Votre navigateur ne supporte pas l'audio.
   </audio>
+
   <div class="loading-popup" id="loading-popup">
     <div class="loading-spinner"></div>
     <p>Achat en cours...</p>
   </div>
+
   <script src="localStorage.js"></script>
+  <script src="scripts/passe_de_combat.js"></script>
 </body>
 </html>

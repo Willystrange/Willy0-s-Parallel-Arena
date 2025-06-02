@@ -131,10 +131,10 @@ body.passe_de_combat {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 5px 20px;
+  padding: 10px 20px;
   padding-bottom: 120px;
-  height: calc(100vh - 180px);
-  min-height: 400px;
+  height: auto;
+  max-height: calc(100vh - 300px);
 }
 
 .passe_de_combat .container {
@@ -289,12 +289,15 @@ body.passe_de_combat {
 /* === CONTROLES === */
 .passe_de_combat .controls {
   text-align: center;
-  margin: 20px 0;
-  padding: 20px;
+  margin: 10px 20px;
+  padding: 15px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 15px;
   backdrop-filter: blur(5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 160px;
+  z-index: 85;
 }
 
 .passe_de_combat .controls .button-container {
