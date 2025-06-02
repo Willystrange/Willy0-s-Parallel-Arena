@@ -47,8 +47,9 @@ body.passe_de_combat {
 .passe_de_combat .player-info {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(5px);
-  padding: 15px 20px;
-  margin: 0 20px 10px 20px;
+  padding: 10px 20px;
+  margin: 5px auto 5px auto;
+  max-width: 1200px;
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   position: sticky;
@@ -132,10 +133,10 @@ body.passe_de_combat {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px 20px;
+  padding: 5px 20px;
   padding-bottom: 120px;
   height: auto;
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 280px);
 }
 
 .passe_de_combat .container {
@@ -290,14 +291,15 @@ body.passe_de_combat {
 /* === CONTROLES === */
 .passe_de_combat .controls {
   text-align: center;
-  margin: 10px 20px;
-  padding: 15px;
+  margin: 5px auto;
+  max-width: 1200px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 15px;
   backdrop-filter: blur(5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   position: sticky;
-  top: 160px;
+  top: 150px;
   z-index: 85;
 }
 
