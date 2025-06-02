@@ -303,7 +303,7 @@ App.adversairePasserTour = () => {
       App.opponentCharacter.defense = Math.round(App.opponentCharacter.defense / 0.70);
     }
   }
-  App.opponentCharacter.PVAVANT = App.opponentCharacter
+  App.opponentCharacter.PVAVANT = App.opponentCharacter.pv;
   App.sauvegarderPartie(App.playerCharacter, App.opponentCharacter);
 };
 
@@ -368,8 +368,6 @@ App.joueurPasserTour = () => {
       App.playerCharacter.defense = Math.round(App.playerCharacter.defense / 0.70);
     }
   }
-  .pv;
-  // Sauvegarde automatique à chaque fin de tour
   App.sauvegarderPartie(App.playerCharacter, App.opponentCharacter);
 };
 
@@ -1166,7 +1164,8 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
       attacker.spe -= 0.10;
       gainSpe = 0.10;
     }
-  } if (["Boompy"].includes(attacker.name)) {
+  } 
+  if (["Boompy"].includes(attacker.name)) {
     gainSpe = 0.34;
     attacker.spe += gainSpe;
     if (attacker.chargement2) {

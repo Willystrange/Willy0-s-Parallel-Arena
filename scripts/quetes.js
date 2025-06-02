@@ -534,27 +534,44 @@ App.updateWeeksStatus = () => {
 };
 
 // Retourne la date de début du week-end (vendredi 09:00) pour la date donnée
+// Retourne la date de début du week-end (vendredi 09:00) pour la date donnée
 App.getWeekendStart = (date) => {
   // copie en heure de Paris
   const paris = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
   const day = paris.getDay(); // 0=dimanche … 6=samedi
-  // calcul du samedi précédent ou courant
-  const daysSinceSaturday = (day + 1) % 7;
-  const saturday = new Date(paris);
-  saturday.setDate(paris.getDate() - daysSinceSaturday);
-  saturday.setHours(9, 0, 0, 0);
-  return saturday;
-};
 
+  // Calcul du vendredi (jour 5) précédent ou courant
+  const daysToFriday = (day + 2) % 7; // Nombre de jours depuis le dernier vendredi
+  const friday = new Date(paris);
+  friday.setDate(paris.getDate() - daysToFriday);
+  friday.setHours(9, 0, 0, 0);
+
+  // Si on est avant vendredi 9h cette semaine, prendre le vendredi précédent
+  if (friday > paris) {
+    friday.setDate(friday.getDate() - 7);
+  }
+
+  return friday;
+};
 
 // Teste si la date donnée est bien entre vendredi 09h (inclus) et lundi 09h (exclu)
 App.isInWeekendPeriod = (date) => {
-  const start = App.getWeekendStart(date);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 3); // +3 jours = lundi 09h
-  return date >= start && date < end;
-};
+  const paris = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+  const day = paris.getDay();
+  const hour = paris.getHours();
 
+  // Vendredi après 9h00 ou Samedi/Dimanche à n'importe quelle heure
+  if ((day === 5 && hour >= 9) || day === 6 || day === 0) {
+    return true;
+  }
+
+  // Lundi avant 9h00
+  if (day === 1 && hour < 9) {
+    return true;
+  }
+
+  return false;
+};
 
 // --- GESTION DES QUÊTES DU WEEK-END AVEC CODES DE TYPE ---
 App.assignWeekendQuests = () => {
@@ -563,64 +580,90 @@ App.assignWeekendQuests = () => {
   const now = new Date();
   const parisNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
 
-  // 1) hors créneau : cacher et sortir
+  // 1) Si hors créneau week-end : supprimer les quêtes et cacher le conteneur
   if (!App.isInWeekendPeriod(parisNow)) {
     if (container) container.style.display = 'none';
+
+    // Supprimer les données des quêtes week-end
+    userData.quetes_weekend = false;
+    userData.weekend_period_start = null;
+    userData.weekend_bonus_claimed = false;
+
+    // Supprimer toutes les données des quêtes week-end individuelles
+    const weekendIds = ['weekend-quete1', 'weekend-quete2', 'weekend-quete3'];
+    weekendIds.forEach(id => {
+      delete userData[`${id}_text`];
+      delete userData[`${id}_total`];
+      delete userData[`${id}_current`];
+      delete userData[`${id}_type`];
+      delete userData[`${id}_reward`];
+      delete userData[`${id}_character`];
+      delete userData[`${id}_completed`];
+    });
+
+    saveUserData(userData);
     return;
   }
 
-  // 2) afficher le conteneur
+  // 2) On est dans la période week-end : afficher le conteneur
   if (container) container.style.display = '';
 
   const periodStartISO = App.getWeekendStart(parisNow).toISOString();
 
-  // 3) si déjà générées ce week-end
+  // 3) Si les quêtes sont déjà générées pour cette période
   if (userData.quetes_weekend && userData.weekend_period_start === periodStartISO) {
     const weekendIds = ['weekend-quete1', 'weekend-quete2', 'weekend-quete3'];
 
-    // affichage et barre de progression
+    // Affichage et mise à jour des barres de progression
     weekendIds.forEach(id => {
       const text = userData[`${id}_text`];
       const total = userData[`${id}_total`];
-      const current = userData[`${id}_current`];
+      const current = userData[`${id}_current`] || 0;
       const el = document.getElementById(id);
-      el.innerHTML = `
-      <li>
-        <p>${text}</p>
-        <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} d'argent</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar" id="${id}-bar"></div>
-          <div class="progress-bar-text" id="${id}-text">
-            ${current >= total ? 'Quête terminée' : `${current} / ${total}`}
+
+      if (el && text) {
+        el.innerHTML = `
+        <li>
+          <p>${text}</p>
+          <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} d'argent</p>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="${id}-bar"></div>
+            <div class="progress-bar-text" id="${id}-text">
+              ${current >= total ? 'Quête terminée' : `${current} / ${total}`}
+            </div>
           </div>
-        </div>
         </li>`;
-      App.updateProgressBar(
-        document.getElementById(`${id}-bar`),
-        document.getElementById(`${id}-text`),
-        total, current
-      );
+
+        const barEl = document.getElementById(`${id}-bar`);
+        const textEl = document.getElementById(`${id}-text`);
+        if (barEl && textEl) {
+          App.updateProgressBar(barEl, textEl, total, current);
+        }
+      }
     });
 
-    // attribution automatique de la récompense par quête
+    // Attribution automatique de la récompense par quête terminée
     weekendIds.forEach(id => {
-      const total = userData[`${id}_total`];
-      const current = userData[`${id}_current`];
+      const total = userData[`${id}_total`] || 0;
+      const current = userData[`${id}_current`] || 0;
       const doneKey = `${id}_completed`;
+
       if (current >= total && !userData[doneKey]) {
         userData.argent = (userData.argent || 0) + App.WEEK_REWARD_AMOUNT;
         userData[doneKey] = true;
-        // (optionnel) notification
         alert(`Quête "${userData[`${id}_text`]}" terminée : +${App.WEEK_REWARD_AMOUNT} argent`);
       }
     });
 
-    // bonus si toutes les quêtes sont terminées
-    const allDone = weekendIds.every(id =>
-      userData[`${id}_current`] >= userData[`${id}_total`]
-    );
+    // Bonus si toutes les quêtes sont terminées
+    const allDone = weekendIds.every(id => {
+      const total = userData[`${id}_total`] || 0;
+      const current = userData[`${id}_current`] || 0;
+      return current >= total;
+    });
+
     if (allDone && !userData.weekend_bonus_claimed) {
-      userData.argent += 40; // ou autre valeur si différente
+      userData.argent = (userData.argent || 0) + 40;
       userData.weekend_bonus_claimed = true;
       alert(`Bonus week-end accordé : +40 argent`);
     }
@@ -629,25 +672,55 @@ App.assignWeekendQuests = () => {
     return;
   }
 
-  // 4) (re)génération des quêtes
+  // 4) Génération de nouvelles quêtes pour cette période week-end
   userData.quetes_weekend = true;
   userData.weekend_period_start = periodStartISO;
+  userData.weekend_bonus_claimed = false;
 
   const available = [];
   const unlocked = App.CHARACTERS.filter(c => userData[c] === 1);
-  if (unlocked.length) {
+
+  // Quête avec personnage spécifique si disponible
+  if (unlocked.length > 0) {
     const c = unlocked[Math.floor(Math.random() * unlocked.length)];
     const w = App.getRandomNumber(3, 5);
-    available.push({ text: `Gagner ${w} parties avec ${c} en mode Weekend.`, total: w, type: 'VCW', current: 0, character: c });
+    available.push({ 
+      text: `Gagner ${w} parties avec ${c} en mode Weekend.`, 
+      total: w, 
+      type: 'VCW', 
+      current: 0, 
+      character: c 
+    });
   }
-  const DW = App.getRandomNumber(45000, 90000);
-  available.push({ text: `Infliger ${DW} points de dégâts en mode Weekend.`, total: DW, type: 'DCW', current: 0 });
-  const OW = App.getRandomNumber(5, 13);
-  available.push({ text: `Utiliser ${OW} objets en mode Weekend.`, total: OW, type: 'OW', current: 0 });
-  const DEW = App.getRandomNumber(10, 22);
-  available.push({ text: `Se défendre ${DEW} fois en mode Weekend.`, total: DEW, type: 'DECW', current: 0 });
 
+  // Quêtes génériques
+  const DW = App.getRandomNumber(45000, 90000);
+  available.push({ 
+    text: `Infliger ${DW} points de dégâts en mode Weekend.`, 
+    total: DW, 
+    type: 'DCW', 
+    current: 0 
+  });
+
+  const OW = App.getRandomNumber(5, 13);
+  available.push({ 
+    text: `Utiliser ${OW} objets en mode Weekend.`, 
+    total: OW, 
+    type: 'OW', 
+    current: 0 
+  });
+
+  const DEW = App.getRandomNumber(10, 22);
+  available.push({ 
+    text: `Se défendre ${DEW} fois en mode Weekend.`, 
+    total: DEW, 
+    type: 'DECW', 
+    current: 0 
+  });
+
+  // Sélection aléatoire de 3 quêtes
   const picks = App.getRandomElements(available, 3);
+
   picks.forEach((q, i) => {
     const id = `weekend-quete${i + 1}`;
     Object.assign(userData, {
@@ -659,21 +732,25 @@ App.assignWeekendQuests = () => {
       [`${id}_character`]: q.character || null,
       [`${id}_completed`]: false
     });
+
     const el = document.getElementById(id);
-    el.innerHTML = `
-    <li>
-      <p>${q.text}</p>
-      <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} d'argent</p>
-      <div class="progress-bar-container">
-        <div class="progress-bar" id="${id}-bar"></div>
-        <div class="progress-bar-text" id="${id}-text">0 / ${q.total}</div>
-      </div>
-    </li>`;
-    App.updateProgressBar(
-      document.getElementById(`${id}-bar`),
-      document.getElementById(`${id}-text`),
-      q.total, 0
-    );
+    if (el) {
+      el.innerHTML = `
+      <li>
+        <p>${q.text}</p>
+        <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} d'argent</p>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="${id}-bar"></div>
+          <div class="progress-bar-text" id="${id}-text">0 / ${q.total}</div>
+        </div>
+      </li>`;
+
+      const barEl = document.getElementById(`${id}-bar`);
+      const textEl = document.getElementById(`${id}-text`);
+      if (barEl && textEl) {
+        App.updateProgressBar(barEl, textEl, q.total, 0);
+      }
+    }
   });
 
   saveUserData(userData);

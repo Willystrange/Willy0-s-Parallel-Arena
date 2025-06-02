@@ -200,16 +200,31 @@ if (!("ontouchstart" in window) && App.interactionZone && App.headerM) {
 
 App.updateStatsPosition = function(currentHeight) {
   const stats = document.querySelector(".stats");
-  if (stats) {
-    if (currentHeight > App.minHeight + 40) {
-      stats.style.opacity = "1";
-      stats.style.transform = `translateY(${(currentHeight - App.minHeight) / 2}px)`;
-    } else {
-      stats.style.opacity = "0";
-      stats.style.transform = "translateY(20px)";
-    }
+  if (!stats) return;
+
+  const statsHeight = stats.getBoundingClientRect().height;
+  const margin = 10;
+  const screenH = window.innerHeight;
+  const threshold = screenH - statsHeight - margin * 2;
+
+  let topPos = currentHeight + margin;
+  let isVisible = currentHeight > App.minHeight + 40;
+
+  if (!isVisible) {
+    // Forcer la position très basse quand les stats sont "cachées"
+    topPos = 1000;
+  } else if (currentHeight > threshold) {
+    topPos = margin;
   }
+
+  stats.style.top = `${topPos}px`;
+  stats.style.opacity = isVisible ? "1" : "0";
+  stats.style.transform = isVisible ? "translateY(0)" : "translateY(20px)";
 };
+
+
+
+
 
 App.finalizeHeaderHeight = function() {
   const currentHeaderHeight = parseInt(App.headerM.style.height) || App.minHeight;
