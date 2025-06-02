@@ -327,32 +327,41 @@ App.initApp = function() {
   App.createPage = function(pageIndex) {
     const page = document.createElement('div');
     page.className = 'page';
+    
+    const rewardsContainer = document.createElement('div');
+    rewardsContainer.className = 'rewards-container';
+    
     const freeContainer = document.createElement('div');
     freeContainer.className = 'free-rewards';
     const premiumContainer = document.createElement('div');
     premiumContainer.className = 'premium-rewards';
+    
     const freeTitle = document.createElement('h2');
     freeTitle.textContent = 'Récompenses Gratuites';
     freeTitle.className = 'rewards-title';
     freeContainer.appendChild(freeTitle);
+    
     const premiumTitle = document.createElement('h2');
     premiumTitle.textContent = 'Récompenses Premium';
     premiumTitle.className = 'rewards-title';
     premiumContainer.appendChild(premiumTitle);
+    
     const freeStart = pageIndex * rewardsPerPage;
     for (let i = freeStart; i < freeStart + rewardsPerPage && i < freeRewards.length; i++) {
       freeContainer.appendChild(App.createRewardElement(freeRewards[i]));
     }
+    
     const premiumStart = pageIndex * rewardsPerPage;
     for (let i = premiumStart; i < premiumStart + rewardsPerPage && i < premiumRewards.length; i++) {
       const elem = App.createRewardElement(premiumRewards[i]);
       elem.classList.add('premium');
       premiumContainer.appendChild(elem);
     }
-    page.appendChild(freeContainer);
-    page.appendChild(premiumContainer);
-    freeContainer.style.float = 'left';
-    premiumContainer.style.float = 'right';
+    
+    rewardsContainer.appendChild(freeContainer);
+    rewardsContainer.appendChild(premiumContainer);
+    page.appendChild(rewardsContainer);
+    
     return page;
   };
 
