@@ -3,7 +3,43 @@ window.App = window.App || {};
 
 sessionStorage.setItem("lastPage", 'menu_principal');
 
-// --- Partie Firebase et initialisations globales ---
+// --- Connexion au serveur de jeu via Socket.IO ---
+App.connectToGameServer = function(userId) {
+  // Remplacez <IP_DU_PI> par l’IP du Raspberry (ex. 192.168.1.115)
+  App.socket = io("https://1ea7-2a01-cb08-814b-6100-aa42-50a6-fb21-9441.ngrok-free.app", {
+    transports: ["websocket"],
+  });
+
+  App.socket.on('connect', () => {
+    console.log(`[SocketIO] connect : SID=${App.socket.id}`);
+    App.socket.emit('register', { userId: userId });
+    console.log(`[SocketIO] emit register → userId=${userId}`);
+
+
+
+    App.socket.emit('ping_test', { message: 'salut serveur' });
+  });
+
+  App.socket.on('register_success', data => {
+    console.log('[SocketIO] register_success :', data.message);
+  });
+
+  App.socket.on('register_error', data => {
+    console.error('[SocketIO] register_error :', data.message);
+  });
+
+  App.socket.on('pong_test', data => {
+    console.log('[CLIENT] pong_test reçu :', data.message);
+  });
+
+  App.socket.on('disconnect', reason => {
+    console.log(`[SocketIO] disconnect : raison=${reason}`);
+  });
+
+  App.socket.on('connect_error', err => {
+    console.error('[SocketIO] connect_error :', err.message);
+  });
+};
 
 // --- Gestion des données utilisateurs ---
 firebase.auth().onAuthStateChanged(user => {
@@ -12,10 +48,14 @@ firebase.auth().onAuthStateChanged(user => {
     App.userId = user.uid;
     let currentUserData = getUserData();
     saveUserData(currentUserData);
+    //App.connectToGameServer(App.userId);
   } else {
     // Aucun utilisateur authentifié
   }
 });
+
+
+
 
 App.trophyVerif = function() {
   let userData = getUserData();
@@ -391,29 +431,11 @@ App.init = function() {
     loadPage('recompenses');
   }
   // Après DOMContentLoaded ou dans App.init :
-  document.getElementById('close-calendar').addEventListener('click', () => {
-    document.getElementById('daily-login-calendar').style.display = 'none';
-    // Si non collecté, afficher la bannière
-    const todayKey = App.getParisDate().toISOString().slice(0, 10);
-    const claimed = getUserData().dailyClaims[todayKey];
-    if (!claimed &&
-      App.getParisDate() >= App.loginStart &&
-      App.getParisDate() <= App.loginEnd) {
-      document.getElementById('daily-login-banner').style.display = 'block';
-    }
-  });
-
-  // Click sur la bannière rouvrira le calendrier
-  document.getElementById('daily-login-banner').addEventListener('click', () => {
-    document.getElementById('daily-login-banner').style.display = 'none';
-    App.showLoginCalendar();
-  });
   App.checkAndAskForUsername();
   App.displayUserInfo();
   App.trophyVerif();
   App.updateStats();
   App.StartedGame();
-  App.checkDailyBanner();
 };
 
 // Initialisation globale de l'app (à appeler dès que possible, par exemple dans le routeur de la SPA)
@@ -460,31 +482,6 @@ App.startWeekendTimer = function() {
   }
 };
 
-// ----------------------
-// Récompenses quotidiennes
-// ----------------------
-App.dailyRewards = {
-  '2025-08-01': { text: '2 récompenses aléatoires', type: 'recompense', amount: 2 },
-  '2025-08-02': { text: '35 points', type: 'points', amount: 35 },
-  '2025-08-03': { text: '5 Double XP', type: 'xp', amount: 5 },
-  '2025-08-04': { text: '3 potions de soin', type: 'potion', amount: 3 },
-  '2025-08-05': { text: "1 cape de l'ombre", type: 'cape', amount: 1 },
-  '2025-08-06': { text: '20 points', type: 'points', amount: 20 },
-  '2025-08-07': { text: '3 boucliers solide', type: 'bouclier', amount: 3 },
-  '2025-08-08': { text: '1 amulette de vitalité', type: 'amulette', amount: 1 },
-  '2025-08-09': { text: '3 double XP', type: 'xp', amount: 3 },
-  '2025-08-10': { text: '3 récompenses aléatoire', type: 'recompense', amount: 3 },
-  '2025-08-11': { text: '1 élixir de puissance', type: 'élixir', amount: 1 },
-  '2025-08-12': { text: '3 cristaux de Renaissance ', type: 'cristaux', amount: 3 },
-  '2025-08-13': { text: '50 points', type: 'points', amount: 50 },
-  '2025-08-14': { text: 'Nouveau personnage "Perro"', type: 'perro', amount: 1 },
-  '2025-08-15': { text: '300XP pour Perro', type: 'xpPerro', amount: 300 },
-};
-
-// Période de jeu : 01 août → 15 août 2025
-App.loginStart = new Date('2025-08-01T09:00:00+02:00');
-App.loginEnd = new Date('2025-08-15T09:00:00+02:00');
-
 // Retourne la date-heure à Paris
 App.getParisDate = function() {
   const parisString = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
@@ -503,213 +500,12 @@ App.isFirstLoginOfDay = function() {
   return false;
 };
 
-// Initialise et affiche le calendrier
-App.showLoginCalendar = function() {
-  const now = App.getParisDate();
-  if (now < App.loginStart || now > App.loginEnd) return;
-  const todayKey = now.toISOString().slice(0, 10);
-  const hist = JSON.parse(localStorage.getItem('loginHistory') || '{}');
-
-  // Génération de la grille
-  const grid = document.getElementById('calendar-grid');
-  grid.innerHTML = '';
-
-  for (let d = new Date(App.loginStart); d <= App.loginEnd; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().slice(0, 10);
-    const cell = document.createElement('div');
-    cell.className = 'calendar-day' + (hist[key] ? ' connected' : '');
-    cell.innerText = `${d.getDate()}/${d.getMonth() + 1}`;
-    cell.dataset.key = key;
-
-    if (key === todayKey) {
-      cell.classList.add('today');
-      cell.addEventListener('click', () => {
-        const userData = getUserData();
-        const claimed = userData.dailyClaims[todayKey];
-        const reward = App.dailyRewards[todayKey];
-
-        if (reward && !claimed) {
-          // crédit
-          if (reward.type === 'points') {
-            userData.argent = (userData.argent || 0) + reward.amount;
-          } else if (reward.type === 'recompense') {
-            userData.recompense = (userData.recompense || 0) + reward.amount;
-          } else if (reward.type === 'bouclier') {
-            userData.bouclier_solide_acheté = userData.bouclier_solide_acheté || [];
-            userData.bouclier_solide_acheté.push(reward.amount);
-          }
-          else if (reward.type === 'potion') {
-            userData.Potion_de_Santé_acheté += reward.amount;
-          }
-          else if (reward.type === 'xp') {
-            userData.Double_XP_acheté += reward.amount;
-          }
-          else if (reward.type === 'amulette') {
-            userData.Amulette_de_Régénération_acheté += reward.amount;
-          }
-          else if (reward.type === 'cape') {
-            userData.Cape_acheté += reward.amount;
-          }
-          else if (reward.type === 'élixir') {
-            userData.elixir_puissance_acheté += reward.amount;
-          }
-          else if (reward.type === 'cristaux') {
-            userData.crystal_acheté += reward_amount;
-          }
-          else if (reward.type === 'perro') {
-            userData.Perro = 1;
-          }
-          else if (reward.type === 'xpPerro') {
-            userData.Perro_XP = (userData.Perro_XP || 0) + reward.amount;
-          }
-          userData.dailyClaims[todayKey] = true;
-          saveUserData(userData);
-
-          // marquer connecté
-          hist[todayKey] = true;
-          localStorage.setItem('loginHistory', JSON.stringify(hist));
-          cell.classList.add('connected');
-        }
-
-        // affichage de l’overlay
-        document.getElementById('reward-icon').innerText = reward.icon || '';
-        document.getElementById('reward-text').innerText = reward.text;
-        document.getElementById('reward-overlay').style.display = 'flex';
-
-        // masquer bannière si visible
-        document.getElementById('daily-login-banner').style.display = 'none';
-      });
-    } else {
-      cell.classList.add('locked');
-    }
-
-    grid.appendChild(cell);
-  }
-
-  document.getElementById('daily-login-calendar').style.display = 'block';
-};
-
-// --- Gestion de la bannière animée ---
-
-// Drapeau pour ne jouer l’animation qu’une fois par jour
-App._bannerAnimatedForDate = null;
-App._resetBannerAnimationFlagIfNeeded = function() {
-  const today = App.getParisDate().toISOString().slice(0, 10);
-  if (App._bannerAnimatedForDate !== today) {
-    App._bannerAnimatedForDate = null;
-  }
-};
-
-// Jouer le rebond une seule fois par jour
-App.showBannerAnimated = function() {
-  const today = App.getParisDate().toISOString().slice(0, 10);
-  if (App._bannerAnimatedForDate === today) return;
-  App._bannerAnimatedForDate = today;
-
-  const b = document.getElementById('daily-login-banner');
-
-  // 1) Verrouille la hauteur actuelle
-  const currentHeight = b.getBoundingClientRect().height;
-  b.style.height = currentHeight + 'px';
-  b.style.overflow = 'hidden';
-
-  // 2) Affiche et lance l’animation
-  b.classList.remove('minimized');
-  b.classList.add('expanded');
-
-  // 3) Au terme de l’animation, on retire la classe expanded, on remet minimized
-  setTimeout(() => {
-    b.classList.remove('expanded');
-    b.classList.add('minimized');
-    // 4) On lâche la hauteur fixe pour revenir au auto
-    b.style.height = '';
-    b.style.overflow = '';
-  }, 1000);
-};
-
-
-// Initialisation des listeners SPA-safe
-App._bannerInited = false;
-App.initBannerEvents = function() {
-  if (App._bannerInited) return;
-  App._bannerInited = true;
-
-  const banner = document.getElementById('daily-login-banner');
-  const handle = banner.querySelector('.banner-handle');
-  const content = banner.querySelector('.banner-content');
-  const closeCal = document.getElementById('close-calendar');
-  const closeOv = document.getElementById('close-reward');
-
-  // Poignée “>” pour basculer entre affiché entier et minimisé
-  handle.addEventListener('click', e => {
-    e.stopPropagation();
-    const banner = document.getElementById('daily-login-banner');
-
-    if (banner.classList.contains('minimized')) {
-      // si minimisée, on l’expanse
-      banner.classList.remove('minimized');
-    } else {
-      // si déjà entière, on la minimise
-      banner.classList.add('minimized');
-    }
-  });
-
-
-  content.addEventListener('click', () => {
-    App.showLoginCalendar();
-  });
-
-  closeCal.addEventListener('click', () => {
-    document.getElementById('daily-login-calendar').style.display = 'none';
-    loadPage('menu_principal');
-    App.checkDailyBanner();
-  });
-
-  closeOv.addEventListener('click', () => {
-    document.getElementById('reward-overlay').style.display = 'none';
-  });
-};
-
-// Affiche ou masque la bannière selon l’état et lance l’animation
-App.checkDailyBanner = function() {
-  App._resetBannerAnimationFlagIfNeeded();
-  App.initBannerEvents();
-
-  const now = App.getParisDate();
-  const key = now.toISOString().slice(0, 10);
-  const inRange = now >= App.loginStart && now <= App.loginEnd;
-  const claimed = getUserData().dailyClaims[key];
-  const banner = document.getElementById('daily-login-banner');
-
-  if (!banner) return;
-
-  if (inRange && !claimed) {
-    // première apparition
-    if (!banner.classList.contains('visible')) {
-      banner.classList.add('visible');
-      banner.style.display = 'flex';
-      App.showBannerAnimated();
-    }
-    else {
-      banner.classList.add('minimized');
-    }
-  } else {
-    banner.style.display = 'none';
-    banner.classList.remove('visible', 'minimized', 'expanded');
-  }
-
-};
-
 // Initialisation globale
 if (!App._initWrapper) {
   App._initWrapper = true;
   App._oldInit = App.init;
   App.init = function() {
     App._oldInit.apply(this, arguments);
-    if (App.isFirstLoginOfDay()) {
-      App.showLoginCalendar();
-    }
-    App.checkDailyBanner();
   };
 }
 

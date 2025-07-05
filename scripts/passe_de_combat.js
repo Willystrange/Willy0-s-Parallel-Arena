@@ -293,7 +293,7 @@ App.initApp = function() {
     { badge: 57, text: "3 Épées tranchantes", level: 57, type: 'epee_tranchante', value: 3, rarity: 'premium' },
     { badge: 58, text: "3 Boucliers solides", level: 58, type: 'bouclier_solide', value: 3, rarity: 'premium' },
     { badge: 59, text: "30 Points", level: 59, type: 'points', value: 30, rarity: 'premium' },
-    { badge: 60, text: "7 récompenses aléatoires + Boompy", level: 60, type: 'recompense', value: 7, rarity: 'premium' }
+    { badge: 60, text: "7 récompenses aléatoires + Nautilus", level: 60, type: 'recompense', value: 7, rarity: 'premium' }
   ];
 
   const rewardsPerPage = 3;
@@ -474,8 +474,8 @@ App.initApp = function() {
 
   // Mise à jour finale du pass "Boompy"
   let updatedUserData = getUserData();
-  if (updatedUserData.pass_level >= 60 && updatedUserData.pass_premium && updatedUserData.Boompy != 1) {
-    updatedUserData.Boompy = 1;
+  if (updatedUserData.pass_level >= 60 && updatedUserData.pass_premium && updatedUserData.Nautilus != 1) {
+    updatedUserData.Nautilus = 1;
   }
   saveUserData(updatedUserData);
 };

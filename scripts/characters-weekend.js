@@ -35,6 +35,7 @@ App.initCharacterSelection = function() {
     { name: "Inconnu", pv: 11300, attaque: 435, defense: 83, spe: 0.25, argent: 0, pv_max: 11300, attaque_originale: 435, defense_originale: 83, rarity: "épique" },
     { name: "Boompy", pv: 11800, attaque: 500, defense: 80, spe: 0, argent: 0, pv_max: 11800, attaque_originale: 500, defense_originale: 80, rarity: "légendaire" },
     {name: "Perro", pv: 9700, attaque: 420, defense: 85, spe: 0.5, argent: 0, pv_max: 9700, attaque_originale: 420, defense_originale: 85, rarity: "commun"},
+    {name: "Nautilus", pv: 11280, attaque: 470, defense: 74, spe: 0.5, argent: 0, pv_max: 11280, attaque_originale: 470, defense_originale: 74, rarity: "épique"},
   ];
 
   const characterList = document.getElementById("character-list");

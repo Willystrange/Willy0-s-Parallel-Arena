@@ -19,12 +19,9 @@ App.characters = [
   { name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: "Inflige 2× attaque + 25% de chance d'immobiliser.", rarete: "épique", classe: "Maître des Arcanes" },
   { name: "Sboonie", pv: 10200, attaque: 410, defense: 95, spe: "Régénère 8% de ses PV max, inflige 50 dégâts et -15% attaque adverse.", rarete: "commun", classe: "Soigneur d’Élite" },
   { name: "Inconnu", pv: 11300, attaque: 435, defense: 83, spe: "Bloque la capacité adverse pour 3 tours et gagne +25 attaque/défense.", rarete: "épique", classe: "Maître des Arcanes" },
-  {
-    name: "Boompy", pv: 11800, attaque: 500, defense: 80, spe: "À chaque attaque, charge un compteur; au troisième coup, déclenche une explosion infligeant 150% de l’attaque à tous les adversaires.", rarete: "légendaire", classe: "Assassin Sauvage"
-  },
-  {
-    name: "Perro", pv: 9700, attaque: 420, defense: 85, spe: "Réduit de 30 % la défense de l'adversaire pendant 2 tours.", rarete: "commun", classe: "Briseur de Défense"
-  }
+  { name: "Boompy", pv: 11800, attaque: 500, defense: 80, spe: "À chaque attaque, charge un compteur; au troisième coup, déclenche une explosion infligeant 150% de l’attaque à tous les adversaires.", rarete: "légendaire", classe: "Assassin Sauvage" },
+  { name: "Perro", pv: 9700, attaque: 420, defense: 85, spe: "Réduit de 30 % la défense de l'adversaire pendant 2 tours.", rarete: "commun", classe: "Briseur de Défense" },
+  { name: "Nautilus", pv: 11280, attaque: 470, defense: 74, spe: "3 frappes à 60% de l'attaque. Chaque frappe a 50% de chance de diminuer de 10 points la défense de l'adversaire.", rarete: "épique", classe: "Lame de l’Ombre" }
 ];
 
 // -------------------------------------------------

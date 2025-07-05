@@ -14,6 +14,8 @@ App.characters = {
   'Sboonie': 5,
   'Rosalie': 2,
   'Inconnue': 2,
+  'Boompy': 1,
+  'Perro': 5,
 };
 
 App.rarityProbabilities = {

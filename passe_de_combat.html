@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Willy0's Parallel Arena</title>
   <script src="scripts/app.js"></script>
-  <link rel="stylesheet" href="styles/passe_de_combat.css">
 </head>
+
 <body class="passe_de_combat">
   <!-- Place ce DIV tout en haut de ton HTML, juste après <body> -->
   <div id="adblock-overlay" style="
@@ -32,8 +32,10 @@
         font-size: 1em;
     ">
       Vous utilisez un bloqueur de publicité.<br>
-      Vous ne pouvez donc ni interragir avec cette page ni obtenir les récompenses de celle-ci avant de l'avoir désactivé.<br>
-      Nous vous rappelons que nous ne mettons pas de publicité tiers sur ce site. Vous pouvez donc le mettre sur la liste blanche de votre bloqueur.<br>
+      Vous ne pouvez donc ni interragir avec cette page ni obtenir les récompenses de celle-ci avant de l'avoir
+      désactivé.<br>
+      Nous vous rappelons que nous ne mettons pas de publicité tiers sur ce site. Vous pouvez donc le mettre sur la
+      liste blanche de votre bloqueur.<br>
       <br>
       (Touchez l'écran pour revenir au menu principal)
     </div>
@@ -73,8 +75,9 @@
     <div class="container" id="album-container">
       <!-- Les pages seront créées dynamiquement -->
     </div>
-    <div class="Dates">Le Parallel Pass 4 durera du 16 juillet au 20 septembre 2025.</div>
+    <div id="Dates" class="Dates">Le Parallel Pass 5 durera du 20 septembre au ... .</div>
   </div>
+
 
   <!-- Footer -->
   <div class="footer">
@@ -95,10 +98,11 @@
   <!-- Popups -->
   <div class="popup" id="ad-popup">
     <h2 style="display: flex; justify-content: space-between; align-items: center;">
-      Parallel Pass 4 Premium
-      <img src="Parallel-Pass-3-premium.png" alt="Icône Parallel Pass 3 Premium" style="width: 80px; height: 80px; margin-left: 10px;">
+      Parallel Pass 5 Premium
+      <img src="Parallel-Pass-3-premium.png" alt="Icône Parallel Pass 3 Premium"
+        style="width: 80px; height: 80px; margin-left: 10px;">
     </h2>
-    <p>Obtenez des récompenses bonus dont le personnage "Boompy" au niveau 60 pour 850 points !</p>
+    <p>Obtenez des récompenses bonus dont le personnage "Nautilus" au niveau 60 pour 850 points !</p>
     <div>
       <button onclick="App.hidePopup()">Annuler</button>
       <button onclick="App.handlePurchase()">Acheter</button>
@@ -119,4 +123,5 @@
   <script src="localStorage.js"></script>
   <script src="scripts/passe_de_combat.js"></script>
 </body>
+
 </html>

@@ -13,7 +13,7 @@ App.DAILY_REWARD_AMOUNT = 15;
 App.WEEK_REWARD_AMOUNT = 20;
 
 // --- FONCTIONS UTILITAIRES ---
-App.CHARACTERS = ['Willy', 'Cocobi', 'Sboonie', 'Rosalie', 'Poulpy', 'Inconnu', 'Diva', 'Colorina', 'Grours', 'Oiseau', 'Baleine', 'Doudou', 'Coeur'];
+App.CHARACTERS = ['Willy', 'Cocobi', 'Sboonie', 'Rosalie', 'Poulpy', 'Inconnu', 'Diva', 'Colorina', 'Grours', 'Oiseau', 'Baleine', 'Doudou', 'Coeur', 'Perro', 'Nautilus', 'Boompy', ];
 
 App.getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -429,7 +429,7 @@ App.getNextFridayAtNine = () => {
 
 
 App.updateAllCountdowns = () => {
-  const ids = ['daily-countdown', 'weekly-countdown', 'weekend-countdown', 'summer-countdown'];
+  const ids = ['daily-countdown', 'weekly-countdown', 'weekend-countdown'];
   const anyVisible = ids.some(id => {
     const el = document.getElementById(id);
     return el && window.getComputedStyle(el).display !== 'none';
@@ -625,7 +625,7 @@ App.assignWeekendQuests = () => {
         el.innerHTML = `
         <li>
           <p>${text}</p>
-          <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} d'argent</p>
+          <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} Points</p>
           <div class="progress-bar-container">
             <div class="progress-bar" id="${id}-bar"></div>
             <div class="progress-bar-text" id="${id}-text">
@@ -738,7 +738,7 @@ App.assignWeekendQuests = () => {
       el.innerHTML = `
       <li>
         <p>${q.text}</p>
-        <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} d'argent</p>
+        <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} Points</p>
         <div class="progress-bar-container">
           <div class="progress-bar" id="${id}-bar"></div>
           <div class="progress-bar-text" id="${id}-text">0 / ${q.total}</div>
@@ -756,156 +756,19 @@ App.assignWeekendQuests = () => {
   saveUserData(userData);
 };
 
-// --- PARAMÈTRES DU SYSTÈME D’ÉTÉ --
-// Dates et quêtes d’été
-App.SUMMER_START_DATE = '2025-05-25'; // date de début (YYYY-MM-JJ)
-App.SUMMER_QUESTS = [
-  { text: 'Gagne 1 partie (hors mode survie)', total: 1, type: 'VTM' },
-  { text: 'Gagne 1 partie sans jamais utiliser la défense (hors mode survie)', total: 1, type: 'VSD' },
-  { text: 'Utilise ta capacité spéciale 3 fois dans la même partie (hors mode survie)', total: 1, type: 'CSP' },
-  { text: 'Inflige au moins 10 000 de dégâts totaux en une partie (hors mode survie)', total: 1, type: 'DPS' },
-  { text: 'Restaure au moins 4 000 PV via potions et/ou amulette dans une même partie (hors mode survie)', total: 1, type: 'SMP' },
-  { text: "Utilise au moins 3 objets différents au cours d'une même partie (hors mode survie)", total: 1, type: 'ODP' },
-  { text: 'Gagne 1 partie en moins de 30 tours (hors mode survie)', total: 1, type: 'VMT' },
-  { text: 'Inflige au moins 1 000 de dégâts en un seul tour (hors mode survie)', total: 1, type: 'MDST' },
-  { text: 'Inflige au moins 12 000 de dégâts totaux en une partie (hors mode survie)', total: 1, type: 'DPS2' },
-  { text: 'Gagne 1 partie avec un personnage Épique ou Légendaire (hors mode survie)', total: 1, type: 'VEL' },
-  { text: "Active l'amulette de régénération et récolte 5 heals", total: 5, type: 'ASH' },
-  { text: 'Utilise 3 potions de soin dans une seule partie (hors mode survie)', total: 1, type: 'USP' },
-  { text: "Survivre 5 manches d'affilé en mode survie", total: 1, type: 'SMS' },
-  { text: 'Remporte 4 parties (hors mode survie)', total: 1, type: 'VPS' },
-  { text: 'Remporter 3 parties avec Perro (hors mode survie)', total: 1, type: 'VPP' },
-];
 
-// renvoie le nombre de jours écoulés depuis le début (0-based)
-App.getSummerDayIndex = () => {
-  const tz = { timeZone: 'Europe/Paris' };
-  const today = new Date(new Date().toLocaleString('en-US', tz)).setHours(0, 0, 0, 0);
-  const start = new Date(App.SUMMER_START_DATE + 'T00:00:00+02:00').getTime();
-  return Math.max(0, Math.floor((today - start) / (1000 * 60 * 60 * 24)));
-};
-
-// Génération des quêtes d’été (une seule fois)
-App.generateSummerQuests = () => {
-  const u = getUserData();
-  if (u.summer_genere) return;
-
-  App.SUMMER_QUESTS.forEach((q, i) => {
-    const key = `Summer${i + 1}`;
-    Object.assign(u, {
-      [`${key}_text`]: q.text,
-      [`${key}_total`]: q.total,
-      [`${key}_current`]: 0,
-      [`${key}_type`]: q.type,
-      [`${key}_completed`]: false,
-      [`${key}_reward`]: '30 Points',
-      [`${key}_active`]: false
-    });
-  });
-
-  u.summer_genere = true;
-  saveUserData(u);
-};
-
-// Affichage des quêtes d’été selon le jour (active/inactive)
-App.displaySummerQuests = () => {
-  const u = getUserData();
-  const container = document.getElementById('summer-quests');
-  if (!container) return;
-
-  const max = Math.min(App.SUMMER_QUESTS.length, App.getSummerDayIndex() + 1);
-
-  // mise à jour des flags active
-  App.SUMMER_QUESTS.forEach((_, i) => {
-    u[`Summer${i + 1}_active`] = (i < max);
-  });
-
-  // reconstruction du HTML
-  let html = '';
-  for (let i = 1; i <= App.SUMMER_QUESTS.length; i++) {
-    const key = `Summer${i}`;
-    const active = u[`${key}_active`];
-    if (!active) continue;
-
-    const text = u[`${key}_text`];
-    const tot = u[`${key}_total`];
-    const cur = u[`${key}_current`];
-    const done = cur >= tot;
-    if (done) u[`${key}_completed`] = true;
-
-    html += `
-      <li>
-        <p>${text}</p>
-        <p class="reward-info">Récompense : ${u[`${key}_reward`]}</p>
-        <div class="progress-bar-container" id="summer-${i}">
-          <div class="progress-bar"></div>
-          <div class="progress-bar-text">${done ? 'Quête terminée' : `${cur} / ${tot}`}</div>
-        </div>
-      </li>
-    `;
-  }
-
-  container.innerHTML = html;
-
-  // mise à jour graphique des barres pour les actives
-  for (let i = 1; i <= max; i++) {
-    App.updateWeeklyProgressBar(
-      `summer-${i}`,
-      getUserData()[`Summer${i}_total`],
-      getUserData()[`Summer${i}_current`]
-    );
-  }
-
-  // --- Récompense automatique des quêtes d'été ---
-  for (let i = 1; i <= max; i++) {
-    const key = `Summer${i}`;
-    const done = u[`${key}_current`] >= u[`${key}_total`];
-    if (done && !u[`${key}_rewardClaimed`]) {
-      u.argent = (u.argent || 0) + 30;
-      u[`${key}_rewardClaimed`] = true;
-      alert(`Quête d'été "${u[`${key}_text`]}" terminée : +30 points`);
-    }
-  }
-
-  saveUserData(u);
-};
-
-// Compteur jusqu’au prochain jour à 09:00
-App.getNextSummerAtNine = () => {
-  const tz = { timeZone: 'Europe/Paris' };
-  const now = new Date(new Date().toLocaleString('en-US', tz));
-  const next = new Date(now.setHours(9, 0, 0, 0));
-  if (now >= next) next.setDate(next.getDate() + 1);
-  return next;
-};
-App.updateSummerCountdown = () => {
-  const now = Date.now();
-  const next = App.getNextSummerAtNine().getTime();
-  document.getElementById('summer-countdown').textContent =
-    'Prochaines quêtes dans : ' + App.formatDiff(next - now);
-};
 
 // --- GESTION DES TIMERS ---
-
 // Stockage des IDs pour pouvoir les arrêter
 App.countdownId = null;  // pour daily/weekend/weekly
-App.summerCountdownId = null;  // pour l’été
 
 // Démarre le compteur d’été en mémorisant l’ID
-App.startSummerCountdown = () => {
-  App.updateSummerCountdown();
-  App.summerCountdownId = setInterval(App.updateSummerCountdown, 1000);
-};
 
 // Méthode pour stopper tous les timers actifs
 App.stopAllTimers = () => {
   if (App.countdownId !== null) {
     clearInterval(App.countdownId);
     App.countdownId = null;
-  }
-  if (App.summerCountdownId !== null) {
-    clearInterval(App.summerCountdownId);
-    App.summerCountdownId = null;
   }
 };
 
@@ -937,12 +800,6 @@ App.checkAllQuestsCompletion(getUserData());
 App.assignWeekendQuests();
 App.startCountdowns();
 
-App.generateSummerQuests();
-App.displaySummerQuests();
-App.startSummerCountdown();
-
-
-
 // 1) Fonction de nettoyage des timers et masquage des compte-à-rebours
 App.clearQuestPage = () => {
   // Arrête tous les intervalles
@@ -952,10 +809,8 @@ App.clearQuestPage = () => {
     'daily-countdown',
     'weekly-countdown',
     'weekend-countdown',
-    'summer-countdown',
     'weekly-quests',
     'weekend-quests',
-    'summer-quests'
   ];
   ids.forEach(id => {
     const el = document.getElementById(id);

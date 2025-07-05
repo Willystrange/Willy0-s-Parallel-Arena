@@ -422,7 +422,7 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
     logColor = 'black';
   }
   let specialLogMessage = "";
-  
+
   const defenseModifier = 0.9 + Math.random() * 0.2;
   const modifiedDefense = Math.round(defender.defense * defenseModifier);
   let damage = Math.max(0, attacker.attaque - modifiedDefense);
@@ -430,7 +430,7 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
   if (attacker.name === "Boompy" && attacker.spe >= 1) {
     damage = Math.max(0, attacker.attaque * 1.5 - modifiedDefense);
     attacker.spe -= 1;
-      specialLogMessage = `${attacker.name} est surchargé, il inflige 150% de ses dégâts de base`;
+    specialLogMessage = `${attacker.name} est surchargé, il inflige 150% de ses dégâts de base`;
     App.addCombatLog(specialLogMessage, logColor, isPlayerAttacking);
     App.scrollToBottom();
   }
@@ -443,17 +443,17 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
 
   if (defender.cape) {
     damage = 0;
-      specialLogMessage = `${defender.name} a utilisé une cape de l'ombre, ${attacker.name} ne l'a donc pas atteint !`;
+    specialLogMessage = `${defender.name} a utilisé une cape de l'ombre, ${attacker.name} ne l'a donc pas atteint !`;
   }
 
   defender.pv = Math.max(0, defender.pv - damage);
 
   if (isPlayerAttacking) {
     attacker.last_action = 1;
-      specialLogMessage = `Vous attaquez et infligez ${damage} points de dégâts à ${defender.name}.`;
+    specialLogMessage = `Vous attaquez et infligez ${damage} points de dégâts à ${defender.name}.`;
     document.getElementById('opponent-pv').textContent = `PV: ${defender.pv}`;
   } else {
-      specialLogMessage = `${attacker.name} attaque et inflige ${damage} points de dégâts.`;
+    specialLogMessage = `${attacker.name} attaque et inflige ${damage} points de dégâts.`;
     document.getElementById('player-pv').textContent = `PV: ${defender.pv}`;
   }
 
@@ -511,10 +511,6 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
         }
       }
     }
-    if (App.currentWave >= 5 && userData.Summer15_active) {
-      userData.Summer15_current += 1;
-      saveUserData(userData);
-    }
 
     App.calculateRewards(App.currentWave);
   }
@@ -541,7 +537,7 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
   }
 
   let specialLogMessage = "";
-  
+
 
   // Immobilisation
   if (character.immobilisation >= 1) {
@@ -691,6 +687,37 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
         opponent.Perro += 3;
         specialLogMessage = `${character.name} utilise sa capacité spéciale, il inflige ${character.attaquee} dégâts et réduit la défense de ${opponent.name} de 30% pour les deux prochains touts !`;
         break;
+      case "Nautilus":
+        character.spe = 0;
+        let attack = character.attaque;
+        character.attaque *= 0.6;
+
+        specialLogMessage = `${character.name} utilise sa capacité spéciale, il effectue 3 attaques à 60% de son attaque normale.`;
+
+        const opponentDefenseModifieee = 0.9 + Math.random() * 0.2;
+        const opponentDefenseee = Math.round(opponent.defense * opponentDefenseModifieee);
+        opponent.pv += (2 * (opponentDefenseee - character.attaque));
+
+        character.degats_partie += (2 * (character.attaque - opponentDefenseee));
+
+        let totalDefenseLost = 0;
+        for (let i = 0; i < 3; i++) {
+          if (Math.random() < 0.5) {
+            opponent.defense -= 10;
+            totalDefenseLost += 10;
+          }
+        }
+
+        if (totalDefenseLost > 0) {
+          specialLogMessage += ` De plus, la défense de ${opponent.name} diminue de ${totalDefenseLost} points !`;
+        }
+
+        App.addCombatLog(specialLogMessage, logColor, isPlayer);
+        App.handleAttack(character, opponent, isPlayer);
+        character.attaque = attack;
+        character.spe = 0;
+        break;
+
 
       // Adversaires spécifiques
       case "Blitzkrieger": {
@@ -1053,7 +1080,7 @@ App.executeAITurn = function(chosenAction) {
     if (chosenAction === "attacker") {
       App.handleAttack(App.opponentCharacter, App.playerCharacter, false);
       App.opponentCharacter.spe += 0.1;
-    } else if (chosenAction === "utiliser capacité spéciale" ) {
+    } else if (chosenAction === "utiliser capacité spéciale") {
       App.useSpecialAbility(App.opponentCharacter, App.playerCharacter, false);
     } else if (chosenAction === "se défendre") {
       App.opponentDefense();
@@ -1103,9 +1130,9 @@ App.predictPlayerNextActionBySequence = function(order = 2) {
 
 App.opponentTurn = function() {
   // Désactivation des boutons d'action
- if (App.opponentCharacter.spe >= 1) {
-   App.opponentCharacter.spe = 1;
- }
+  if (App.opponentCharacter.spe >= 1) {
+    App.opponentCharacter.spe = 1;
+  }
   App.opponentCharacter.defenseCooldown = 3;
   userData = getUserData();
   document.getElementById('attack-button').disabled = true;
@@ -1272,7 +1299,7 @@ App.handleDefense = function(character, opponent, isPlayer) {
       if (isPlayer) {
         character.last_action = 1;
         character.defense_partie += 1;
-        
+
         App.scrollToBottom();
         App.opponentTurn();
       }
@@ -1511,7 +1538,11 @@ App.calculateRewards = function(wave) {
   const name = App.playerCharacter.name;
   const argent = Math.round((Math.floor(Math.random() * 7) + 3) * wave * 0.8);
   let xp = Math.round(25 * wave * 0.7);
-  if (userData.XP_jour >= 2500) xp = 0;
+  if (userData.Double_XP > 0) {
+    xp *= 2;
+    userData.Double_XP -= 1;
+  }
+  if (userData.XP_jour >= 5000) xp = 0;
 
   userData.argent = (userData.argent || 0) + argent;
   userData[`${name}_XP`] = (userData[`${name}_XP`] || 0) + xp;

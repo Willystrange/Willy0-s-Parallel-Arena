@@ -40,7 +40,7 @@ App.versionCompare = function(v1, v2) {
 App.mise_a_jour = function() {
   const userData = getUserData();
   // Version actuelle du jeu
-  const currentVersion = 'B2.1.1.00';
+  const currentVersion = 'B2.2.0.00';
 
   // Valeurs par défaut pour les données utilisateur
   const defaultUserData = {
@@ -125,6 +125,10 @@ App.mise_a_jour = function() {
     Inconnu_XP: 0,
     Inconnu_Level: 1,
     Inconnu_boost: 0,
+    Nautilus: 0,
+    Nautilus_XP: 0,
+    Nautilus_Level: 1,
+    Nautilus_boost: 0,
     Double_XP: 5,
     Double_XP_acheté: 0,
     Potion_de_Santé_acheté: 0,
@@ -170,9 +174,34 @@ App.mise_a_jour = function() {
     localStorage.removeItem('rulesAccepted');
   }
   if (App.versionCompare(userData.version || '0.0.0', currentVersion) < 0) {
+    userData.semaine1 = false;
+    userData.semaine2 = false;
+    userData.semaine3 = false;
+    userData.semaine4 = false;
+    userData.semaine5 = false;
+    userData.semaine6 = false;
+    userData.quete_genere = false;
 
+    if (userData) {
+      for (let i = 1; i <= 15; i++) {
+        delete userData[`Summer${i}_text`];
+        delete userData[`Summer${i}_total`];
+        delete userData[`Summer${i}_current`];
+        delete userData[`Summer${i}_type`];
+        delete userData[`Summer${i}_completed`];
+        delete userData[`Summer${i}_reward`];
+        delete userData[`Summer${i}_active`];
+      }
+      delete userData.summer_genere;
+      
+
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+
+
+    console.log("Les données des quêtes Summer ont été supprimées du localStorage.");
   }
-
   // Vérification et ajout des clés manquantes avec leur valeur par défaut
   for (const key in defaultUserData) {
     if (!userData.hasOwnProperty(key)) {
@@ -189,3 +218,5 @@ App.mise_a_jour = function() {
 
 // Exécution de la mise à jour dès le chargement de la page
 App.mise_a_jour();
+
+

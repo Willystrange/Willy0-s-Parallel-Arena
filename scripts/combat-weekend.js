@@ -741,6 +741,37 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
       App.addCombatLog(specialLogMessage, logColor, isPlayer);
       break;
 
+    case "Nautilus":
+      character.spe = 0;
+      let attack = character.attaque;
+      character.attaque *= 0.6;
+
+      specialLogMessage = `${character.name} utilise sa capacité spéciale, il effectue 3 attaques à 60% de son attaque normale.`;
+
+      const opponentDefenseModifieee = 0.9 + Math.random() * 0.2;
+      const opponentDefenseee = Math.round(opponent.defense * opponentDefenseModifieee);
+      opponent.pv += (2 * (opponentDefenseee - character.attaque));
+
+      character.degats_partie += (2 * (character.attaque - opponentDefenseee));
+
+      let totalDefenseLost = 0;
+      for (let i = 0; i < 3; i++) {
+        if (Math.random() < 0.5) {
+          opponent.defense -= 10;
+          totalDefenseLost += 10;
+        }
+      }
+
+      if (totalDefenseLost > 0) {
+        specialLogMessage += ` De plus, la défense de ${opponent.name} diminue de ${totalDefenseLost} points !`;
+      }
+
+      App.addCombatLog(specialLogMessage, logColor, isPlayer);
+      App.handleAttack(character, opponent, isPlayer);
+      character.attaque = attack;
+      character.spe = 0;
+      break;
+
     default:
       specialLogMessage = `${character.name} utilise sa capacité spéciale (effet par défaut).`;
       App.addCombatLog(specialLogMessage, logColor, isPlayer);
@@ -754,7 +785,7 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
   App.scrollToBottom();
 
   // Si c'est un joueur non-spécifique, passe au tour de l'adversaire
-  if (isPlayer && !['Diva', 'Willy', 'Baleine', 'Doudou'].includes(character.name)) {
+  if (isPlayer && !['Diva', 'Willy', 'Baleine', 'Doudou', 'Nautilus'].includes(character.name)) {
     opponentTurn();
   }
 };
@@ -1164,7 +1195,7 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
       attacker.spe -= 0.10;
       gainSpe = 0.10;
     }
-  } 
+  }
   if (["Boompy"].includes(attacker.name)) {
     gainSpe = 0.34;
     attacker.spe += gainSpe;
@@ -1271,16 +1302,16 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
     let gainXP = App.calculateXP(attacker, defender, isPlayerAttacking);
     let gainArgent = Math.round(gainXP / 3);
     if (gainXP < 20 && isPlayerAttacking) gainXP = 20;
-    if (userData.XP_jour >= 2500) gainXP = 0;
+    if (userData.XP_jour >= 5000) gainXP = 0;
     if (App.playerCharacter.xp2) gainXP *= 2;
     if (App.playerCharacter.points2) gainArgent *= 2;
 
     userData.XP_jour += gainXP;
     if (userData.Double_XP > 0) {
       gainXP *= 2;
-      userData.Double_XP--;
+      userData.Double_XP -= 1;
     } else if (userData.Double_XP_acheté > 0) {
-      userData.Double_XP_acheté--;
+      userData.Double_XP_acheté -= 1;
       gainXP *= 2;
     }
     if (userData.parties_weekend_test < 1) {
@@ -1368,86 +1399,6 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
           break;
       }
     });
-
-    // ----- Quêtes d'été -----
-    for (let i = 1; i <= 15; i++) {
-      const key = `Summer${i}`;
-      const activeKey = `${key}_active`;
-      const typeKey = `${key}_type`;
-      const currentKey = `${key}_current`;
-      if (userData[activeKey]) {
-        switch (userData[typeKey]) {
-          case "VTM":
-            if (isPlayerAttacking) userData[currentKey] += 1;
-            break;
-          case "VSD":
-            if (isPlayerAttacking && App.playerCharacter.defense_partie === 0) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "CSP":
-            if (App.playerCharacter.capacite_partie >= 3) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "DPS":
-            if (App.playerCharacter.degats_partie >= 10000) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "SMP":
-            if (App.playerCharacter.soin >= 4000) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "ODP":
-            if (App.playerCharacter.objets_partie >= 3) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "VMT":
-            if (isPlayerAttacking && App.playerCharacter.tourTT <= 30) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "MDST":
-            if (App.playerCharacter.MaxDegats >= 1000) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "DPS2":
-            if (App.playerCharacter.degats_partie >= 12000) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "VEL":
-            if (isPlayerAttacking && App.playerCharacter.name === "Cocobi" || App.playerCharacter.name === "Diva" || App.playerCharacter.name === "Poulpy" || App.playerCharacter.name === "Rosalie" || App.playerCharacter.name === "Inconnu" || App.playerCharacter.name === "Boompy") {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "ASH":
-            if (App.playerCharacter.amulette_heal >= 5) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "USP":
-            if (App.playerCharacter.objets_soin >= 3) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "VPS":
-            if (isPlayerAttacking) {
-              userData[currentKey] += 1;
-            }
-            break;
-          case "VPP":
-            if (isPlayerAttacking && App.playerCharacter.name === "Perro") {
-              userData[currentKey] += 1;
-            }
-            break;
-        }
-      }
-    }
     saveUserData(userData);
     App.checkAndDisplayCharacterUnlock(userData);
 
@@ -1482,7 +1433,7 @@ App.calculateXP = function(attacker, defender, isPlayerAttacking) {
   if (isPlayerAttacking) {
     const ratio = (attacker.pv / attacker.pv_max) * 100;
     return Math.round((2 * ratio) * (1 / (1 + niveau)));
-  } else if (userData.XP_jour >= 2500) {
+  } else if (userData.XP_jour >= 5000) {
     return 0;
   } else {
     return Math.round(20 - (2 * (niveau - 1)));
@@ -1493,7 +1444,10 @@ App.calculateXP = function(attacker, defender, isPlayerAttacking) {
 App.updateCharacterXP = function(userData, characterName, xp) {
   const key = `${characterName}_XP`;
   if (userData.hasOwnProperty(key)) {
+
     userData[key] += xp;
+
+
     saveUserData(userData);
   }
 };

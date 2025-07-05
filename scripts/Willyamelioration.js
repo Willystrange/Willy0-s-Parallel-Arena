@@ -31,8 +31,8 @@ App.initFirebaseAuth = function() {
       // S'assurer que userData existe
       let currentUserData = getUserData();
       saveUserData(currentUserData);
-    } else { 
-      console.log("Aucun utilisateur authentifié"); 
+    } else {
+      console.log("Aucun utilisateur authentifié");
     }
   });
 };
@@ -119,9 +119,9 @@ App.afficherDonneesUtilisateur = function() {
 
   // Gestion de l'affichage des boutons pour modification des stats
   if (userData.Willy_pts > 0 &&
-      userData.Willy_PV_pts < 25 &&
-      userData.Willy_attaque_pts < 20 &&
-      userData.Willy_defense_pts < 20) {
+    userData.Willy_PV_pts < 25 &&
+    userData.Willy_attaque_pts < 20 &&
+    userData.Willy_defense_pts < 20) {
     App.afficherBoutonsStats(userData);
     App.desactiverBoutons(true);
   } else {
