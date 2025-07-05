@@ -231,7 +231,6 @@ App.loadSavedGame = function() {
     App.applyEvent();
   }
 
-  console.log("Partie chargée avec succès !");
   App.updateUI();
   alert("Vous ne pouvez pas abandonner une partie !");
 };
@@ -513,7 +512,6 @@ App.useItem = function(itemName) {
       break;
 
     default:
-      console.log('Objet non reconnu :', itemName);
   }
 
   // Mise à jour de l’UI et du journal
@@ -568,10 +566,8 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
 
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
 
@@ -806,7 +802,7 @@ App.playerActionHistory = App.loadPlayerActionHistory();
 App.manhattanDistance = function(arr1, arr2) {
   let distance = 0;
   for (let i = 0; i < arr1.length; i++) {
-    distance += Math.abs(arr1[i] - arr2[i]);
+    distance += Math.abs(arr1[i] - arr1[i]);
   }
   return distance;
 };
@@ -1095,7 +1091,6 @@ window.App = window.App || {};
 // --- Défense spécifique de l’adversaire ---
 App.opponentDefense = function() {
   App.opponentCharacter.isDefending = true;
-  console.log("l'adversaire se défend");
   App.opponentCharacter.spe -= 0.1;
   App.opponentCharacter.defense_droit = 4;
 
@@ -1111,10 +1106,8 @@ App.opponentDefense = function() {
     `${App.opponentCharacter.name} se défend de la dernière attaque de ${App.playerCharacter.name}.`;
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
 
@@ -1134,10 +1127,8 @@ App.opponentDefense = function() {
 App.handleDefense = function(character, opponent, isPlayer) {
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   let specialLogMessage;
@@ -1179,10 +1170,8 @@ App.handleDefense = function(character, opponent, isPlayer) {
 App.handleAttack = function(attacker, defender, isPlayerAttacking) {
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   let gainSpe;
@@ -1565,3 +1554,4 @@ document.body.addEventListener('click', function(e) {
 });
 
 initStatsPanelState();
+// Removes all console.log statements from the javascript code.

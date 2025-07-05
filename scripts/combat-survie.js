@@ -108,7 +108,6 @@ App.chargerPartie = function() {
   App.playerCharacter = sauvegardeLocal.playerCharacter;
   App.opponentCharacter = sauvegardeLocal.opponentCharacter;
 
-  console.log("Partie chargée avec succès !");
   App.updateUI(); // Mise à jour de l'interface après chargement
 };
 
@@ -143,11 +142,9 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
 
 
 App.userData = getUserData();
-console.log(App.userData.difficulty);
 
 history.replaceState(null, null, window.location.href);
 
-console.log("good");
 
 App.adversairepasser_tour = function() {
   App.updateSpecialBar(App.opponentCharacter, 'opponent-special-bar');
@@ -415,10 +412,8 @@ App.nextWave = function() {
 App.handleAttack = function(attacker, defender, isPlayerAttacking) {
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   let specialLogMessage = "";
@@ -519,12 +514,11 @@ App.handleAttack = function(attacker, defender, isPlayerAttacking) {
 
 
 App.useSpecialAbility = function(character, opponent, isPlayer) {
+  let specialLogMessage = "";
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   if (character.spe < 1) return;
@@ -913,7 +907,6 @@ App.mostProbableAction = function(data) {
   // Prédiction par séquence (ordre 2, ajustable)
   let sequencePrediction = App.predictPlayerNextActionBySequence(2);
   if (sequencePrediction !== null) {
-    console.log("Prédiction par séquence trouvée :", sequencePrediction);
     return sequencePrediction;
   }
   // Si aucun résultat, on analyse les actions dans les données similaires
@@ -1012,7 +1005,6 @@ App.evaluateAction = function(state, action, predictedPlayerAction, difficultyMo
     // Bonus : si le joueur peut utiliser sa capacité spéciale
     if (Jcs === 1) {
       score += 30;
-      console.log("Bonus défense car le joueur peut utiliser sa capacité spéciale");
     }
     score += JpvPrecise * 0.1;
     if (difficultyModifier > 0) {
@@ -1036,7 +1028,6 @@ App.evaluateAction = function(state, action, predictedPlayerAction, difficultyMo
     App.situationStats[situationKey][action].count > 0) {
     let avgDelta = App.situationStats[situationKey][action].totalDelta / App.situationStats[situationKey][action].count;
     score += avgDelta * 0.5;
-    console.log(`Bonus adaptatif pour l'action "${action}" dans la situation ${situationKey}: avgDelta = ${avgDelta}, bonus = ${avgDelta * 0.5}`);
   }
   if (App.opponentCharacter.defense_droit > 0 && action === "se défendre") {
     score = -9999;
@@ -1058,7 +1049,6 @@ App.chooseBestAction = function(IA, state, predictedPlayerAction, difficultyModi
   let bestScore = -Infinity;
   possibleActions.forEach(action => {
     const score = App.evaluateAction(state, action, predictedPlayerAction, difficultyModifier, playerIsDefending);
-    console.log(`Action "${action}" -> score ${score}`);
     if (score > bestScore) {
       bestScore = score;
       bestAction = action;
@@ -1067,7 +1057,6 @@ App.chooseBestAction = function(IA, state, predictedPlayerAction, difficultyModi
 
   if (userData.difficulty === "Easy" && Math.random() < 0.3) {
     bestAction = possibleActions[Math.floor(Math.random() * possibleActions.length)];
-    console.log("Difficulté Easy : choix aléatoire de l'action", bestAction);
   }
 
   return bestAction;
@@ -1076,7 +1065,6 @@ App.chooseBestAction = function(IA, state, predictedPlayerAction, difficultyModi
 App.executeAITurn = function(chosenAction) {
   const delay = Math.floor(Math.random() * 1800) + 200; // délai entre 1s et 3s
   setTimeout(() => {
-    console.log("L'IA exécute l'action planifiée :", chosenAction);
     if (chosenAction === "attacker") {
       App.handleAttack(App.opponentCharacter, App.playerCharacter, false);
       App.opponentCharacter.spe += 0.1;
@@ -1106,7 +1094,6 @@ App.arraysEqual = function(a, b) {
 };
 
 App.predictPlayerNextActionBySequence = function(order = 2) {
-  console.log("6");
   if (App.playerActionHistory.length < order) return null;
   const sequence = App.playerActionHistory.slice(-order);
   const counts = {};
@@ -1157,18 +1144,13 @@ App.opponentTurn = function() {
   let IApv = Math.min(Math.ceil((App.opponentCharacter.pv / App.opponentCharacter.pv_max) * 100 / 20) * 20, 100);
 
 
-  console.log("5");
-
-
   App.playerActionHistory.push(Jaction);
   if (App.playerActionHistory.length > 30) {
     App.playerActionHistory = App.playerActionHistory.slice(-30);
   }
   App.savePlayerActionHistory(App.playerActionHistory);
-  console.log("7");
 
   const currentState = [Jcs, Jdefense, Jpv, Jaction, IAcs, IAdefense, IApv];
-  console.log("État courant :", currentState);
 
   const playerIsDefending = (App.playerCharacter.defense_droit === 4);
   const currentSituationKey = App.getSituationKey(currentState, playerIsDefending);
@@ -1176,7 +1158,6 @@ App.opponentTurn = function() {
   // Mise à jour des statistiques de la situation précédente
   let currentPlayerHP = App.playerCharacter.pv;
   let currentAIHP = App.opponentCharacter.pv;
-  console.log("8");
   if (
     App.lastSituationKey !== null &&
     App.lastAIAction !== null &&
@@ -1199,7 +1180,6 @@ App.opponentTurn = function() {
     }
     App.situationStats[App.lastSituationKey][App.lastAIAction].totalDelta += effectiveDelta;
     App.situationStats[App.lastSituationKey][App.lastAIAction].count++;
-    console.log(`Mise à jour de l'efficacité pour l'action "${App.lastAIAction}" dans la situation ${App.lastSituationKey} : deltaPlayer = ${deltaPlayer}, deltaAI = ${deltaAI}, effectiveDelta = ${effectiveDelta}, nouvelle moyenne = ${App.situationStats[App.lastSituationKey][App.lastAIAction].totalDelta / App.situationStats[App.lastSituationKey][App.lastAIAction].count}`);
   }
 
   // Choix de l'action pour ce tour
@@ -1210,10 +1190,7 @@ App.opponentTurn = function() {
     if (!App.opponentCharacter.defenseCooldown || App.opponentCharacter.defenseCooldown === 0) possibleActions.push("se défendre");
     currentAction = possibleActions[Math.floor(Math.random() * possibleActions.length)];
   }
-  console.log("Action planifiée pour ce tour :", currentAction);
   App.executeAITurn(currentAction);
-
-  console.log("9");
 
   // Mise à jour de l'historique
   App.historicalData.push(currentState);
@@ -1235,13 +1212,10 @@ App.opponentTurn = function() {
   let predictedPlayerAction = App.mostProbableAction(similarData);
   if (Math.random() > predictionAccuracy) {
     predictedPlayerAction = null;
-    console.log("Prédiction ignorée (difficulté moindre)");
   }
-  console.log("Action prédite du joueur pour le prochain tour :", predictedPlayerAction);
 
   // Planification du prochain coup de l'IA
   const nextAction = App.chooseBestAction(App.opponentCharacter, currentState, predictedPlayerAction, difficultyModifier, playerIsDefending);
-  console.log("Action planifiée pour le prochain tour :", nextAction);
   App.opponentCharacter.nextAction = nextAction;
 
   // Stockage de l'état pour la prochaine mise à jour
@@ -1293,9 +1267,7 @@ App.handleDefense = function(character, opponent, isPlayer) {
       character.defense_bouton = 1;
       character.defense_droit = 4;
       specialLogMessage = `${character.name} se defend contre la prochaine attaque de ${opponent.name}.`;
-      console.log("3");
       App.addCombatLog(specialLogMessage, logColor, isPlayer);
-      console.log("4");
       if (isPlayer) {
         character.last_action = 1;
         character.defense_partie += 1;
@@ -1405,7 +1377,8 @@ App.useItem = function(itemName) {
       break;
     case 'Potion de Santé':
       userData.Potion_de_Santé_acheté -= 1;
-      App.playerCharacter.pv = Math.min(App.playerCharacter.pv_maximum, App.playerCharacter.pv + 1100);
+      ```text
+App.playerCharacter.pv = Math.min(App.playerCharacter.pv_maximum, App.playerCharacter.pv + 1100);
       App.playerCharacter.objets_partie += 1;
       App.playerCharacter.objets_soin += 1;
       saveUserData(userData);
@@ -1587,7 +1560,6 @@ catch (e) {
 
 if (App.sauvegarde && App.ud.partie_commencee_survie) {
   App.chargerPartie();
-  console.log('Reprise de la partie.');
   App.updateUI();
 } else {
   // nouvelle partie (votre code existant)
@@ -1661,7 +1633,6 @@ if (App.sauvegarde && App.ud.partie_commencee_survie) {
     // Redirection vers index.html via loadPage si les données de l'adversaire ne sont pas trouvées
     loadPage('index');
   }
-  console.log('Démarrage nouvelle partie.');
   // création de la première sauvegarde
   App.specialAbility = App.playerCharacter.spe || 0;
   App.sauvegarderPartie(App.playerCharacter, App.opponentCharacter);

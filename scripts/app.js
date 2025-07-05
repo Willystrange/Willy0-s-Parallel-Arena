@@ -462,7 +462,9 @@ function loadPage(page) {
     const nexts = likelyNextPages[page] || [];
     nexts.forEach(preloadPage);
   })
-    .catch(err => console.error(err));
+    .catch(err => {
+    // Error handled silently
+  });
   // après avoir déclenché preloadPage pour le HTML/JS…
 }
 
