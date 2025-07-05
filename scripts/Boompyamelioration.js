@@ -25,14 +25,12 @@ App.coutPourNiveauSuivant = function(level) {
 App.initFirebaseAuth = function() {
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      console.log("Utilisateur authentifié avec UID :", user.uid);
       App.User = true;
       App.userId = user.uid;
       // S'assurer que userData existe
       let currentUserData = getUserData();
       saveUserData(currentUserData);
     } else {
-      console.log("Aucun utilisateur authentifié");
     }
   });
 };
@@ -77,7 +75,6 @@ App.levelUp = function() {
 };
 
 App.afficherDonneesUtilisateur = function() {
-  console.log('Données utilisateur chargées');
   const userData = getUserData();
   // Initialisation des valeurs si absentes
   userData.Boompy_pts = userData.Boompy_pts || 0;
@@ -121,7 +118,7 @@ App.afficherDonneesUtilisateur = function() {
     document.getElementById('Boompy-info').style.display = 'block';
   }
 
-  console.log('Boompy_pts:', userData.Boompy_pts);
+  
 
   if (userData.Boompy_pts > 0 &&
       userData.Boompy_PV_pts < 25 &&
@@ -206,7 +203,6 @@ App.totalPointsUtilises = function() {
 App.confirmerStats = function() {
   const userData = getUserData();
   if (!userData) {
-    console.error("Impossible de confirmer les stats : données utilisateur introuvables.");
     return;
   }
   App.modificationsTemp.PV = App.modificationsTemp.PV || 0;
@@ -215,8 +211,7 @@ App.confirmerStats = function() {
 
   const totalPts = App.totalPointsUtilises();
   if (totalPts > userData.Boompy_pts) {
-    console.error("Erreur : points à attribuer supérieurs aux points disponibles.");
-    alerte("Erreur : points à attribuer supérieurs aux points disponibles.");
+    alert("Erreur : points à attribuer supérieurs aux points disponibles.");
     return;
   }
 
@@ -234,9 +229,7 @@ App.confirmerStats = function() {
   try {
     saveUserData(userData);
     App.afficherDonneesUtilisateur();
-    console.log("Modifications confirmées avec succès !");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
   }
 };
 

@@ -29,14 +29,12 @@ App.userId = null;
 // Gestion de l'authentification Firebase
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    console.log("Utilisateur authentifié avec UID :", user.uid);
     App.User = true;
     App.userId = user.uid;
     // S'assurer que userData existe
     let currentUserData = getUserData();
     saveUserData(currentUserData);
   } else { 
-    console.log("Aucun utilisateur authentifié"); 
   }
 });
 
@@ -83,7 +81,6 @@ App.levelUp = function() {
 
 // --- Gestion de l'affichage des statistiques ---
 App.afficherDonneesUtilisateur = function() {
-  console.log('Données utilisateur chargées');
   const userData = getUserData();
   // Initialiser les statistiques si elles sont absentes
   userData.Baleine_pts = userData.Baleine_pts || 0;
@@ -133,11 +130,9 @@ App.afficherDonneesUtilisateur = function() {
     document.getElementById('Baleine-info').style.display = 'block';
   }
 
-  console.log('1');
-  console.log(userData.Baleine_pts);
+  
 
   if (userData.Baleine_pts > 0 && userData.Baleine_PV_pts < 20 && userData.Baleine_attaque_pts < 10 && userData.Baleine_defense_pts < 30) {
-    console.log('2');
     App.afficherBoutonsStats(userData);
     App.desactiverBoutons(true);
   } else {
@@ -251,9 +246,7 @@ App.confirmerStats = function() {
   try {
     saveUserData(userData);
     App.afficherDonneesUtilisateur();
-    console.log("Modifications confirmées avec succès !");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
   }
 };
 
