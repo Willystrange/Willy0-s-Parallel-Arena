@@ -19,9 +19,7 @@ App.saveUserDataToFirebase = function(userId) {
 
   userRef.set(userData, (error) => {
     if (error) {
-      console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
     } else {
-      console.log('Données utilisateur sauvegardées dans Firebase');
     }
   });
 };
@@ -35,9 +33,7 @@ App.loadUserDataFromFirebase = function(userId) {
       const userData = data.userData || {};
 
       localStorage.setItem('userData', JSON.stringify(userData));
-      console.log('Données utilisateur récupérées depuis Firebase');
     } else {
-      console.log('Aucune donnée utilisateur trouvée dans Firebase');
     }
   });
 };
@@ -50,7 +46,6 @@ App.login = function() {
   App.auth.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
-      console.log('Utilisateur connecté:', user);
 
       App.loadUserDataFromFirebase(user.uid);
       App.saveConnectionState(user.uid, true);
@@ -61,7 +56,6 @@ App.login = function() {
       }, 2000);
     })
     .catch((error) => {
-      console.error('Erreur de connexion:', error.message);
       alert('Erreur de connexion : ' + error.message);
     });
 };
@@ -73,7 +67,6 @@ App.register = function() {
   App.auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
-      console.log('Utilisateur inscrit:', user);
 
       App.saveUserDataToFirebase(user.uid);
       App.saveConnectionState(user.uid, true);
@@ -82,7 +75,6 @@ App.register = function() {
       loadPage('menu_principal');
     })
     .catch((error) => {
-      console.error('Erreur d\'inscription:', error.message);
       alert('Erreur d\'inscription : ' + error.message);
     });
 };
@@ -92,7 +84,6 @@ App.googleSignIn = function() {
   App.auth.signInWithPopup(provider)
     .then((result) => {
       const user = result.user;
-      console.log('Utilisateur connecté avec Google:', user);
 
       const userRef = App.database.ref(`users/${user.uid}`);
       userRef.once('value', (snapshot) => {
@@ -107,7 +98,6 @@ App.googleSignIn = function() {
       });
     })
     .catch((error) => {
-      console.error('Erreur de connexion avec Google:', error.message);
       alert('Erreur de connexion avec Google : ' + error.message);
     });
 };

@@ -391,8 +391,8 @@ function preloadImages(page) {
     const img = new Image();
     img.src = src;
     // Optionnel : gérer onload/onerror pour debug
-    img.onload = () => console.log(`Image preloadée : ${src}`);
-    img.onerror = () => console.warn(`Échec preload image : ${src}`);
+    img.onload = () => {};
+    img.onerror = () => {};
   });
 }
 // fonction de préchargement

@@ -104,7 +104,6 @@ App.chargerPartie = function() {
   App.playerCharacter = sauvegardeLocal.playerCharacter;
   App.opponentCharacter = sauvegardeLocal.opponentCharacter;
 
-  console.log("Partie chargée avec succès !");
   App.updateUI(); // Mise à jour de l'interface après chargement
 };
 
@@ -138,7 +137,6 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
 
 
 App.userData = getUserData();
-console.log(App.userData.difficulty);
 
 // Chargement de la sauvegarde de partie depuis localStorage
 App.sauvegarde = null;
@@ -148,7 +146,6 @@ try {
   console.error('Erreur lors du parsing de la sauvegarde :', e);
 }
 if (App.sauvegarde) {
-  console.log('Sauvegarde trouvée :', App.sauvegarde);
 }
 
 if (userData.partie_commencee && App.sauvegarde) {
@@ -226,14 +223,11 @@ if (userData.partie_commencee && App.sauvegarde) {
   }
 }
 
-console.log('Player Character :', App.playerCharacter);
-console.log('Opponent Character :', App.opponentCharacter);
 App.sauvegarderPartie(App.playerCharacter, App.opponentCharacter);
 
 // Empêche le retour en arrière dans l'historique du navigateur
 history.replaceState(null, null, window.location.href);
 
-console.log("good");
 
 // Initialisation de la capacité spéciale (on suppose que playerCharacter.spe existe)
 App.specialAbility = App.playerCharacter.spe || 0;
@@ -262,7 +256,6 @@ if (document.getElementById('opponent-pv')) {
 
 
 App.updateUI();
-console.log("1");
 
 // Fonction qui met à jour l'état du bouton de capacité spéciale
 App.updateSpecialButton = function() {
@@ -281,13 +274,11 @@ App.updateSpecialButton = function() {
   }
 };
 App.updateSpecialButton();
-console.log("2");
 
 // Fonction pour mettre à jour le tour et ajouter un log dans le combat
 App.updateTour = function() {
   const logColor = "grey";
   App.playerCharacter.tourTT += 1;
-  console.log("Tour ", App.playerCharacter.tourTT);
   let specialLogMessage = 'Tour ' + App.playerCharacter.tourTT;
   App.addCombatLog(specialLogMessage, logColor, "milieu");
 };
@@ -587,10 +578,8 @@ App.addCombatLog = function(message, color, isPlayer) {
 App.useSpecialAbility = function(character, opponent, isPlayer) {
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   if (character.spe < 1) {
@@ -683,7 +672,8 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
             if (character.pv > character.pv_max) {
               character.pv = character.pv_max;
             }
-            App.addCombatLog(specialLogMessage, logColor, isPlayer);
+            App.addCombatLog(specialLog```javascript
+Message, logColor, isPlayer);
             App.handleAttack(character, opponent, isPlayer);
             App.updateSpecialBar(App.playerCharacter, 'player-special-bar');
             App.updateSpecialBar(App.opponentCharacter, 'opponent-special-bar');
@@ -941,7 +931,6 @@ App.mostProbableAction = function(data) {
   // Prédiction par séquence (ordre 2, ajustable)
   let sequencePrediction = App.predictPlayerNextActionBySequence(2);
   if (sequencePrediction !== null) {
-    console.log("Prédiction par séquence trouvée :", sequencePrediction);
     return sequencePrediction;
   }
   // Si aucun résultat, on analyse les actions dans les données similaires
@@ -1040,7 +1029,6 @@ App.evaluateAction = function(state, action, predictedPlayerAction, difficultyMo
     // Bonus : si le joueur peut utiliser sa capacité spéciale
     if (Jcs === 1) {
       score += 30;
-      console.log("Bonus défense car le joueur peut utiliser sa capacité spéciale");
     }
     score += JpvPrecise * 0.1;
     if (difficultyModifier > 0) {
@@ -1064,7 +1052,6 @@ App.evaluateAction = function(state, action, predictedPlayerAction, difficultyMo
     App.situationStats[situationKey][action].count > 0) {
     let avgDelta = App.situationStats[situationKey][action].totalDelta / App.situationStats[situationKey][action].count;
     score += avgDelta * 0.5;
-    console.log(`Bonus adaptatif pour l'action "${action}" dans la situation ${situationKey}: avgDelta = ${avgDelta}, bonus = ${avgDelta * 0.5}`);
   }
   if (App.opponentCharacter.defense_droit > 0 && action === "se défendre") {
     score = -9999;
@@ -1086,7 +1073,6 @@ App.chooseBestAction = function(IA, state, predictedPlayerAction, difficultyModi
   let bestScore = -Infinity;
   possibleActions.forEach(action => {
     const score = App.evaluateAction(state, action, predictedPlayerAction, difficultyModifier, playerIsDefending);
-    console.log(`Action "${action}" -> score ${score}`);
     if (score > bestScore) {
       bestScore = score;
       bestAction = action;
@@ -1095,7 +1081,6 @@ App.chooseBestAction = function(IA, state, predictedPlayerAction, difficultyModi
 
   if (userData.difficulty === "Easy" && Math.random() < 0.3) {
     bestAction = possibleActions[Math.floor(Math.random() * possibleActions.length)];
-    console.log("Difficulté Easy : choix aléatoire de l'action", bestAction);
   }
 
   return bestAction;
@@ -1104,7 +1089,6 @@ App.chooseBestAction = function(IA, state, predictedPlayerAction, difficultyModi
 App.executeAITurn = function(chosenAction) {
   const delay = Math.floor(Math.random() * 2000) + 1000; // délai entre 1s et 3s
   setTimeout(() => {
-    console.log("L'IA exécute l'action planifiée :", chosenAction);
     if (chosenAction === "attacker") {
       App.handleAttack(App.opponentCharacter, App.playerCharacter, false);
     } else if (chosenAction === "utiliser capacité spéciale" && App.opponentCharacter.spe === 1) {
@@ -1132,7 +1116,6 @@ App.arraysEqual = function(a, b) {
 };
 
 App.predictPlayerNextActionBySequence = function(order = 2) {
-  console.log("6");
   if (App.playerActionHistory.length < order) return null;
   const sequence = App.playerActionHistory.slice(-order);
   const counts = {};
@@ -1178,18 +1161,13 @@ App.opponentTurn = function() {
   let IApv = Math.min(Math.ceil((App.opponentCharacter.pv / App.opponentCharacter.pv_max) * 100 / 20) * 20, 100);
 
 
-  console.log("5");
-
-
   App.playerActionHistory.push(Jaction);
   if (App.playerActionHistory.length > 30) {
     App.playerActionHistory = App.playerActionHistory.slice(-30);
   }
   App.savePlayerActionHistory(App.playerActionHistory);
-  console.log("7");
 
   const currentState = [Jcs, Jdefense, Jpv, Jaction, IAcs, IAdefense, IApv];
-  console.log("État courant :", currentState);
 
   const playerIsDefending = (App.playerCharacter.defense_droit === 4);
   const currentSituationKey = App.getSituationKey(currentState, playerIsDefending);
@@ -1197,7 +1175,6 @@ App.opponentTurn = function() {
   // Mise à jour des statistiques de la situation précédente
   let currentPlayerHP = App.playerCharacter.pv;
   let currentAIHP = App.opponentCharacter.pv;
-  console.log("8");
   if (
     App.lastSituationKey !== null &&
     App.lastAIAction !== null &&
@@ -1220,7 +1197,6 @@ App.opponentTurn = function() {
     }
     App.situationStats[App.lastSituationKey][App.lastAIAction].totalDelta += effectiveDelta;
     App.situationStats[App.lastSituationKey][App.lastAIAction].count++;
-    console.log(`Mise à jour de l'efficacité pour l'action "${App.lastAIAction}" dans la situation ${App.lastSituationKey} : deltaPlayer = ${deltaPlayer}, deltaAI = ${deltaAI}, effectiveDelta = ${effectiveDelta}, nouvelle moyenne = ${App.situationStats[App.lastSituationKey][App.lastAIAction].totalDelta / App.situationStats[App.lastSituationKey][App.lastAIAction].count}`);
   }
 
   // Choix de l'action pour ce tour
@@ -1231,10 +1207,7 @@ App.opponentTurn = function() {
     if (!App.opponentCharacter.defenseCooldown || App.opponentCharacter.defenseCooldown === 0) possibleActions.push("se défendre");
     currentAction = possibleActions[Math.floor(Math.random() * possibleActions.length)];
   }
-  console.log("Action planifiée pour ce tour :", currentAction);
   App.executeAITurn(currentAction);
-
-  console.log("9");
 
   // Mise à jour de l'historique
   App.historicalData.push(currentState);
@@ -1256,13 +1229,10 @@ App.opponentTurn = function() {
   let predictedPlayerAction = App.mostProbableAction(similarData);
   if (Math.random() > predictionAccuracy) {
     predictedPlayerAction = null;
-    console.log("Prédiction ignorée (difficulté moindre)");
   }
-  console.log("Action prédite du joueur pour le prochain tour :", predictedPlayerAction);
 
   // Planification du prochain coup de l'IA
   const nextAction = App.chooseBestAction(App.opponentCharacter, currentState, predictedPlayerAction, difficultyModifier, playerIsDefending);
-  console.log("Action planifiée pour le prochain tour :", nextAction);
   App.opponentCharacter.nextAction = nextAction;
 
   // Stockage de l'état pour la prochaine mise à jour
@@ -1298,10 +1268,8 @@ App.opponentDefense = function() {
   specialLogMessage = `${App.opponentCharacter.name} se defend de la dernière attaque de ${App.playerCharacter.name}.`;
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   App.updateSpecialBar(App.playerCharacter, 'player-special-bar');
@@ -1317,10 +1285,8 @@ App.opponentDefense = function() {
 App.handleDefense = function(character, opponent, isPlayer) {
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
   if (character.defense_droit === 0) {
@@ -1329,9 +1295,7 @@ App.handleDefense = function(character, opponent, isPlayer) {
       character.defense_bouton = 1;
       character.defense_droit = 4;
       specialLogMessage = `${character.name} se defend contre la prochaine attaque de ${opponent.name}.`;
-      console.log("3");
       App.addCombatLog(specialLogMessage, logColor, isPlayer);
-      console.log("4");
       if (isPlayer) {
         character.last_action = 1;
         character.defense_partie += 1;
@@ -1361,10 +1325,8 @@ App.handleAttack = function(attacker, defender, isPlayer) {
   const isPlayerAttacking = isPlayer;
   let logColor = 'null';
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    console.log("L'utilisateur préfère le mode sombre");
     logColor = 'white';
   } else {
-    console.log("L'utilisateur préfère le mode clair");
     logColor = 'black';
   }
 
@@ -1414,7 +1376,7 @@ App.handleAttack = function(attacker, defender, isPlayer) {
       damage = Math.max(0, attacker.attaque * 1.5 - modifiedDefense);
       attacker.spe -= 1;
       specialLogMessage = `${attacker.name} est surchargé, il inflige 150% de ses dégats de base !`;
-      App.addCombatLog(specialLogMessage, logColor, isPlayer);
+App.addCombatLog(specialLogMessage, logColor, isPlayer);
     }
     if (defender.defense_bouton === 1) {
       defender.defense_bouton = 0;

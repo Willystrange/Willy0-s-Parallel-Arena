@@ -11,33 +11,24 @@ App.connectToGameServer = function(userId) {
   });
 
   App.socket.on('connect', () => {
-    console.log(`[SocketIO] connect : SID=${App.socket.id}`);
     App.socket.emit('register', { userId: userId });
-    console.log(`[SocketIO] emit register → userId=${userId}`);
-
-
 
     App.socket.emit('ping_test', { message: 'salut serveur' });
   });
 
   App.socket.on('register_success', data => {
-    console.log('[SocketIO] register_success :', data.message);
   });
 
   App.socket.on('register_error', data => {
-    console.error('[SocketIO] register_error :', data.message);
   });
 
   App.socket.on('pong_test', data => {
-    console.log('[CLIENT] pong_test reçu :', data.message);
   });
 
   App.socket.on('disconnect', reason => {
-    console.log(`[SocketIO] disconnect : raison=${reason}`);
   });
 
   App.socket.on('connect_error', err => {
-    console.error('[SocketIO] connect_error :', err.message);
   });
 };
 

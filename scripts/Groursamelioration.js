@@ -28,7 +28,6 @@ App.userId = null;
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-
     App.User = true;
     App.userId = user.uid;
     // S'assurer que userData existe et le sauvegarder
