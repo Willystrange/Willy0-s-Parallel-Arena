@@ -76,7 +76,6 @@ App.levelUp = function() {
 };
 
 App.afficherDonneesUtilisateur = function() {
-  console.log('Données utilisateur chargées');
   const userData = getUserData();
   // Initialisation des valeurs si non définies
   userData.Rosalie_pts = userData.Rosalie_pts || 0;
@@ -119,7 +118,7 @@ App.afficherDonneesUtilisateur = function() {
     document.getElementById('Rosalie-info').style.display = 'block';
   }
 
-  console.log('Rosalie_pts:', userData.Rosalie_pts);
+  
 
   if (userData.Rosalie_pts > 0 &&
       userData.Rosalie_PV_pts < 25 &&
@@ -204,7 +203,6 @@ App.totalPointsUtilises = function() {
 App.confirmerStats = function() {
   const userData = getUserData();
   if (!userData) {
-    console.error("Impossible de confirmer les stats : données utilisateur introuvables.");
     return;
   }
   App.modificationsTemp.PV = App.modificationsTemp.PV || 0;
@@ -213,7 +211,6 @@ App.confirmerStats = function() {
 
   const totalPts = App.totalPointsUtilises();
   if (totalPts > userData.Rosalie_pts) {
-    console.error("Erreur : points à attribuer supérieurs aux points disponibles.");
     alerte("Erreur : points à attribuer supérieurs aux points disponibles.");
     return;
   }
@@ -231,9 +228,7 @@ App.confirmerStats = function() {
   try {
     saveUserData(userData);
     App.afficherDonneesUtilisateur();
-    console.log("Modifications confirmées avec succès !");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
   }
 };
 

@@ -7,7 +7,6 @@ App.encrypt = function(data) {
   try {
     return CryptoJS.AES.encrypt(data, App.secretKey).toString();
   } catch (error) {
-    console.error('Erreur de cryptage:', error);
     alert('Erreur de cryptage des données.');
     return '';
   }
@@ -18,7 +17,6 @@ App.decrypt = function(data) {
     const bytes = CryptoJS.AES.decrypt(data, App.secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (error) {
-    console.error('Erreur de décryptage:', error);
     alert('Erreur de décryptage des données.');
     return '';
   }
@@ -26,14 +24,12 @@ App.decrypt = function(data) {
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    console.log("Utilisateur authentifié avec UID :", user.uid);
     App.User = true;
     App.userId = user.uid;
     // S'assurer que userData existe
     let currentUserData = getUserData();
     saveUserData(currentUserData);
   } else {
-    console.log("Aucun utilisateur authentifié");
   }
 });
 

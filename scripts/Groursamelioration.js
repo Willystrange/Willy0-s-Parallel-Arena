@@ -207,7 +207,6 @@ App.totalPointsUtilises = function() {
 App.confirmerStats = function() {
   const userData = getUserData();
   if (!userData) {
-    console.error("Impossible de confirmer les stats : données utilisateur introuvables.");
     return;
   }
 
@@ -217,7 +216,6 @@ App.confirmerStats = function() {
 
   const totalPts = App.totalPointsUtilises();
   if (totalPts > userData.Grours_pts) {
-    console.error("Erreur : points à attribuer supérieurs aux points disponibles.");
     alert("Erreur : points à attribuer supérieurs aux points disponibles.");
     return;
   }

@@ -27,14 +27,12 @@ App.userId = null;
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    console.log("Utilisateur authentifié avec UID :", user.uid);
     App.User = true;
     App.userId = user.uid;
     // S'assurer que userData existe
     let currentUserData = getUserData();
     saveUserData(currentUserData);
   } else {
-    console.log("Aucun utilisateur authentifié");
   }
 });
 
@@ -76,7 +74,6 @@ App.levelUp = function() {
 };
 
 App.afficherDonneesUtilisateur = function() {
-  console.log('Données utilisateur chargées');
   const userData = getUserData();
   userData.Perro_pts = userData.Perro_pts || 0;
   userData.Perro_PV_pts = userData.Perro_PV_pts || 0;
@@ -123,7 +120,7 @@ App.afficherDonneesUtilisateur = function() {
     document.getElementById('Perro-info').style.display = 'block';
   }
 
-  console.log(userData.Perro_pts);
+  
 
   if (
     userData.Perro_pts > 0 &&
@@ -230,7 +227,6 @@ App.totalPointsUtilises = function() {
 App.confirmerStats = function() {
   const userData = getUserData();
   if (!userData) {
-    console.error("Impossible de confirmer les stats : données utilisateur introuvables.");
     return;
   }
 
@@ -240,7 +236,6 @@ App.confirmerStats = function() {
   const totalPts = App.totalPointsUtilises();
 
   if (totalPts > userData.Perro_pts) {
-    console.error("Erreur : points à attribuer supérieurs aux points disponibles.");
     alert("Erreur : points à attribuer supérieurs aux points disponibles.");
     return;
   }
@@ -260,9 +255,7 @@ App.confirmerStats = function() {
   try {
     saveUserData(userData);
     App.afficherDonneesUtilisateur();
-    console.log("Modifications confirmées avec succès !");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
   }
 };
 

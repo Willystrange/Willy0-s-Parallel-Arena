@@ -76,7 +76,6 @@ App.levelUp = function() {
 };
 
 App.afficherDonneesUtilisateur = function() {
-  console.log('Données utilisateur chargées');
   const userData = getUserData();
   userData.Sboonie_pts = userData.Sboonie_pts || 0;
   userData.Sboonie_PV_pts = userData.Sboonie_PV_pts || 0;
@@ -117,7 +116,7 @@ App.afficherDonneesUtilisateur = function() {
     document.getElementById('Sboonie-info').style.display = 'block';
   }
 
-  console.log(userData.Sboonie_pts);
+  
 
   if (userData.Sboonie_pts > 0 &&
       userData.Sboonie_PV_pts < 30 &&
@@ -201,7 +200,6 @@ App.totalPointsUtilises = function() {
 App.confirmerStats = function() {
   const userData = getUserData();
   if (!userData) {
-    console.error("Impossible de confirmer les stats : données utilisateur introuvables.");
     return;
   }
   App.modificationsTemp.PV = App.modificationsTemp.PV || 0;
@@ -210,7 +208,6 @@ App.confirmerStats = function() {
 
   const totalPts = App.totalPointsUtilises();
   if (totalPts > userData.Sboonie_pts) {
-    console.error("Erreur : points à attribuer supérieurs aux points disponibles.");
     alerte("Erreur : points à attribuer supérieurs aux points disponibles.");
     return;
   }
@@ -228,9 +225,7 @@ App.confirmerStats = function() {
   try {
     saveUserData(userData);
     App.afficherDonneesUtilisateur();
-    console.log("Modifications confirmées avec succès !");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
   }
 };
 
