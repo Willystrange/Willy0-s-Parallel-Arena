@@ -530,8 +530,6 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
     character.last_action = 2;
   }
 
-  let specialLogMessage = "";
-
 
   // Immobilisation
   if (character.immobilisation >= 1) {
@@ -1377,8 +1375,8 @@ App.useItem = function(itemName) {
       break;
     case 'Potion de Santé':
       userData.Potion_de_Santé_acheté -= 1;
-      ```text
-App.playerCharacter.pv = Math.min(App.playerCharacter.pv_maximum, App.playerCharacter.pv + 1100);
+
+      App.playerCharacter.pv = Math.min(App.playerCharacter.pv_maximum, App.playerCharacter.pv + 1100);
       App.playerCharacter.objets_partie += 1;
       App.playerCharacter.objets_soin += 1;
       saveUserData(userData);
@@ -1418,7 +1416,7 @@ App.playerCharacter.pv = Math.min(App.playerCharacter.pv_maximum, App.playerChar
       saveUserData(userData);
       break;
     default:
-      console.log('Objet non reconnu');
+
   }
 
   document.getElementById('player-pv').textContent = `PV: ${Math.round(App.playerCharacter.pv)}`;

@@ -1554,4 +1554,3 @@ document.body.addEventListener('click', function(e) {
 });
 
 initStatsPanelState();
-// Removes all console.log statements from the javascript code.

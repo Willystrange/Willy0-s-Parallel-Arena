@@ -545,8 +545,6 @@ App.useItem = function(itemName) {
       App.playerCharacter.objets_partie += 1;
       saveUserData(userData);
       break;
-    default:
-      console.log('Objet non reconnu');
   }
 
   document.getElementById('player-pv').textContent = `PV: ${App.playerCharacter.pv}`;
