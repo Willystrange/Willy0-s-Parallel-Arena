@@ -672,8 +672,7 @@ App.useSpecialAbility = function(character, opponent, isPlayer) {
             if (character.pv > character.pv_max) {
               character.pv = character.pv_max;
             }
-            App.addCombatLog(specialLog```javascript
-Message, logColor, isPlayer);
+            App.addCombatLog(specialLogMessage, logColor, isPlayer);
             App.handleAttack(character, opponent, isPlayer);
             App.updateSpecialBar(App.playerCharacter, 'player-special-bar');
             App.updateSpecialBar(App.opponentCharacter, 'opponent-special-bar');
