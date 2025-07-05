@@ -27,14 +27,13 @@ App.userId = null;
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    console.log("Utilisateur authentifié avec UID :", user.uid);
     App.User = true;
     App.userId = user.uid;
     // S'assurer que userData existe
     let currentUserData = getUserData();
     saveUserData(currentUserData);
   } else { 
-    console.log("Aucun utilisateur authentifié"); 
+
   }
 });
 
@@ -76,7 +75,6 @@ App.levelUp = function() {
 };
 
 App.afficherDonneesUtilisateur = function() {
-  console.log('Données utilisateur chargées');
   const userData = getUserData();
   userData.Doudou_pts = userData.Doudou_pts || 0;
   userData.Doudou_PV_pts = userData.Doudou_PV_pts || 0;
@@ -123,7 +121,7 @@ App.afficherDonneesUtilisateur = function() {
     document.getElementById('Doudou-info').style.display = 'block';
   }
 
-  console.log(userData.Doudou_pts);
+  
 
   if (userData.Doudou_pts > 0 && userData.Doudou_PV_pts < 35 && userData.Doudou_attaque_pts < 5 && userData.Doudou_defense_pts < 20) {
     App.afficherBoutonsStats(userData);
@@ -238,7 +236,7 @@ App.confirmerStats = function() {
   try {
     saveUserData(userData);
     App.afficherDonneesUtilisateur();
-    console.log("Modifications confirmées avec succès !");
+    
   } catch (error) {
     console.error("Erreur lors de la sauvegarde des données utilisateur :", error);
   }
