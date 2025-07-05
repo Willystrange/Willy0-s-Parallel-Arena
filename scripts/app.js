@@ -4,6 +4,9 @@ var app = {};
 let baseAudios = [];
 let audiosCGlobal = [];
 
+// Flag global pour vérifier si la musique de base a déjà commencé
+let hasStarted = false;
+
 initMusicPlayer = function() {
   const userData = getUserData();
   const musicFiles = [
@@ -14,7 +17,7 @@ initMusicPlayer = function() {
 
   baseAudios = musicFiles.map(file => new Audio(file));
 
-  let hasStarted = false;
+  // hasStarted is now a global flag, no local redeclaration here
   if (userData.music) {
     const stopMusicC = () => {
       audiosCGlobal.forEach(audio => {
@@ -59,7 +62,7 @@ let hasStartedC = false;
 initMusicPlayerC = function() {
   const userData = getUserData();
   const musicFilesC = [
-    'music/C1.mp3', 'music/C2.mp3', 'music/C3.mp3', 'music/C4.mp3', 'music/C5.mp3', 'music/C6.mp3', 'C7.mp3', 'music/C8.mp3', 'music/C9.mp3', 'music/C10.mp3'
+    'music/C1.mp3', 'music/C2.mp3', 'music/C3.mp3', 'music/C4.mp3', 'music/C5.mp3', 'music/C6.mp3', 'music/C7.mp3', 'music/C8.mp3', 'music/C9.mp3', 'music/C10.mp3'
   ];
   if (userData.music) {
     combatAudios = musicFilesC.map(file => new Audio(file));
@@ -80,6 +83,7 @@ function resumeBaseMusic() {
 
 function startMusicC() {
   if (hasStartedC) return;
+  const userData = getUserData();
   if (userData.music) {
     hasStartedC = true;
 
