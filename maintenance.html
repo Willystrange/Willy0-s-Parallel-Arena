@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="scripts/app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="scripts/maintenance.js" data-dynamic="true"></script>
+
     <title>Willy0's Parallel Arena</title>
     <style>
         body {
@@ -44,85 +48,5 @@
         <h1 class="maintenance-title">Le jeu est en maintenance</h1>
         <p class="maintenance-info" id="maintenance-info">Chargement des informations...</p>
     </div>
-
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
-            authDomain: "willy0s-parallel-arena.firebaseapp.com",
-            databaseURL: "https://willy0s-parallel-arena-default-rtdb.firebaseio.com",
-            projectId: "willy0s-parallel-arena",
-            storageBucket: "willy0s-parallel-arena.appspot.com",
-            messagingSenderId: "683284732830",
-            appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f",
-            measurementId: "G-85B8R4NKNM"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const maintenanceStartRef = ref(database, 'maintenance/start');
-        const maintenanceEndRef = ref(database, 'maintenance/end');
-
-        const maintenanceInfoElement = document.getElementById('maintenance-info');
-
-        let startTime = null;
-        let endTime = null;
-
-        function formatDateTime(datetime) {
-            const date = new Date(datetime);
-            const now = new Date();
-
-            const isToday = date.toDateString() === now.toDateString();
-            const hours = date.getHours();
-            const minutes = date.getMinutes();
-            const timePart = minutes === 0 ? `${hours}h` : `${hours}h${minutes}`;
-
-            if (isToday) {
-                return `Heure de fin estimée: ${timePart}`;
-            } else {
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                const formattedDate = date.toLocaleDateString('fr-FR', options);
-                return `Date de fin estimée: ${formattedDate} à ${timePart}`;
-            }
-        }
-
-        function updateMaintenanceInfo() {
-            if (startTime && endTime) {
-                maintenanceInfoElement.textContent = formatDateTime(endTime);
-                checkMaintenanceEnd(endTime);
-            } else {
-                maintenanceInfoElement.textContent = 'Les horaires de maintenance ne sont pas disponibles.';
-            }
-        }
-
-        // Vérifier si l'heure de fin est atteinte
-        function checkMaintenanceEnd(endTime) {
-            const currentTime = new Date();
-            const maintenanceEndTime = new Date(endTime);
-            if (currentTime >= maintenanceEndTime) {
-                window.location.href = 'index.html'; // Redirection vers index.html
-            }
-        }
-
-        // Mise à jour automatique des valeurs si Firebase change
-        onValue(maintenanceStartRef, (snapshot) => {
-            startTime = snapshot.val();
-            updateMaintenanceInfo();
-        });
-
-        onValue(maintenanceEndRef, (snapshot) => {
-            endTime = snapshot.val();
-            updateMaintenanceInfo();
-        });
-
-        // Vérification périodique de l'heure de fin toutes les 30 secondes
-        setInterval(() => {
-            if (endTime) {
-                checkMaintenanceEnd(endTime);
-            }
-        }, 30000); // Vérifie toutes les 30 secondes
-    </script>
 </body>
 </html>
