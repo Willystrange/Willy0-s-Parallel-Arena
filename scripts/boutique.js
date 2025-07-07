@@ -352,12 +352,11 @@ App.userId = null;
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    console.log("Utilisateur authentifié avec UID :", user.uid);
     App.User = true;
     App.userId = user.uid;
     saveUserData(App.userData);
   } else {
-    console.log("Aucun utilisateur authentifié");
+
   }
 });
 

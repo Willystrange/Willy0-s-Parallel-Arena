@@ -8200,8 +8200,9 @@ body.passe_de_combat {
 }
 
 .passe_de_combat .pass-icon {
-  background: rgba(255, 130, 69, 0.95);
+  background: rgba(255, 130, 69, 0.95) !important;
   box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+  border-radius: 50%;
 }
 
 .passe_de_combat .footer-icon img {

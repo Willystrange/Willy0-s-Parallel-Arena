@@ -25,14 +25,13 @@ App.coutPourNiveauSuivant = function(level) {
 App.initFirebaseAuth = function() {
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      console.log("Utilisateur authentifié avec UID :", user.uid);
       App.User = true;
       App.userId = user.uid;
       // S'assurer que userData existe
       let currentUserData = getUserData();
       saveUserData(currentUserData);
     } else {
-      console.log("Aucun utilisateur authentifié");
+
     }
   });
 };

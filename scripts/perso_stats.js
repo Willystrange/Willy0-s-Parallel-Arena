@@ -49,31 +49,30 @@ App.adjustCharacters = function(nbr_perso) {
 // -------------------------------------------------
 App.loadFilter = function() {
   const ud = getUserData();
+  // Ne charge plus App.filterOrder
   App.filterAttribute = ud.filterAttribute || 'name';
-  App.filterOrder = ud.filterOrder || 'asc';
   const attrSel = document.getElementById('filter-attribute');
-  const orderSel = document.getElementById('filter-order');
+  // Supprime la référence à orderSel
   if (attrSel) attrSel.value = App.filterAttribute;
-  if (orderSel) orderSel.value = App.filterOrder;
 };
 
-App.saveFilter = function(attr, order) {
+App.saveFilter = function(attr) { // Supprime le paramètre 'order'
   const ud = getUserData();
   ud.filterAttribute = attr;
-  ud.filterOrder = order;
+  // Supprime la sauvegarde de ud.filterOrder
   saveUserData(ud);
   App.filterAttribute = attr;
-  App.filterOrder = order;
+  // Supprime la mise à jour de App.filterOrder
 };
 
 // -------------------------------------------------
-// 3) Fonctions de tri
+// 3) Fonctions de tri (simplifiées)
 // -------------------------------------------------
 App.orderRarity = ['commun', 'inhabituel', 'rare', 'épique', 'légendaire'];
 
-App.getValue = function(c) {
+App.getValue = function(c, attribute) { // Ajout de 'attribute' pour la flexibilité
   const ud = getUserData();
-  switch (App.filterAttribute) {
+  switch (attribute) { // Utilise le paramètre 'attribute'
     case 'level':
       return ud[c.name] === 1
         ? (ud[`${c.name}_Level`] || 1)
@@ -88,12 +87,7 @@ App.getValue = function(c) {
   }
 };
 
-App.compare = function(a, b) {
-  const va = App.getValue(a), vb = App.getValue(b);
-  if (va < vb) return App.filterOrder === 'asc' ? -1 : 1;
-  if (va > vb) return App.filterOrder === 'asc' ? 1 : -1;
-  return 0;
-};
+// Supprime App.compare car le tri ascendant/descendant n'est plus géré globalement
 
 // -------------------------------------------------
 // 4) Récupération de la liste à afficher
@@ -114,17 +108,17 @@ App.getRenderData = function() {
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(c);
     });
-    // Trier les labels selon ordre
+    // Trier les labels selon ordre naturel (ascendant)
     let labels = Array.from(map.keys());
     if (attr === 'rarete') {
       labels.sort((a, b) => {
         const ia = App.orderRarity.indexOf(a), ib = App.orderRarity.indexOf(b);
-        return App.filterOrder === 'asc' ? ia - ib : ib - ia;
+        return ia - ib; // Toujours ascendant pour la rareté
       });
     } else {
       labels.sort((a, b) => {
-        if (a.toLowerCase() < b.toLowerCase()) return App.filterOrder === 'asc' ? -1 : 1;
-        if (a.toLowerCase() > b.toLowerCase()) return App.filterOrder === 'asc' ? 1 : -1;
+        if (a.toLowerCase() < b.toLowerCase()) return -1;
+        if (a.toLowerCase() > b.toLowerCase()) return 1;
         return 0;
       });
     }
@@ -144,11 +138,23 @@ App.getRenderData = function() {
     return data;
   } else {
     // name or level: trier unlocked puis locked
-    unlocked.sort(App.compare);
-    locked.sort(App.compare);
+    // Tri ascendant par défaut pour 'name' et 'level'
+    unlocked.sort((a, b) => {
+      const va = App.getValue(a, attr), vb = App.getValue(b, attr);
+      if (va < vb) return -1;
+      if (va > vb) return 1;
+      return 0;
+    });
+    locked.sort((a, b) => {
+      const va = App.getValue(a, attr), vb = App.getValue(b, attr);
+      if (va < vb) return -1;
+      if (va > vb) return 1;
+      return 0;
+    });
     return unlocked.concat(locked).map(c => ({ char: c }));
   }
 };
+
 
 // -------------------------------------------------
 // 5) Rendu dans le DOM
@@ -282,13 +288,11 @@ App.toggleStats = function(character, element) {
 App.initCharacters = function() {
   App.loadFilter();
   const attrSel = document.getElementById('filter-attribute');
-  const orderSel = document.getElementById('filter-order');
-  if (attrSel && orderSel) {
-    [attrSel, orderSel].forEach(sel => {
-      sel.addEventListener('change', () => {
-        App.saveFilter(attrSel.value, orderSel.value);
-        App.renderCharacters();
-      });
+  // Supprime la récupération de orderSel
+  if (attrSel) { // Simplification de la condition
+    attrSel.addEventListener('change', () => {
+      App.saveFilter(attrSel.value); // Appelle saveFilter avec un seul paramètre
+      App.renderCharacters();
     });
   }
 

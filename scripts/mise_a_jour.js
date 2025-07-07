@@ -41,6 +41,7 @@ App.mise_a_jour = function() {
   const userData = getUserData();
   // Version actuelle du jeu
   const currentVersion = 'B2.2.0.00';
+  const versionreset = 'B2.2.0.00';
 
   // Valeurs par défaut pour les données utilisateur
   const defaultUserData = {
@@ -197,10 +198,15 @@ App.mise_a_jour = function() {
 
       localStorage.setItem('userData', JSON.stringify(userData));
     }
-
-
-
-    console.log("Les données des quêtes Summer ont été supprimées du localStorage.");
+  }
+  if (App.versionCompare(userData.version || '0.0.0', versionreset) < 0) {
+    userData.pass_premium = false;
+    userData.pass_XP = 0;
+    userData.pass_level = 0;
+    for (let i = 1; i <= 60; i++) {
+      userData[`free_${i}`] = false ;
+      userData[`premium_${i}`] = false ;
+    }
   }
   // Vérification et ajout des clés manquantes avec leur valeur par défaut
   for (const key in defaultUserData) {
@@ -218,5 +224,3 @@ App.mise_a_jour = function() {
 
 // Exécution de la mise à jour dès le chargement de la page
 App.mise_a_jour();
-
-
