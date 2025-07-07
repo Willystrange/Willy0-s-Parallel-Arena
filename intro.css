@@ -4470,7 +4470,7 @@ html {
 }
 
 .combat .combat-actions button#defense-button {
-  background-image: url('../defense.png');
+  background-image: url('defense.png');
   border-color: rgba(155, 89, 182, 0.4);
 }
 
@@ -4480,7 +4480,7 @@ html {
 }
 
 .combat .combat-actions button#attack-button {
-  background-image: url('../attaque.png');
+  background-image: url('attaque.png');
   border-color: rgba(231, 76, 60, 0.4);
 }
 
@@ -4490,7 +4490,7 @@ html {
 }
 
 .combat .combat-actions button#special-button {
-  background-image: url('../special.png');
+  background-image: url('special.png');
   border-color: rgba(243, 156, 18, 0.4);
 }
 
@@ -4510,7 +4510,7 @@ html {
 }
 
 .combat .combat-actions button#items-button {
-  background-image: url('../inventaire.png');
+  background-image: url('inventaire.png');
   border-color: rgba(39, 174, 96, 0.4);
 }
 
