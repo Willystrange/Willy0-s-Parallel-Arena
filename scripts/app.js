@@ -126,7 +126,12 @@ if (!firebase.apps.length) {
 }
 
 const database = firebase.database();
-const perf = firebase.performance();
+let perf = null;
+if (firebaseConfig.performance && typeof firebaseConfig.performance === 'function') {
+  perf = firebase.performance();
+} else {
+  console.warn('Firebase performance API not available in this context.')
+}
 
 // --- Mesure FCP et FID ---
 if ('PerformanceObserver' in window) {
