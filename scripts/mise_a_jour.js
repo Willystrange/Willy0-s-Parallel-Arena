@@ -181,7 +181,7 @@ App.mise_a_jour = function() {
     userData.semaine4 = false;
     userData.semaine5 = false;
     userData.semaine6 = false;
-    userData.quete_genere = false;
+    userData.quetes_genere = false;
 
     if (userData) {
       for (let i = 1; i <= 15; i++) {
