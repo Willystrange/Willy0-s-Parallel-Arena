@@ -79,6 +79,12 @@ App.registerPasskey = async function() {
         options.challenge = App.base64ToBuffer(options.challenge);
         options.user.id = App.base64ToBuffer(options.user.id);
 
+        if (options.excludeCredentials) {
+            options.excludeCredentials.forEach(cred => {
+                cred.id = App.base64ToBuffer(cred.id);
+            });
+        }
+
         // 3. Appel à l'API du navigateur
         const credential = await navigator.credentials.create({ publicKey: options });
 
