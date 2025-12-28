@@ -575,12 +575,90 @@ app.post('/api/passkey/login-options', async (req, res) => {
 });
 
 app.post('/api/passkey/login-verify', async (req, res) => {
-    const { body, tempId } = req.body, { rpID, origin } = { rpID: req.headers.host.split(':')[0], origin: `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}` };
+    const { body, tempId, email } = req.body;
+    const { rpID, origin } = { rpID: req.headers.host.split(':')[0], origin: `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}` };
     const expectedChallenge = challenges.get(`auth_pending_${tempId}`);
+    
+    if (!expectedChallenge) return res.status(400).json({ error: "Session invalide ou expirée" });
+
     const all = await loadAllUsersData();
-    const userId = Object.keys(all).find(uid => all[uid].passkeys && all[uid].passkeys.some(pk => pk.credentialID === body.id));
-    if (!userId || !expectedChallenge) return res.status(400).json({ error: "Session invalide" });
-    res.json({ success: true, userId, userData: all[userId] });
+    
+    // Recherche de l'utilisateur et de la passkey correspondante
+    let userId = null;
+    let foundPasskey = null;
+
+    // Si l'email est fourni, on optimise la recherche
+    if (email) {
+        const uid = Object.keys(all).find(id => all[id].email && all[id].email.toLowerCase() === email.toLowerCase());
+        if (uid) {
+            const u = all[uid];
+            if (u.passkeys) {
+                foundPasskey = u.passkeys.find(pk => {
+                    // Conversion robuste Buffer/String pour comparaison
+                    const storedId = Buffer.isBuffer(pk.credentialID) ? pk.credentialID.toString('base64url') : pk.credentialID;
+                    return storedId === body.id;
+                });
+                if (foundPasskey) userId = uid;
+            }
+        }
+    }
+
+    // Si pas trouvé par email (ou email non fourni), recherche globale par ID de credential
+    if (!userId) {
+        userId = Object.keys(all).find(uid => {
+            const u = all[uid];
+            if (!u.passkeys) return false;
+            const pk = u.passkeys.find(k => {
+                const storedId = Buffer.isBuffer(k.credentialID) ? k.credentialID.toString('base64url') : k.credentialID;
+                return storedId === body.id;
+            });
+            if (pk) {
+                foundPasskey = pk;
+                return true;
+            }
+            return false;
+        });
+    }
+
+    if (!userId || !foundPasskey) {
+        return res.status(400).json({ error: "Utilisateur ou Passkey introuvable" });
+    }
+
+    // VÉRIFICATION CRYPTOGRAPHIQUE
+    try {
+        // S'assurer que la clé publique est un Buffer pour la vérif
+        const pubKey = Buffer.isBuffer(foundPasskey.credentialPublicKey) 
+            ? foundPasskey.credentialPublicKey 
+            : Buffer.from(foundPasskey.credentialPublicKey, 'base64');
+
+        const verification = await verifyAuthenticationResponse({
+            response: body,
+            expectedChallenge,
+            expectedOrigin: origin,
+            expectedRPID: rpID,
+            authenticator: {
+                credentialPublicKey: pubKey,
+                credentialID: Buffer.isBuffer(foundPasskey.credentialID) ? foundPasskey.credentialID : Buffer.from(foundPasskey.credentialID, 'base64url'),
+                counter: foundPasskey.counter,
+            },
+        });
+
+        if (verification.verified) {
+            // Mise à jour du compteur pour prévenir les attaques par replay
+            const u = all[userId];
+            const pkIndex = u.passkeys.findIndex(pk => pk === foundPasskey);
+            u.passkeys[pkIndex].counter = verification.authenticationInfo.newCounter;
+            await saveUserData(userId, u);
+            
+            challenges.delete(`auth_pending_${tempId}`);
+            res.json({ success: true, userId, userData: u });
+        } else {
+            res.status(400).json({ error: "Vérification échouée" });
+        }
+    } catch (error) {
+        console.error("Erreur vérification Passkey:", error);
+        res.status(400).json({ error: error.message });
+    }
 });
 
 // --- ADMIN ---
