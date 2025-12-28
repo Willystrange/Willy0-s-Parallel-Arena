@@ -67,6 +67,7 @@ async function loadServerConfig() {
 const onlineUsers = new Map();
 io.on('connection', (socket) => {
     socket.on('register', (data) => { if (data.userId) onlineUsers.set(socket.id, { userId: data.userId, lastSeen: Date.now() }); });
+    socket.on('ping_test', (data) => { console.log(`[PING] ${data.message}`); socket.emit('pong', { message: 'pong' }); });
     socket.on('disconnect', () => onlineUsers.delete(socket.id));
 });
 
@@ -474,7 +475,97 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     res.json({ success: true, game, results });
 });
 
+app.post('/api/combat/survival/upgrade', verifyToken, async (req, res) => {
+    const { userId, stat } = req.body;
+    const game = games.get(userId);
+    if (!game || game.gameMode !== 'survie') return res.status(400).json({ error: "Partie invalide" });
+
+    // Apply upgrade
+    if (stat === 'pv') {
+        const boost = Math.round(game.player.pv_maximum * 0.20);
+        game.player.pv_maximum += boost;
+        game.player.pv += boost; // Heal amount equal to boost
+    } else if (stat === 'attaque') {
+        game.player.attaque = Math.round(game.player.attaque * 1.15);
+    } else if (stat === 'defense') {
+        game.player.defense = Math.round(game.player.defense * 1.15);
+    }
+    game.player.last_upgrade = stat;
+
+    // Next Wave Setup
+    game.wave++;
+    game.opponent = generateSurvivalOpponent(game.wave);
+    game.opponent.next_choice = combatEngine.makeAIDecision(game);
+    
+    // Reset turn-based counters if needed, but keep accumulated state
+    game.turn = 1;
+
+    res.json({ success: true, game });
+});
+
 // --- PASSKEYS ---
+const challenges = new Map();
+
+app.post('/api/passkey/register-options', verifyToken, async (req, res) => {
+    const userData = await getUserData(req.uid);
+    if (!userData) return res.status(404).json({ error: "Utilisateur inconnu" });
+    
+    const rpID = req.headers.host.split(':')[0];
+    const options = await generateRegistrationOptions({
+        rpName: 'Parallel Arena',
+        rpID,
+        userID: req.uid,
+        userName: userData.pseudo || userData.email || 'User',
+        attestationType: 'none',
+        excludeCredentials: (userData.passkeys || []).map(pk => ({ id: pk.credentialID, type: 'public-key' })),
+        authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred', authenticatorAttachment: 'platform' },
+    });
+    
+    challenges.set(req.uid, options.challenge);
+    res.json(options);
+});
+
+app.post('/api/passkey/register-verify', verifyToken, async (req, res) => {
+    const { body } = req.body;
+    const userData = await getUserData(req.uid);
+    const expectedChallenge = challenges.get(req.uid);
+    const rpID = req.headers.host.split(':')[0];
+    const origin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}`;
+
+    if (!expectedChallenge) return res.status(400).json({ error: "Challenge expiré" });
+
+    let verification;
+    try {
+        verification = await verifyRegistrationResponse({
+            response: body,
+            expectedChallenge,
+            expectedOrigin: origin,
+            expectedRPID: rpID,
+        });
+    } catch (error) {
+        console.error("Vérification échouée:", error);
+        return res.status(400).json({ error: error.message });
+    }
+
+    const { verified, registrationInfo } = verification;
+    if (verified && registrationInfo) {
+        const newPasskey = {
+            credentialID: registrationInfo.credentialID,
+            credentialPublicKey: registrationInfo.credentialPublicKey,
+            counter: registrationInfo.counter,
+            transports: body.response.transports,
+        };
+
+        if (!userData.passkeys) userData.passkeys = [];
+        userData.passkeys.push(newPasskey);
+        await saveUserData(req.uid, userData);
+        challenges.delete(req.uid);
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ error: "Vérification échouée" });
+    }
+});
+
 app.post('/api/passkey/login-options', async (req, res) => {
     const rpID = req.headers.host.split(':')[0];
     const options = await generateAuthenticationOptions({ rpID, userVerification: 'preferred' });
