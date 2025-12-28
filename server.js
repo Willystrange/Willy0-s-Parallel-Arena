@@ -564,10 +564,28 @@ app.post('/api/passkey/register-verify', verifyToken, async (req, res) => {
 
     const { verified, registrationInfo } = verification;
     if (verified && registrationInfo) {
+        
+        // Helper sécurisé pour la conversion
+        const safeToBase64Url = (input) => {
+            if (!input) return null;
+            if (Buffer.isBuffer(input)) return input.toString('base64url');
+            if (typeof input === 'string') return input; 
+            // Tentative de conversion générique (Array, etc.)
+            try { return Buffer.from(input).toString('base64url'); } catch(e) { return null; }
+        };
+
+        const credID = safeToBase64Url(registrationInfo.credentialID);
+        const credKey = safeToBase64Url(registrationInfo.credentialPublicKey);
+
+        if (!credID || !credKey) {
+            console.error("Erreur critique : Credential ID ou Public Key manquant après vérification.");
+            return res.status(400).json({ error: "Données de Passkey invalides" });
+        }
+
         // CORRECTION CRITIQUE : On sauvegarde en String Base64URL pour éviter la corruption JSON/Buffer
         const newPasskey = {
-            credentialID: Buffer.from(registrationInfo.credentialID).toString('base64url'),
-            credentialPublicKey: Buffer.from(registrationInfo.credentialPublicKey).toString('base64url'),
+            credentialID: credID,
+            credentialPublicKey: credKey,
             counter: registrationInfo.counter,
             transports: body.response.transports,
         };
@@ -832,8 +850,10 @@ async function cleanupDatabase() {
 
                 // Repair Credential ID
                 if (newPk.credentialID && typeof newPk.credentialID === 'object' && newPk.credentialID.type === 'Buffer') {
-                    newPk.credentialID = Buffer.from(newPk.credentialID.data).toString('base64url');
-                    modified = true;
+                    if (Array.isArray(newPk.credentialID.data)) {
+                        newPk.credentialID = Buffer.from(newPk.credentialID.data).toString('base64url');
+                        modified = true;
+                    }
                 } else if (Buffer.isBuffer(newPk.credentialID)) {
                     newPk.credentialID = newPk.credentialID.toString('base64url');
                     modified = true;
@@ -841,8 +861,10 @@ async function cleanupDatabase() {
 
                 // Repair Public Key
                 if (newPk.credentialPublicKey && typeof newPk.credentialPublicKey === 'object' && newPk.credentialPublicKey.type === 'Buffer') {
-                    newPk.credentialPublicKey = Buffer.from(newPk.credentialPublicKey.data).toString('base64url');
-                    modified = true;
+                     if (Array.isArray(newPk.credentialPublicKey.data)) {
+                        newPk.credentialPublicKey = Buffer.from(newPk.credentialPublicKey.data).toString('base64url');
+                        modified = true;
+                     }
                 } else if (Buffer.isBuffer(newPk.credentialPublicKey)) {
                     newPk.credentialPublicKey = newPk.credentialPublicKey.toString('base64url');
                     modified = true;
