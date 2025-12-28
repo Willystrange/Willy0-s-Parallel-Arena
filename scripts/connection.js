@@ -8,61 +8,6 @@ if (App.firebaseConfig && !firebase.apps.length) {
 }
 App.auth = firebase.auth();
 
-// --- Gestion de l'état de connexion ---
-App.saveConnectionState = function(userId, est_connecte) {
-  localStorage.setItem('connection', JSON.stringify({ userid: userId, est_connecte }));
-};
-
-// --- Sauvegarde et chargement des données utilisateur via SERVEUR LOCAL ---
-App.saveUserDataToFirebase = async function(userId, extraData = {}) {
-  const userData = getUserData();
-  Object.assign(userData, extraData);
-
-  const user = firebase.auth().currentUser;
-  if (!user) return { success: false, error: "Non connecté" };
-  
-  try {
-      const token = await user.getIdToken();
-      if (!token) return { success: false, error: "Jeton manquant" };
-
-      const response = await fetch(`/api/user/${userId}`, {
-          method: 'POST',
-          headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ userData })
-      });
-      const data = await response.json();
-      if (data.success && data.userData) {
-          localStorage.setItem('userData', JSON.stringify(data.userData));
-          return { success: true };
-      } else {
-          return { success: false, error: data.error };
-      }
-  } catch (e) {
-      console.error('Erreur sauvegarde serveur local:', e);
-      return { success: false, error: "Erreur de connexion au serveur." };
-  }
-};
-
-App.loadUserDataFromFirebase = async function(userId) {
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-  try {
-      const token = await user.getIdToken();
-      const response = await fetch(`/api/user/${userId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success && data.userData) {
-          localStorage.setItem('userData', JSON.stringify(data.userData));
-      }
-  } catch (e) {
-      console.error('Erreur chargement serveur local:', e);
-  }
-};
-
 // --- Gestion de l'authentification ---
 App.login = function() {
   const email = document.getElementById('email').value;

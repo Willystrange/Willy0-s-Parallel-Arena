@@ -70,6 +70,61 @@ App.bufferToBase64 = (buffer) => {
     return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 };
 
+// --- Gestion de l'état de connexion ---
+App.saveConnectionState = function(userId, est_connecte) {
+  localStorage.setItem('connection', JSON.stringify({ userid: userId, est_connecte }));
+};
+
+// --- Sauvegarde et chargement des données utilisateur via SERVEUR LOCAL ---
+App.saveUserDataToFirebase = async function(userId, extraData = {}) {
+  const userData = getUserData();
+  Object.assign(userData, extraData);
+
+  const user = firebase.auth().currentUser;
+  if (!user) return { success: false, error: "Non connecté" };
+  
+  try {
+      const token = await user.getIdToken();
+      if (!token) return { success: false, error: "Jeton manquant" };
+
+      const response = await fetch(`/api/user/${userId}`, {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ userData })
+      });
+      const data = await response.json();
+      if (data.success && data.userData) {
+          localStorage.setItem('userData', JSON.stringify(data.userData));
+          return { success: true };
+      } else {
+          return { success: false, error: data.error };
+      }
+  } catch (e) {
+      console.error('Erreur sauvegarde serveur local:', e);
+      return { success: false, error: "Erreur de connexion au serveur." };
+  }
+};
+
+App.loadUserDataFromFirebase = async function(userId) {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/user/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success && data.userData) {
+          localStorage.setItem('userData', JSON.stringify(data.userData));
+      }
+  } catch (e) {
+      console.error('Erreur chargement serveur local:', e);
+  }
+};
+
 // Liste globale des équipements (Injectée pour fiabilité maximale)
 if (!App.equipments || App.equipments.length === 0) {
     App.equipments = [
@@ -639,6 +694,43 @@ function preloadPage(page) {
 let lastPageHadFooter = false; // Variable pour suivre si la page précédente avait un footer
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Vérification de la session persistante
+  const connectionState = localStorage.getItem('connection');
+  let isConnected = false;
+  let userId = null;
+
+  if (connectionState) {
+    try {
+      const state = JSON.parse(connectionState);
+      if (state.est_connecte && state.userid) {
+        isConnected = true;
+        userId = state.userid;
+      }
+    } catch (e) {
+      console.warn("Invalid connection state in localStorage");
+    }
+  }
+
+  // Si connecté et données présentes, on va directement au menu
+  if (isConnected) {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+        console.log("Session restored, skipping intro.");
+        
+        // Tentative de rafraîchissement des données en arrière-plan (si Firebase init déjà fait ou se fera via onAuthStateChanged)
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+           firebase.auth().onAuthStateChanged(user => {
+               if (user && user.uid === userId) {
+                   App.loadUserDataFromFirebase(userId);
+               }
+           });
+        }
+        
+        loadPage('menu_principal');
+        return;
+    }
+  }
+
   loadPage('intro');
 });
 
