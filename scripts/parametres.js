@@ -120,7 +120,12 @@ App.registerPasskey = async function() {
         }
     } catch (err) {
         console.error(err);
-        alert("Erreur lors de la création de la Passkey : " + err.message);
+        // Gestion spécifique de l'erreur "Déjà enregistré" (InvalidStateError)
+        if (err.name === 'InvalidStateError' || err.message.includes('The object is in an invalid state')) {
+            alert("Vous avez déjà une Passkey active sur cet appareil.");
+        } else {
+            alert("Erreur lors de la création de la Passkey : " + err.message);
+        }
     }
 };
 
