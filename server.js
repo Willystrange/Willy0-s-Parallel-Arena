@@ -597,6 +597,8 @@ app.post('/api/passkey/login-verify', async (req, res) => {
     if (!expectedChallenge) return res.status(400).json({ error: "Session invalide ou expirée" });
 
     const all = await loadAllUsersData();
+    console.log(`[PASSKEY DEBUG] Login request for email: ${email}`);
+    console.log(`[PASSKEY DEBUG] Users loaded from DB: ${Object.keys(all).length}`);
     
     // Helper pour reconstruire les Buffers corrompus par JSON.stringify
     const reconstructBuffer = (obj) => {
@@ -619,23 +621,33 @@ app.post('/api/passkey/login-verify', async (req, res) => {
     // Recherche de l'utilisateur et de la passkey correspondante
     let userId = null;
     let foundPasskey = null;
+    let userFoundByEmail = false;
 
     // Si l'email est fourni, on optimise la recherche
     if (email) {
         const uid = Object.keys(all).find(id => all[id].email && all[id].email.toLowerCase() === email.toLowerCase());
         if (uid) {
+            userFoundByEmail = true;
+            console.log(`[PASSKEY DEBUG] User found by email: ${uid}`);
             const u = all[uid];
             if (u.passkeys) {
                 foundPasskey = u.passkeys.find(pk => {
-                    return toBase64Url(pk.credentialID) === body.id;
+                    const normalized = toBase64Url(pk.credentialID);
+                    console.log(`[PASSKEY DEBUG] Comparing stored: ${normalized} vs received: ${body.id}`);
+                    return normalized === body.id;
                 });
                 if (foundPasskey) userId = uid;
+            } else {
+                console.log(`[PASSKEY DEBUG] User has no passkeys.`);
             }
+        } else {
+            console.log(`[PASSKEY DEBUG] No user found with email: ${email}`);
         }
     }
 
     // Si pas trouvé par email (ou email non fourni), recherche globale par ID de credential
     if (!userId) {
+        console.log(`[PASSKEY DEBUG] Fallback: searching by Credential ID globally...`);
         userId = Object.keys(all).find(uid => {
             const u = all[uid];
             if (!u.passkeys) return false;
@@ -651,7 +663,9 @@ app.post('/api/passkey/login-verify', async (req, res) => {
     }
 
     if (!userId || !foundPasskey) {
-        return res.status(400).json({ error: "Utilisateur ou Passkey introuvable" });
+        if (email && !userFoundByEmail) return res.status(400).json({ error: "Aucun compte associé à cet email." });
+        if (userFoundByEmail && !foundPasskey) return res.status(400).json({ error: "Cette Passkey ne correspond pas à ce compte." });
+        return res.status(400).json({ error: "Utilisateur ou Passkey introuvable." });
     }
 
     // VÉRIFICATION CRYPTOGRAPHIQUE
