@@ -467,6 +467,7 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     if (!game) return res.status(404).json({ error: "Inconnu" });
     const results = { gameOver: false, logs: [] };
     if (action === 'attack') combatEngine.handleAttack(game.player, game.opponent, true, results);
+    if (action === 'cheat_win') { game.opponent.pv = 0; results.logs.push({ text: "VICTOIRE INSTANTANÉE (DEV) !", color: "gold", side: "milieu" }); }
     if (game.opponent.pv > 0) combatEngine.handleAttack(game.opponent, game.player, false, results);
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
         results.gameOver = true; results.winner = game.player.pv > 0 ? 'player' : 'opponent';
