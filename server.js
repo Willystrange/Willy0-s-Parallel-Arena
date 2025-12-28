@@ -564,9 +564,10 @@ app.post('/api/passkey/register-verify', verifyToken, async (req, res) => {
 
     const { verified, registrationInfo } = verification;
     if (verified && registrationInfo) {
+        // CORRECTION CRITIQUE : On sauvegarde en String Base64URL pour éviter la corruption JSON/Buffer
         const newPasskey = {
-            credentialID: registrationInfo.credentialID,
-            credentialPublicKey: registrationInfo.credentialPublicKey,
+            credentialID: Buffer.from(registrationInfo.credentialID).toString('base64url'),
+            credentialPublicKey: Buffer.from(registrationInfo.credentialPublicKey).toString('base64url'),
             counter: registrationInfo.counter,
             transports: body.response.transports,
         };
@@ -807,7 +808,62 @@ app.post('/api/admin/maintenance', verifyToken, verifyAdmin, async (req, res) =>
 });
 
 // --- START ---
-server.listen(PORT, '0.0.0.0', () => console.log(`🚀 SERVEUR FULL OP SUR PORT ${PORT}`));
+server.listen(PORT, '0.0.0.0', async () => {
+    console.log(`🚀 SERVEUR FULL OP SUR PORT ${PORT}`);
+    await cleanupDatabase();
+});
+
+// --- DATABASE CLEANUP & MIGRATION ---
+async function cleanupDatabase() {
+    console.log("[DB] Starting Passkey cleanup & repair...");
+    try {
+        const users = await loadAllUsersData();
+        let updatedCount = 0;
+
+        for (const [uid, user] of Object.entries(users)) {
+            if (!user.passkeys || !Array.isArray(user.passkeys)) continue;
+
+            let hasChanges = false;
+            const cleanPasskeys = user.passkeys.map(pk => {
+                if (!pk) return null;
+
+                let modified = false;
+                const newPk = { ...pk };
+
+                // Repair Credential ID
+                if (newPk.credentialID && typeof newPk.credentialID === 'object' && newPk.credentialID.type === 'Buffer') {
+                    newPk.credentialID = Buffer.from(newPk.credentialID.data).toString('base64url');
+                    modified = true;
+                } else if (Buffer.isBuffer(newPk.credentialID)) {
+                    newPk.credentialID = newPk.credentialID.toString('base64url');
+                    modified = true;
+                }
+
+                // Repair Public Key
+                if (newPk.credentialPublicKey && typeof newPk.credentialPublicKey === 'object' && newPk.credentialPublicKey.type === 'Buffer') {
+                    newPk.credentialPublicKey = Buffer.from(newPk.credentialPublicKey.data).toString('base64url');
+                    modified = true;
+                } else if (Buffer.isBuffer(newPk.credentialPublicKey)) {
+                    newPk.credentialPublicKey = newPk.credentialPublicKey.toString('base64url');
+                    modified = true;
+                }
+
+                if (modified) hasChanges = true;
+                return newPk;
+            }).filter(pk => pk && pk.credentialID); // Remove nulls and empty IDs
+
+            if (hasChanges || cleanPasskeys.length !== user.passkeys.length) {
+                user.passkeys = cleanPasskeys;
+                await saveUserData(uid, user);
+                updatedCount++;
+                console.log(`[DB] Repaired passkeys for user: ${uid} (${user.pseudo || 'No Pseudo'})`);
+            }
+        }
+        console.log(`[DB] Cleanup complete. ${updatedCount} users updated.`);
+    } catch (e) {
+        console.error("[DB] Cleanup failed:", e);
+    }
+}
 
 function generateSurvivalOpponent(wave) {
     const names = Object.keys(OPPONENT_STATS_RANGES), name = names[Math.floor(Math.random() * names.length)], stats = OPPONENT_STATS_RANGES[name], scale = 1 + (wave - 1) * 0.1;
