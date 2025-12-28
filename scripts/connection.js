@@ -220,16 +220,9 @@ App.initConditionalUI = async function() {
     // 1. Vérification de la compatibilité
     if (!window.isSecureContext || !navigator.credentials || !window.PublicKeyCredential) return;
     
-    // Si la Conditional UI n'est pas dispo, on met en valeur le bouton manuel
+    // Si la Conditional UI n'est pas dispo, on ne fait rien (le bouton a été supprimé)
     const isConditionalAvailable = await PublicKeyCredential.isConditionalMediationAvailable?.();
-    if (!isConditionalAvailable) {
-        const btn = document.querySelector('button[onclick="App.loginWithPasskey()"]');
-        if (btn) {
-            btn.style.animation = "breathe 2.5s ease-in-out infinite";
-            btn.title = "Passkey disponible !";
-        }
-        return;
-    }
+    if (!isConditionalAvailable) return;
 
     try {
         // 2. Récupération des options pour le flux "usernameless"
@@ -251,16 +244,16 @@ App.initConditionalUI = async function() {
         const h1 = document.querySelector('#loginForm h1');
         if(h1) h1.innerHTML = "Connexion 🟢"; 
 
-        const assertion = await navigator.credentials.get({
-            publicKey: options,
-            mediation: 'conditional'
-        });
-
         // Force le focus pour afficher le prompt du navigateur si ce n'est pas déjà fait
         setTimeout(() => {
             const emailInput = document.getElementById('email');
             if (emailInput) emailInput.focus();
-        }, 100);
+        }, 300); // Délai légèrement augmenté pour être sûr que le DOM est prêt et l'API WebAuthn active
+
+        const assertion = await navigator.credentials.get({
+            publicKey: options,
+            mediation: 'conditional'
+        });
 
         if (!assertion) return;
 
