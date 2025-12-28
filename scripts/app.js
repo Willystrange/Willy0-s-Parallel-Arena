@@ -53,7 +53,11 @@ App.getRecaptchaToken = function(action) {
 
 // --- UTILS: WEBAUTHN BINARY CONVERSION ---
 App.base64ToBuffer = (base64) => {
-    const binary = window.atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
+    let padded = base64.replace(/-/g, '+').replace(/_/g, '/');
+    while (padded.length % 4) {
+        padded += '=';
+    }
+    const binary = window.atob(padded);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes.buffer;

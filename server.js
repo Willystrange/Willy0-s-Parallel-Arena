@@ -657,8 +657,6 @@ app.post('/api/passkey/login-verify', async (req, res) => {
     if (!expectedChallenge) return res.status(400).json({ error: "Session invalide ou expirée" });
 
     const all = await loadAllUsersData();
-    console.log(`[PASSKEY DEBUG] Login request for email: ${email}`);
-    console.log(`[PASSKEY DEBUG] Users loaded from DB: ${Object.keys(all).length}`);
     
     // Helper pour reconstruire les Buffers corrompus par JSON.stringify
     const reconstructBuffer = (obj) => {
@@ -691,26 +689,18 @@ app.post('/api/passkey/login-verify', async (req, res) => {
         const uid = Object.keys(all).find(id => all[id].email && all[id].email.toLowerCase() === email.toLowerCase());
         if (uid) {
             userFoundByEmail = true;
-            console.log(`[PASSKEY DEBUG] User found by email: ${uid}`);
             const u = all[uid];
             if (u.passkeys) {
                 foundPasskey = u.passkeys.find(pk => {
-                    const normalized = toBase64Url(pk.credentialID);
-                    console.log(`[PASSKEY DEBUG] Comparing stored: ${normalized} vs received: ${body.id}`);
-                    return normalized === body.id;
+                    return toBase64Url(pk.credentialID) === body.id;
                 });
                 if (foundPasskey) userId = uid;
-            } else {
-                console.log(`[PASSKEY DEBUG] User has no passkeys.`);
             }
-        } else {
-            console.log(`[PASSKEY DEBUG] No user found with email: ${email}`);
         }
     }
 
     // Si pas trouvé par email (ou email non fourni), recherche globale par ID de credential
     if (!userId) {
-        console.log(`[PASSKEY DEBUG] Fallback: searching by Credential ID globally...`);
         userId = Object.keys(all).find(uid => {
             const u = all[uid];
             if (!u.passkeys) return false;
@@ -733,9 +723,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
 
     // VÉRIFICATION CRYPTOGRAPHIQUE
     try {
-        // Préparation rigoureuse des données pour simplewebauthn
         let pubKey = reconstructBuffer(foundPasskey.credentialPublicKey);
-        // Si c'est une string (Base64URL depuis la DB), on la convertit en Buffer proprement
         if (!Buffer.isBuffer(pubKey) && typeof pubKey === 'string') {
             pubKey = Buffer.from(pubKey, 'base64url');
         }
@@ -745,26 +733,18 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             credID = Buffer.from(credID, 'base64url');
         }
 
-        const authenticatorObj = {
+        const credentialObj = {
             credentialPublicKey: pubKey,
             credentialID: credID,
             counter: Number(foundPasskey.counter || 0),
         };
-
-        // DEBUG FINAL : On vérifie ce qu'on envoie à la lib
-        console.log("[PASSKEY LOGIN] Authenticator Object prepared:", {
-            hasPubKey: Buffer.isBuffer(authenticatorObj.credentialPublicKey),
-            pubKeyLen: authenticatorObj.credentialPublicKey ? authenticatorObj.credentialPublicKey.length : 0,
-            hasID: Buffer.isBuffer(authenticatorObj.credentialID),
-            counter: authenticatorObj.counter
-        });
 
         const verification = await verifyAuthenticationResponse({
             response: body,
             expectedChallenge,
             expectedOrigin: origin,
             expectedRPID: rpID,
-            authenticator: authenticatorObj,
+            credential: credentialObj, // Correction : 'credential' au lieu de 'authenticator'
         });
 
         if (verification.verified) {
