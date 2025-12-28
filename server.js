@@ -734,7 +734,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
         }
 
         const credentialObj = {
-            credentialPublicKey: pubKey,
+            credentialPublicKey: new Uint8Array(pubKey),
             credentialID: credID,
             counter: Number(foundPasskey.counter || 0),
         };
