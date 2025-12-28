@@ -563,6 +563,17 @@ app.post('/api/passkey/register-verify', verifyToken, async (req, res) => {
     }
 
     const { verified, registrationInfo } = verification;
+    
+    // DEBUG LOG pour comprendre pourquoi c'est manquant
+    if (verified) {
+        console.log("[PASSKEY REGISTER DEBUG] Registration Info received:", JSON.stringify(registrationInfo, (key, value) => {
+            if (key === 'credentialPublicKey' || key === 'credentialID') {
+                return value ? `Buffer(${value.length || 0} bytes)` : 'undefined';
+            }
+            return value;
+        }));
+    }
+
     if (verified && registrationInfo) {
         
         // Helper sécurisé pour la conversion
