@@ -514,7 +514,7 @@ app.post('/api/passkey/register-options', verifyToken, async (req, res) => {
     const options = await generateRegistrationOptions({
         rpName: 'Parallel Arena',
         rpID,
-        userID: req.uid,
+        userID: Buffer.from(req.uid, 'utf-8'),
         userName: userData.pseudo || userData.email || 'User',
         attestationType: 'none',
         excludeCredentials: (userData.passkeys || []).map(pk => ({ id: pk.credentialID, type: 'public-key' })),
