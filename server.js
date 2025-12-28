@@ -610,6 +610,9 @@ app.post('/api/passkey/login-verify', async (req, res) => {
     const toBase64Url = (obj) => {
         const buf = reconstructBuffer(obj);
         if (Buffer.isBuffer(buf)) return buf.toString('base64url');
+        if (typeof buf === 'string') {
+            return buf.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        }
         return buf;
     };
 

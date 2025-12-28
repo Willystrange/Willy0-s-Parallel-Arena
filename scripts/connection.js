@@ -144,13 +144,15 @@ App.loginWithPasskey = async function(silent = false) {
             alert(`Bon retour, ${result.userData.pseudo} !`);
             loadPage('menu_principal');
         } else {
-            if (!silent) alert("Erreur Passkey : " + result.error);
+            // Si c'est une erreur serveur (clé invalide, user non trouvé...), on l'affiche TOUJOURS
+            // car ce n'est pas une annulation volontaire de l'utilisateur.
+            alert("Échec Passkey : " + result.error);
         }
     } catch (err) {
         console.warn("[PASSKEY] Erreur ou Annulation:", err);
-        // On n'affiche l'alerte que si ce n'est pas une annulation volontaire et pas en mode silencieux
-        if (!silent && err.name !== 'NotAllowedError' && err.name !== 'AbortError') {
-             alert("Erreur de connexion Passkey : " + err.message);
+        // On n'affiche l'alerte que si ce n'est pas une annulation volontaire (silent ne joue plus sur les erreurs techniques graves)
+        if (err.name !== 'NotAllowedError' && err.name !== 'AbortError') {
+             if (!silent) alert("Erreur de connexion Passkey : " + err.message);
         }
     }
 };
