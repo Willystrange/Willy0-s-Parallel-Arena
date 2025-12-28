@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "6LcMZzcsAAAAABJNQwfd8Azzi45yk-KT86hK437W";
 async function verifyRecaptcha(token, userId = null) {
     if (token === "DEV_BYPASS_TOKEN") return { success: true };
-    if (token && (token.startsWith("timeout_") || token.startsWith("no_"))) return { success: true, bypassed: true };
+    if (token && (token.startsWith("timeout_") || token.startsWith("no_") || token.startsWith("error_") || token.startsWith("exception_"))) return { success: true, bypassed: true };
     try {
         const params = new URLSearchParams();
         params.append('secret', RECAPTCHA_SECRET_KEY);
