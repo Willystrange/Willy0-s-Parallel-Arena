@@ -744,7 +744,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             authenticator: {
                 credentialPublicKey: pubKey,
                 credentialID: credID,
-                counter: foundPasskey.counter,
+                counter: foundPasskey.counter || 0, // Default to 0 if undefined
             },
         });
 
@@ -752,8 +752,10 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             // Mise à jour du compteur pour prévenir les attaques par replay
             const u = all[userId];
             const pkIndex = u.passkeys.findIndex(pk => pk === foundPasskey);
-            u.passkeys[pkIndex].counter = verification.authenticationInfo.newCounter;
-            await saveUserData(userId, u);
+            if (pkIndex !== -1) {
+                 u.passkeys[pkIndex].counter = verification.authenticationInfo.newCounter;
+                 await saveUserData(userId, u);
+            }
             
             challenges.delete(`auth_pending_${tempId}`);
             res.json({ success: true, userId, userData: u });
