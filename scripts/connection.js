@@ -140,6 +140,9 @@ App.loginWithPasskey = async function(silent = false) {
         const result = await verifyRes.json();
 
         if (result.success) {
+            if (result.token) {
+                await firebase.auth().signInWithCustomToken(result.token);
+            }
             localStorage.setItem('userData', JSON.stringify(result.userData));
             App.saveConnectionState(result.userId, true);
             alert(`Bon retour, ${result.userData.pseudo} !`);
@@ -330,6 +333,9 @@ App.initConditionalUI = async function() {
         const result = await verifyRes.json();
 
         if (result.success) {
+            if (result.token) {
+                await firebase.auth().signInWithCustomToken(result.token);
+            }
             localStorage.setItem('userData', JSON.stringify(result.userData));
             App.saveConnectionState(result.userId, true);
             alert(`Bon retour, ${result.userData.pseudo} !`);

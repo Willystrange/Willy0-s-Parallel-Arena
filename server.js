@@ -762,7 +762,11 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             }
             
             challenges.delete(`auth_pending_${tempId}`);
-            res.json({ success: true, userId, userData: u });
+            
+            // Génération du token Firebase pour la session client
+            const token = await admin.auth().createCustomToken(userId);
+            
+            res.json({ success: true, userId, userData: u, token });
         } else {
             res.status(400).json({ error: "Vérification échouée" });
         }
