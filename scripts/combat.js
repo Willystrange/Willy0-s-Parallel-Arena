@@ -65,26 +65,17 @@ App.saveGame(App.playerCharacter, App.opponentCharacter);
 history.replaceState(null, null, window.location.href);
 
 // Initialisation du combat sur le serveur
-
 App.syncCombatStart = async function() {
-
     const connection = JSON.parse(localStorage.getItem('connection'));
-
-    if (!connection || !connection.userid) return loadPage('connection');
-
-    
-
-    const userId = connection.userid;
+    if (!connection || !connection.userid) return;
 
     const user = firebase.auth().currentUser;
-    const token = user ? await user.getIdToken() : '';
+    if (!user) return;
 
-    const playerObj = App.playerCharacter;
-    const opponentObj = App.opponentCharacter;
-
+    const token = await user.getIdToken();
     const recaptchaToken = await App.getRecaptchaToken('combat_start');
 
-    const response = await fetch('/api/combat/start', {
+    await fetch('/api/combat/start', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -93,61 +84,19 @@ App.syncCombatStart = async function() {
         body: JSON.stringify({
             userId: user.uid,
             gameMode: 'classic',
-            playerCharacter: playerObj,
-            opponentCharacter: opponentObj,
+            playerCharacter: App.playerCharacter,
+            opponentCharacter: App.opponentCharacter,
             recaptchaToken: recaptchaToken
         })
     });
 
+    // Une fois synchronisé, si l'adversaire est plus rapide, il joue
+    if (App.playerCharacter.vitesse < App.opponentCharacter.vitesse && App.playerCharacter.tourTT < 1) {
+        App.executeServerAction('opponent_init');
+    }
 };
 
-
-
 App.syncCombatStart();
-
-
-
-// Remplacez les fonctions locales par des appels API
-
-App.executeServerAction = async function(action, extra = {}) {
-
-    // Désactiver les boutons pendant l'action
-
-    const buttons = ['attack-button', 'special-button', 'defense-button', 'items-button'];
-
-    buttons.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = true; });
-
-
-
-    const connection = JSON.parse(localStorage.getItem('connection'));
-
-    if (!connection || !connection.userid) return loadPage('connection');
-
-
-
-    const userId = connection.userid;
-
-    const user = firebase.auth().currentUser;
-
-    const token = user ? await user.getIdToken() : '';
-
-
-
-    const response = await fetch('/api/combat/action', {
-
-        method: 'POST',
-
-        headers: { 
-
-            'Content-Type': 'application/json',
-
-            'Authorization': `Bearer ${token}`
-
-        },
-
-        body: JSON.stringify({ userId, action, ...extra })
-
-    });
 
     const data = await response.json();
     if (data.success) {
@@ -217,10 +166,6 @@ App.partie = function() {
   saveUserData(App.userData);
 }
 App.partie();
-
-if (App.playerCharacter.vitesse < App.opponentCharacter.vitesse) {
-    setTimeout(() => App.executeServerAction('opponent_init'), 500);
-}
 
 // 4) Écouteur délégué
 document.body.addEventListener('click', function(e) {
