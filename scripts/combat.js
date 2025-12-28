@@ -98,6 +98,26 @@ App.syncCombatStart = async function() {
 
 App.syncCombatStart();
 
+App.executeServerAction = async function(action, extra = {}) {
+    // Désactiver les boutons pendant l'action
+    const buttons = ['attack-button', 'special-button', 'defense-button', 'items-button'];
+    buttons.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = true; });
+
+    const connection = JSON.parse(localStorage.getItem('connection'));
+    if (!connection || !connection.userid) return;
+
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : '';
+
+    const response = await fetch('/api/combat/action', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId: user.uid, action, ...extra })
+    });
+
     const data = await response.json();
     if (data.success) {
         const results = data.results;
