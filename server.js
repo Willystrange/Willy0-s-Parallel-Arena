@@ -463,15 +463,42 @@ app.post('/api/combat/start', verifyToken, async (req, res) => {
 });
 
 app.post('/api/combat/action', verifyToken, async (req, res) => {
-    const { userId, action } = req.body, game = games.get(userId);
+    const { userId, action, itemName } = req.body, game = games.get(userId);
     if (!game) return res.status(404).json({ error: "Inconnu" });
     const results = { gameOver: false, logs: [] };
-    if (action === 'attack') combatEngine.handleAttack(game.player, game.opponent, true, results);
-    if (action === 'cheat_win') { game.opponent.pv = 0; results.logs.push({ text: "VICTOIRE INSTANTANÉE (DEV) !", color: "gold", side: "milieu" }); }
-    if (game.opponent.pv > 0) combatEngine.handleAttack(game.opponent, game.player, false, results);
+
+    if (action === 'attack') {
+        combatEngine.handleAttack(game.player, game.opponent, true, results);
+    } else if (action === 'defend') {
+        game.player.defense_bouton = 1;
+        results.logs.push({ text: "Vous vous préparez à parer la prochaine attaque !", color: "lightblue", side: "milieu" });
+    } else if (action === 'special') {
+        combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
+    } else if (action === 'use_item') {
+        combatEngine.applyItem(game, itemName, results);
+    } else if (action === 'cheat_win') {
+        game.opponent.pv = 0;
+        results.logs.push({ text: "VICTOIRE INSTANTANÉE (DEV) !", color: "gold", side: "milieu" });
+    }
+
+    if (game.opponent.pv > 0) {
+        // Logique de l'adversaire (IA) si ce n'est pas déjà fini
+        const aiAction = combatEngine.makeAIDecision(game);
+        if (aiAction === 'attack') {
+            combatEngine.handleAttack(game.opponent, game.player, false, results);
+        } else if (aiAction === 'defend') {
+            game.opponent.defense_bouton = 1;
+            results.logs.push({ text: `${game.opponent.name} se prépare à parer !`, color: "grey", side: "milieu" });
+        } else if (aiAction === 'special') {
+            combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
+        }
+    }
+
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
-        results.gameOver = true; results.winner = game.player.pv > 0 ? 'player' : 'opponent';
-        await finalizeGame(userId, game, results); games.delete(userId);
+        results.gameOver = true;
+        results.winner = game.player.pv > 0 ? 'player' : 'opponent';
+        await finalizeGame(userId, game, results);
+        games.delete(userId);
     }
     res.json({ success: true, game, results });
 });
