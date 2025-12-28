@@ -581,19 +581,39 @@ app.post('/api/passkey/register-verify', verifyToken, async (req, res) => {
             if (!input) return null;
             if (Buffer.isBuffer(input)) return input.toString('base64url');
             if (typeof input === 'string') return input; 
+            // Cas spécifique : Objet Uint8Array sérialisé ou Buffer-like
+            if (typeof input === 'object') {
+                try {
+                    // Si c'est un objet {0: x, 1: y} (Uint8Array JSONifié), on le convertit en tableau
+                    const val = Object.values(input); 
+                    return Buffer.from(val).toString('base64url');
+                } catch(e) {}
+            }
             try { return Buffer.from(input).toString('base64url'); } catch(e) { return null; }
         };
 
-        // Fallback robustes
-        let credID = safeToBase64Url(registrationInfo.credentialID);
-        if (!credID && body.id) credID = body.id; // Utilisation de l'ID client si manquant
+        // Extraction intelligente basée sur les logs
+        let rawID = registrationInfo.credentialID;
+        let rawKey = registrationInfo.credentialPublicKey;
 
-        // Recherche de la clé publique (parfois à la racine selon les versions/configs)
-        let credKey = safeToBase64Url(registrationInfo.credentialPublicKey);
+        // Support de la structure imbriquée (v13+ ou format spécifique)
+        if (!rawID && registrationInfo.credential && registrationInfo.credential.id) {
+            rawID = registrationInfo.credential.id;
+        }
+        if (!rawKey && registrationInfo.credential && registrationInfo.credential.publicKey) {
+            rawKey = registrationInfo.credential.publicKey;
+        }
+
+        let credID = safeToBase64Url(rawID);
+        // Fallback ultime sur body.id
+        if (!credID && body.id) credID = body.id;
+
+        let credKey = safeToBase64Url(rawKey);
+        // Fallback ultime sur verification
         if (!credKey && verification.credentialPublicKey) credKey = safeToBase64Url(verification.credentialPublicKey);
 
-        console.log("[PASSKEY DEBUG] Extracted ID:", credID);
-        console.log("[PASSKEY DEBUG] Extracted Key present:", !!credKey);
+        console.log("[PASSKEY DEBUG] Final ID:", credID);
+        console.log("[PASSKEY DEBUG] Final Key Length:", credKey ? credKey.length : 0);
 
         if (!credID || !credKey) {
             console.error("Erreur critique : Données manquantes.");
