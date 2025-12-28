@@ -82,13 +82,17 @@ App.login = function() {
     });
 };
 
-App.loginWithPasskey = async function() {
+App.loginWithPasskey = async function(silent = false) {
     console.log("[PASSKEY] Tentative de connexion lancée...");
     const email = document.getElementById('email').value;
-    if (!email) return alert("Veuillez saisir votre email pour utiliser votre Passkey.");
+    if (!email) {
+        if (!silent) alert("Veuillez saisir votre email pour utiliser votre Passkey.");
+        return;
+    }
 
     if (!window.isSecureContext || !navigator.credentials) {
-        return alert("Les Passkeys ne sont disponibles que via une connexion sécurisée (HTTPS ou localhost).");
+        if (!silent) alert("Les Passkeys ne sont disponibles que via une connexion sécurisée.");
+        return;
     }
 
     try {
@@ -108,7 +112,10 @@ App.loginWithPasskey = async function() {
             }));
         }
 
+        // Si silent = true, c'est l'appel auto à l'étape 2.
+        // On ne spécifie pas mediation: 'conditional' ici, on veut la modale explicite.
         const assertion = await navigator.credentials.get({ publicKey: options });
+        
         const body = {
             id: assertion.id,
             rawId: App.bufferToBase64(assertion.rawId),
@@ -134,11 +141,14 @@ App.loginWithPasskey = async function() {
             alert(`Bon retour, ${result.userData.pseudo} !`);
             loadPage('menu_principal');
         } else {
-            alert("Erreur Passkey : " + result.error);
+            if (!silent) alert("Erreur Passkey : " + result.error);
         }
     } catch (err) {
-        console.error(err);
-        alert("Erreur de connexion Passkey : " + err.message);
+        console.warn("[PASSKEY] Erreur ou Annulation:", err);
+        // On n'affiche l'alerte que si ce n'est pas une annulation volontaire et pas en mode silencieux
+        if (!silent && err.name !== 'NotAllowedError' && err.name !== 'AbortError') {
+             alert("Erreur de connexion Passkey : " + err.message);
+        }
     }
 };
 
@@ -211,9 +221,40 @@ App.showForm = function(formId) {
   document.getElementById('loginForm').classList.add('hidden');
   document.getElementById('registerForm').classList.add('hidden');
   document.getElementById(formId).classList.remove('hidden');
+  // Reset des étapes si on revient sur le login
+  if (formId === 'loginForm') App.handleBackStep();
 };
 App.showLoginForm = () => App.showForm('loginForm');
 App.showRegisterForm = () => App.showForm('registerForm');
+
+// --- GESTION DES ÉTAPES (STEPS) ---
+App.handleNextStep = function() {
+    const emailInput = document.getElementById('email');
+    if (!emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        return;
+    }
+
+    // UI Switch
+    document.getElementById('step-1').classList.add('hidden');
+    document.getElementById('step-2').classList.remove('hidden');
+    
+    // Affichage email & Focus password
+    document.getElementById('email-display').textContent = emailInput.value;
+    document.getElementById('password').focus();
+
+    // Tentative automatique de Passkey (Modal)
+    // On ne bloque pas l'utilisateur s'il n'a pas de passkey, le champ mdp est là.
+    if (window.isSecureContext && navigator.credentials) {
+        App.loginWithPasskey(true); // true = mode silencieux (pas d'alertes si échec/annulation)
+    }
+};
+
+App.handleBackStep = function() {
+    document.getElementById('step-2').classList.add('hidden');
+    document.getElementById('step-1').classList.remove('hidden');
+    document.getElementById('email').focus();
+};
 
 // --- CONDITIONAL UI (AUTOFILL PASSKEY) ---
 App.initConditionalUI = async function() {
