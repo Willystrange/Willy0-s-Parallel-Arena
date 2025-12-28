@@ -730,26 +730,42 @@ app.post('/api/passkey/login-verify', async (req, res) => {
 
     // VÉRIFICATION CRYPTOGRAPHIQUE
     try {
+        // Préparation rigoureuse des données pour simplewebauthn
         let pubKey = reconstructBuffer(foundPasskey.credentialPublicKey);
-        if (!Buffer.isBuffer(pubKey)) pubKey = Buffer.from(pubKey, 'base64'); // Fallback string
+        // Si c'est une string (Base64URL depuis la DB), on la convertit en Buffer proprement
+        if (!Buffer.isBuffer(pubKey) && typeof pubKey === 'string') {
+            pubKey = Buffer.from(pubKey, 'base64url');
+        }
 
         let credID = reconstructBuffer(foundPasskey.credentialID);
-        if (!Buffer.isBuffer(credID)) credID = Buffer.from(credID, 'base64url'); // Fallback string
+        if (!Buffer.isBuffer(credID) && typeof credID === 'string') {
+            credID = Buffer.from(credID, 'base64url');
+        }
+
+        const authenticatorObj = {
+            credentialPublicKey: pubKey,
+            credentialID: credID,
+            counter: Number(foundPasskey.counter || 0),
+        };
+
+        // DEBUG FINAL : On vérifie ce qu'on envoie à la lib
+        console.log("[PASSKEY LOGIN] Authenticator Object prepared:", {
+            hasPubKey: Buffer.isBuffer(authenticatorObj.credentialPublicKey),
+            pubKeyLen: authenticatorObj.credentialPublicKey ? authenticatorObj.credentialPublicKey.length : 0,
+            hasID: Buffer.isBuffer(authenticatorObj.credentialID),
+            counter: authenticatorObj.counter
+        });
 
         const verification = await verifyAuthenticationResponse({
             response: body,
             expectedChallenge,
             expectedOrigin: origin,
             expectedRPID: rpID,
-            authenticator: {
-                credentialPublicKey: pubKey,
-                credentialID: credID,
-                counter: foundPasskey.counter || 0, // Default to 0 if undefined
-            },
+            authenticator: authenticatorObj,
         });
 
         if (verification.verified) {
-            // Mise à jour du compteur pour prévenir les attaques par replay
+            // Mise à jour du compteur
             const u = all[userId];
             const pkIndex = u.passkeys.findIndex(pk => pk === foundPasskey);
             if (pkIndex !== -1) {
@@ -763,7 +779,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             res.status(400).json({ error: "Vérification échouée" });
         }
     } catch (error) {
-        console.error("Erreur vérification Passkey:", error);
+        console.error("Erreur vérification Passkey (Stack):", error);
         res.status(400).json({ error: error.message });
     }
 });
