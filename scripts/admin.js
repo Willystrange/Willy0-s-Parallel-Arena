@@ -126,8 +126,11 @@ App.switchTab = function(tabId) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
     
-    // Correction ici : on utilise l'ID du tab au lieu de event
-    const activeTab = Array.from(document.querySelectorAll('.nav-item')).find(el => el.innerText.toLowerCase().includes(tabId.substring(0,3)));
+    // Correction : on cherche l'élément qui appelle switchTab avec le bon ID
+    const activeTab = Array.from(document.querySelectorAll('.nav-item')).find(el => {
+        const onclick = el.getAttribute('onclick');
+        return onclick && onclick.includes(`'${tabId}'`);
+    });
     if (activeTab) activeTab.classList.add('active');
     
     const content = document.getElementById(`tab-${tabId}`);
