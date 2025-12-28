@@ -376,6 +376,80 @@ app.post('/api/character/upgrade', verifyToken, async (req, res) => {
     await saveUserData(userId, userData); res.json({ success: true, userData });
 });
 
+app.post('/api/quest/claim', verifyToken, async (req, res) => {
+    const { userId, questKey, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
+    const userData = await getUserData(userId);
+    
+    // Validate quest exists
+    if (!userData || !userData[`${questKey}_text`]) return res.status(400).json({ error: "Quête introuvable" });
+    
+    // Check if already claimed
+    if (userData[`${questKey}_rewardClaimed`]) return res.status(400).json({ error: "Déjà réclamé" });
+    
+    // Check completion
+    const current = userData[`${questKey}_current`] || 0;
+    const total = userData[`${questKey}_total`] || 1;
+    if (current < total) return res.status(400).json({ error: "Quête non terminée" });
+
+    const rewards = [];
+    
+    // --- Weekly Logic ---
+    if (questKey.startsWith('Semaine')) {
+        const xp = userData[`${questKey}_reward_xp`] || 0;
+        const boxes = userData[`${questKey}_reward_recompense`] || 0;
+        
+        if (xp > 0) {
+            updateParallelPass(userData, xp);
+            rewards.push({ name: "XP Pass", amount: xp, info: `+${xp} XP Pass` });
+        }
+        if (boxes > 0) {
+            userData.recompense = (userData.recompense || 0) + boxes;
+            rewards.push({ name: "Récompense(s)", amount: boxes, info: `+${boxes} Récompense(s) aléatoire(s)` });
+        }
+    } 
+    // --- Daily / Weekend Logic (Standard Points) ---
+    else {
+        const amount = userData[`${questKey}_reward`] || 15; // Default 15
+        userData.argent = (userData.argent || 0) + amount;
+        rewards.push({ name: "Points", amount: amount, info: `+${amount} Points` });
+    }
+
+    userData[`${questKey}_rewardClaimed`] = true;
+    userData[`${questKey}_completed`] = true; // Ensure consistency
+    
+    await saveUserData(userId, userData);
+    res.json({ success: true, userData, rewards });
+});
+
+app.post('/api/quest/claim-weekend-bonus', verifyToken, async (req, res) => {
+    const { userId, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
+    const userData = await getUserData(userId);
+
+    if (userData.weekend_bonus_claimed) return res.status(400).json({ error: "Déjà réclamé" });
+
+    // Verify all 3 quests are done
+    const allDone = ['weekend-quete1', 'weekend-quete2', 'weekend-quete3'].every(id => {
+        return (userData[`${id}_current`] || 0) >= (userData[`${id}_total`] || 1);
+    });
+
+    if (!allDone) return res.status(400).json({ error: "Quêtes non terminées" });
+
+    // Grant Rewards: 2500 XP Pass + 2 Random Chests
+    updateParallelPass(userData, 2500);
+    userData.recompense = (userData.recompense || 0) + 2;
+    userData.weekend_bonus_claimed = true;
+
+    const rewards = [
+        { name: "XP Pass", amount: 2500, info: "+2500 XP Pass" },
+        { name: "Récompenses", amount: 2, info: "+2 Récompenses aléatoires" }
+    ];
+
+    await saveUserData(userId, userData);
+    res.json({ success: true, userData, rewards });
+});
+
 // --- COMBAT ACTIONS ---
 const games = new Map();
 app.post('/api/combat/start', verifyToken, async (req, res) => {
