@@ -108,20 +108,28 @@ App.saveUserDataToFirebase = async function(userId, extraData = {}) {
   }
 };
 
-App.loadUserDataFromFirebase = async function(userId) {
-  const user = firebase.auth().currentUser;
-  if (!user) return;
+App.loadUserDataFromFirebase = async function(userId, currentUser = null) {
+  const user = currentUser || firebase.auth().currentUser;
+  if (!user) {
+      console.error("[LoadUserData] No user found.");
+      return false;
+  }
   try {
       const token = await user.getIdToken();
       const response = await fetch(`/api/user/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (!response.ok) throw new Error("Network response was not ok");
+      
       const data = await response.json();
       if (data.success && data.userData) {
           localStorage.setItem('userData', JSON.stringify(data.userData));
+          return true;
       }
+      return false;
   } catch (e) {
       console.error('Erreur chargement serveur local:', e);
+      return false;
   }
 };
 
@@ -721,7 +729,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof firebase !== 'undefined' && firebase.auth) {
            firebase.auth().onAuthStateChanged(user => {
                if (user && user.uid === userId) {
-                   App.loadUserDataFromFirebase(userId);
+                   App.loadUserDataFromFirebase(userId, user);
                }
            });
         }

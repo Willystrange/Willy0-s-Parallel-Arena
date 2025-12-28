@@ -16,7 +16,16 @@ App.login = function() {
   App.auth.signInWithEmailAndPassword(email, password)
     .then(async (userCredential) => {
       const user = userCredential.user;
-      await App.loadUserDataFromFirebase(user.uid);
+      const loaded = await App.loadUserDataFromFirebase(user.uid, user);
+      
+      if (!loaded) {
+          // Sécurité : Si le chargement échoue, on ne sauvegarde PAS par dessus.
+          // On vérifie si c'est vraiment une erreur ou juste un compte vide.
+          // Pour l'instant, on bloque pour éviter la perte de données.
+          alert("Erreur : Impossible de charger votre sauvegarde. Veuillez réessayer.");
+          return;
+      }
+
       // Lier l'email au compte serveur pour les passkeys
       await App.saveUserDataToFirebase(user.uid, { email: user.email });
       App.saveConnectionState(user.uid, true);
