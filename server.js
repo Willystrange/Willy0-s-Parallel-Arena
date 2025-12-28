@@ -733,9 +733,13 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             credID = Buffer.from(credID, 'base64url');
         }
 
-        const credentialObj = {
+        // Stratégie "Shotgun" : On couvre toutes les conventions de nommage possibles
+        // pour s'assurer que la lib trouve les propriétés, peu importe sa version.
+        const dbAuth = {
             credentialPublicKey: new Uint8Array(pubKey),
+            publicKey: new Uint8Array(pubKey), // Alias
             credentialID: credID,
+            id: credID, // Alias
             counter: Number(foundPasskey.counter || 0),
         };
 
@@ -744,7 +748,8 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             expectedChallenge,
             expectedOrigin: origin,
             expectedRPID: rpID,
-            credential: credentialObj, // Correction : 'credential' au lieu de 'authenticator'
+            credential: dbAuth,     // Pour v10+
+            authenticator: dbAuth,  // Pour versions antérieures (fallback)
         });
 
         if (verification.verified) {
