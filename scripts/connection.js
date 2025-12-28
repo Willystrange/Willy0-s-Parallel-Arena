@@ -104,6 +104,9 @@ App.loginWithPasskey = async function(silent = false) {
         const options = await optionsRes.json();
         if (options.error) throw new Error(options.error);
 
+        // Récupération de l'ID temporaire pour la validation
+        const tempId = options.tempId;
+
         options.challenge = App.base64ToBuffer(options.challenge);
         if (options.allowCredentials) {
             options.allowCredentials = options.allowCredentials.map(c => ({
@@ -131,7 +134,7 @@ App.loginWithPasskey = async function(silent = false) {
         const verifyRes = await fetch('/api/passkey/login-verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, body })
+            body: JSON.stringify({ email, body, tempId }) // Ajout de tempId
         });
         const result = await verifyRes.json();
 
