@@ -3,14 +3,13 @@
     <h1>Connexion</h1>
     <div class="input-group">
       <label for="email">Email:</label>
-      <input type="email" id="email" name="username" autocomplete="username webauthn" required autofocus placeholder="Email (Clique pour Passkey)">
+      <input type="email" id="email" name="username" autocomplete="username webauthn" required placeholder="Email ou Passkey">
     </div>
     <div class="input-group">
       <label for="password">Mot de passe:</label>
       <input type="password" id="password" autocomplete="current-password" required>
     </div>
     <button type="submit">Se connecter</button>
-    <button type="button" onclick="App.loginWithPasskey()" style="background: #2ecc71;">Connexion par Passkey</button>
     <button type="button" onclick="App.showRegisterForm()">Créer un compte</button>
     <button type="button" onclick="App.googleSignIn()">Connexion avec Google</button>
   </form>
