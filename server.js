@@ -581,16 +581,26 @@ app.post('/api/passkey/register-verify', verifyToken, async (req, res) => {
             if (!input) return null;
             if (Buffer.isBuffer(input)) return input.toString('base64url');
             if (typeof input === 'string') return input; 
-            // Tentative de conversion générique (Array, etc.)
             try { return Buffer.from(input).toString('base64url'); } catch(e) { return null; }
         };
 
-        const credID = safeToBase64Url(registrationInfo.credentialID);
-        const credKey = safeToBase64Url(registrationInfo.credentialPublicKey);
+        // Fallback robustes
+        let credID = safeToBase64Url(registrationInfo.credentialID);
+        if (!credID && body.id) credID = body.id; // Utilisation de l'ID client si manquant
+
+        // Recherche de la clé publique (parfois à la racine selon les versions/configs)
+        let credKey = safeToBase64Url(registrationInfo.credentialPublicKey);
+        if (!credKey && verification.credentialPublicKey) credKey = safeToBase64Url(verification.credentialPublicKey);
+
+        console.log("[PASSKEY DEBUG] Extracted ID:", credID);
+        console.log("[PASSKEY DEBUG] Extracted Key present:", !!credKey);
 
         if (!credID || !credKey) {
-            console.error("Erreur critique : Credential ID ou Public Key manquant après vérification.");
-            return res.status(400).json({ error: "Données de Passkey invalides" });
+            console.error("Erreur critique : Données manquantes.");
+            console.log("Full Verification Object:", JSON.stringify(verification, null, 2)); // DEBUG FINAL
+            return res.status(400).json({ 
+                error: `Données incomplètes: ${!credID ? 'ID' : ''} ${!credKey ? 'PublicKey' : ''}`.trim() 
+            });
         }
 
         // CORRECTION CRITIQUE : On sauvegarde en String Base64URL pour éviter la corruption JSON/Buffer
