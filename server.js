@@ -511,13 +511,26 @@ app.post('/api/passkey/register-options', verifyToken, async (req, res) => {
     if (!userData) return res.status(404).json({ error: "Utilisateur inconnu" });
     
     const rpID = req.headers.host.split(':')[0];
+    
+    // Helper pour nettoyer les IDs (gestion du bug JSON.stringify sur les Buffers)
+    const cleanID = (id) => {
+        if (!id) return id;
+        if (typeof id === 'string') return id;
+        if (Buffer.isBuffer(id)) return id.toString('base64url');
+        if (id.type === 'Buffer' && Array.isArray(id.data)) return Buffer.from(id.data).toString('base64url');
+        return id;
+    };
+
     const options = await generateRegistrationOptions({
         rpName: 'Parallel Arena',
         rpID,
         userID: Buffer.from(req.uid, 'utf-8'),
         userName: userData.pseudo || userData.email || 'User',
         attestationType: 'none',
-        excludeCredentials: (userData.passkeys || []).map(pk => ({ id: pk.credentialID, type: 'public-key' })),
+        excludeCredentials: (userData.passkeys || []).map(pk => ({ 
+            id: cleanID(pk.credentialID), 
+            type: 'public-key' 
+        })),
         authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred', authenticatorAttachment: 'platform' },
     });
     
@@ -583,6 +596,21 @@ app.post('/api/passkey/login-verify', async (req, res) => {
 
     const all = await loadAllUsersData();
     
+    // Helper pour reconstruire les Buffers corrompus par JSON.stringify
+    const reconstructBuffer = (obj) => {
+        if (!obj) return obj;
+        if (Buffer.isBuffer(obj)) return obj;
+        if (obj.type === 'Buffer' && Array.isArray(obj.data)) return Buffer.from(obj.data);
+        if (typeof obj === 'string') return obj; // Base64 probablement
+        return obj;
+    };
+
+    const toBase64Url = (obj) => {
+        const buf = reconstructBuffer(obj);
+        if (Buffer.isBuffer(buf)) return buf.toString('base64url');
+        return buf;
+    };
+
     // Recherche de l'utilisateur et de la passkey correspondante
     let userId = null;
     let foundPasskey = null;
@@ -594,9 +622,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             const u = all[uid];
             if (u.passkeys) {
                 foundPasskey = u.passkeys.find(pk => {
-                    // Conversion robuste Buffer/String pour comparaison
-                    const storedId = Buffer.isBuffer(pk.credentialID) ? pk.credentialID.toString('base64url') : pk.credentialID;
-                    return storedId === body.id;
+                    return toBase64Url(pk.credentialID) === body.id;
                 });
                 if (foundPasskey) userId = uid;
             }
@@ -609,8 +635,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             const u = all[uid];
             if (!u.passkeys) return false;
             const pk = u.passkeys.find(k => {
-                const storedId = Buffer.isBuffer(k.credentialID) ? k.credentialID.toString('base64url') : k.credentialID;
-                return storedId === body.id;
+                return toBase64Url(k.credentialID) === body.id;
             });
             if (pk) {
                 foundPasskey = pk;
@@ -626,10 +651,11 @@ app.post('/api/passkey/login-verify', async (req, res) => {
 
     // VÉRIFICATION CRYPTOGRAPHIQUE
     try {
-        // S'assurer que la clé publique est un Buffer pour la vérif
-        const pubKey = Buffer.isBuffer(foundPasskey.credentialPublicKey) 
-            ? foundPasskey.credentialPublicKey 
-            : Buffer.from(foundPasskey.credentialPublicKey, 'base64');
+        let pubKey = reconstructBuffer(foundPasskey.credentialPublicKey);
+        if (!Buffer.isBuffer(pubKey)) pubKey = Buffer.from(pubKey, 'base64'); // Fallback string
+
+        let credID = reconstructBuffer(foundPasskey.credentialID);
+        if (!Buffer.isBuffer(credID)) credID = Buffer.from(credID, 'base64url'); // Fallback string
 
         const verification = await verifyAuthenticationResponse({
             response: body,
@@ -638,7 +664,7 @@ app.post('/api/passkey/login-verify', async (req, res) => {
             expectedRPID: rpID,
             authenticator: {
                 credentialPublicKey: pubKey,
-                credentialID: Buffer.isBuffer(foundPasskey.credentialID) ? foundPasskey.credentialID : Buffer.from(foundPasskey.credentialID, 'base64url'),
+                credentialID: credID,
                 counter: foundPasskey.counter,
             },
         });
