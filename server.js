@@ -666,6 +666,9 @@ app.post('/api/passkey/login-verify', async (req, res) => {
         if (Buffer.isBuffer(obj)) return obj;
         if (obj.type === 'Buffer' && Array.isArray(obj.data)) return Buffer.from(obj.data);
         if (typeof obj === 'string') return obj; // Base64 probablement
+        if (typeof obj === 'object') {
+            try { return Buffer.from(Object.values(obj)); } catch(e) {}
+        }
         return obj;
     };
 
