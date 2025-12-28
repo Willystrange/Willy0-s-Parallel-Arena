@@ -8,6 +8,53 @@ if (App.firebaseConfig && !firebase.apps.length) {
 }
 App.auth = firebase.auth();
 
+// --- POLYFILLS ANTI-CACHE (Si app.js est vieux) ---
+if (!App.saveConnectionState) {
+    App.saveConnectionState = function(userId, est_connecte) {
+      localStorage.setItem('connection', JSON.stringify({ userid: userId, est_connecte }));
+    };
+}
+
+if (!App.loadUserDataFromFirebase) {
+    App.loadUserDataFromFirebase = async function(userId, currentUser = null) {
+      const user = currentUser || firebase.auth().currentUser;
+      if (!user) { console.error("[Load] No user"); return false; }
+      try {
+          const token = await user.getIdToken();
+          const response = await fetch(`/api/user/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+          if (!response.ok) throw new Error("Network error");
+          const data = await response.json();
+          if (data.success && data.userData) {
+              localStorage.setItem('userData', JSON.stringify(data.userData));
+              return true;
+          }
+          return false;
+      } catch (e) { console.error(e); return false; }
+    };
+}
+
+if (!App.saveUserDataToFirebase) {
+    App.saveUserDataToFirebase = async function(userId, extraData = {}) {
+      const userData = (typeof getUserData === 'function') ? getUserData() : (JSON.parse(localStorage.getItem('userData')) || {});
+      Object.assign(userData, extraData);
+      const user = firebase.auth().currentUser;
+      if (!user) return { success: false, error: "Non connecté" };
+      try {
+          const token = await user.getIdToken();
+          const response = await fetch(`/api/user/${userId}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ userData })
+          });
+          const data = await response.json();
+          if (data.success && data.userData) {
+              localStorage.setItem('userData', JSON.stringify(data.userData));
+              return { success: true };
+          } else { return { success: false, error: data.error }; }
+      } catch (e) { return { success: false, error: e.message }; }
+    };
+}
+
 // --- Gestion de l'authentification ---
 App.login = function() {
   const email = document.getElementById('email').value;
