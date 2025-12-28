@@ -94,49 +94,168 @@ async function verifyAdmin(req, res, next) {
 }
 
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }));
+app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
 // --- DATA ---
 const PORT = process.env.PORT || 3000;
-const SURVIVAL_OPPONENTS_FILE = path.join(__dirname, 'data', 'survival_opponents.json');
-function loadJSONData(path, def) { if (!fs.existsSync(path)) return def; try { return JSON.parse(fs.readFileSync(path, 'utf8')); } catch (e) { return def; } }
-const OPPONENT_STATS_RANGES = loadJSONData(SURVIVAL_OPPONENTS_FILE, {});
+function loadJSONData(p, def) { if (!fs.existsSync(p)) return def; try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return def; } }
+const TROPHY_ROAD = loadJSONData(path.join(__dirname, 'data', 'trophy_road.json'), []);
+const PASS_REWARDS = loadJSONData(path.join(__dirname, 'data', 'pass_rewards.json'), { free: [], premium: [] });
+const OPPONENT_STATS_RANGES = loadJSONData(path.join(__dirname, 'data', 'survival_opponents.json'), {});
+const EQUIPMENTS_DATA = loadJSONData(path.join(__dirname, 'data', 'equipments.json'), []);
 
-// --- ROUTES PUBLIQUES ---
-app.get('/api/config/maintenance', async (req, res) => {
-    res.json(await loadServerConfig());
-});
+// --- HELPERS ---
+function getParisCycleId(type) {
+    const now = new Date();
+    const options = { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(now);
+    const get = (t) => parseInt(parts.find(p => p.type === t).value, 10);
+    const parisWallTime = new Date(Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second')));
+    parisWallTime.setUTCHours(parisWallTime.getUTCHours() - 9);
+    if (type === 'daily') return parisWallTime.toISOString().split('T')[0];
+    const day = parisWallTime.getUTCDay();
+    parisWallTime.setUTCDate(parisWallTime.getUTCDate() - ((day - 4 + 7) % 7));
+    return parisWallTime.toISOString().split('T')[0];
+}
 
+function updateParallelPass(userData, gainXP) {
+    if (gainXP > 0) userData.pass_XP = (userData.pass_XP || 0) + gainXP;
+    const calcNext = (lvl) => Math.round((50 + (lvl * 20)) * 1.1);
+    while ((userData.pass_XP || 0) >= calcNext(userData.pass_level || 0)) {
+        userData.pass_XP -= calcNext(userData.pass_level || 0);
+        userData.pass_level = (userData.pass_level || 0) + 1;
+    }
+}
+
+// --- CORE ROUTES ---
+app.get('/api/config/maintenance', async (req, res) => res.json(await loadServerConfig()));
 app.get('/api/news', async (req, res) => {
     const doc = await db.collection('settings').doc('news').get();
     res.json(doc.exists ? doc.data().items : []);
 });
-
 app.get('/api/check-pseudo/:pseudo', async (req, res) => {
-    const snapshot = await db.collection('users').where('pseudo_lower', '==', req.params.pseudo.trim().toLowerCase()).get();
-    res.json({ available: snapshot.empty });
+    const snap = await db.collection('users').where('pseudo_lower', '==', req.params.pseudo.trim().toLowerCase()).get();
+    res.json({ available: snap.empty });
 });
 
-// --- ROUTES UTILISATEURS ---
-app.get('/api/user/:userId', verifyToken, async (req, res) => {
-    const data = await getUserData(req.params.userId);
-    res.json({ success: true, userData: data });
-});
+app.get('/api/user/:userId', verifyToken, async (req, res) => res.json({ success: true, userData: await getUserData(req.params.userId) }));
 
 app.post('/api/user/:userId', verifyToken, async (req, res) => {
-    const current = await getUserData(req.params.userId) || {};
+    const userId = req.params.userId;
     const newData = req.body.userData;
-    const ALLOWED = ['pseudo', 'settings', 'musicAllowed', 'autoplayEnabled', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'quetes_jour', 'quetes_weekend', 'equipments'];
+    const current = await getUserData(userId) || {};
+    const ALLOWED = ['pseudo', 'settings', 'musicAllowed', 'autoplayEnabled', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'quetes_jour', 'quetes_weekend', 'equipments', 'tutorial_menu_principal_completed', 'lastLoginDay'];
     ALLOWED.forEach(k => { if (newData[k] !== undefined) current[k] = newData[k]; });
-    Object.keys(newData).forEach(k => { if (k.startsWith('quete') || k.startsWith('Semaine')) current[k] = newData[k]; });
-    await saveUserData(req.params.userId, current);
+    Object.keys(newData).forEach(k => { if (k.startsWith('quete') || k.startsWith('Semaine') || k.startsWith('weekend-quete')) current[k] = newData[k]; });
+    await saveUserData(userId, current);
     res.json({ success: true, userData: current });
 });
 
-// --- PASSKEY LOGIQUE ---
-const challenges = new Map();
+// --- SHOP & CLAIMS ---
+const ITEM_MAP = { xp: 'Double_XP_acheté', potion: 'Potion_de_Santé_acheté', epee: 'epee_tranchante_acheté', elixir: 'elixir_puissance_acheté', armure: 'armure_fer_acheté', bouclier: 'bouclier_solide_acheté', cape: 'Cape_acheté', crystal: 'crystal_acheté', marque_chasseur: 'marque_chasseur_acheté', purge_spirituelle: 'purge_spirituelle_acheté', orbe_siphon: 'orbe_siphon_acheté' };
+
+app.post('/api/shop/buy', verifyToken, async (req, res) => {
+    const { userId, type, itemId, price, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
+    const userData = await getUserData(userId);
+    if (!userData || (userData.argent || 0) < price) return res.status(400).json({ error: "Fonds insuffisants" });
+    userData.argent -= price;
+    if (type === 'equipment') { if (!userData.equipments) userData.equipments = []; userData.equipments.push(itemId); }
+    else { const prop = ITEM_MAP[type]; if (prop) userData[prop] = (userData[prop] || 0) + (req.body.quantity || 1); }
+    await saveUserData(userId, userData);
+    res.json({ success: true, userData });
+});
+
+app.post('/api/shop/claim-daily', verifyToken, async (req, res) => {
+    const { userId, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
+    const userData = await getUserData(userId);
+    const cycleId = getParisCycleId('daily');
+    if (userData.daily_reward_claim_id === cycleId) return res.status(400).json({ error: "Déjà récupéré" });
+    userData.recompense = (userData.recompense || 0) + 1;
+    userData.daily_reward_claim_id = cycleId;
+    await saveUserData(userId, userData);
+    res.json({ success: true, userData });
+});
+
+app.post('/api/quest/claim', verifyToken, async (req, res) => {
+    const { userId, questKey, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Bot" });
+    const userData = await getUserData(userId);
+    if (userData[`${questKey}_rewardClaimed`]) return res.status(400).json({ error: "Déjà fait" });
+    userData.argent = (userData.argent || 0) + 15;
+    userData[`${questKey}_rewardClaimed`] = true;
+    userData[`${questKey}_completed`] = true;
+    await saveUserData(userId, userData);
+    res.json({ success: true, userData });
+});
+
+app.post('/api/character/upgrade', verifyToken, async (req, res) => {
+    const { userId, characterName, action, stats, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Bot" });
+    const userData = await getUserData(userId);
+    if (action === 'levelup') {
+        const lvl = userData[characterName + '_Level'] || 1;
+        const cost = lvl * 25;
+        if (userData.argent < cost) return res.status(400).json({ error: "Points insuffisants" });
+        userData.argent -= cost;
+        userData[characterName + '_Level'] = lvl + 1;
+        userData[characterName + '_pts'] = (userData[characterName + '_pts'] || 0) + 4;
+    } else if (action === 'stats') {
+        userData[characterName + '_PV_pts'] = (userData[characterName + '_PV_pts'] || 0) + (stats.PV || 0);
+        userData[characterName + '_attaque_pts'] = (userData[characterName + '_attaque_pts'] || 0) + (stats.attaque || 0);
+        userData[characterName + '_defense_pts'] = (userData[characterName + '_defense_pts'] || 0) + (stats.defense || 0);
+        userData[characterName + '_pts'] -= ((stats.PV || 0) + (stats.attaque || 0) + (stats.defense || 0));
+    }
+    await saveUserData(userId, userData);
+    res.json({ success: true, userData });
+});
+
+// --- COMBAT & AI ---
+const games = new Map();
+app.post('/api/combat/start', verifyToken, async (req, res) => {
+    const { userId, gameMode, playerCharacter, opponentCharacter, recaptchaToken } = req.body;
+    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Bot" });
+    const game = { userId, gameMode, player: playerCharacter, opponent: opponentCharacter, wave: gameMode === 'survie' ? 1 : 0, startTime: Date.now(), lastActionTime: Date.now(), turn: 1 };
+    if (gameMode === 'survie') game.opponent = generateSurvivalOpponent(1);
+    game.opponent.next_choice = combatEngine.makeAIDecision(game);
+    games.set(userId, game);
+    res.json({ success: true, gameState: game });
+});
+
+app.post('/api/combat/action', verifyToken, async (req, res) => {
+    const { userId, action } = req.body;
+    const game = games.get(userId);
+    if (!game) return res.status(404).json({ error: "Partie perdue" });
+    const results = { gameOver: false, logs: [] };
+    if (action === 'attack') combatEngine.handleAttack(game.player, game.opponent, true, results);
+    else if (action === 'special') combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
+    else if (action === 'defend') { game.player.defense_bouton = 1; game.player.defense_droit = 4; }
+
+    if (!results.gameOver && game.opponent.pv > 0) {
+        if (game.opponent.next_choice === 'attack') combatEngine.handleAttack(game.opponent, game.player, false, results);
+        else if (game.opponent.next_choice === 'special') combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
+        game.opponent.next_choice = combatEngine.makeAIDecision(game);
+    }
+
+    if (game.player.pv <= 0 || game.opponent.pv <= 0) {
+        results.gameOver = true;
+        results.winner = game.player.pv > 0 ? 'player' : 'opponent';
+        const userData = await getUserData(userId);
+        if (userData) {
+            userData.argent = (userData.argent || 0) + (results.winner === 'player' ? 20 : 5);
+            userData.trophees = Math.max(0, (userData.trophees || 0) + (results.winner === 'player' ? 10 : -5));
+            updateParallelPass(userData, results.winner === 'player' ? 50 : 10);
+            await saveUserData(userId, userData);
+        }
+        games.delete(userId);
+    }
+    res.json({ success: true, game, results });
+});
+
+// --- PASSKEYS ---
 app.post('/api/passkey/login-options', async (req, res) => {
     const { email } = req.body;
     const rpID = req.headers.host.split(':')[0];
@@ -147,7 +266,7 @@ app.post('/api/passkey/login-options', async (req, res) => {
         return res.json({ ...options, tempId });
     }
     const snap = await db.collection('users').where('email_lower', '==', email.toLowerCase().trim()).limit(1).get();
-    if (snap.empty) return res.status(404).json({ error: "Compte inconnu" });
+    if (snap.empty) return res.status(404).json({ error: "Inconnu" });
     const user = snap.docs[0].data();
     const options = await generateAuthenticationOptions({
         rpID, allowCredentials: user.passkeys.map(pk => ({ id: pk.credentialID, type: 'public-key', transports: pk.transports })),
@@ -157,58 +276,48 @@ app.post('/api/passkey/login-options', async (req, res) => {
     res.json(options);
 });
 
-// (Note: Les autres routes Passkey, Shop, Combat ont été simplifiées pour la compatibilité Firebase)
-// Elles utilisent maintenant await getUserData() et await saveUserData()
-
-// --- COMBAT ---
-const games = new Map();
-app.post('/api/combat/start', verifyToken, async (req, res) => {
-    const { userId, gameMode, playerCharacter, opponentCharacter, recaptchaToken } = req.body;
-    if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const game = { userId, gameMode, player: playerCharacter, opponent: opponentCharacter, wave: gameMode === 'survie' ? 1 : 0, startTime: Date.now(), lastActionTime: Date.now() };
-    if (gameMode === 'survie') game.opponent = generateSurvivalOpponent(1);
-    game.opponent.next_choice = combatEngine.makeAIDecision(game);
-    games.set(userId, game);
-    res.json({ success: true, gameState: game });
-});
-
-app.post('/api/combat/action', verifyToken, async (req, res) => {
-    const { userId, action } = req.body;
-    const game = games.get(userId);
-    if (!game) return res.status(404).json({ error: "Partie introuvable" });
-    const results = { gameOver: false, logs: [] };
-    if (action === 'attack') combatEngine.handleAttack(game.player, game.opponent, true, results);
-    else if (action === 'special') combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
-    
-    if (!results.gameOver) {
-        if (game.opponent.next_choice === 'attack') combatEngine.handleAttack(game.opponent, game.player, false, results);
-        game.opponent.next_choice = combatEngine.makeAIDecision(game);
+app.post('/api/passkey/login-verify', async (req, res) => {
+    const { email, body, tempId } = req.body;
+    const { rpID, origin } = { rpID: req.headers.host.split(':')[0], origin: `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}` };
+    let userId = null, challengeKey = null;
+    if (email) {
+        const snap = await db.collection('users').where('email_lower', '==', email.toLowerCase().trim()).limit(1).get();
+        if (!snap.empty) { userId = snap.docs[0].id; challengeKey = `auth_${email.toLowerCase().trim()}`; }
+    } else if (tempId) {
+        challengeKey = `auth_pending_${tempId}`;
+        const all = await db.collection('users').get(); // Simplified for now
+        all.forEach(doc => { if (doc.data().passkeys && doc.data().passkeys.some(pk => pk.credentialID === body.id)) userId = doc.id; });
     }
-
-    if (game.player.pv <= 0 || game.opponent.pv <= 0) {
-        results.gameOver = true;
-        results.winner = game.player.pv > 0 ? 'player' : 'opponent';
-        // Logic de fin de partie et sauvegarde Firebase
-        const userData = await getUserData(userId);
-        if (userData) {
-            userData.argent = (userData.argent || 0) + (results.winner === 'player' ? 20 : 5);
-            await saveUserData(userId, userData);
-        }
-        games.delete(userId);
-    }
-    res.json({ success: true, game, results });
+    const expectedChallenge = challenges.get(challengeKey);
+    if (!userId || !expectedChallenge) return res.status(400).json({ error: "Session expirée" });
+    const userData = await getUserData(userId);
+    const passkey = userData.passkeys.find(pk => pk.credentialID === body.id);
+    const verification = await verifyAuthenticationResponse({
+        response: body, expectedChallenge, expectedOrigin: origin, expectedRPID: rpID,
+        credential: { id: Buffer.from(passkey.credentialID, 'base64url'), publicKey: Buffer.from(passkey.publicKey, 'base64'), counter: passkey.counter || 0, transports: passkey.transports },
+    });
+    if (verification.verified) {
+        passkey.counter = verification.authenticationInfo.newCounter;
+        await saveUserData(userId, userData);
+        challenges.delete(challengeKey);
+        res.json({ success: true, userId, userData });
+    } else res.status(400).json({ error: "Échec" });
 });
 
 // --- ADMIN ---
+app.get('/api/admin/users', verifyToken, verifyAdmin, async (req, res) => {
+    const snap = await db.collection('users').limit(50).get();
+    const users = []; snap.forEach(doc => users.push({ uid: doc.id, ...doc.data() }));
+    res.json({ success: true, users });
+});
+
 app.post('/api/admin/maintenance', verifyToken, verifyAdmin, async (req, res) => {
     await db.collection('settings').doc('config').set(req.body);
     res.json({ success: true });
 });
 
 // --- START ---
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Serveur Willy0 Arena prêt sur le port ${PORT}`);
-});
+server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Willy0 Arena LIVE sur le port ${PORT}`));
 
 function generateSurvivalOpponent(wave) {
     const names = Object.keys(OPPONENT_STATS_RANGES);
