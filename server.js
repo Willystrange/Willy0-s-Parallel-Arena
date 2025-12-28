@@ -527,10 +527,12 @@ app.post('/api/passkey/register-options', verifyToken, async (req, res) => {
         userID: Buffer.from(req.uid, 'utf-8'),
         userName: userData.pseudo || userData.email || 'User',
         attestationType: 'none',
-        excludeCredentials: (userData.passkeys || []).map(pk => ({ 
-            id: cleanID(pk.credentialID), 
-            type: 'public-key' 
-        })),
+        excludeCredentials: (userData.passkeys || [])
+            .map(pk => ({ 
+                id: cleanID(pk.credentialID), 
+                type: 'public-key' 
+            }))
+            .filter(c => c.id), // Filtre les IDs invalides ou manquants
         authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred', authenticatorAttachment: 'platform' },
     });
     
