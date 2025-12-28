@@ -119,11 +119,12 @@ async function openNextBox() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
+    const recaptchaToken = await App.getRecaptchaToken('lootbox_open');
     const token = await user.getIdToken();
     const res = await fetch('/api/lootbox/open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ userId: user.uid, boxType })
+        body: JSON.stringify({ userId: user.uid, boxType, recaptchaToken })
     });
     const data = await res.json();
 
