@@ -1,42 +1,31 @@
 // Créer ou récupérer le namespace App
 window.App = window.App || {};
 
+App.game_version = 'B2.2.1.20';
+var game_version = App.game_version;
+
 sessionStorage.setItem("lastPage", 'menu_principal');
 
-// --- Connexion au serveur de jeu via Socket.IO ---
-App.connectToGameServer = function(userId) {
-  // Remplacez <IP_DU_PI> par l’IP du Raspberry (ex. 192.168.1.115)
-  App.socket = io("https://1ea7-2a01-cb08-814b-6100-aa42-50a6-fb21-9441.ngrok-free.app", {
-    transports: ["websocket"],
-  });
-
-  App.socket.on('connect', () => {
-    App.socket.emit('register', { userId: userId });
-
-    App.socket.emit('ping_test', { message: 'salut serveur' });
-  });
-
-  App.socket.on('register_success', data => {
-  });
-
-  App.socket.on('register_error', data => {
-  });
-
-  App.socket.on('pong_test', data => {
-  });
-
-  App.socket.on('disconnect', reason => {
-  });
-
-  App.socket.on('connect_error', err => {
-  });
-};
-
 // --- Gestion des données utilisateurs ---
-firebase.auth().onAuthStateChanged(user => {
+if (window.firebaseConfig && !firebase.apps.length) {
+    firebase.initializeApp(window.firebaseConfig);
+}
+
+firebase.auth().onAuthStateChanged(async user => {
   if (user) {
     App.User = true;
     App.userId = user.uid;
+    const token = await user.getIdToken();
+    
+    // Chargement initial depuis le serveur local
+    const response = await fetch(`/api/user/${user.uid}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (data.success && data.userData) {
+        localStorage.setItem('userData', JSON.stringify(data.userData));
+    }
+
     let currentUserData = getUserData();
     saveUserData(currentUserData);
     //App.connectToGameServer(App.userId);
@@ -93,6 +82,62 @@ App.updateStats = function() {
   }
 
   App.updateTrophyProgress();
+  App.claimAvailableTrophyRewards();
+};
+
+App.isClaimingTrophy = false;
+
+App.claimAvailableTrophyRewards = function() {
+    if (App.isClaimingTrophy) return; // Empêcher les appels multiples
+    
+    const userData = getUserData();
+    const trophies = userData.trophees || 0;
+    const rewards = App.getTrophyRoadRewards();
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    // Trouver la première récompense disponible non récupérée
+    const rewardToClaim = rewards.find(r => trophies >= r.trophies && !userData[`trophy_claimed_${r.trophies}`]);
+
+    if (rewardToClaim) {
+        const milestone = rewardToClaim.trophies;
+        console.log(`[TROPHY] Tentative de réclamation du palier ${milestone}`);
+        App.isClaimingTrophy = true;
+        
+        App.getRecaptchaToken('trophy_claim').then(recaptchaToken => {
+            user.getIdToken().then(token => {
+                fetch('/api/trophy/claim', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ userId: user.uid, milestone: milestone, recaptchaToken: recaptchaToken })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    App.isClaimingTrophy = false;
+                    if (data.success) {
+                        localStorage.setItem('userData', JSON.stringify(data.userData));
+                        console.log(`Récompense ${milestone} récupérée !`);
+                        
+                        if (data.extra && data.extra.openBox) {
+                            let boxes = JSON.parse(sessionStorage.getItem('boxesToOpen')) || [];
+                            boxes.push(data.extra.openBox);
+                            sessionStorage.setItem('boxesToOpen', JSON.stringify(boxes));
+                            window.location.href = 'ouverture_coffre.html';
+                        } else {
+                            App.updateStats(); // Re-vérifier s'il y en a d'autres
+                        }
+                    } else {
+                        console.error("Erreur claim:", data.error);
+                        // Optionnel: marquer comme échoué temporairement pour éviter de boucler
+                    }
+                })
+                .catch(err => {
+                    App.isClaimingTrophy = false;
+                    console.error(err);
+                });
+            });
+        });
+    }
 };
 
 // À placer en début de fichier, au même niveau que les autres App.xxx
@@ -107,8 +152,10 @@ App.isWeekendPeriod = function() {
   const day = paris.getDay();    // 6 = samedi, 0 = dimanche, 1 = lundi
   const hour = paris.getHours();
 
-  // Samedi à partir de 09h00
-  if (day === 6 && hour >= 9) return true;
+  // Vendredi à partir de 09h00
+  if (day === 5 && hour >= 9) return true;
+  // Samedi complet
+  if (day === 6) return true;
   // Tout le dimanche
   if (day === 0) return true;
   // Lundi jusqu'à 09h00
@@ -118,46 +165,173 @@ App.isWeekendPeriod = function() {
 };
 
 
+App.getTrophyRoadRewards = function() {
+    // Define the initial, handcrafted part of the trophy road
+    return [
+        { trophies: 10, rewards: [{ type: 'coins', amount: 20 }] },
+        { trophies: 20, rewards: [{ type: 'item', id: 'potion', amount: 1 }] },
+        { trophies: 30, rewards: [{ type: 'random' }] },
+        { trophies: 40, rewards: [{ type: 'item', id: 'epee', amount: 1 }] },
+        { trophies: 50, rewards: [{ type: 'random' }] },
+        { trophies: 65, rewards: [{ type: 'item', id: 'bouclier', amount: 1 }] },
+        { trophies: 80, rewards: [{ type: 'coins', amount: 75 }] },
+        { trophies: 100, rewards: [{ type: 'random_character' }] },
+        { trophies: 120, rewards: [{ type: 'coins', amount: 100 }] },
+        { trophies: 140, rewards: [{ type: 'item', id: 'elixir', amount: 1 }] },
+        { trophies: 160, rewards: [{ type: 'random' }] },
+        { trophies: 180, rewards: [{ type: 'item', id: 'amulette', amount: 1 }] },
+        { trophies: 200, rewards: [{ type: 'coins', amount: 150 }] },
+        { trophies: 225, rewards: [{ type: 'chest', chestType: 'Attaque' }] },
+        { trophies: 250, rewards: [{ type: 'random' }] },
+        { trophies: 275, rewards: [{ type: 'item', id: 'crystal', amount: 1 }] },
+        { trophies: 300, rewards: [{ type: 'coins', amount: 200 }, { type: 'random_character' }] },
+        { trophies: 330, rewards: [{ type: 'random' }] },
+        { trophies: 360, rewards: [{ type: 'chest', chestType: 'Défense' }] },
+        { trophies: 390, rewards: [{ type: 'coins', amount: 250 }] },
+        { trophies: 420, rewards: [{ type: 'item', id: 'armure', amount: 1 }] },
+        { trophies: 450, rewards: [{ type: 'coins', amount: 300 }] },
+        { trophies: 480, rewards: [{ type: 'item', id: 'cape', amount: 1 }] },
+        { trophies: 510, rewards: [{ type: 'random' }] },
+        { trophies: 540, rewards: [{ type: 'chest', chestType: 'Equilibre' }] },
+        { trophies: 570, rewards: [{ type: 'coins', amount: 400 }] },
+        { trophies: 600, rewards: [{ type: 'random_character' }] },
+        { trophies: 640, rewards: [{ type: 'coins', amount: 450 }] },
+        { trophies: 680, rewards: [{ type: 'chest', chestType: 'Agilité' }] },
+        { trophies: 720, rewards: [{ type: 'coins', amount: 500 }] },
+        { trophies: 760, rewards: [{ type: 'item', id: 'xp_2', amount: 3 }] },
+        { trophies: 800, rewards: [{ type: 'coins', amount: 600 }] },
+        { trophies: 850, rewards: [{ type: 'chest', chestType: 'Attaque' }] },
+        { trophies: 900, rewards: [{ type: 'coins', amount: 700 }, { type: 'random_character' }] },
+        { trophies: 950, rewards: [{ type: 'coins', amount: 800 }] },
+        { trophies: 1000, rewards: [{ type: 'random_chest' }] },
+        { trophies: 1100, rewards: [{ type: 'coins', amount: 1000 }] },
+        { trophies: 1200, rewards: [{ type: 'item', id: 'potion', amount: 10 }] },
+        { trophies: 1300, rewards: [{ type: 'coins', amount: 1250 }] },
+        { trophies: 1400, rewards: [{ type: 'chest', chestType: 'Défense' }] },
+        { trophies: 1500, rewards: [{ type: 'coins', amount: 1500 }, { type: 'random_character' }] },
+        { trophies: 1600, rewards: [{ type: 'item', id: 'elixir', amount: 10 }] },
+        { trophies: 1700, rewards: [{ type: 'coins', amount: 1750 }] },
+        { trophies: 1800, rewards: [{ type: 'chest', chestType: 'Equilibre' }] },
+        { trophies: 1900, rewards: [{ type: 'item', id: 'amulette', amount: 5 }] },
+        { trophies: 2000, rewards: [{ type: 'coins', amount: 2000 }, { type: 'random_chest' }] },
+    ];
+};
+
+App.getProceduralTrophyReward = function(trophies) {
+    if (trophies < 2000) return null;
+
+    const milestone = Math.floor(trophies / 100) * 100;
+    if (milestone === 0) return null;
+
+    const cycle = (milestone / 100) % 10; // Cycle of 10 rewards (1000 trophies)
+    let reward;
+
+    const amountMultiplier = Math.floor(milestone / 1000);
+
+    switch (cycle) {
+        case 1: // 2100, 3100, 4100, ...
+            reward = { type: 'coins', amount: 100 + 100 * amountMultiplier };
+            break;
+        case 2: // 2200, 3200, ...
+            const items = ['potion', 'epee', 'elixir', 'bouclier'];
+            const randomItem = items[Math.floor(Math.random() * items.length)];
+            reward = { type: 'item', id: randomItem, amount: 5 + amountMultiplier };
+            break;
+        case 3: // 2300, 3300, ...
+            reward = { type: 'coins', amount: 200 + 150 * amountMultiplier };
+            break;
+        case 4: // 2400, 3400, ...
+            const chests = ['Attaque', 'Défense', 'Agilité', 'Équilibre'];
+            const randomChest = chests[Math.floor(Math.random() * chests.length)];
+            reward = { type: 'chest', chestType: randomChest };
+            break;
+        case 5: // 2500, 3500, ...
+            reward = { type: 'coins', amount: 400 + 250 * amountMultiplier };
+            break;
+        case 6: // 2600, 3600, ...
+            const rareItems = ['amulette', 'cape', 'armure', 'crystal'];
+            const randomRareItem = rareItems[Math.floor(Math.random() * rareItems.length)];
+            reward = { type: 'item', id: randomRareItem, amount: 3 + amountMultiplier };
+            break;
+        case 7: // 2700, 3700, ...
+            reward = { type: 'coins', amount: 600 + 300 * amountMultiplier };
+            break;
+        case 8: // 2800, 3800, ...
+            reward = { type: 'random_chest' };
+            break;
+        case 9: // 2900, 3900, ...
+            reward = { type: 'coins', amount: 800 + 400 * amountMultiplier };
+            break;
+        case 0: // 3000, 4000, ...
+            reward = { type: 'random_character' };
+            break;
+        default:
+            return null;
+    }
+
+    return { trophies: milestone, rewards: [reward] };
+};
+
 App.updateTrophyProgress = function() {
-  const userData = getUserData();
-  const trophies = userData.trophees || 0;
-  const rewardPals = [
-    { trophies: 10 }, { trophies: 20 }, { trophies: 30 }, { trophies: 40 },
-    { trophies: 60 }, { trophies: 80 }, { trophies: 100 }, { trophies: 120 },
-    { trophies: 150 }, { trophies: 180 }, { trophies: 220 }, { trophies: 260 },
-    { trophies: 300 }, { trophies: 350 }, { trophies: 400 }, { trophies: 460 },
-    { trophies: 520 }, { trophies: 580 }, { trophies: 650 }, { trophies: 720 },
-    { trophies: 800 }, { trophies: 880 }, { trophies: 970 }, { trophies: 1060 },
-    { trophies: 1150 }, { trophies: 1250 }, { trophies: 1350 }, { trophies: 1460 },
-    { trophies: 1570 }, { trophies: 1690 }
-  ];
-  let previousThreshold = 0, nextThreshold = rewardPals[0].trophies, currentIndex = 0;
-  for (let i = 0; i < rewardPals.length; i++) {
-    if (trophies < rewardPals[i].trophies) {
-      nextThreshold = rewardPals[i].trophies;
-      currentIndex = i;
-      break;
-    } else {
-      previousThreshold = rewardPals[i].trophies;
+    const userData = getUserData();
+    const trophies = userData.trophees || 0;
+
+    const predefinedRewards = App.getTrophyRoadRewards();
+    let nextReward = null;
+    let previousThreshold = 0;
+
+    // Find next reward and previous threshold from predefined list
+    for (const reward of predefinedRewards) {
+        if (trophies < reward.trophies) {
+            nextReward = reward;
+            break;
+        }
+        previousThreshold = reward.trophies;
     }
-    if (i === rewardPals.length - 1) {
-      nextThreshold = rewardPals[i].trophies;
-      currentIndex = i;
+
+    // If all predefined are passed, find next procedural
+    if (!nextReward) {
+        const lastPredefinedTrophies = predefinedRewards[predefinedRewards.length - 1].trophies;
+        previousThreshold = Math.max(lastPredefinedTrophies, Math.floor(trophies / 100) * 100);
+        const nextMilestone = previousThreshold + 100;
+        nextReward = App.getProceduralTrophyReward(nextMilestone);
     }
-  }
-  let progress = previousThreshold === 0 ? (trophies / nextThreshold) * 100
-    : ((trophies - previousThreshold) / (nextThreshold - previousThreshold)) * 100;
-  progress = Math.min(progress, 100);
-  const progressFill = document.getElementById("trophiesProgressFill");
-  if (progressFill) {
-    progressFill.style.width = progress + "%";
-  }
-  const nextRewardsElem = document.getElementById("nextRewards");
-  if (nextRewardsElem) {
-    let rewardText = "Prochaine récompense à " + nextThreshold + " trophées : 1 récompense aléatoire";
-    if ((currentIndex + 1) % 8 === 0) { rewardText += " et un nouveau personnage aléatoire"; }
-    nextRewardsElem.textContent = rewardText;
-  }
+    
+    if (!nextReward) {
+        // Handle end of all rewards if procedural has a limit
+        const progressFill = document.getElementById("trophiesProgressFill");
+        if (progressFill) progressFill.style.width = "100%";
+        const nextRewardsElem = document.getElementById("nextRewards");
+        if (nextRewardsElem) nextRewardsElem.textContent = "Vous êtes au sommet !";
+        return;
+    }
+
+    const nextThreshold = nextReward.trophies;
+    
+    let progress = (trophies - previousThreshold) / (nextThreshold - previousThreshold) * 100;
+    progress = Math.max(0, Math.min(progress, 100));
+
+    const progressFill = document.getElementById("trophiesProgressFill");
+    if (progressFill) {
+        progressFill.style.width = progress + "%";
+    }
+
+    const nextRewardsElem = document.getElementById("nextRewards");
+    if (nextRewardsElem) {
+        const rewardDescriptions = nextReward.rewards.map(r => {
+            const name = r.id ? r.id.replace(/_/g, ' ') : r.chestType;
+            switch (r.type) {
+                case 'coins': return `${r.amount} pièces`;
+                case 'item': return `${r.amount}x ${name}`;
+                case 'chest': return `1x Coffre ${name}`;
+                case 'random_character': return `1x Nouveau personnage`;
+                case 'random': return '1x Récompense Aléatoire';
+                case 'random_chest': return '1x Coffre Aléatoire';
+                default: return '1x Récompense';
+            }
+        }).join(' et ');
+        nextRewardsElem.textContent = `Prochaine récompense à ${nextThreshold} trophées : ${rewardDescriptions}`;
+    }
 };
 
 // --- Gestion de l'en-tête avec glissement ---
@@ -166,7 +340,7 @@ App.interactionZone = document.querySelector(".interaction-zone");
 App.startY = 0;
 App.isDragging = false;
 App.minHeight = 60;
-App.maxHeight = window.innerHeight;
+App.maxHeight = window.innerHeight - 60;
 
 if (App.interactionZone && App.headerM) {
   // Pour les appareils tactiles
@@ -174,7 +348,7 @@ if (App.interactionZone && App.headerM) {
     App.startY = e.touches[0].clientY;
     App.isDragging = true;
     App.headerM.style.transition = "none";
-  });
+  }, { passive: true });
   App.interactionZone.addEventListener("touchmove", (e) => {
     if (!App.isDragging) return;
     const deltaY = e.touches[0].clientY - App.startY;
@@ -182,7 +356,7 @@ if (App.interactionZone && App.headerM) {
     const newHeight = Math.min(App.maxHeight, Math.max(App.minHeight, currentHeaderHeight + deltaY));
     App.headerM.style.height = `${newHeight}px`;
     App.updateStatsPosition(newHeight);
-  });
+  }, { passive: true });
   App.interactionZone.addEventListener("touchend", () => {
     App.isDragging = false;
     App.finalizeHeaderHeight();
@@ -290,6 +464,30 @@ App.initView = function() {
   if (localStorage.getItem('autoplayEnabled') === 'true') {
     playMusic();
   }
+
+  // Add event listeners for info buttons and close button
+  const infoButtons = document.querySelectorAll('.info-button');
+  infoButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      const mode = event.target.dataset.mode;
+      App.showExplanation(mode);
+    });
+  });
+
+  const closeButton = document.querySelector('#explanationModal .close-button');
+  if (closeButton) {
+    closeButton.addEventListener('click', App.closeExplanation);
+  }
+
+  // Also close modal if clicking outside content
+  const modalOverlay = document.getElementById('explanationModal');
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (event) => {
+      if (event.target === modalOverlay) {
+        App.closeExplanation();
+      }
+    });
+  }
 };
 
 // --- Navigation et sélection de mode ---
@@ -327,8 +525,13 @@ App.showModeSelection = function() {
   weekendBtn.textContent = 'Week-end';
   weekendBtn.appendChild(timer);
 
+  const isWeekend = App.isWeekendPeriod();
+
   // n'affiche le bouton que si on est dans la période week-end
-  weekendBtn.style.display = App.isWeekendPeriod() ? '' : 'none';
+  const weekendContainer = weekendBtn.parentElement;
+  if (weekendContainer) {
+    weekendContainer.style.display = isWeekend ? 'flex' : 'none';
+  }
 
   // affiche la boîte de sélection
   modeDialog.classList.add('scale-in-top');
@@ -343,20 +546,20 @@ App.showModeSelection = function() {
   if (cancelBtn) cancelBtn.onclick = App.closeModeSelection;
 };
 App.startGame = function(mode) {
-  const userData = getUserData();
+  const userData = App.userData || getUserData();
+  sessionStorage.setItem('gameMode', mode);
   if (mode === 'classique') {
     userData.classicGames = (userData.classicGames || 0) + 1;
     saveUserData(userData);
-    loadPage('characters');
+    loadPage('character-selection');
   } else if (mode === 'survie') {
     userData.survivalGames = (userData.survivalGames || 0) + 1;
     saveUserData(userData);
-    loadPage('characters_survie');
+    loadPage('character-selection');
   } else if (mode === 'classique-weeknd') {
-    loadPage('characters-weekend');
+    loadPage('character-selection');
   }
 };
-
 App.StartedGame = function() {
   const userData = getUserData();
   if (userData.partie_commencee) {
@@ -378,7 +581,6 @@ App.resetDoubleXPIfNeeded = function() {
     userData.boutique_recompense = false;
     userData.XP_jour = 0;
     userData.quetes_jour = false;
-    userData.fraude = (userData.fraude || 0) - 1;
     saveUserData(userData);
     localStorage.setItem('lastDoubleXPCheck', now.toISOString());
   }
@@ -398,20 +600,6 @@ App.resetDoubleXPIfNeeded = function() {
   }
 };
 
-App.checkAndAskForUsername = function() {
-  let userData = getUserData();
-  if (!userData.pseudo || userData.pseudo.trim().length === 0 || userData.pseudo.length > 13) {
-    let pseudo = null;
-    while (!pseudo || pseudo.trim().length === 0 || pseudo.length > 13) {
-      pseudo = prompt("Veuillez entrer votre pseudo (maximum 13 caractères, sans espaces vides) :");
-      if (pseudo && pseudo.trim().length > 0 && pseudo.length <= 13) {
-        userData.pseudo = pseudo.trim();
-        saveUserData(userData);
-      }
-    }
-  }
-};
-
 App.init = function() {
   let userData = getUserData();
   if (userData.version !== game_version) {
@@ -422,7 +610,6 @@ App.init = function() {
     loadPage('recompenses');
   }
   // Après DOMContentLoaded ou dans App.init :
-  App.checkAndAskForUsername();
   App.displayUserInfo();
   App.trophyVerif();
   App.updateStats();
@@ -435,7 +622,7 @@ App.getNextMonday9AM = function() {
   const now = App.getParisDate();
   const next = new Date(now);
   next.setHours(9, 0, 0, 0);
-  const day = now.getDay();               // 0=dimanche … 6=samedi
+  const day = now.getDay();               // 0=dimanche ... 6=samedi
   let diff = (8 - day) % 7;
   if (day === 1 && now < next) diff = 0;  // lundi avant 9h → même jour
   if (day !== 1 && diff === 0) diff = 7;
@@ -500,5 +687,144 @@ if (!App._initWrapper) {
   };
 }
 
+// --- TUTORIAL LOGIC ---
+App.tutorialSteps = [
+  {
+    elementId: 'playButton',
+    text: "Cliquez ici pour choisir un mode de jeu et commencer une partie."
+  },
+  {
+    elementId: 'questsButton',
+    text: "Consultez vos quêtes quotidiennes, hebdomadaires et spéciales ici pour gagner des récompenses."
+  },
+  {
+    elementId: 'inventoryButton',
+    text: "Accédez à votre inventaire pour voir les objets que vous avez collectés."
+  },
+  {
+    elementId: 'header',
+    text: "Faites glisser cette barre vers le bas pour voir vos statistiques détaillées."
+  },
+  {
+    elementId: 'header',
+    text: "Faites-la glisser vers le haut pour la remonter. Essayez maintenant !"
+  }
+];
+App.currentTutorialStep = 0;
+
+App.startTutorial = function() {
+  if (localStorage.getItem('tutorial_menu_principal_completed') === 'true') {
+    return;
+  }
+  document.getElementById('tutorialOverlay').style.display = 'flex';
+  App.showTutorialStep(App.currentTutorialStep);
+};
+
+App.showTutorialStep = function(stepIndex) {
+  // Remove highlight and interactive class from previous step
+  if (stepIndex > 0) {
+    const prevElement = document.getElementById(App.tutorialSteps[stepIndex - 1].elementId);
+    if (prevElement) {
+      prevElement.classList.remove('tutorial-highlight', 'tutorial-interactive');
+    }
+  }
+
+  const step = App.tutorialSteps[stepIndex];
+  const element = document.getElementById(step.elementId);
+  const tooltip = document.getElementById('tutorialTooltip');
+  const text = document.getElementById('tutorialText');
+  const nextButton = document.getElementById('tutorialNextButton');
+
+  if (!element) {
+    App.endTutorial();
+    return;
+  }
+
+  element.classList.add('tutorial-highlight');
+  text.innerText = step.text;
+
+  // Make the element interactive only on the last step
+  if (stepIndex === App.tutorialSteps.length - 1) {
+    element.classList.add('tutorial-interactive');
+  }
+
+  const rect = element.getBoundingClientRect();
+  tooltip.style.top = `${rect.bottom + 10}px`;
+  tooltip.style.left = `${rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+
+  // Adjust position if tooltip goes off-screen
+  if (rect.bottom + tooltip.offsetHeight + 10 > window.innerHeight) {
+    tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+  }
+  if (rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) < 0) {
+    tooltip.style.left = '10px';
+  }
+
+
+  if (stepIndex === App.tutorialSteps.length - 1) {
+    nextButton.innerText = 'Terminer';
+  } else {
+    nextButton.innerText = 'Suivant';
+  }
+};
+
+App.nextTutorialStep = function() {
+  App.currentTutorialStep++;
+  if (App.currentTutorialStep < App.tutorialSteps.length) {
+    App.showTutorialStep(App.currentTutorialStep);
+  } else {
+    App.endTutorial();
+  }
+};
+
+App.endTutorial = function() {
+  const lastStep = App.tutorialSteps[App.currentTutorialStep - 1] || App.tutorialSteps[App.tutorialSteps.length - 1];
+  const lastElement = document.getElementById(lastStep.elementId);
+  if (lastElement) {
+    lastElement.classList.remove('tutorial-highlight', 'tutorial-interactive');
+  }
+  document.getElementById('tutorialOverlay').style.display = 'none';
+  localStorage.setItem('tutorial_menu_principal_completed', 'true');
+};
+// --- END TUTORIAL LOGIC ---
+
+
+// --- Game Mode Explanations ---
+App.gameModeExplanations = {
+  'classique': {
+    title: 'Mode Classique',
+    text: 'Affrontez des adversaires contrôlés par l\'ordinateur dans des combats équilibrés. L\'objectif est de réduire les points de vie de votre adversaire à zéro.'
+  },
+  'survie': {
+    title: 'Mode Survie',
+    text: 'Testez votre endurance ! Affrontez des vagues d\'ennemis de plus en plus puissants. Combien de manches pourrez-vous survivre ?'
+  },
+  'classique-weeknd': {
+    title: 'Mode Classique Weekend',
+    text: 'Un mode spécial disponible uniquement le week-end ! Profitez de bonus uniques et de récompenses accrues. Les règles de base sont similaires au mode Classique.'
+  }
+};
+
+App.showExplanation = function(mode) {
+  const explanation = App.gameModeExplanations[mode];
+  if (explanation) {
+    document.getElementById('modalTitle').innerText = explanation.title;
+    document.getElementById('modalText').innerText = explanation.text;
+    document.getElementById('explanationModal').style.display = 'flex';
+  }
+};
+
+App.closeExplanation = function() {
+  document.getElementById('explanationModal').style.display = 'none';
+};
 
 App.init();
+App.userData = getUserData();
+saveUserData(App.userData);
+
+
+App.initView();
+if (document.getElementById('tutorialNextButton')) {
+    document.getElementById('tutorialNextButton').addEventListener('click', App.nextTutorialStep);
+}
+App.startTutorial();

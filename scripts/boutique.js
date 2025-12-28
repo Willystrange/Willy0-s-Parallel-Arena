@@ -1,466 +1,729 @@
 window.App = window.App || {};
 
-/* ===================== NAVIGATION ===================== */
+// ===================== CONSTANTES ET CONFIGURATION =====================
+// Données statiques pour éviter de les recréer dans les fonctions.
+App.BONUS_TEXTS = {
+  xp_2: { alt: "Double XP Bonus", title: "Double XP", description: "Profitez du double XP lors de vos combats !" },
+  potion: { alt: "Potion de Santé", title: "Potion de Santé", description: "Augmente les PV du joueur de 1100." },
+  amulette: { alt: "Amulette de Régénération", title: "Amulette de Régénération", description: "Régénère 2% des PV max par tour." },
+  epee: { alt: "Épée Tranchante", title: "Épée Tranchante", description: "Augmente l'attaque du joueur de 5%." },
+  elixir: { alt: "Élixir de Puissance", title: "Élixir de Puissance", description: "Augmente l'attaque de 50 points." },
+  bouclier: { alt: "Bouclier solide", title: "Bouclier solide", description: "Augmente la défense de 15 points." },
+  cape: { alt: "Cape de l'ombre", title: "Cape de l'ombre", description: "Ignore les dégâts subis par la prochaine attaque." },
+  armure: { alt: "Armure de Fer", title: "Armure de Fer", description: "Réduit les dégâts reçus de 10%." },
+  crystal: { alt: "Crystal de renouveau", title: "Crystal de renouveau", description: "Recharge 0.8 points de la capacité spéciale." }
+};
+
+App.DAILY_ITEMS = [
+    { img: "XP_2.png", title: "Double XP x1", description: "Profitez du double XP lors de vos combats !", price: 18, type: "xp", quantity: 1 },
+    { img: "XP_2.png", title: "Double XP x3", description: "Profitez du double XP lors de vos combats !", price: 48, type: "xp", quantity: 3 },
+    { img: "XP_2.png", title: "Double XP x5", description: "Profitez du double XP lors de vos combats !", price: 75, type: "xp", quantity: 5 },
+    { img: "Potion-1.png", title: "Potion de Santé x1", description: "Augmente les PV du joueur de 1100.", price: 12, type: "potion", quantity: 1 },
+    { img: "Potion-1.png", title: "Potion de Santé x3", description: "Augmente les PV du joueur de 1100.", price: 33, type: "potion", quantity: 3 },
+    { img: "Potion-1.png", title: "Potion de Santé x5", description: "Augmente les PV du joueur de 1100.", price: 50, type: "potion", quantity: 5 },
+    { img: "Amulette-1.png", title: "Amulette de Régénération x1", description: "Régénère 2% des PV max par tour.", price: 35, type: "amulette", quantity: 1 },
+    { img: "Amulette-1.png", title: "Amulette de Régénération x3", description: "Régénère 2% des PV max par tour.", price: 95, type: "amulette", quantity: 3 },
+    { img: "Amulette-1.png", title: "Amulette de Régénération x5", description: "Régénère 2% des PV max par tour.", price: 150, type: "amulette", quantity: 5 },
+    { img: "epee-1.png", title: "Épée Tranchante x1", description: "Augmente l'attaque du joueur de 5%.", price: 18, type: "epee", quantity: 1 },
+    { img: "epee-1.png", title: "Épée Tranchante x3", description: "Augmente l'attaque du joueur de 5%.", price: 48, type: "epee", quantity: 3 },
+    { img: "epee-1.png", title: "Épée Tranchante x5", description: "Augmente l'attaque du joueur de 5%.", price: 75, type: "epee", quantity: 5 },
+    { img: "elixir-1.png", title: "Élixir de Puissance x1", description: "Augmente l'attaque de 50 points.", price: 15, type: "elixir", quantity: 1 },
+    { img: "elixir-1.png", title: "Élixir de Puissance x3", description: "Augmente l'attaque de 50 points.", price: 40, type: "elixir", quantity: 3 },
+    { img: "elixir-1.png", title: "Élixir de Puissance x5", description: "Augmente l'attaque de 50 points.", price: 60, type: "elixir", quantity: 5 },
+    { img: "bouclier.png", title: "Bouclier solide x1", description: "Augmente la défense de 15 points.", price: 10, type: "bouclier", quantity: 1 },
+    { img: "bouclier.png", title: "Bouclier solide x3", description: "Augmente la défense de 15 points.", price: 28, type: "bouclier", quantity: 3 },
+    { img: "bouclier.png", title: "Bouclier solide x5", description: "Augmente la défense de 15 points.", price: 40, type: "bouclier", quantity: 5 },
+    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x1", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 70, type: "cape", quantity: 1 },
+    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x3", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 190, type: "cape", quantity: 3 },
+    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x5", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 300, type: "cape", quantity: 5 }
+];
+
+// Map pour lier le type d'item à la propriété correspondante dans userData
+App.ITEM_PROPERTY_MAP = {
+    xp: 'Double_XP_acheté',
+    potion: 'Potion_de_Santé_acheté',
+    amulette: 'Amulette_de_Régénération_acheté',
+    epee: 'epee_tranchante_acheté',
+    elixir: 'elixir_puissance_acheté',
+    armure: 'armure_fer_acheté',
+    bouclier: 'bouclier_solide_acheté',
+    cape: 'Cape_acheté',
+    crystal: 'crystal_acheté',
+    marque_chasseur: 'marque_chasseur_acheté',
+    purge_spirituelle: 'purge_spirituelle_acheté',
+    orbe_siphon: 'orbe_siphon_acheté'
+};
+
+// Cache pour les données utilisateur afin de limiter les accès au localStorage
+App.userData = JSON.parse(localStorage.getItem('userData')) || {};
+
+// ===================== NAVIGATION =====================
 App.viewCharacters = function() {
+  clearTimeout(App.dailyTimerId);
   loadPage("perso_stats");
-}
+};
 App.goToPasse = function() {
+  clearTimeout(App.dailyTimerId);
   loadPage("passe_de_combat");
-}
+};
 App.showMainMenu = function() {
+  clearTimeout(App.dailyTimerId);
   loadPage("menu_principal");
+};
+
+// ===================== FONCTIONS UTILITAIRES =====================
+App.getRandomInt = (max) => Math.floor(Math.random() * max);
+App.applyDiscount = (price) => Math.round(price * 0.8); // 20% de réduction
+
+// Fonction pour créer le HTML d'un item, évite la duplication de code
+function createItemHTML(item) {
+    const discountedPrice = item.discountedPrice !== undefined ? item.discountedPrice : App.applyDiscount(item.price);
+    const priceHTML = item.discountedPrice !== undefined
+        ? `<p>Prix normal : ${item.price} points</p><p>Prix réduit : ${discountedPrice} points</p>`
+        : `<p>Prix : ${item.price} Points</p>`;
+
+    return `
+        <img src="${item.img}" alt="${item.title}">
+        <h2>${item.title}</h2>
+        <p>${item.description}</p>
+        ${priceHTML}
+        <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
+        <p class="error-message"></p>
+    `;
 }
 
-/* ===================== SUPPRESSION DES TRADUCTIONS ===================== */
-// Les configurations et dictionnaires de traductions ont été retirés.
-// Les textes en français sont directement codés en dur.
+// ===================== MISE À JOUR DE L'INTERFACE (DOM) =====================
+App.updateStaticTexts = function() {
+    document.querySelectorAll('.stock-label').forEach(el => el.textContent = "En stock : ");
+    document.getElementById('balance').textContent = `Solde : ${App.userData.argent || 0}`;
+    document.getElementById('search-bar').placeholder = "Rechercher un objet";
+    document.getElementById('dailyoffers').textContent = "Offres Journalières";
 
-// Mise à jour des labels de stock
-document.querySelectorAll('.stock-label').forEach(el => {
-  el.textContent = "En stock : ";
-});
-
-// MISE À JOUR DES TEXTES STATIQUES
-document.getElementById('balance').textContent =
-  "Solde : " + (JSON.parse(localStorage.getItem('userData'))?.argent || 0);
-document.getElementById('search-bar').placeholder = "Rechercher un objet";
-document.getElementById('dailyoffers').textContent = "Offres Journalières";
-
-// Mise à jour du titre principal et des catégories
-App.content = document.querySelector('.content');
-if (App.content) {
-  App.content.querySelector('h1').textContent = "Bienvenue dans la Boutique de Jeux";
-  document.getElementById('xptitle').textContent = "Catégorie XP";
-  document.getElementById('soinstitle').textContent = "Catégorie Soins";
-  document.getElementById('attaquetitle').textContent = "Catégorie Attaque";
-  document.getElementById('defensetitle').textContent = "Catégorie Défense";
-  document.getElementById('autretitle').textContent = "Catégorie Autre";
-}
-
-// Mise à jour des bonus statiques par catégorie
-App.updateBonusText = function(id, bonusKey) {
-  const el = document.getElementById(id);
-  if (el) {
-    const texts = {
-      xp_2: {
-        alt: "Double XP Bonus",
-        title: "Double XP",
-        description: "Profitez du double XP lors de vos combats !"
-      },
-      potion: {
-        alt: "Potion de Santé",
-        title: "Potion de Santé",
-        description: "Augmente les PV du joueur de 1100."
-      },
-      amulette: {
-        alt: "Amulette de Régénération",
-        title: "Amulette de Régénération",
-        description: "Régénère 2% des PV max par tour."
-      },
-      epee: {
-        alt: "Épée Tranchante",
-        title: "Épée Tranchante",
-        description: "Augmente l'attaque du joueur de 5%."
-      },
-      elixir: {
-        alt: "Élixir de Puissance",
-        title: "Élixir de Puissance",
-        description: "Augmente l'attaque de 50 points."
-      },
-      bouclier: {
-        alt: "Bouclier solide",
-        title: "Bouclier solide",
-        description: "Augmente la défense de 15 points."
-      },
-      cape: {
-        alt: "Cape de l'ombre",
-        title: "Cape de l'ombre",
-        description: "Ignore les dégâts subis par la prochaine attaque."
-      },
-      armure: {
-        alt: "Armure de Fer",
-        title: "Armure de Fer",
-        description: "Réduit les dégâts reçus de 10%."
-      },
-      crystal: {
-        alt: "Crystal de renouveau",
-        title: "Crystal de renouveau",
-        description: "Recharge 0.8 points de la capacité spéciale."
-      }
-    };
-    el.querySelector('img').alt = texts[bonusKey].alt;
-    el.querySelector('h2').textContent = texts[bonusKey].title;
-    const ps = el.querySelectorAll('p');
-    if (ps.length > 0) {
-      ps[0].textContent = texts[bonusKey].description;
+    const content = document.querySelector('.content');
+    if (content) {
+        content.querySelector('h1').textContent = "Bienvenue dans la Boutique de Jeux";
+        document.getElementById('xptitle').textContent = "Catégorie XP";
+        document.getElementById('soinstitle').textContent = "Catégorie Soins";
+        document.getElementById('attaquetitle').textContent = "Catégorie Attaque";
+        document.getElementById('defensetitle').textContent = "Catégorie Défense";
+        document.getElementById('autretitle').textContent = "Catégorie Autre";
     }
-  }
-}
-App.updateBonusText('xp-2', 'xp_2');
-App.updateBonusText('potion', 'potion');
-App.updateBonusText('amulette', 'amulette');
-App.updateBonusText('epee', 'epee');
-App.updateBonusText('elixir', 'elixir');
-App.updateBonusText('bouclier', 'bouclier');
-App.updateBonusText('cape', 'cape');
-App.updateBonusText('armure', 'armure');
-App.updateBonusText('crystal', 'crystal');
 
-// Mise à jour des alt des icônes du footer
-App.footerImgs = document.querySelectorAll('.footer img');
-if (App.footerImgs.length >= 4) {
-  App.footerImgs[0].alt = "Personnages";
-  App.footerImgs[1].alt = "Menu Principal";
-  App.footerImgs[2].alt = "Passe de combat";
-  App.footerImgs[3].alt = "Boutique";
-}
+    // Mise à jour groupée des bonus
+    Object.keys(App.BONUS_TEXTS).forEach(key => {
+        const el = document.getElementById(key.replace('_', '-'));
+        if (el) {
+            const texts = App.BONUS_TEXTS[key];
+            el.querySelector('img').alt = texts.alt;
+            el.querySelector('h2').textContent = texts.title;
+            const p = el.querySelector('p');
+            if (p) p.textContent = texts.description;
+        }
+    });
 
-// MISE À JOUR DES BOUTONS "ACHETER" STATIQUES
-App.updateStaticBuyButtons = function() {
-  document.querySelectorAll('.bonus-item .buyButton').forEach(button => {
-    button.textContent = "Acheter";
-  });
-}
-// MISE À JOUR DES OPTIONS DES SELECT (le mot "points" reste inchangé)
-App.updateStaticOptions = function() {
-  document.querySelectorAll('.quantity-select option').forEach(option => {
-    option.textContent = option.textContent.replace(/points/gi, "points");
-  });
-}
-App.updateStaticBuyButtons();
-App.updateStaticOptions();
+    const footerImgs = document.querySelectorAll('.footer img');
+    if (footerImgs.length >= 4) {
+        footerImgs[0].alt = "Personnages";
+        footerImgs[1].alt = "Menu Principal";
+        footerImgs[2].alt = "Passe de combat";
+        footerImgs[3].alt = "Boutique";
+    }
 
-/* ===================== FONCTIONS D'OFFRES JOURNALIÈRES ===================== */
-App.applyDiscount = function(price) {
-  return Math.round(price * 0.8); // Réduction de 20%
-}
-App.getRandomInt = function(max) {
-  return Math.floor(Math.random() * max);
-}
+    document.querySelectorAll('.bonus-item .buyButton').forEach(button => button.textContent = "Acheter");
+};
+
+App.updateStockDisplay = function() {
+    for (const type in App.ITEM_PROPERTY_MAP) {
+        const elementId = `stock-${type}`;
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.textContent = App.userData[App.ITEM_PROPERTY_MAP[type]] || 0;
+        }
+    }
+};
+
+App.updateEquipmentButtonsState = function() {
+    const ownedEquipments = App.userData.equipments || [];
+    document.querySelectorAll('.buyButton[data-type="equipment"]').forEach(button => {
+        if (ownedEquipments.includes(button.dataset.id)) {
+            button.textContent = 'Possédé';
+            button.disabled = true;
+        }
+    });
+};
+
+App.updateWeeklyLootboxButtonState = function() {
+    const button = document.getElementById('claim-daily-lootbox');
+    if (!button) return;
+
+    const currentCycle = App.getParisCycleId('weekly');
+    if (App.userData.weekly_chest_claim_id === currentCycle) {
+        button.disabled = true;
+        button.textContent = "Déjà pris";
+    } else {
+        button.disabled = false;
+        button.textContent = "Réclamer";
+    }
+};
+
+// ===================== OFFRE SPÉCIALE HEBDOMADAIRE =====================
+App.generateSpecialWeeklyOffer = function() {
+    const today = new Date();
+    const currentThursday = new Date();
+    currentThursday.setDate(today.getDate() - (today.getDay() + 3) % 7); // Le jeudi de cette semaine
+    currentThursday.setHours(0, 0, 0, 0);
+
+    let specialOffer = JSON.parse(localStorage.getItem('specialWeeklyOffer')) || {};
+
+    if (specialOffer.date !== currentThursday.toDateString()) {
+        const lootboxTypes = ['Attaque', 'Défense', 'Agilité', 'Équilibre'];
+        const randomType = lootboxTypes[App.getRandomInt(lootboxTypes.length)];
+        let discount = App.getRandomInt(31) + 5; // Entre 5 et 35%
+        if (App.getRandomInt(100) < 5) { // 5% de chance d'avoir 70%
+            discount = 70;
+        }
+        const originalPrice = 1000;
+        const discountedPrice = Math.round(originalPrice * (1 - discount / 100));
+
+        specialOffer = {
+            date: currentThursday.toDateString(),
+            type: randomType,
+            discount: discount,
+            originalPrice: originalPrice,
+            discountedPrice: discountedPrice,
+            purchasesLeft: 3 // Peut être acheté 3 fois
+        };
+        localStorage.setItem('specialWeeklyOffer', JSON.stringify(specialOffer));
+        // Réinitialiser les achats de l'utilisateur pour cette offre
+        App.userData.special_weekly_offer_purchases = 0;
+        saveUserData(App.userData);
+    }
+    return specialOffer;
+};
+
+App.displaySpecialWeeklyOffer = function(userData) {
+  const specialOffer = App.specialWeeklyOffer;
+  if (!specialOffer) return;
+
+  const container = document.getElementById('special-weekly-offer');
+  if (!container) return;
+
+  // Normalisation du type pour le nom du fichier (suppression des accents pour éviter les 404)
+  const normalizedType = specialOffer.type.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").substring(0, 3);
+
+  container.innerHTML = `
+    <div class="weekly-offer-card">
+      <div class="weekly-offer-title">Offre Spéciale de la Semaine</div>
+      <img src="coffre_${normalizedType}.png" alt="Coffre ${specialOffer.type} en promotion">
+      <div class="weekly-offer-details">
+        <span>1x Coffre ${specialOffer.type}</span>
+        <span class="weekly-offer-price">${specialOffer.price} Crystaux</span>
+      </div>
+      <button class="buy-button" onclick="App.buySpecialWeeklyOffer()">Acheter</button>
+    </div>
+  `;
+};
+
+App.handleBuySpecialLootbox = function(button) {
+    const price = parseInt(button.dataset.price, 10);
+    const errorMessage = button.nextElementSibling;
+    errorMessage.textContent = '';
+
+    if (App.userData.argent >= price) {
+        let specialOffer = JSON.parse(localStorage.getItem('specialWeeklyOffer'));
+        if (!specialOffer) {
+            errorMessage.textContent = "Offre non disponible.";
+            return;
+        }
+
+        App.userData.special_weekly_offer_purchases = (App.userData.special_weekly_offer_purchases || 0) + 1;
+
+        if (App.userData.special_weekly_offer_purchases <= 3) {
+            App.userData.argent -= price;
+            const lootboxType = button.dataset.lootboxType;
+            let boxesToOpen = JSON.parse(sessionStorage.getItem('boxesToOpen')) || [];
+            boxesToOpen.push(lootboxType);
+            sessionStorage.setItem('boxesToOpen', JSON.stringify(boxesToOpen));
+            sessionStorage.setItem('boughtFromShop', 'true');
+            saveUserData(App.userData);
+            loadPage('ouverture_coffre');
+        } else {
+            errorMessage.textContent = "Vous avez atteint la limite d'achat pour cette offre.";
+            button.disabled = true;
+            button.textContent = "Épuisé";
+        }
+    } else {
+        errorMessage.textContent = "Solde insuffisant !";
+    }
+};
+
+// ===================== OFFRES JOURNALIÈRES =====================
 App.generateDailyOffers = function() {
-  const today = new Date().toDateString();
-  let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
-  const dailyCategory = document.getElementById('category-daily');
-  if (dailyOffers.date === today) {
-    return dailyOffers;
-  }
-  // Efface les anciennes offres
-  dailyCategory.innerHTML = '';
-  // Ajoute la récompense gratuite
-  const rewardItem = document.createElement('div');
-  rewardItem.classList.add('bonus-item');
-  rewardItem.innerHTML = `
-      <img src="recompense.png" alt="Récompense Gratuite">
-      <h2>Récompense Gratuite</h2>
-      <p>Profitez d'une récompense gratuite aujourd'hui !</p>
-      <p>Prix : 0 Points</p>
-      <button class="claimButton">Réclamer</button>
-      <p class="error-message"></p>
-    `;
-  dailyCategory.appendChild(rewardItem);
+    const today = new Date().toDateString();
+    let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
+    if (dailyOffers.date === today) {
+        return dailyOffers;
+    }
 
-  // Tableau d'items pour l'offre journalière
-  App.items = [
-    { img: "XP_2.png", title: "Double XP x1", description: "Profitez du double XP lors de vos combats !", price: 15, type: "xp", quantity: 1 },
-    { img: "XP_2.png", title: "Double XP x3", description: "Profitez du double XP lors de vos combats !", price: 41, type: "xp", quantity: 3 },
-    { img: "XP_2.png", title: "Double XP x5", description: "Profitez du double XP lors de vos combats !", price: 65, type: "xp", quantity: 5 },
-    { img: "Potion-1.png", title: "Potion de Santé x1", description: "Augmente les PV du joueur de 1100.", price: 10, type: "potion", quantity: 1 },
-    { img: "Potion-1.png", title: "Potion de Santé x3", description: "Augmente les PV du joueur de 1100.", price: 28, type: "potion", quantity: 3 },
-    { img: "Potion-1.png", title: "Potion de Santé x5", description: "Augmente les PV du joueur de 1100.", price: 44, type: "potion", quantity: 5 },
-    { img: "Amulette-1.png", title: "Amulette de Régénération x1", description: "Régénère 2% des PV max par tour.", price: 28, type: "amulette", quantity: 1 },
-    { img: "Amulette-1.png", title: "Amulette de Régénération x3", description: "Régénère 2% des PV max par tour.", price: 77, type: "amulette", quantity: 3 },
-    { img: "Amulette-1.png", title: "Amulette de Régénération x5", description: "Régénère 2% des PV max par tour.", price: 122, type: "amulette", quantity: 5 },
-    { img: "epee-1.png", title: "Épée Tranchante x1", description: "Augmente l'attaque du joueur de 5%.", price: 15, type: "epee", quantity: 1 },
-    { img: "epee-1.png", title: "Épée Tranchante x3", description: "Augmente l'attaque du joueur de 5%.", price: 41, type: "epee", quantity: 3 },
-    { img: "epee-1.png", title: "Épée Tranchante x5", description: "Augmente l'attaque du joueur de 5%.", price: 65, type: "epee", quantity: 5 },
-    { img: "elixir-1.png", title: "Élixir de Puissance x1", description: "Augmente l'attaque de 50 points.", price: 20, type: "elixir", quantity: 1 },
-    { img: "elixir-1.png", title: "Élixir de Puissance x3", description: "Augmente l'attaque de 50 points.", price: 55, type: "elixir", quantity: 3 },
-    { img: "elixir-1.png", title: "Élixir de Puissance x5", description: "Augmente l'attaque de 50 points.", price: 87, type: "elixir", quantity: 5 },
-    { img: "bouclier.png", title: "Bouclier solide x1", description: "Augmente la défense de 15 points.", price: 13, type: "bouclier", quantity: 1 },
-    { img: "bouclier.png", title: "Bouclier solide x3", description: "Augmente la défense de 15 points.", price: 36, type: "bouclier", quantity: 3 },
-    { img: "bouclier.png", title: "Bouclier solide x5", description: "Augmente la défense de 15 points.", price: 57, type: "bouclier", quantity: 5 },
-    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x1", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 55, type: "cape", quantity: 1 },
-    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x3", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 152, type: "cape", quantity: 3 },
-    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x5", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 239, type: "cape", quantity: 5 }
-  ];
-  const randomIndex = App.getRandomInt(App.items.length);
-  const item = App.items[randomIndex];
-  App.items.splice(randomIndex, 1);
-  const discountedPrice = App.applyDiscount(item.price);
-  const offerItem = document.createElement('div');
-  offerItem.classList.add('bonus-item');
-  offerItem.innerHTML = `
-      <img src="${item.img}" alt="${item.title}">
-      <h2>${item.title}</h2>
-      <p>${item.description}</p>
-      <p>Prix normal : ${item.price} points</p>
-      <p>Prix réduit : ${discountedPrice} points</p>
-      <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
-      <p class="error-message"></p>
-    `;
-  dailyCategory.appendChild(offerItem);
-  dailyOffers = { date: today, item: { img: item.img, title: item.title, description: item.description, price: item.price, discountedPrice, type: item.type, quantity: item.quantity } };
-  localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
-  saveUserData(JSON.parse(localStorage.getItem('userData')) || {});
-  return dailyOffers;
-}
+    const randomIndex = App.getRandomInt(App.DAILY_ITEMS.length);
+    const item = { ...App.DAILY_ITEMS[randomIndex] }; // Copie pour éviter de modifier l'original
+    item.discountedPrice = App.applyDiscount(item.price);
+
+    dailyOffers = { date: today, item: item };
+    localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
+    saveUserData(App.userData); // Sauvegarde au cas où des données auraient changé
+    return dailyOffers;
+};
 
 App.displayDailyOffers = function() {
-  const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
-  const dailyCategory = document.getElementById('category-daily');
-  if (!dailyOffers) return;
-  const today = new Date().toDateString();
-  if (dailyOffers.date !== today) {
-    App.generateDailyOffers();
-    return;
-  }
-  dailyCategory.innerHTML = '';
-  const rewardItem = document.createElement('div');
-  rewardItem.classList.add('bonus-item');
-  rewardItem.innerHTML = `
-      <img src="gratuite-rec.png" alt="Récompense Gratuite">
-      <h2>Récompense Gratuite</h2>
-      <p>Profitez d'une récompense gratuite aujourd'hui !</p>
-      <p>Prix : 0 Points</p>
-      <button class="claimButton"${(JSON.parse(localStorage.getItem('userData')) || {}).boutique_recompense ? ' disabled' : ''}>${(JSON.parse(localStorage.getItem('userData')) || {}).boutique_recompense ? 'Déjà pris' : 'Réclamer'}</button>
-      <p class="error-message"></p>
+    const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
+    const dailyCategory = document.getElementById('category-daily');
+    if (!dailyCategory || !dailyOffers) return;
+
+    const today = new Date().toDateString();
+    if (dailyOffers.date !== today) {
+        App.generateDailyOffers();
+        App.displayDailyOffers();
+        return;
+    }
+
+    dailyCategory.innerHTML = '';
+
+    // Récompense gratuite (UPDATED FOR PARIS TIME CHECK)
+    const rewardItem = document.createElement('div');
+    rewardItem.classList.add('bonus-item');
+    
+    const currentDailyCycle = App.getParisCycleId('daily');
+    const isClaimed = (App.userData.daily_reward_claim_id === currentDailyCycle);
+
+    rewardItem.innerHTML = `
+        <img src="gratuite-rec.png" alt="Récompense Gratuite">
+        <h2>Récompense Gratuite</h2>
+        <p>Profitez d'une récompense gratuite aujourd'hui !</p>
+        <p>Prix : 0 Points</p>
+        <button class="claimButton"${isClaimed ? ' disabled' : ''}>${isClaimed ? 'Déjà pris' : 'Réclamer'}</button>
+        <p class="error-message"></p>
     `;
-  dailyCategory.appendChild(rewardItem);
-  const item = dailyOffers.item;
-  const offerItem = document.createElement('div');
-  offerItem.classList.add('bonus-item');
-  offerItem.innerHTML = `
-      <img src="${item.img}" alt="${item.title}">
-      <h2>${item.title}</h2>
-      <p>${item.description}</p>
-      <p>Prix normal : ${item.price} points</p>
-      <p>Prix réduit : ${item.discountedPrice} points</p>
-      <button class="buyButton" data-type="${item.type}" data-price="${item.discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
-      <p class="error-message"></p>
-    `;
-  dailyCategory.appendChild(offerItem);
-  // Ajout des écouteurs d'évènements
-  dailyCategory.querySelectorAll('.claimButton').forEach(button => {
-    button.addEventListener('click', App.handleClaimButtonClick);
-  });
-  dailyCategory.querySelectorAll('.buyButton').forEach(button => {
-    button.addEventListener('click', App.handleBuyButtonClick);
-  });
-  document.querySelectorAll('.buyButton').forEach(button => {
-    button.addEventListener('click', App.handleBuyButtonClick);
-  });
+    dailyCategory.appendChild(rewardItem);
 
-}
+    // Offre du jour
+    const offerItem = document.createElement('div');
+    offerItem.classList.add('bonus-item');
+    offerItem.innerHTML = createItemHTML(dailyOffers.item);
+    dailyCategory.appendChild(offerItem);
+};
 
-/* ===================== AUTRES FONCTIONS ===================== */
-App.updateStockDisplay = function() {
-  const userData = JSON.parse(localStorage.getItem('userData')) || {};
-  document.getElementById('stock-xp').textContent = userData.Double_XP_acheté || 0;
-  document.getElementById('stock-potion').textContent = userData.Potion_de_Santé_acheté || 0;
-  document.getElementById('stock-amulette').textContent = userData.Amulette_de_Régénération_acheté || 0;
-  document.getElementById('stock-epee').textContent = userData.epee_tranchante_acheté || 0;
-  document.getElementById('stock-elixir').textContent = userData.elixir_puissance_acheté || 0;
-  document.getElementById('stock-armure').textContent = userData.armure_fer_acheté || 0;
-  document.getElementById('stock-bouclier').textContent = userData.bouclier_solide_acheté || 0;
-  document.getElementById('stock-cape').textContent = userData.Cape_acheté || 0;
-  document.getElementById('stock-crystal').textContent = userData.crystal_acheté || 0;
-}
+// ===================== GESTIONNAIRES D'ÉVÉNEMENTS (HANDLERS) =====================
+App.handleBuyButtonClick = function(button) {
+    const type = button.dataset.type;
+    const errorMessage = button.nextElementSibling;
+    errorMessage.textContent = ''; // Reset error message
 
-App.handleBuyButtonClick = function(event) {
-  const button = event.target;
-  const type = button.dataset.type;
-  const errorMessage = button.nextElementSibling;
-  let quantity, prixTotal;
-
-  // Vérifier si le bouton est précédé d'un sélecteur
-  const bonusItem = button.closest('.bonus-item');
-  const select = bonusItem.querySelector('.quantity-select');
-
-  if (select) {
-    // On récupère l'option sélectionnée
-    const selectedOption = select.options[select.selectedIndex];
-    quantity = parseInt(select.value);
-    // On utilise le prix affiché dans l'option (déjà calculé en fonction de la quantité)
-    prixTotal = parseInt(selectedOption.getAttribute('data-price'));
-  } else {
-    // Si pas de sélecteur, c'est une offre pack.
-    quantity = parseInt(button.dataset.quantity) || 1;
-    const basePrice = parseInt(button.dataset.price);
-    // On applique les coefficients pour un pack
-    if (quantity === 1) {
-      prixTotal = Math.round(basePrice * 0.96);
-    } else if (quantity === 3) {
-      prixTotal = Math.round(basePrice * 0.92);
-    } else if (quantity === 5) {
-      prixTotal = Math.round(basePrice * 0.87);
-    } else {
-      prixTotal = basePrice;
-    }
-  }
-
-  App.userData = JSON.parse(localStorage.getItem('userData')) || {};
-  if (App.userData.argent >= prixTotal) {
-    App.userData.argent -= prixTotal;
-    if (type === 'xp') {
-      App.userData.Double_XP_acheté = (App.userData.Double_XP_acheté || 0) + quantity;
-    } else if (type === 'potion') {
-      App.userData.Potion_de_Santé_acheté = (App.userData.Potion_de_Santé_acheté || 0) + quantity;
-    } else if (type === 'amulette') {
-      App.userData.Amulette_de_Régénération_acheté = (App.userData.Amulette_de_Régénération_acheté || 0) + quantity;
-    } else if (type === 'epee') {
-      App.userData.epee_tranchante_acheté = (App.userData.epee_tranchante_acheté || 0) + quantity;
-    } else if (type === 'elixir') {
-      App.userData.elixir_puissance_acheté = (App.userData.elixir_puissance_acheté || 0) + quantity;
-    } else if (type === 'armure') {
-      App.userData.armure_fer_acheté = (App.userData.armure_fer_acheté || 0) + quantity;
-    } else if (type === 'bouclier') {
-      App.userData.bouclier_solide_acheté = (App.userData.bouclier_solide_acheté || 0) + quantity;
-    } else if (type === 'cape') {
-      App.userData.Cape_acheté = (App.userData.Cape_acheté || 0) + quantity;
-    } else if (type === 'crystal') {
-      App.userData.crystal_acheté = (App.userData.crystal_acheté || 0) + quantity;
-    }
-    saveUserData(App.userData);
-    document.getElementById('balance').textContent = "Solde : " + App.userData.argent;
-    errorMessage.textContent = '';
-    App.updateStockDisplay();
-  } else {
-    errorMessage.textContent = "Solde insuffisant !";
-  }
-}
-
-
-
-App.handleClaimButtonClick = function(event) {
-  const button = event.target;
-  button.disabled = true;
-  button.textContent = "Déjà pris";
-  button.nextElementSibling.textContent = '';
-  let userData = JSON.parse(localStorage.getItem('userData')) || {};
-  if (!userData.boutique_recompense) {
-    userData.recompense = (userData.recompense || 0) + 1;
-    userData.boutique_recompense = true;
-    saveUserData(userData);
-    loadPage('recompenses');
-  }
-}
-
-  App.userData = JSON.parse(localStorage.getItem('userData')) || {};
-
-App.User = false;
-App.userId = null;
-
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    App.User = true;
-    App.userId = user.uid;
-    saveUserData(App.userData);
-  } else {
-
-  }
-});
-
-/* ===================== MINUTERIE OFFRES JOURNALIÈRES ===================== */
-App.updateDailyTimer = function() {
-  const now = new Date();
-  const resetHour = 9;
-  const nextReset = new Date();
-  nextReset.setHours(resetHour, 0, 0, 0);
-  if (now > nextReset) {
-    nextReset.setDate(nextReset.getDate() + 1);
-  }
-  const timeLeft = nextReset - now;
-  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-  document.getElementById('daily-timer').textContent = `- ${hours}h ${minutes}m ${seconds}s`;
-  setTimeout(App.updateDailyTimer, 1000);
-}
-App.updateDailyTimer();
-
-/* ===================== FONCTION DE RECHERCHE ===================== */
-App.searchBar = document.getElementById('search-bar');
-App.items = document.querySelectorAll('.bonus-item');
-App.searchResults = document.getElementById('search-results');
-
-App.normalizeString = function(str) {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-App.isSimilar = function(str1, str2) {
-  let diffCount = 0;
-  const maxLen = Math.max(str1.length, str2.length);
-  const minLen = Math.min(str1.length, str2.length);
-  for (let i = 0; i < minLen; i++) {
-    if (str1[i] !== str2[i]) {
-      diffCount++;
-      if (diffCount > 2) return false;
-    }
-  }
-  return diffCount <= 2 || (maxLen - minLen <= 1);
-}
-
-App.similarityScore = function(query, itemName) {
-  const normalizedQuery = App.normalizeString(query);
-  const normalizedItemName = App.normalizeString(itemName);
-  if (normalizedItemName.startsWith(normalizedQuery)) {
-    return 3;
-  }
-  if (normalizedItemName.includes(normalizedQuery)) {
-    return 2;
-  }
-  if (App.isSimilar(normalizedItemName, normalizedQuery)) {
-    return 1;
-  }
-  return 0;
-}
-
-App.searchBar.addEventListener('input', function() {
-  const query = App.searchBar.value;
-  App.searchResults.innerHTML = '';
-  if (query) {
-    const results = [];
-    App.items.forEach(item => {
-      const itemName = item.querySelector('h2').textContent;
-      const score = App.similarityScore(query, itemName);
-      if (score > 0) {
-        results.push({ element: item, score });
-      }
-    });
-    results.sort((a, b) => b.score - a.score);
-    results.forEach(result => {
-      const resultDiv = document.createElement('div');
-      resultDiv.textContent = result.element.querySelector('h2').textContent;
-      // Utilisation d'un id unique si présent, sinon on peut utiliser d'autres attributs
-      const itemId = result.element.id;
-      resultDiv.onclick = function() {
-        const targetItem = document.getElementById(itemId);
-        if (targetItem) {
-          targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (type === 'lootbox') {
+        const price = parseInt(button.dataset.price, 10);
+        if (App.userData.argent >= price) {
+            App.userData.argent -= price;
+            const lootboxType = button.dataset.lootboxType;
+            let boxesToOpen = JSON.parse(sessionStorage.getItem('boxesToOpen')) || [];
+            boxesToOpen.push(lootboxType);
+            sessionStorage.setItem('boxesToOpen', JSON.stringify(boxesToOpen));
+            sessionStorage.setItem('boughtFromShop', 'true');
+            saveUserData(App.userData);
+            loadPage('ouverture_coffre');
+        } else {
+            errorMessage.textContent = "Solde insuffisant !";
         }
-        App.searchBar.value = '';
-        App.searchResults.innerHTML = '';
-      };
-      App.searchResults.appendChild(resultDiv);
-    });
-  }
-});
+    } else if (type === 'special-lootbox') {
+        App.handleBuySpecialLootbox(button);
+    } else {
+        // --- AUTHORITATIVE SERVER BUY (Equipments & Consumables) ---
+        const user = firebase.auth().currentUser;
+        if (!user) { errorMessage.textContent = "Non connecté"; return; }
 
-/* ===================== INITIALISATION ===================== */
-// Sauvegarde initiale et affichage
-App.generateDailyOffers();
-App.displayDailyOffers();
-App.updateStockDisplay();
-// Ajoutez cet écouteur une seule fois, par exemple à la fin de votre initialisation
-document.querySelectorAll('.quantity-select').forEach(select => {
-  select.addEventListener('change', function(){
+        let payload = { userId: user.uid, type: type };
+        
+        if (type === 'equipment') {
+            payload.itemId = button.dataset.id;
+            payload.price = parseInt(button.dataset.price, 10);
+        } else {
+            const bonusItem = button.closest('.bonus-item');
+            const select = bonusItem.querySelector('.quantity-select');
+            if (select) {
+                const selectedOption = select.options[select.selectedIndex];
+                payload.quantity = parseInt(selectedOption.textContent, 10);
+                payload.price = parseInt(selectedOption.getAttribute('data-price'), 10);
+            } else {
+                payload.quantity = parseInt(button.dataset.quantity, 10) || 1;
+                payload.price = parseInt(button.dataset.price, 10);
+            }
+        }
+
+        App.getRecaptchaToken('shop_buy').then(recaptchaToken => {
+            payload.recaptchaToken = recaptchaToken;
+            user.getIdToken().then(token => {
+                fetch('/api/shop/buy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        App.userData = data.userData;
+                        document.getElementById('balance').textContent = `Solde : ${App.userData.argent}`;
+                        saveUserData(App.userData);
+                        
+                        if (type === 'equipment') {
+                            button.textContent = 'Possédé';
+                            button.disabled = true;
+                        } else {
+                            App.updateStockDisplay();
+                        }
+                    } else {
+                        errorMessage.textContent = data.error || "Erreur lors de l'achat";
+                    }
+                })
+                .catch(err => {
+                    errorMessage.textContent = "Erreur réseau";
+                });
+            });
+        });
+    }
+};
+
+App.handleClaimButtonClick = function(button) {
+    const user = firebase.auth().currentUser;
+    if (!user) { alert("Veuillez vous connecter"); return; }
+
+    const currentDailyCycle = App.getParisCycleId('daily');
+    if (App.userData.daily_reward_claim_id !== currentDailyCycle) {
+        button.disabled = true; // Optimistic disable
+        App.getRecaptchaToken('shop_claim_daily').then(recaptchaToken => {
+            user.getIdToken().then(token => {
+                fetch('/api/shop/claim-daily', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        userId: user.uid,
+                        recaptchaToken: recaptchaToken
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        App.userData = data.userData;
+                        saveUserData(App.userData);
+                        button.disabled = true;
+                        button.textContent = "Déjà pris";
+                        loadPage('recompenses');
+                    } else {
+                        alert(data.error || "Erreur lors de la récupération");
+                        button.disabled = false;
+                    }
+                });
+            });
+        });
+    }
+};
+
+App.handleClaimWeeklyLootboxButtonClick = function(button) {
+    const user = firebase.auth().currentUser;
+    if (!user) { alert("Veuillez vous connecter"); return; }
+
+    button.disabled = true;
+    
+    App.getRecaptchaToken('shop_claim_weekly').then(recaptchaToken => {
+        user.getIdToken().then(token => {
+            fetch('/api/shop/claim-weekly', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId: user.uid, recaptchaToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    App.userData = data.userData;
+                    saveUserData(App.userData);
+                    
+                    let boxesToOpen = JSON.parse(sessionStorage.getItem('boxesToOpen')) || [];
+                    boxesToOpen.push(data.boxType);
+                    sessionStorage.setItem('boxesToOpen', JSON.stringify(boxesToOpen));
+                    
+                    button.textContent = "Déjà pris";
+                    loadPage('ouverture_coffre');
+                } else {
+                    alert(data.error || "Impossible de récupérer le coffre");
+                    if (data.error !== "Déjà récupéré cette semaine (Reviens Jeudi à 9h00 Paris)") {
+                         button.disabled = false;
+                    } else {
+                         button.textContent = "Déjà pris";
+                    }
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                button.disabled = false;
+            });
+        });
+    });
+};
+
+App.handleQuantityChange = function(select) {
     const selectedOption = select.options[select.selectedIndex];
     const newPrice = selectedOption.getAttribute('data-price');
-    const bonusItem = select.closest('.bonus-item');
-    const button = bonusItem.querySelector('.buyButton');
-    // On stocke le prix affiché dans le bouton (pour l’achat)
+    const button = select.closest('.bonus-item').querySelector('.buyButton');
     button.dataset.price = newPrice;
-  });
-});
+};
 
+// ===================== MINUTERIES =====================
+App.getParisDate = function() {
+    const now = new Date();
+    const options = { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const parts = formatter.formatToParts(now);
+    const get = (t) => parseInt(parts.find(p => p.type === t).value, 10);
+    return new Date(Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second')));
+};
+
+App.getParisCycleId = function(type) {
+    const nowParis = App.getParisDate();
+    // Shift -9h
+    nowParis.setUTCHours(nowParis.getUTCHours() - 9);
+    
+    if (type === 'daily') {
+        return nowParis.toISOString().split('T')[0];
+    } else {
+         const day = nowParis.getUTCDay(); // 0-6
+         const diff = (day - 4 + 7) % 7;
+         nowParis.setUTCDate(nowParis.getUTCDate() - diff);
+         return nowParis.toISOString().split('T')[0];
+    }
+};
+
+App.updateDailyTimer = function() {
+    const timerElement = document.getElementById('daily-timer');
+    if (!timerElement) {
+        clearTimeout(App.dailyTimerId);
+        return;
+    }
+    const nowParis = App.getParisDate();
+    let nextReset = new Date(nowParis);
+    nextReset.setUTCHours(9, 0, 0, 0);
+    
+    if (nowParis >= nextReset) nextReset.setUTCDate(nextReset.getUTCDate() + 1);
+
+    const timeLeft = nextReset - nowParis;
+    const hours = Math.floor(timeLeft / 3600000);
+    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+    const seconds = Math.floor((timeLeft % 60000) / 1000);
+    timerElement.textContent = `- ${hours}h ${minutes}m ${seconds}s`;
+    App.dailyTimerId = setTimeout(App.updateDailyTimer, 1000);
+};
+
+App.updateWeeklyTimer = function() {
+    const timerElement = document.getElementById('weekly-timer');
+    if (!timerElement) {
+        if (App.weeklyTimerId) clearTimeout(App.weeklyTimerId);
+        return;
+    }
+    const nowParis = App.getParisDate();
+    
+    // Target: Next Thursday 09:00:00 Paris
+    // Day 0=Sun, 4=Thu.
+    let target = new Date(nowParis);
+    target.setUTCHours(9, 0, 0, 0);
+    
+    const day = target.getUTCDay();
+    const diff = (4 - day + 7) % 7;
+    
+    if (diff === 0 && nowParis < target) {
+        // It is Thursday, before 9AM -> Target is today 9AM
+    } else {
+        let addDays = diff;
+        if (diff === 0 && nowParis >= target) addDays = 7;
+        target.setUTCDate(target.getUTCDate() + addDays);
+    }
+
+    const timeLeft = target - nowParis;
+    const days = Math.floor(timeLeft / 86400000);
+    const hours = Math.floor((timeLeft % 86400000) / 3600000);
+    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+    const seconds = Math.floor((timeLeft % 60000) / 1000);
+    timerElement.textContent = `Prochain coffre dans : ${days}j ${hours}h ${minutes}m ${seconds}s`;
+    App.weeklyTimerId = setTimeout(App.updateWeeklyTimer, 1000);
+};
+
+App.updateSpecialWeeklyOfferTimer = function() {
+    const timerElement = document.getElementById('special-weekly-offer-timer');
+    if (!timerElement) {
+        if (App.specialWeeklyOfferTimerId) clearTimeout(App.specialWeeklyOfferTimerId);
+        return;
+    }
+
+    const now = new Date();
+    const nextThursday = new Date();
+    nextThursday.setDate(now.getDate() + (11 - now.getDay()) % 7); // Prochain jeudi
+    nextThursday.setHours(0, 0, 0, 0); // À minuit
+
+    const timeLeft = nextThursday - now;
+    const days = Math.floor(timeLeft / 86400000);
+    const hours = Math.floor((timeLeft % 86400000) / 3600000);
+    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+    const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+    timerElement.textContent = `Fin de l'offre dans : ${days}j ${hours}h ${minutes}m ${seconds}s`;
+    App.specialWeeklyOfferTimerId = setTimeout(App.updateSpecialWeeklyOfferTimer, 1000);
+};
+
+// ===================== RECHERCHE =====================
+App.normalizeString = (str) => str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+App.similarityScore = function(query, itemName) {
+    const normalizedQuery = App.normalizeString(query);
+    const normalizedItemName = App.normalizeString(itemName);
+    if (normalizedItemName.startsWith(normalizedQuery)) return 3;
+    if (normalizedItemName.includes(normalizedQuery)) return 2;
+    // isSimilar logic can be simplified or kept as is if it works well
+    const minLen = Math.min(normalizedItemName.length, normalizedQuery.length);
+    let diff = Math.abs(normalizedItemName.length - normalizedQuery.length);
+    for (let i = 0; i < minLen; i++) {
+        if (normalizedItemName[i] !== normalizedQuery[i]) diff++;
+    }
+    return diff <= 2 ? 1 : 0;
+};
+
+App.handleSearch = function(searchBar) {
+    const query = searchBar.value;
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = '';
+    if (query) {
+        const allItems = document.querySelectorAll('.bonus-item');
+        const results = [];
+        allItems.forEach(item => {
+            const itemName = item.querySelector('h2').textContent;
+            const score = App.similarityScore(query, itemName);
+            if (score > 0) {
+                results.push({ element: item, score });
+            }
+        });
+
+        results.sort((a, b) => b.score - a.score);
+        const fragment = document.createDocumentFragment();
+        results.forEach(result => {
+            const resultDiv = document.createElement('div');
+            resultDiv.textContent = result.element.querySelector('h2').textContent;
+            resultDiv.onclick = () => {
+                result.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                searchBar.value = '';
+                searchResults.innerHTML = '';
+            };
+            fragment.appendChild(resultDiv);
+        });
+        searchResults.appendChild(fragment);
+    }
+};
+
+// ===================== GESTION DES ONGLETS =====================
+App.switchTab = (activeTab) => {
+    if (!activeTab) return;
+    const activeContentId = activeTab.getAttribute('data-tab');
+    document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    activeTab.classList.add('active');
+    const activeContent = document.getElementById(activeContentId);
+    if (activeContent) activeContent.classList.add('active');
+};
+
+// ===================== DÉLÉGATION D'ÉVÉNEMENTS =====================
+// Un seul écouteur pour tous les clics et changements, beaucoup plus performant.
+// On vérifie si les écouteurs ont déjà été attachés pour éviter les duplications
+// lors de la navigation sans rechargement de page.
+if (!App.shopListenersAttached) {
+    document.addEventListener('click', function(event) {
+        const buyButton = event.target.closest('.buyButton');
+        if (buyButton) {
+            event.preventDefault();
+            App.handleBuyButtonClick(buyButton);
+            return;
+        }
+
+        const claimButton = event.target.closest('.claimButton');
+        if (claimButton) {
+            event.preventDefault();
+            App.handleClaimButtonClick(claimButton);
+            return;
+        }
+        
+        const weeklyClaimButton = event.target.closest('#claim-daily-lootbox');
+        if (weeklyClaimButton) {
+            event.preventDefault();
+            App.handleClaimWeeklyLootboxButtonClick(weeklyClaimButton);
+            return;
+        }
+
+        const tab = event.target.closest('.tab-link');
+        if (tab) {
+            event.preventDefault();
+            App.switchTab(tab);
+            return;
+        }
+    });
+
+    document.addEventListener('change', function(event) {
+        const quantitySelect = event.target.closest('.quantity-select');
+        if (quantitySelect) {
+            App.handleQuantityChange(quantitySelect);
+        }
+    });
+
+    document.addEventListener('input', function(event) {
+        const searchBar = event.target.closest('#search-bar');
+        if (searchBar) {
+            App.handleSearch(searchBar);
+        }
+    });
+
+    App.shopListenersAttached = true;
+}
+
+// ===================== INITIALISATION =====================
+function initializeShop() {
+    App.updateStaticTexts();
+    App.generateDailyOffers();
+    App.displayDailyOffers();
+    App.displaySpecialWeeklyOffer(); // Afficher l'offre spéciale hebdomadaire
+    App.updateStockDisplay();
+    App.updateEquipmentButtonsState();
+    App.updateWeeklyLootboxButtonState();
+    App.updateWeeklyTimer();
+    App.updateDailyTimer();
+    App.updateSpecialWeeklyOfferTimer(); // Démarrer le minuteur de l'offre spéciale
+
+    // Gérer l'onglet initial et la redirection
+    const shopSection = sessionStorage.getItem('shopSection');
+    if (shopSection === 'equipments') {
+        const equipmentsTab = document.querySelector('[data-tab="equipment-content"]');
+        App.switchTab(equipmentsTab);
+        sessionStorage.removeItem('shopSection');
+    } else {
+        const initialTab = document.querySelector('.tab-link.active');
+        App.switchTab(initialTab);
+    }
+}
+
+// Lancer l'initialisation une fois que le DOM est prêt
+// (dans un projet moderne, on utiliserait DOMContentLoaded, mais c'est plus sûr ainsi)
+initializeShop();
+
+window.addEventListener('unload', function() {
+    if (App.dailyTimerId) clearTimeout(App.dailyTimerId);
+    if (App.weeklyTimerId) clearTimeout(App.weeklyTimerId);
+    if (App.specialWeeklyOfferTimerId) clearTimeout(App.specialWeeklyOfferTimerId);
+});
 

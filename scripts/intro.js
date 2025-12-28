@@ -82,7 +82,7 @@ App.showTouchScreen = function() {
 
 // Au clic sur l'écran "Toucher pour commencer", charger la page appropriée selon l'état d'authentification
 App.connectToGameServer = function(userId) {
-  const serverUrl = "https://1ea7-2a01-cb08-814b-6100-aa42-50a6-fb21-9441.ngrok-free.app";
+  const serverUrl = window.location.origin;
 
   App.socket = io(serverUrl, {
     transports: ["websocket"],
@@ -115,15 +115,37 @@ App.connectToGameServer = function(userId) {
 
 
 // --- Gestion des données utilisateurs ---
-firebase.auth().onAuthStateChanged(user => {
+if (!firebase.apps.length) {
+    const config = window.firebaseConfig || {
+        apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
+        authDomain: "willy0s-parallel-arena.firebaseapp.com",
+        projectId: "willy0s-parallel-arena",
+        appId: "1:683284732830:web:ef7fb4cf1c88f73eead48f"
+    };
+    firebase.initializeApp(config);
+}
+
+firebase.auth().onAuthStateChanged(async user => {
   if (user) {
     App.User = true;
     App.userId = user.uid;
+    
+    // Chargement initial depuis le serveur local
+    try {
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/user/${user.uid}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success && data.userData) {
+            localStorage.setItem('userData', JSON.stringify(data.userData));
+        }
+    } catch (e) {}
+
     let currentUserData = getUserData();
     saveUserData(currentUserData);
     //App.connectToGameServer(App.userId);
   } else {
-    //App.setConnectionStatus(false);
     // Aucun utilisateur authentifié
   }
 });
@@ -131,15 +153,13 @@ firebase.auth().onAuthStateChanged(user => {
 if (App.touchScreen) {
   App.touchScreen.addEventListener('click', function() {
     App.clearConnectionStatus();
-    loadPage('menu_principal'); // Nom de la page sans extension
+    if (firebase.auth().currentUser) {
+      loadPage('menu_principal'); // Nom de la page sans extension
+    } else {
+      loadPage('connection');
+    }
   });
-} else {
-  // Lors d'un clic, charger la page de connexion
-  App.clearConnectionStatus();
-  App.touchScreen.addEventListener('click', function() {
-    loadPage('connection');
-  });
-};
+}
 
 
 // Enregistrement du Service Worker (ceci peut rester global)

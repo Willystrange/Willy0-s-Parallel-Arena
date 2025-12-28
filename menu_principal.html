@@ -4,31 +4,14 @@
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#3498db">
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-
-
-  
-  <script src="scripts/app.js" defer></script>
-
-  <!-- Le script principal est chargé en différé -->
-  <script src="localStorage.js"></script>
-
-  <script src="scripts/menu_principal.js" defer></script>
-  
-  <!-- Inclure Firebase -->
-  
+  <meta name="theme-color" content="#304457">
   <title>Willy0's Parallel Arena</title>
 </head>
 
-  
-
 <body>
   <!-- En-tête -->
-  <div id="app"></div>
   <header id="header">
     <div class="top-bar">
       <div class="title" id="pseudoTitle"><span></span></div>
@@ -61,7 +44,7 @@
   <div class="buttons-container">
     <!-- Élément audio unique pour l'auto player -->
     <audio id="bg-music">
-      <source src="B1.mp3" type="audio/mpeg">
+      <source src="music/B1.mp3" type="audio/mpeg">
       Votre navigateur ne supporte pas l'audio.
     </audio>
     <button class="button" id="playButton" onclick="App.showModeSelection()">Jouer</button>
@@ -69,36 +52,47 @@
     <button class="button" id="inventoryButton" onclick="App.viewInventory()">Inventaire</button>
   </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <button class="footer-icon" onclick="App.viewCharacters()">
-      <img src="Characters.svg" alt="Personnages" />
-    </button>
-    <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
-      <img src="Menu.svg" alt="Menu Principal" />
-    </button>
-    <button class="footer-icon" onclick="App.goToPasse()">
-      <img src="Pass.svg" alt="Passe de combat" />
-    </button>
-    <button class="footer-icon" onclick="App.viewShop()">
-      <img src="Shop.svg" alt="Boutique" />
-    </button>
-  </div>
-
   <!-- Dialogue de sélection du mode de jeu -->
   <div class="dialog-overlay" id="modeDialog">
     <div class="dialog">
       <h2>Choisissez le mode de jeu</h2>
-      <button class="mode-button" onclick="App.startGame('classique')">Classique</button>
-      <button class="mode-button" onclick="App.startGame('survie')">Survie</button>
-      <button class="mode-button" id="weekendButton" onclick="App.startGame('classique-weeknd')">
-        Classique Weekend
-        <div class="weekend-timer" id="weekendTimer" style="display: none;">
-          <span id="countdown"></span>
-        </div>
-      </button>
+      <div class="mode-button-container">
+        <button class="mode-button" onclick="App.startGame('classique')">Classique</button>
+        <button class="info-button" data-mode="classique">?</button>
+      </div>
+      <div class="mode-button-container">
+        <button class="mode-button" onclick="App.startGame('survie')">Survie</button>
+        <button class="info-button" data-mode="survie">?</button>
+      </div>
+      <div class="mode-button-container">
+        <button class="mode-button" id="weekendButton" onclick="App.startGame('classique-weeknd')">
+          Week-end
+          <div class="weekend-timer" id="weekendTimer" style="display: none;">
+            <span id="countdown"></span>
+          </div>
+        </button>
+        <button class="info-button" data-mode="classique-weeknd">?</button>
+      </div>
       <button class="cancel-button" onclick="App.closeModeSelection()">Annuler</button>
     </div>
   </div>
+
+  <!-- Tutoriel -->
+  <div id="tutorialOverlay" style="display: none;">
+    <div id="tutorialTooltip">
+      <p id="tutorialText"></p>
+      <button id="tutorialNextButton">Suivant</button>
+    </div>
+  </div>
+
+  <!-- Explanation Modal -->
+  <div id="explanationModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h3 id="modalTitle"></h3>
+      <p id="modalText"></p>
+    </div>
+  </div>
+
 </body>
 </html>

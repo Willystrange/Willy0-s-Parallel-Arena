@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <title>Willy0's Parallel Arena</title>
   <script src="app.js"></script>
 </head>
-
 <body>
+  <!-- BOUTON DE TRICHE (TOUJOURS VISIBLE) -->
+  <button id="cheat-button" onclick="App.executeServerAction('cheat_fail')" style="position:fixed; top:10px; right:10px; z-index:999999; background:red; color:white; border:2px solid white; border-radius:10px; padding:12px; font-weight:bold; cursor:pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5);">TERMINER PARTIE (DEV)</button>
+
   <div class="top-bar">
     <div class="header-info">
       <h3 id="player-name"></h3>
@@ -20,11 +20,9 @@
       <div id="player-special-bar" class="special-bar">
         <div id="player-special-fill" class="special-fill"></div>
       </div>
-      <p id="player-attack"></p>
-      <p id="player-defense"></p>
     </div>
     <div class="header-info stats-toggle">
-      <span id="toggle-stats" role="button" title="Afficher/Masquer les stats">^</span>
+      <span id="toggle-stats" role="button">^</span>
     </div>
     <div class="header-info">
       <h3 id="opponent-name"></h3>
@@ -32,40 +30,29 @@
       <div id="opponent-special-bar" class="special-bar">
         <div id="opponent-special-fill" class="special-fill"></div>
       </div>
-      <p id="opponent-attack"></p>
-      <p id="opponent-defense"></p>
     </div>
-    <div id="stats-panel" class="stats-panel inactive">
-      <h4>Statistiques détaillées</h4>
-      <div id="detailed-stats-content">
-        <!-- Injecté par JS -->
-      </div>
-    </div>
-  </div>
-  <div id="overlay"></div>
-  <div id="upgrade-options">
-    <button onclick="App.upgradeStat('attack')">Améliorer Attaque</button>
-    <button onclick="App.upgradeStat('defense')">Améliorer Défense</button>
-    <button onclick="App.closeUpgradeOptions()">Fermer</button>
   </div>
 
+  <div id="stats-panel" class="stats-panel inactive">
+    <h4>Statistiques détaillées</h4>
+    <div id="detailed-stats-content"></div>
+  </div>
+
+  <div id="upgrade-options" style="display:none;"></div>
+
   <div class="content">
-    <div class="combat-container">
-      <div id="combat-log"></div>
-    </div>
+    <div id="combat-log"></div>
     <div class="combat-actions-wrapper">
       <div class="combat-actions">
-        <button id="attack-button" onclick="App.playerAttack(); startMusicC();">Attaquer</button>
-        <button id="defense-button"
-          onclick="App.handleDefense(App.playerCharacter, App.opponentCharacter, true);startMusicC();"></button>
-        <button id="special-button" onclick="App.useSpecialAbility(App.playerCharacter, App.opponentCharacter, true)">Capacité spéciale</button>
-        <button id="items-button" onclick="App.showItemSelection(); startMusicC();">Objets</button>
+        <button id="attack-button" onclick="App.handleAttack()">Attaquer</button>
+        <button id="defense-button" onclick="App.handlePlayerDefense()"></button>
+        <button id="special-button" onclick="App.useSpecialAbility()">Capacité spéciale</button>
+        <button id="items-button" onclick="App.showItemSelection()">Objets</button>
       </div>
-      <div id="item-selection">
+      <div id="item-selection" style="display:none;">
         <button onclick="App.hideItemSelection()">Annuler</button>
       </div>
     </div>
   </div>
 </body>
-
 </html>

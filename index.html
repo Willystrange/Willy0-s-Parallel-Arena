@@ -3,7 +3,7 @@
 <head>
 
   <meta charset="UTF-8">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
 
 
   <title>Willy0's Parallel Arena</title>
@@ -14,26 +14,73 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-performance-compat.js"></script>
+  
+  <!-- KILL SERVICE WORKER (Cache Fix) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log("Service Worker unregistered to force update.");
+        }
+      });
+    }
+  </script>
+  
+  <!-- RECAPTCHA V3 RÉACTIVÉ -->
+  <script src="https://www.google.com/recaptcha/api.js?render=6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG"></script>
+
+  <script>
+    // Bloquer l'affichage immédiatement pour éviter le "flicker" avant le check maintenance
+    document.documentElement.style.display = 'none';
+    
+    (async function() {
+      try {
+        const res = await fetch('/api/config/maintenance');
+        const data = await res.json();
+        if (data.maintenance) {
+          window.location.href = 'maintenance.html';
+        } else {
+          document.documentElement.style.display = 'block';
+        }
+      } catch (e) {
+        document.documentElement.style.display = 'block';
+      }
+    })();
+  </script>
+
+<script src="scripts/app.js?v=force_reload_2"></script>
+  <script src="scripts/combat-core.js"></script>
+  <script src="scripts/mastery-system.js"></script>
   <link rel="stylesheet" href="intro.css">
-  <link rel="stylesheet" href="quetes.css">
+  <link rel="stylesheet" href="footer.css">
 </head>
 <body>
   <!-- Zone de l'application : éléments persistants et contenu dynamique -->
+  <div class="footer persistent">
+    <button class="footer-icon" onclick="loadPage('perso_stats')">
+      <img src="Characters.svg" alt="Personnages">
+    </button>
+    <button class="footer-icon" onclick="loadPage('menu_principal')">
+      <img src="Menu.svg" alt="Menu Principal">
+    </button>
+    <button class="footer-icon" onclick="loadPage('passe_de_combat')">
+      <img src="Pass.svg" alt="Passe de combat">
+    </button>
+    <button class="footer-icon" onclick="loadPage('boutique')">
+      <img src="Shop.svg" alt="Boutique">
+    </button>
+  </div>
   <audio id="background-music-1" loop>
-    <source src="../B1.mp3" type="audio/mp3">
+    <source src="music/B1.mp3" type="audio/mp3">
     Votre navigateur ne supporte pas l'élément audio.
   </audio>
   <audio id="background-music-2" loop>
-    <source src="../B2.mp3" type="audio/mp3">
+    <source src="music/B2.mp3" type="audio/mp3">
     Votre navigateur ne supporte pas l'élément audio.
   </audio>
   <div id="app">
   </div>
-
-  <!-- Inclusion du script principal de la SPA -->
-  <script src="localStorage.js"></script>
-  <script src="scripts/app.js"></script>
+  <div id="footer-placeholder"></div>
 </body>
 </html>

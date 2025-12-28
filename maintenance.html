@@ -4,50 +4,167 @@
     <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#304457">
-    <script src="scripts/app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="scripts/maintenance.js" data-dynamic="true"></script>
-
-    <title>Willy0's Parallel Arena</title>
+    <meta name="theme-color" content="#121212">
+    <title>Maintenance - Parallel Arena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #333;
-            color: white;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
             overflow: hidden;
         }
 
-        .maintenance-container {
+        .background-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(187, 134, 252, 0.15) 0%, rgba(187, 134, 252, 0) 70%);
+            animation: pulse 4s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
             text-align: center;
-            background-color: #444;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
         }
 
-        .maintenance-title {
-            font-size: 24px;
-            margin-bottom: 20px;
+        .icon-wrapper {
+            margin-bottom: 30px;
         }
 
-        .maintenance-info {
-            font-size: 18px;
-            margin-top: 10px;
+        .game-icon {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 0 15px rgba(187, 134, 252, 0.5));
+            animation: float 3s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: #bb86fc;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            height: 2px;
+            width: 50px;
+            background: #03dac6;
+            margin: 20px auto;
+            border-radius: 2px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #03dac6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
         }
     </style>
 </head>
 <body>
-    <div class="maintenance-container">
-        <h1 class="maintenance-title">Le jeu est en maintenance</h1>
-        <p class="maintenance-info" id="maintenance-info">Chargement des informations...</p>
+    <div class="background-glow"></div>
+    
+    <div class="container">
+        <div class="icon-wrapper">
+            <img src="icon.png" alt="Parallel Arena" class="game-icon">
+        </div>
+        
+        <h1>Nous sommes en maintenance</h1>
+        <div class="divider"></div>
+        
+        <p id="maintenance-message">Le serveur revient bientôt !</p>
+        
+        <div id="status-container" class="status-badge">
+            Vérification du statut<span class="loading-dots"></span>
+        </div>
     </div>
+
+    <script>
+        async function checkMaintenance() {
+            try {
+                const response = await fetch('/api/config/maintenance');
+                const data = await response.json();
+                
+                if (!data.maintenance) {
+                    const badge = document.getElementById('status-container');
+                    const msg = document.getElementById('maintenance-message');
+                    
+                    // Message de fin de maintenance
+                    badge.style.background = "rgba(3, 218, 198, 0.2)";
+                    badge.style.color = "#03dac6";
+                    badge.innerHTML = "MAINTENANCE TERMINÉE !";
+                    msg.innerHTML = "Le serveur est de nouveau en ligne. Redémarrage du Jeu...";
+                    msg.style.color = "#03dac6";
+                    
+                    // Rechargement après un court délai pour que l'utilisateur lise le message
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                    return;
+                }
+                
+                if (data.maintenance_message) {
+                    document.getElementById('maintenance-message').innerText = data.maintenance_message;
+                }
+            } catch (e) {
+                console.error("Erreur check maintenance:", e);
+            }
+        }
+
+        // Vérification très fréquente (toutes les 5 secondes) pour la réactivité
+        setInterval(checkMaintenance, 5000);
+        checkMaintenance();
+    </script>
 </body>
 </html>

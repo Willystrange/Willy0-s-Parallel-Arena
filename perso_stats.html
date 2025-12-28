@@ -4,10 +4,11 @@
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#304457">
   <script src="scripts/app.js"></script>
+  <script src="scripts/equipments.js"></script>
   
   <script src="scripts/perso_stats.js"></script>
   <title>Willy0's Parallel Arena</title>
@@ -34,19 +35,25 @@
       <!-- Les statistiques seront affichées ici -->
     </div>
   </div>
-  <div class="footer">
-    <button class="footer-icon perso-icon" onclick="App.viewCharacters()" id="perso-icon">
-      <img src="Characters.svg" alt="Personnages">
-    </button>
-    <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
-      <img src="Menu.svg" alt="Menu Principal">
-    </button>
-    <button class="footer-icon passe-icon" onclick="App.goToPasse()">
-      <img src="Pass.svg" alt="Passe de combat">
-    </button>
-    <button class="footer-icon" onclick="App.viewShop()">
-      <img src="Shop.svg" alt="Boutique">
-    </button>
+  
+  <div id="mastery-help-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Système de Maîtrise</h2>
+      <p>La maîtrise représente votre habileté avec un personnage. Elle est divisée en Niveaux et en Grades.</p>
+      
+      <h3>Niveaux de Maîtrise</h3>
+      <p>Chaque personnage progresse à travers plusieurs niveaux de maîtrise, débloquant des récompenses et affirmant votre expertise. L'ordre est le suivant :</p>
+      <ul id="mastery-levels-list">
+        <!-- JS will populate this -->
+      </ul>
+  
+      <h3>Grades de Maîtrise</h3>
+      <p>Dans chaque niveau, vous devez gravir plusieurs grades. Chaque grade requiert un certain nombre de points de maîtrise, qui s'obtiennent en jouant avec le personnage. L'ordre est le suivant :</p>
+      <ul id="mastery-grades-list">
+        <!-- JS will populate this -->
+      </ul>
+    </div>
   </div>
 </body>
 </html>

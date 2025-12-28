@@ -5,42 +5,14 @@
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#304457">
   <title>Willy0's Parallel Arena</title>
   <script src="scripts/app.js"></script>
 </head>
 
 <body class="passe_de_combat">
-  <!-- Place ce DIV tout en haut de ton HTML, juste après <body> -->
-  <div id="adblock-overlay" style="
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #000;
-      color: #fff;
-      z-index: 9999;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 0 20px;
-  ">
-    <div id="adblock-message" style="
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        line-height: 1.5;
-        font-size: 1em;
-    ">
-      Vous utilisez un bloqueur de publicité.<br>
-      Vous ne pouvez donc ni interragir avec cette page ni obtenir les récompenses de celle-ci avant de l'avoir
-      désactivé.<br>
-      Nous vous rappelons que nous ne mettons pas de publicité tiers sur ce site. Vous pouvez donc le mettre sur la
-      liste blanche de votre bloqueur.<br>
-      <br>
-      (Touchez l'écran pour revenir au menu principal)
-    </div>
-  </div>
-
   <!-- Header avec titre centré -->
   <div class="header">
     <h1 class="premiumA">
@@ -75,34 +47,21 @@
     <div class="container" id="album-container">
       <!-- Les pages seront créées dynamiquement -->
     </div>
-    <div id="Dates" class="Dates">Le Parallel Pass 5 durera du 20 septembre au 22 novembre 2025.</div>
   </div>
+  <div id="Dates" class="Dates">Le Parallel Pass 7 durera du 21 mars 2026 au 23 mai 2026.</div>
 
 
   <!-- Footer -->
-  <div class="footer">
-    <button class="footer-icon perso-icon" onclick="App.viewCharacters()" id="perso-icon">
-      <img src="Characters.svg" alt="Personnages">
-    </button>
-    <button class="footer-icon main-menu-icon" onclick="App.showMainMenu()">
-      <img src="Menu.svg" alt="Menu Principal">
-    </button>
-    <button class="footer-icon pass-icon" onclick="App.goToPasse()">
-      <img src="Pass.svg" alt="Passe de combat">
-    </button>
-    <button class="footer-icon" onclick="App.viewShop()">
-      <img src="Shop.svg" alt="Boutique">
-    </button>
-  </div>
+  
 
   <!-- Popups -->
-  <div class="popup" id="ad-popup">
+  <div class="popup" id="premium-pass-popup">
     <h2 style="display: flex; justify-content: space-between; align-items: center;">
-      Parallel Pass 5 Premium
+      Parallel Pass 7 Premium
       <img src="Parallel-Pass-3-premium.png" alt="Icône Parallel Pass 3 Premium"
         style="width: 80px; height: 80px; margin-left: 10px;">
     </h2>
-    <p>Obtenez des récompenses bonus dont le personnage "Nautilus" au niveau 60 pour 850 points !</p>
+    <p>Obtenez des récompenses bonus dont le personnage "Korb" au niveau 60 pour 850 points !</p>
     <div>
       <button onclick="App.hidePopup()">Annuler</button>
       <button onclick="App.handlePurchase()">Acheter</button>
@@ -111,7 +70,7 @@
   </div>
 
   <audio id="bg-music">
-    <source src="B1.mp3" type="audio/mpeg">
+    <source src="music/B1.mp3" type="audio/mpeg">
     Votre navigateur ne supporte pas l'audio.
   </audio>
 
@@ -120,8 +79,6 @@
     <p>Achat en cours...</p>
   </div>
 
-  <script src="localStorage.js"></script>
-  <script src="scripts/passe_de_combat.js"></script>
-</body>
+  <script src="scripts/passe_de_combat.js"></script></body>
 
 </html>

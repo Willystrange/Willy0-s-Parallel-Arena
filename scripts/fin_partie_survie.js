@@ -27,12 +27,20 @@ App.afficherDonnees = function() {
     document.getElementById('fin_argent').classList.add('show');
   }, 2000);
 
+  // Utilisation du module centralisé
+  let masteryDelay = 0;
+  if (App.MasterySystem && App.MasterySystem.displayMasteryInfo) {
+    masteryDelay = App.MasterySystem.displayMasteryInfo('content');
+  }
+
   // Afficher le bouton quitter après les récompenses
   setTimeout(() => {
-    document.getElementById('quit-button').style.display = 'block';
-  }, 4000);
+    const quitButton = document.getElementById('quit-button');
+    quitButton.style.display = 'block';
+    // On s'assure que le bouton est bien le dernier élément
+    document.getElementById('content').appendChild(quitButton);
+  }, 3000 + masteryDelay);
 };
 
 // Initialisation au chargement de la page
-
 App.afficherDonnees();

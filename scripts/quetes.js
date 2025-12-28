@@ -13,7 +13,7 @@ App.DAILY_REWARD_AMOUNT = 15;
 App.WEEK_REWARD_AMOUNT = 20;
 
 // --- FONCTIONS UTILITAIRES ---
-App.CHARACTERS = ['Willy', 'Cocobi', 'Sboonie', 'Rosalie', 'Poulpy', 'Inconnu', 'Diva', 'Colorina', 'Grours', 'Oiseau', 'Baleine', 'Doudou', 'Coeur', 'Perro', 'Nautilus', 'Boompy', ];
+App.CHARACTERS = ['Willy', 'Cocobi', 'Sboonie', 'Rosalie', 'Poulpy', 'Inconnu', 'Diva', 'Colorina', 'Grours', 'Oiseau', 'Baleine', 'Doudou', 'Coeur', 'Perro', 'Nautilus', 'Boompy', 'Paradoxe', 'Korb', ];
 
 App.getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -52,10 +52,10 @@ App.assignRandomQuest = () => {
           userData[`${id}_reward`] = App.DAILY_REWARD_AMOUNT;
         }
         if (questCurrent >= questTotal) {
-          if (!userData[`${id}_completed`]) {
-            userData.argent = (userData.argent || 0) + App.DAILY_REWARD_AMOUNT;
-            alert(`Quête ${questText} terminée : +${App.DAILY_REWARD_AMOUNT} argent`);
+          // Correction syntaxe et logique : on marque comme complété avant de réclamer
+          if (!userData[`${id}_completed`] || !userData[`${id}_rewardClaimed`]) {
             userData[`${id}_completed`] = true;
+            App.checkAndRewardQuestCompletion(id, userData);
           }
           questElement.innerHTML = `
           <li>
@@ -187,117 +187,91 @@ App.updateWeeklyProgressBar = (containerId, total, current) => {
 
 // --- GESTION DES QUÊTES HEBDOMADAIRES ---
 App.generateWeeklyQuests = () => {
-  const userData = getUserData();
-  userData.quetes_genere = true;
+    const userData = getUserData();
+    userData.quetes_genere = true;
 
-  for (let week = 1; week <= 9; week++) {
-    const availableQuests = [];
-    const unlockedCharacters = App.CHARACTERS.filter(c => userData[c] === 1);
+    const questTemplates = [
+        { type: 'VPCS', text: (n, char) => `Gagner ${n} parties avec ${char} en mode classique.`, objectives: { easy: [5, 8], medium: [9, 15], hard: [16, 25] }, requiresCharacter: true },
+        { type: 'SPS', text: (n, char) => `Survivre ${n} manches en mode survie avec ${char}.`, objectives: { easy: [10, 20], medium: [21, 35], hard: [36, 50] }, requiresCharacter: true },
+        { type: 'VCS', text: (n) => `Gagner ${n} parties en mode classique.`, objectives: { easy: [7, 12], medium: [13, 20], hard: [21, 30] } },
+        { type: 'DSC', text: (n) => `Infliger ${n} points de dégâts en mode classique.`, objectives: { easy: [75000, 150000], medium: [150001, 300000], hard: [300001, 600000] } },
+        { type: 'O', text: (n) => `Utiliser ${n} objets.`, objectives: { easy: [8, 15], medium: [16, 25], hard: [26, 40] } },
+        { type: 'SS', text: (n) => `Survivre à ${n} manches en mode survie.`, objectives: { easy: [15, 25], medium: [26, 40], hard: [41, 60] } },
+        { type: 'DC', text: (n) => `Se défendre ${n} fois en mode classique.`, objectives: { easy: [15, 25], medium: [26, 40], hard: [41, 60] } },
+        { type: 'CC', text: (n) => `Utiliser ${n} capacités spéciales en mode classique.`, objectives: { easy: [25, 40], medium: [41, 60], hard: [61, 80] } },
+        { type: 'DS', text: (n) => `Infliger ${n} points de dégâts en mode survie.`, objectives: { easy: [100000, 200000], medium: [200001, 400000], hard: [400001, 700000] } },
+        { type: 'CS', text: (n) => `Utiliser la capacité spéciale ${n} fois en mode survie.`, objectives: { easy: [25, 45], medium: [46, 65], hard: [66, 90] } },
+        { type: 'CRC', text: (n) => `Faire ${n} coups critiques.`, objectives: { easy: [10, 20], medium: [21, 35], hard: [36, 50] } },
+        { type: 'BSC', text: (n) => `Bloquer ${n} capacités spéciales.`, objectives: { easy: [8, 15], medium: [16, 25], hard: [26, 40] } }
+    ];
 
-    if (unlockedCharacters.length > 0) {
-      const char1 = unlockedCharacters[Math.floor(Math.random() * unlockedCharacters.length)];
-      const winsWithChar = App.getRandomNumber(7, 15);
-      availableQuests.push({
-        text: `Gagner ${winsWithChar} parties avec ${char1} en mode classique.`,
-        total: winsWithChar,
-        current: 0,
-        type: 'VPCS',
-        character: char1
-      });
+    const weeklyRewards = {
+        easy: { xp: 150, recompense: 1, text: "1 récompense aléatoire et 150XP pour le Parallel Pass" },
+        medium: { xp: 250, recompense: 2, text: "2 récompenses aléatoires et 250XP pour le Parallel Pass" },
+        hard: { xp: 500, recompense: 4, text: "4 récompenses aléatoires et 500XP pour le Parallel Pass" }
+    };
 
-      const char2 = unlockedCharacters[Math.floor(Math.random() * unlockedCharacters.length)];
-      const survWithChar = App.getRandomNumber(14, 27);
-      availableQuests.push({
-        text: `Survivre ${survWithChar} manches en mode survie avec ${char2}.`,
-        total: survWithChar,
-        current: 0,
-        type: 'SPS',
-        character: char2
-      });
+    for (let week = 1; week <= 9; week++) {
+        const unlockedCharacters = App.CHARACTERS.filter(c => userData[c] === 1);
+        let availableTemplates = questTemplates.slice();
+        if (unlockedCharacters.length === 0) {
+            availableTemplates = availableTemplates.filter(t => !t.requiresCharacter);
+        }
+
+        const finalQuests = [];
+        const difficultiesToAssign = ['hard', 'medium', 'medium', 'easy', 'easy'];
+        let templatesToUse = App.getRandomElements(availableTemplates, 5);
+
+        for(let i = 0; i < 5; i++) {
+            const difficulty = difficultiesToAssign[i];
+            const questTemplate = templatesToUse[i];
+
+            const [min, max] = questTemplate.objectives[difficulty];
+            const total = App.getRandomNumber(min, max);
+            const reward = weeklyRewards[difficulty];
+            let character = null;
+            let text = '';
+
+            if (questTemplate.requiresCharacter) {
+                character = unlockedCharacters[Math.floor(Math.random() * unlockedCharacters.length)];
+                text = questTemplate.text(total, character);
+            } else {
+                text = questTemplate.text(total);
+            }
+
+            finalQuests.push({
+                text: text,
+                total: total,
+                current: 0,
+                type: questTemplate.type,
+                character: character,
+                completed: false,
+                reward_text: reward.text,
+                reward_xp: reward.xp,
+                reward_recompense: reward.recompense
+            });
+        }
+
+
+        finalQuests.forEach((quest, idx) => {
+            const id = `Semaine${week}_${idx + 1}`;
+            Object.assign(userData, {
+                [`${id}_text`]: quest.text,
+                [`${id}_total`]: quest.total,
+                [`${id}_current`]: quest.current,
+                [`${id}_type`]: quest.type,
+                [`${id}_completed`]: false,
+                [`${id}_reward_text`]: quest.reward_text,
+                [`${id}_reward_xp`]: quest.reward_xp,
+                [`${id}_reward_recompense`]: quest.reward_recompense,
+            });
+            if (quest.character) {
+                userData[`${id}_character`] = quest.character;
+            }
+        });
     }
 
-    const wins = App.getRandomNumber(8, 20);
-    availableQuests.push({
-      text: `Gagner ${wins} parties en mode classique.`,
-      total: wins,
-      current: 0,
-      type: 'VCS'
-    });
-
-    const dmgClassic = App.getRandomNumber(100000, 500000);
-    availableQuests.push({
-      text: `Infliger ${dmgClassic} points de dégâts en mode classique.`,
-      total: dmgClassic,
-      current: 0,
-      type: 'DSC'
-    });
-
-    const items = App.getRandomNumber(10, 20);
-    availableQuests.push({
-      text: `Utiliser ${items} objets.`,
-      total: items,
-      current: 0,
-      type: 'O'
-    });
-
-    const survRounds = App.getRandomNumber(20, 40);
-    availableQuests.push({
-      text: `Survivre à ${survRounds} manches en mode survie.`,
-      total: survRounds,
-      current: 0,
-      type: 'SS'
-    });
-
-    const defenses = App.getRandomNumber(20, 40);
-    availableQuests.push({
-      text: `Se défendre ${defenses} fois en mode classique.`,
-      total: defenses,
-      current: 0,
-      type: 'DC'
-    });
-
-    const specialClassic = App.getRandomNumber(35, 60);
-    availableQuests.push({
-      text: `Utiliser ${specialClassic} capacités spéciales en mode classique.`,
-      total: specialClassic,
-      current: 0,
-      type: 'CC'
-    });
-
-    const dmgSurvival = App.getRandomNumber(150000, 550000);
-    availableQuests.push({
-      text: `Infliger ${dmgSurvival} points de dégâts en mode survie.`,
-      total: dmgSurvival,
-      current: 0,
-      type: 'DS'
-    });
-
-    const specialSurvival = App.getRandomNumber(35, 65);
-    availableQuests.push({
-      text: `Utiliser la capacité spéciale ${specialSurvival} fois en mode survie.`,
-      total: specialSurvival,
-      current: 0,
-      type: 'CS'
-    });
-
-    const weeklyQuests = App.getRandomElements(availableQuests, 5);
-    weeklyQuests.forEach((quest, idx) => {
-      const id = `Semaine${week}_${idx + 1}`;
-      Object.assign(userData, {
-        [`${id}_text`]: quest.text,
-        [`${id}_total`]: quest.total,
-        [`${id}_current`]: quest.current,
-        [`${id}_type`]: quest.type,
-        [`${id}_completed`]: false,
-        [`${id}_reward`]: "1 récompense aléatoire"
-      });
-      if (quest.character) {
-        userData[`${id}_character`] = quest.character;
-      }
-    });
-  }
-
-  saveUserData(userData);
+    saveUserData(userData);
 };
 
 
@@ -314,16 +288,21 @@ App.displayWeeklyQuests = () => {
     for (let i = 1; i <= 5; i++) {
       const questKey = `Semaine${weekNumber}_${i}`;
       const questText = userData[`${questKey}_text`] || '';
+      if (!questText) continue; // Do not display empty quests
       const questTotal = userData[`${questKey}_total`] || 1;
       let questCurrent = userData[`${questKey}_current`] || 0;
+      const rewardText = userData[`${questKey}_reward_text`] || "Récompense non spécifiée";
+
       if (questCurrent >= questTotal) {
-        userData[`${questKey}_completed`] = true;
-        // On sauvegarde en dehors de la boucle interne pour éviter plusieurs écritures
+        if (!userData[`${questKey}_completed`] || !userData[`${questKey}_rewardClaimed`]) {
+            userData[`${questKey}_completed`] = true;
+            App.checkAndRewardQuestCompletion(questKey, userData);
+        }
       }
       const progressBarId = `week-${weekNumber}-quest-${i}`;
       weeklyContent += `<li>
         <p>${questText}</p>
-        <p class="reward-info">Récompense : 1 récompense aléatoire et 200XP pour le Parallel Pass</p>
+        <p class="reward-info">Récompense : ${rewardText}</p>
         <div class="progress-bar-container" id="${progressBarId}">
           <div class="progress-bar" style="width: ${(questCurrent / questTotal) * 100}%;"></div>
           <div class="progress-bar-text">${questCurrent >= questTotal ? 'Quête terminée' : `${questCurrent} / ${questTotal}`}</div>
@@ -338,13 +317,53 @@ App.displayWeeklyQuests = () => {
   saveUserData(userData);
 };
 
+// --- GESTION DES RÉCOMPENSES EN SÉRIE ---
+App.activeClaimsCount = 0;
+App.accumulatedRewards = [];
+
 App.checkAndRewardQuestCompletion = (questKey, userData) => {
   if (userData[`${questKey}_completed`] && !userData[`${questKey}_rewardClaimed`]) {
-    const questText = userData[`${questKey}_text`];
-    userData.pass_XP = (userData.pass_XP || 0) + 200;
-    userData.recompense = (userData.recompense || 0) + 1;
-    alert(`Quête ${questText} terminée : +200XP pour le Parallel Pass et +1 récompense aléatoire`)
-    userData[`${questKey}_rewardClaimed`] = true;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    App.activeClaimsCount++;
+
+    App.getRecaptchaToken('quest_claim').then(recaptchaToken => {
+        user.getIdToken().then(token => {
+            fetch('/api/quest/claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ userId: user.uid, questKey: questKey, recaptchaToken: recaptchaToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                App.activeClaimsCount--;
+                if (data.success) {
+                    localStorage.setItem('userData', JSON.stringify(data.userData));
+                    if (data.rewards) {
+                        // Récupérer le texte de la quête
+                        const questText = data.userData[questKey + '_text'] || "Quête accomplie";
+                        // Ajouter l'intitulé de la quête à chaque récompense
+                        const detailedRewards = data.rewards.map(r => ({
+                            ...r,
+                            info: `<span style="color:#bb86fc; font-weight:bold;">${questText}</span><br>${r.info || ''}`
+                        }));
+                        App.accumulatedRewards = App.accumulatedRewards.concat(detailedRewards);
+                    }
+                }
+                
+                // Si toutes les quêtes en cours ont été traitées, on affiche tout
+                if (App.activeClaimsCount === 0 && App.accumulatedRewards.length > 0) {
+                    sessionStorage.setItem('pendingRewards', JSON.stringify(App.accumulatedRewards));
+                    App.accumulatedRewards = [];
+                    loadPage('recompenses');
+                }
+            })
+            .catch(() => {
+                App.activeClaimsCount--;
+            });
+        });
+    });
   }
 };
 
@@ -368,16 +387,7 @@ App.getNextDailyAtNine = () => {
   return next;
 };
 
-// Retourne un objet Date pour le prochain lundi à 09:00 (heure de Paris)
-App.getNextMondayAtNine = () => {
-  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
-  const day = now.getDay();           // 0=dimanche…6=samedi
-  const daysToMonday = (8 - day) % 7; // si day=1 (lundi), → 0, sinon nombre de jours restant
-  const next = new Date(now);
-  next.setDate(now.getDate() + daysToMonday);
-  next.setHours(9, 0, 0, 0);
-  return next;
-};
+
 
 // (Le calcul pour les quêtes hebdomadaires reste App.getNextThursdayAtNine)
 
@@ -478,7 +488,7 @@ App.updateAllCountdowns = () => {
 
 
 App.getCustomWeekNumber = (date) => {
-  const startDate = new Date('2025-07-16T07:00:00Z'); // 9h en France (UTC+1 en hiver)
+  const startDate = new Date('2026-01-15T07:00:00Z'); // 9h en France (UTC+1 en hiver)
   const diff = date - startDate;
   const oneWeek = 1000 * 60 * 60 * 24 * 7;
   return ((Math.ceil(diff / oneWeek) - 1) % 5) + 1;
@@ -508,16 +518,15 @@ App.updateWeeksStatus = () => {
   const parisCurrentDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
   // Dates de début des semaines
   const weekDates = [
-    new Date('2025-07-17T09:00:00+02:00'),
-    new Date('2025-07-24T09:00:00+02:00'),
-    new Date('2025-07-31T09:00:00+02:00'),
-    new Date('2025-08-07T09:00:00+02:00'),
-    new Date('2025-08-14T09:00:00+02:00'),
-    new Date('2025-08-21T09:00:00+02:00'),
-    new Date('2025-08-28T09:00:00+02:00'),
-    new Date('2025-09-04T09:00:00+02:00'),
-    new Date('2025-09-11T09:00:00+02:00'),
-    new Date('2025-09-18T09:00:00+02:00')
+    new Date('2026-03-19T09:00:00+02:00'),
+    new Date('2026-03-26T09:00:00+02:00'),
+    new Date('2026-04-02T09:00:00+02:00'),
+    new Date('2026-04-09T09:00:00+02:00'),
+    new Date('2026-04-16T09:00:00+02:00'),
+    new Date('2026-04-23T09:00:00+02:00'),
+    new Date('2026-04-30T09:00:00+02:00'),
+    new Date('2026-05-07T09:00:00+02:00'),
+    new Date('2026-05-14T09:00:00+02:00'),
   ];
 
 
@@ -533,7 +542,6 @@ App.updateWeeksStatus = () => {
   App.displayWeeklyQuests();
 };
 
-// Retourne la date de début du week-end (vendredi 09:00) pour la date donnée
 // Retourne la date de début du week-end (vendredi 09:00) pour la date donnée
 App.getWeekendStart = (date) => {
   // copie en heure de Paris
@@ -646,12 +654,10 @@ App.assignWeekendQuests = () => {
     weekendIds.forEach(id => {
       const total = userData[`${id}_total`] || 0;
       const current = userData[`${id}_current`] || 0;
-      const doneKey = `${id}_completed`;
+      const doneKey = `${id}_rewardClaimed`;
 
       if (current >= total && !userData[doneKey]) {
-        userData.argent = (userData.argent || 0) + App.WEEK_REWARD_AMOUNT;
-        userData[doneKey] = true;
-        alert(`Quête "${userData[`${id}_text`]}" terminée : +${App.WEEK_REWARD_AMOUNT} argent`);
+        App.checkAndRewardQuestCompletion(id, userData);
       }
     });
 
@@ -663,9 +669,42 @@ App.assignWeekendQuests = () => {
     });
 
     if (allDone && !userData.weekend_bonus_claimed) {
-      userData.argent = (userData.argent || 0) + 40;
-      userData.weekend_bonus_claimed = true;
-      alert(`Bonus week-end accordé : +40 argent`);
+      if (!App.isClaimingWeekendBonus) {
+          App.isClaimingWeekendBonus = true;
+          const user = firebase.auth().currentUser;
+          if (user) {
+              App.activeClaimsCount++; // Ajouter à la file
+              App.getRecaptchaToken('weekend_bonus').then(recaptchaToken => {
+                  user.getIdToken().then(token => {
+                      fetch('/api/quest/claim-weekend-bonus', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ userId: user.uid, recaptchaToken })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                          App.activeClaimsCount--;
+                          App.isClaimingWeekendBonus = false;
+                          if (data.success) {
+                              localStorage.setItem('userData', JSON.stringify(data.userData));
+                              const detailedRewards = data.rewards.map(r => ({
+                                  ...r,
+                                  info: `<span style="color:#03dac6; font-weight:bold;">Toutes les quêtes weekend finies !</span><br>${r.info || ''}`
+                              }));
+                              App.accumulatedRewards = App.accumulatedRewards.concat(detailedRewards);
+                          }
+                          
+                          // Déclencher l'affichage si c'est le dernier fini
+                          if (App.activeClaimsCount === 0 && App.accumulatedRewards.length > 0) {
+                              sessionStorage.setItem('pendingRewards', JSON.stringify(App.accumulatedRewards));
+                              App.accumulatedRewards = [];
+                              loadPage('recompenses');
+                          }
+                      });
+                  });
+              });
+          }
+      }
     }
 
     saveUserData(userData);

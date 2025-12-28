@@ -1,26 +1,9 @@
 // On part du principe que le namespace App existe déjà
 window.App = window.App || {};
 
-/* ---------- Fonctions de cryptage/décryptage ---------- */
-App.secretKey = "ta_clé_secrète"; // à placer en haut de ton fichier app.js
-App.encrypt = function(data) {
-  try {
-    return CryptoJS.AES.encrypt(data, App.secretKey).toString();
-  } catch (error) {
-    alert('Erreur de cryptage des données.');
-    return '';
-  }
-};
-
-App.decrypt = function(data) {
-  try {
-    const bytes = CryptoJS.AES.decrypt(data, App.secretKey);
-    return bytes.toString(CryptoJS.enc.Utf8);
-  } catch (error) {
-    alert('Erreur de décryptage des données.');
-    return '';
-  }
-};
+if (window.firebaseConfig && !firebase.apps.length) {
+    firebase.initializeApp(window.firebaseConfig);
+}
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
@@ -34,59 +17,108 @@ firebase.auth().onAuthStateChanged(user => {
 });
 
 /* ---------- Mise à jour de l'interface ---------- */
-App.updateUI = function() {
-  document.getElementById('loginButton').style.display = App.User ? 'none' : 'block';
-  document.getElementById('logoutButton').style.display = App.User ? 'block' : 'none';
-};
+App.updateUIP = function() {
+  const loginButton = document.getElementById('loginButton');
+  if (loginButton) {
+    loginButton.style.display = App.User ? 'none' : 'block';
+  }
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.style.display = App.User ? 'block' : 'none';
+  }
+  const addPasskeyButton = document.getElementById('addPasskeyButton');
+  if (addPasskeyButton) {
+    addPasskeyButton.style.display = App.User ? 'block' : 'none';
+  }
 
-firebase.auth().onAuthStateChanged(() => App.updateUI());
-
-/* ---------- Actions sur les sauvegardes ---------- */
-App.handleImportBackup = function() {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = '.txt';
-  fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const importedData = App.decrypt(e.target.result);
-        const userData = JSON.parse(importedData);
-        saveUserData(userData);
-        alert('Sauvegarde importée avec succès !');
-        location.reload();
-      } catch (error) {
-        alert("Erreur lors de l'importation. Vérifiez la clé et l'intégrité des données.");
-      }
-    };
-    reader.readAsText(file);
-  });
-  fileInput.click();
-};
-
-App.handleDownloadBackup = function() {
-  try {
-    const userData = getUserData();
-    const encryptedData = App.encrypt(JSON.stringify(userData));
-    const blob = new Blob([encryptedData], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const container = document.getElementById('downloadLinkContainer');
-    container.innerHTML = '';
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Willy0_s_Parallel_Arena_backup.txt';
-    a.textContent = 'Télécharger la sauvegarde';
-    a.className = 'button';
-    a.style.marginTop = '10px';
-    container.appendChild(a);
-    alert('Sauvegarde effectuée avec succès ! Cliquez sur le lien pour télécharger le fichier.');
-  } catch (error) {
-    alert('Erreur lors de la sauvegarde des données.');
+  // Ajout du bouton Admin si l'utilisateur est administrateur
+  const userData = getUserData();
+  const container = document.querySelector('.container');
+  if (userData.isAdmin && container && !document.getElementById('adminPortalButton')) {
+    const adminBtn = document.createElement('a');
+    adminBtn.id = 'adminPortalButton';
+    adminBtn.className = 'button';
+    adminBtn.style.background = 'linear-gradient(135deg, #6200ee, #bb86fc)';
+    adminBtn.style.color = 'white';
+    adminBtn.style.fontWeight = 'bold';
+    adminBtn.innerText = '🛠️ Portail Administrateur';
+    adminBtn.onclick = () => window.location.href = 'admin.html';
+    
+    // Insérer avant le bouton de déconnexion ou à la fin
+    if (logoutButton) {
+        container.insertBefore(adminBtn, logoutButton);
+    } else {
+        container.appendChild(adminBtn);
+    }
   }
 };
 
+firebase.auth().onAuthStateChanged(() => App.updateUIP());
+
+/* ---------- Passkey Logic ---------- */
+App.registerPasskey = async function() {
+    const user = firebase.auth().currentUser;
+    if (!user) return alert("Connectez-vous d'abord");
+
+    // Vérification du support Navigateur + Contexte Sécurisé (HTTPS/Localhost)
+    if (!window.isSecureContext || !navigator.credentials) {
+        return alert("Votre navigateur ou votre connexion (non-HTTPS) ne permet pas l'utilisation des Passkeys.");
+    }
+
+    try {
+        const token = await user.getIdToken();
+        
+        // 1. Obtenir les options du serveur
+        const optionsRes = await fetch('/api/passkey/register-options', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const options = await optionsRes.json();
+
+        // 2. Conversion des données binaires pour le navigateur
+        options.challenge = App.base64ToBuffer(options.challenge);
+        options.user.id = App.base64ToBuffer(options.user.id);
+
+        // 3. Appel à l'API du navigateur
+        const credential = await navigator.credentials.create({ publicKey: options });
+
+        // 4. Conversion de la réponse pour l'envoi au serveur
+        const body = {
+            id: credential.id,
+            rawId: App.bufferToBase64(credential.rawId),
+            response: {
+                attestationObject: App.bufferToBase64(credential.response.attestationObject),
+                clientDataJSON: App.bufferToBase64(credential.response.clientDataJSON),
+                transports: credential.getTransports ? credential.getTransports() : [],
+            },
+            type: credential.type,
+        };
+
+        // 5. Vérification finale sur le serveur
+        const verifyRes = await fetch('/api/passkey/register-verify', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                body,
+                email: user.email // ON AJOUTE L'EMAIL ICI
+            })
+        });
+
+        if ((await verifyRes.json()).success) {
+            alert("Passkey ajoutée avec succès ! Vous pouvez maintenant vous connecter sans mot de passe.");
+        } else {
+            alert("Échec de l'enregistrement de la Passkey.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Erreur lors de la création de la Passkey : " + err.message);
+    }
+};
+
+/* ---------- Actions sur les sauvegardes ---------- */
 App.updateBackup = function() {
   const userData = getUserData();
   const defaultUserData = {
@@ -105,7 +137,7 @@ App.updateBackup = function() {
     trophees: 0,
     argent: 0,
     VICTOIRE: false,
-    version: 'B2.2.0.00',
+    version: 'B2.2.1.20',
     recompense: 0,
     perso_recompense: 0,
     xp_du_jour: 0,
@@ -173,6 +205,14 @@ App.updateBackup = function() {
     Nautilus_XP: 0,
     Nautilus_Level: 1,
     Nautilus_boost: 0,
+    Paradoxe: 0,
+    Paradoxe_XP: 0,
+    Paradoxe_Level: 1,
+    Paradoxe_boost: 0,
+    Korb: 0,
+    Korb_XP: 0,
+    Korb_Level: 1,
+    Korb_boost: 0,
     Double_XP: 5,
     Double_XP_acheté: 0,
     Potion_de_Santé_acheté: 0,
@@ -184,7 +224,6 @@ App.updateBackup = function() {
     Cape_acheté: 0,
     crystal_acheté: 0,
     lastDoubleXPCheck: 0,
-    lastFraudeReset: 0,
     boutique_recompense: false,
     semaine1: false,
     semaine2: false,
@@ -223,25 +262,28 @@ App.updateBackup = function() {
 };
 
 /* ---------- Déconnexion ---------- */
-App.firebaseConfig = firebaseConfig;
-App.firebaseApp = firebase.initializeApp(App.firebaseConfig);
+// Firebase Auth est déjà initialisé globalement
 App.auth = firebase.auth();
-App.database = firebase.database();
 
-App.logout = function() {
+App.logout = async function() {
   const userData = getUserData();
   if (App.auth.currentUser) {
     const userId = App.auth.currentUser.uid;
-    database.ref(`users/${userId}/userData`).set(userData, (error) => {
-      if (error) {
-        alert('Erreur lors de la sauvegarde : ' + error.message);
-      } else {
-        App.auth.signOut().then(() => {
-          localStorage.removeItem('connection');
-          localStorage.removeItem('userData');
-          window.location.reload();
-        })
-      }
+    // On sauvegarde une dernière fois sur le serveur local
+    try {
+        await fetch(`/api/user/${userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userData })
+        });
+    } catch (e) {}
+
+    App.auth.signOut().then(() => {
+      localStorage.removeItem('connection');
+      localStorage.removeItem('userData');
+      window.location.reload();
+    }).catch(error => {
+        alert('Erreur lors de la déconnexion : ' + error.message);
     });
   } else {
     alert("Aucun utilisateur n'est connecté.");
@@ -250,9 +292,9 @@ App.logout = function() {
 
 /* ---------- Initialisation de l'interface Backup ---------- */
 App.initBackupInterface = function() {
-  document.getElementById('importBackup').addEventListener('click', App.handleImportBackup);
-  document.getElementById('downloadBackup').addEventListener('click', App.handleDownloadBackup);
   document.getElementById('updateBackup').addEventListener('click', App.updateBackup);
+  const addPasskeyBtn = document.getElementById('addPasskeyButton');
+  if (addPasskeyBtn) addPasskeyBtn.onclick = App.registerPasskey;
   document.getElementById('contactDev').addEventListener('click', () => {
     loadPage('feed-back');
   });
@@ -261,8 +303,20 @@ App.initBackupInterface = function() {
     App.logout();
   });
 
+  // Gestion du volume
+  const volumeSlider = document.getElementById('volumeSlider');
+  if (volumeSlider) {
+    const userData = getUserData();
+    volumeSlider.value = userData.musicVolume !== undefined ? userData.musicVolume : 0.5;
+    volumeSlider.addEventListener('input', (e) => {
+      if (typeof App.setMusicVolume === 'function') {
+        App.setMusicVolume(e.target.value);
+      }
+    });
+  }
+
   // Mise à jour de l'interface et affichage de la version
-  App.updateUI();
+  App.updateUIP();
   const userData = getUserData();
   const versionInfo = document.getElementById('versionInfo');
   versionInfo.textContent = userData.version ? 'v.' + userData.version : 'Version non disponible';

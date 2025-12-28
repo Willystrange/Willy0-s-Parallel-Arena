@@ -1,28 +1,5 @@
-// scripts/perso_stats.js
-
 window.App = window.App || {};
-
-// -------------------------------------------------
-// 0) Déclaration des personnages
-// -------------------------------------------------
-App.characters = [
-  { name: "Willy", pv: 11100, attaque: 463, defense: 86, spe: "Effectue trois attaques.", rarete: "inhabituel", classe: "Lame de l’Ombre" },
-  { name: "Cocobi", pv: 11000, attaque: 440, defense: 115, spe: "Réduit les PV adverses de 12% de ses PV max.", rarete: "légendaire", classe: "Briseur de Défense" },
-  { name: "Oiseau", pv: 9800, attaque: 510, defense: 85, spe: "Inflige 2.5x son attaque et gagne 20 défense.", rarete: "rare", classe: "Assassin Sauvage" },
-  { name: "Grours", pv: 13000, attaque: 430, defense: 68, spe: "Inflige 500 + son attaque, ignore 50% de la défense.", rarete: "rare", classe: "Colosse Invincible" },
-  { name: "Baleine", pv: 10200, attaque: 435, defense: 105, spe: "Si défense ≥ 29, perd 15 défense, gagne 1000 PV.", rarete: "inhabituel", classe: "Gardien Résolu" },
-  { name: "Doudou", pv: 13800, attaque: 350, defense: 80, spe: "Régénère 5% ou 15% de ses PV actuels selon max.", rarete: "inhabituel", classe: "Régénérateur Mystique" },
-  { name: "Coeur", pv: 10000, attaque: 450, defense: 100, spe: "Inflige 1.5x son attaque et régénère 10–15% des dégâts.", rarete: "rare", classe: "Soigneur d’Élite" },
-  { name: "Diva", pv: 11021, attaque: 475, defense: 100, spe: "Réduit l'attaque adverse de 25% pour 3 tours.", rarete: "légendaire", classe: "Lame de l’Ombre" },
-  { name: "Poulpy", pv: 11500, attaque: 440, defense: 100, spe: "Inflige 1.75× son attaque, ignore 50% def, -15% def adversaire.", rarete: "épique", classe: "Briseur de Défense" },
-  { name: "Colorina", pv: 9600, attaque: 420, defense: 80, spe: "Inflige 85% de son attaque et réduit la défense de l'adversaire de 15% pour 3 tours.", rarete: "commun", classe: "Briseur de Défense" },
-  { name: "Rosalie", pv: 10500, attaque: 460, defense: 85, spe: "Inflige 2× attaque + 25% de chance d'immobiliser.", rarete: "épique", classe: "Maître des Arcanes" },
-  { name: "Sboonie", pv: 10200, attaque: 410, defense: 95, spe: "Régénère 8% de ses PV max, inflige 50 dégâts et -15% attaque adverse.", rarete: "commun", classe: "Soigneur d’Élite" },
-  { name: "Inconnu", pv: 11300, attaque: 435, defense: 83, spe: "Bloque la capacité adverse pour 3 tours et gagne +25 attaque/défense.", rarete: "épique", classe: "Maître des Arcanes" },
-  { name: "Boompy", pv: 11800, attaque: 500, defense: 80, spe: "À chaque attaque, charge un compteur; au troisième coup, déclenche une explosion infligeant 150% de l’attaque à tous les adversaires.", rarete: "légendaire", classe: "Assassin Sauvage" },
-  { name: "Perro", pv: 9700, attaque: 420, defense: 85, spe: "Réduit de 30 % la défense de l'adversaire pendant 2 tours.", rarete: "commun", classe: "Briseur de Défense" },
-  { name: "Nautilus", pv: 11280, attaque: 470, defense: 74, spe: "3 frappes à 60% de l'attaque. Chaque frappe a 50% de chance de diminuer de 10 points la défense de l'adversaire.", rarete: "épique", classe: "Lame de l’Ombre" }
-];
+App.equipments = App.equipments || window.equipments || [];
 
 // -------------------------------------------------
 // 1) Ajustement aléatoire si nécessaire
@@ -194,8 +171,14 @@ App.renderCharacters = function() {
 // 6) Toggle stats / affichage / scroll
 // -------------------------------------------------
 App.GoPerso = function(name) {
-  loadPage(name + 'amelioration');
+  localStorage.setItem('characterToImprove', name);
+  loadPage('character-upgrade');
 }
+
+App.goToEquipments = function(characterName) {
+  sessionStorage.setItem('characterToEquip', characterName);
+  loadPage('equipments');
+};
 
 App.hideStats = function() {
   const stats = document.querySelector('.stats');
@@ -210,6 +193,9 @@ App.hideStats = function() {
   });
 };
 
+App.masteryLevelNames = ["Écho Temporel", "Voyageur Dimensionnel", "Gardien du Paradoxe", "Conquérant des Failles", "Maître des Réalités", "Titan Parallèle", "Singularité Vivante"];
+App.masteryGradeNames = ["Fragment", "Éclat", "Noyau", "Essence", "Nexus", "Harmonie", "Zénith", "Apogée", "Infinité", "Singularité"];
+
 App.displayCharacterStats = function(character, element) {
   const stats = document.querySelector('.stats');
   const ud = getUserData();
@@ -221,21 +207,96 @@ App.displayCharacterStats = function(character, element) {
     const pv_p = ud[`${character.name}_PV_pts`] || 0;
     const at_p = ud[`${character.name}_attaque_pts`] || 0;
     const def_p = ud[`${character.name}_defense_pts`] || 0;
-    const currPV = Math.round((1 + pv_p * .02) * character.pv);
-    const currAt = Math.round((1 + at_p * .02) * character.attaque);
-    const currDef = Math.round((1 + def_p * .02) * character.defense);
+    const vit_p = ud[`${character.name}_vitesse_pts`] || 0;
+    const crit_p = ud[`${character.name}_critique_pts`] || 0;
+
+    // Données de maîtrise
+    const characterData = (ud.characters && ud.characters[character.name]) ? ud.characters[character.name] : {};
+    const masteryLevel = characterData.masteryLevel || 0;
+    const masteryGrade = characterData.masteryGrade || 0;
+    const masteryPoints = characterData.masteryPoints || 0;
+    const levelName = App.masteryLevelNames[masteryLevel] || `Niveau ${masteryLevel}`;
+    const gradeName = App.masteryGradeNames[masteryGrade] || `Grade ${masteryGrade + 1}`;
+
+    function getPointsRequired(level, grade) {
+        const gradesPerLevel = [3, 4, 5, 5, 5, 10]; 
+        const basePointsPerGrade = 100;
+        const levelMultiplier = Math.pow(1.6, level);
+        const gradeMultiplier = 1 + (grade * 0.25);
+        return Math.floor(basePointsPerGrade * levelMultiplier * gradeMultiplier);
+    }
+    const pointsRequired = getPointsRequired(masteryLevel, masteryGrade);
+    const progressPercentage = pointsRequired > 0 ? Math.min((masteryPoints / pointsRequired) * 100, 100) : 0;
+
+    // Calcul des stats de base améliorées par les points de compétence
+    const basePV = Math.round((1 + pv_p * .02) * character.pv);
+    const baseAt = Math.round((1 + at_p * .02) * character.attaque);
+    const baseDef = Math.round((1 + def_p * .02) * character.defense);
+    const baseVit = Math.round((1 + vit_p * .02) * character.vitesse);
+    const baseCrit = Math.round((1 + crit_p * .02) * character.chanceCritique);
+
+    // Calcul des bonus d'équipement
+    const equipmentBonuses = { pv: 0, attaque: 0, defense: 0, vitesse: 0, critique: 0 };
+    if (ud.characters && ud.characters[character.name] && ud.characters[character.name].equipments) {
+      ud.characters[character.name].equipments.forEach(equipId => {
+        const equipment = App.equipments.find(e => e.id === equipId);
+        if (equipment) {
+          Object.keys(equipment.stats).forEach(stat => {
+            const value = parseInt(equipment.stats[stat]);
+            if (!isNaN(value)) {
+              equipmentBonuses[stat] += value;
+            }
+          });
+        }
+      });
+    }
+
+    // Calcul des stats finales
+    const finalPV = basePV + equipmentBonuses.pv;
+    const finalAt = baseAt + equipmentBonuses.attaque;
+    const finalDef = baseDef + equipmentBonuses.defense;
+    const finalVit = baseVit + equipmentBonuses.vitesse;
+    const finalCrit = baseCrit + equipmentBonuses.critique;
+
+    // Fonction pour formater l'affichage des stats avec bonus
+    const formatStat = (base, bonus) => {
+      if (bonus > 0) {
+        return `${base + bonus} (+${bonus})`;
+      } else if (bonus < 0) {
+        return `${base + bonus} (${bonus})`;
+      }
+      return base;
+    };
 
     html = `
+      <button id="mastery-help-icon" class="help-icon">?</button>
       <strong>${character.name}</strong><br>
       Rareté : ${character.rarete}<br>
       Classe : ${character.classe}<br>
-      PV : ${currPV}<br>
-      Attaque : ${currAt}<br>
-      Défense : ${currDef}<br>
-      Spéciale : ${character.spe}<br><br>
+      PV : ${formatStat(basePV, equipmentBonuses.pv)}<br>
+      Attaque : ${formatStat(baseAt, equipmentBonuses.attaque)}<br>
+      Défense : ${formatStat(baseDef, equipmentBonuses.defense)}<br>
+      Vitesse : ${formatStat(baseVit, equipmentBonuses.vitesse)}<br>
+      Chance de coup critique : ${formatStat(baseCrit, equipmentBonuses.critique)}%<br>
+      Spéciale : ${character.spe}<br>
+      
+      <div class="mastery-display">
+        <div class="mastery-title">Maîtrise</div>
+        <div class="mastery-rank"><span class="mastery-level-name">${levelName}</span> <span class="mastery-grade-name">${gradeName}</span></div>
+        <div class="mastery-progress-bar-container">
+          <div class="mastery-progress-bar" style="width: ${progressPercentage}%;"></div>
+        </div>
+        <div class="mastery-points">${masteryPoints} / ${pointsRequired} pts</div>
+      </div>
+
+      <br>
       <button class="button-improve"
               onclick="App.GoPerso('${character.name}')">
         Améliorer ${character.name}
+      </button>
+      <button class="button-improve"
+              onclick="App.goToEquipments('${character.name}')">
+        Équiper
       </button>
     `;
   } else {
@@ -246,7 +307,9 @@ App.displayCharacterStats = function(character, element) {
       PV : ${character.pv}<br>
       Attaque : ${character.attaque}<br>
       Défense : ${character.defense}<br>
-      Spéciale : ${character.spe}
+      Vitesse : ${character.vitesse} <br>
+      Chance de coup critique : ${character.chanceCritique}%<br>
+      Spéciale : ${character.spe} <br>
     `;
   }
 
@@ -285,6 +348,38 @@ App.toggleStats = function(character, element) {
 // -------------------------------------------------
 // 7) Initialisation
 // -------------------------------------------------
+App.initHelpModal = function() {
+    const modal = document.getElementById('mastery-help-modal');
+    if (!modal) return;
+
+    const closeBtn = modal.querySelector('.close-button');
+    const levelsList = document.getElementById('mastery-levels-list');
+    const gradesList = document.getElementById('mastery-grades-list');
+
+    if (!closeBtn || !levelsList || !gradesList) return;
+
+    // Populate lists
+    levelsList.innerHTML = App.masteryLevelNames.map(name => `<li>${name}</li>`).join('');
+    gradesList.innerHTML = App.masteryGradeNames.map(name => `<li>${name}</li>`).join('');
+
+    // Event delegation for the help icon
+    document.body.addEventListener('click', (event) => {
+        if (event.target.id === 'mastery-help-icon') {
+            modal.style.display = 'block';
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    });
+};
+
 App.initCharacters = function() {
   App.loadFilter();
   const attrSel = document.getElementById('filter-attribute');
@@ -302,6 +397,7 @@ App.initCharacters = function() {
     stats.classList.add('hide');
   }
 
+  App.initHelpModal();
   App.renderCharacters();
 };
 

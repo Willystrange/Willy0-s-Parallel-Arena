@@ -6,11 +6,10 @@
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#304457">
   <title>Willy0's Parallel Arena</title>
-  <link rel="stylesheet" href="styles/inventaire.css">
 
   <script src="scripts/app.js"></script>
 </head>
@@ -86,6 +85,15 @@
               <p class="quantity">Quantité : <span id="stock-elixir-inv">0</span></p>
             </div>
           </div>
+          
+          <div class="inventory-item" id="inv-marque">
+            <img src="marque_chasseur.png" alt="Marque de chasseur">
+            <div class="item-info">
+              <h3>Marque de chasseur</h3>
+              <p>Garantit que votre prochaine attaque soit un coup critique.</p>
+              <p class="quantity">Quantité : <span id="stock-marque-inv">0</span></p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -134,26 +142,31 @@
               <p class="quantity">Quantité : <span id="stock-crystal-inv">0</span></p>
             </div>
           </div>
+          
+          <div class="inventory-item" id="inv-purge">
+            <img src="purge-spirituelle.png" alt="Purge Spirituelle">
+            <div class="item-info">
+              <h3>Purge Spirituelle</h3>
+              <p>Dissipe tous les effets négatifs qui vous affectent.</p>
+              <p class="quantity">Quantité : <span id="stock-purge-inv">0</span></p>
+            </div>
+          </div>
+          
+          <div class="inventory-item" id="inv-orbe">
+            <img src="orbe-siphon.png" alt="Orbe de Siphon">
+            <div class="item-info">
+              <h3>Orbe de Siphon</h3>
+              <p>Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.</p>
+              <p class="quantity">Quantité : <span id="stock-orbe-inv">0</span></p>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <div class="footer">
-    <button class="footer-icon" onclick="App.viewCharacters()">
-      <img src="Characters.svg" alt="Personnages">
-    </button>
-    <button class="footer-icon" onclick="App.showMainMenu()">
-      <img src="Menu.svg" alt="Menu Principal">
-    </button>
-    <button class="footer-icon" onclick="App.goToPasse()">
-      <img src="Pass.svg" alt="Passe de combat">
-    </button>
-    <button class="footer-icon" onclick="App.viewShop()">
-      <img src="Shop.svg" alt="Boutique">
-    </button>
-  </div>
+  
 </body>
 
 </html>

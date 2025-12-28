@@ -1,0 +1,12 @@
+{
+    "Blitzkrieger": { "minPv": 9000, "maxPv": 11500, "minAttaque": 250, "maxAttaque": 340, "minDefense": 70, "maxDefense": 90, "vitesse": 210 },
+    "Frostbite": { "minPv": 8500, "maxPv": 11000, "minAttaque": 220, "maxAttaque": 300, "minDefense": 75, "maxDefense": 85, "vitesse": 120 },
+    "Inferno Beast": { "minPv": 8000, "maxPv": 10500, "minAttaque": 270, "maxAttaque": 350, "minDefense": 65, "maxDefense": 80, "vitesse": 270 },
+    "Steel Sentinel": { "minPv": 9500, "maxPv": 12000, "minAttaque": 200, "maxAttaque": 270, "minDefense": 85, "maxDefense": 100, "vitesse": 30 },
+    "Shadow Stalker": { "minPv": 8600, "maxPv": 10800, "minAttaque": 240, "maxAttaque": 320, "minDefense": 60, "maxDefense": 75, "vitesse": 150 },
+    "Thunderstrike": { "minPv": 9000, "maxPv": 11500, "minAttaque": 280, "maxAttaque": 360, "minDefense": 55, "maxDefense": 70, "vitesse": 300 },
+    "Giga Titan": { "minPv": 10000, "maxPv": 12500, "minAttaque": 230, "maxAttaque": 310, "minDefense": 80, "maxDefense": 95, "vitesse": 90 },
+    "Venom Warden": { "minPv": 8700, "maxPv": 11000, "minAttaque": 260, "maxAttaque": 340, "minDefense": 70, "maxDefense": 85, "vitesse": 240 },
+    "Stormbringer": { "minPv": 8800, "maxPv": 11200, "minAttaque": 250, "maxAttaque": 330, "minDefense": 65, "maxDefense": 80, "vitesse": 180 },
+    "Earthshaker": { "minPv": 9200, "maxPv": 11800, "minAttaque": 210, "maxAttaque": 290, "minDefense": 90, "maxDefense": 105, "vitesse": 60 }
+}

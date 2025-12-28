@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Admin Panel - Parallel Arena</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
+    <!-- KILL SERVICE WORKER (Interference Fix) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+    </script>
+    
+    <!-- Charger la config firebase de manière isolée -->
+    <script src="scripts/firebase-setup.js?v=2"></script>
+    <script src="scripts/admin.js?v=2"></script>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
+        .header { background: #1f1f1f; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .header h1 { margin: 0; font-size: 1.2rem; color: #bb86fc; }
+        .logout-btn { background: #cf6679; color: black; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+        
+        .nav { display: flex; background: #1f1f1f; margin-bottom: 20px; overflow-x: auto; }
+        .nav-item { flex: 1; text-align: center; padding: 15px; cursor: pointer; color: #aaa; border-bottom: 2px solid transparent; white-space: nowrap; }
+        .nav-item.active { color: #bb86fc; border-bottom: 2px solid #bb86fc; }
+
+        .content { padding: 15px; display: none; }
+        .content.active { display: block; }
+
+        .card { background: #1e1e1e; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .card h2 { margin-top: 0; font-size: 1.1rem; color: #03dac6; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #888; }
+        input, textarea, select { width: 100%; padding: 10px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        textarea { min-height: 150px; font-family: monospace; }
+
+        button.action-btn { width: 100%; padding: 12px; background: #bb86fc; color: black; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        button.action-btn.danger { background: #cf6679; }
+
+        .user-list-item { background: #252525; padding: 10px; border-radius: 4px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .user-list-item span { font-size: 0.9rem; }
+        .user-list-item small { color: #666; display: block; font-size: 0.75rem; }
+
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; -webkit-transition: .4s; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; -webkit-transition: .4s; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #bb86fc; }
+        input:checked + .slider:before { -webkit-transform: translateX(26px); -ms-transform: translateX(26px); transform: translateX(26px); }
+
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <h1 style="color:#bb86fc">ADMIN PANEL</h1>
+    <p>Accès restreint</p>
+    <button class="action-btn" style="width: 200px;" onclick="App.login(event)">Se connecter</button>
+</div>
+
+<div class="header">
+    <h1>PA Admin <small id="online-count" style="font-size: 0.7rem; color: #03dac6; margin-left: 10px;">En ligne : 0</small></h1>
+    <button class="logout-btn" onclick="App.logout()">X</button>
+</div>
+
+<div class="nav">
+    <div class="nav-item active" onclick="App.switchTab('maintenance')">Maintenance</div>
+    <div class="nav-item" onclick="App.switchTab('news')">News</div>
+    <div class="nav-item" onclick="App.switchTab('users')">Joueurs</div>
+    <div class="nav-item" onclick="App.switchTab('active')">Actifs</div>
+</div>
+
+<!-- ... maintenance and news tabs ... -->
+
+<!-- USERS ... -->
+
+<!-- ACTIVE USERS -->
+<div id="tab-active" class="content">
+    <div class="card">
+        <h2>Joueurs en ligne</h2>
+        <p style="font-size:0.8rem; color:#888;">Liste des joueurs actuellement connectés au serveur.</p>
+        <div id="active-users-list">
+            <!-- Liste remplie dynamiquement -->
+        </div>
+    </div>
+</div>
+
+<!-- MAINTENANCE -->
+<div id="tab-maintenance" class="content active">
+    <div class="card">
+        <h2>État du Serveur</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <span>Mode Maintenance</span>
+            <label class="switch">
+                <input type="checkbox" id="maintenance-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="form-group">
+            <label>Message de maintenance</label>
+            <input type="text" id="maintenance-message" placeholder="Serveur en maintenance...">
+        </div>
+        <div class="card" style="background: #252525; border: 1px solid #333;">
+            <h3 style="font-size: 0.9rem; color: #bb86fc; margin-top: 0;">Programmer à l'avance</h3>
+            <div class="form-group">
+                <label>Début (Date et Heure)</label>
+                <input type="datetime-local" id="scheduled-start">
+            </div>
+            <div class="form-group">
+                <label>Fin (Date et Heure)</label>
+                <input type="datetime-local" id="scheduled-end">
+            </div>
+            <p style="font-size: 0.75rem; color: #888;">Laissez vide pour désactiver la programmation.</p>
+        </div>
+        <button class="action-btn" onclick="App.saveMaintenance()">Appliquer</button>
+    </div>
+</div>
+
+<!-- NEWS -->
+<div id="tab-news" class="content">
+    <div class="card">
+        <h2>Ajouter / Modifier une News</h2>
+        <input type="hidden" id="news-id">
+        <div class="form-group">
+            <label>Type d'Actualité</label>
+            <select id="news-type">
+                <option value="AN">📢 Annonce</option>
+                <option value="NM">🆙 Nouvelle Mise à jour</option>
+                <option value="NS">🏆 Nouvelle Saison</option>
+                <option value="EV">🔥 Événement</option>
+                <option value="SO">✅ Correction</option>
+                <option value="PR">⚠️ Problème</option>
+                <option value="BO">🐛 Bogue</option>
+                <option value="ER">❌ Erreur</option>
+                <option value="TE">🛠️ Test</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Titre</label>
+            <input type="text" id="news-title" placeholder="Le titre de la news...">
+        </div>
+        <div class="form-group">
+            <label>Contenu</label>
+            <textarea id="news-content" placeholder="Détails de l'actualité..."></textarea>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1;">
+                <label>Date</label>
+                <input type="date" id="news-date">
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Heure</label>
+                <input type="time" id="news-time">
+            </div>
+        </div>
+        <button class="action-btn" id="btn-save-news" onclick="App.saveNews()">Publier News</button>
+        <button class="action-btn hidden" id="btn-cancel-news" style="background:#555;" onclick="App.resetNewsForm()">Annuler Modification</button>
+    </div>
+
+    <div class="card">
+        <h2>News Publiées</h2>
+        <div id="news-list">
+            <!-- Liste des news ici -->
+        </div>
+    </div>
+</div>
+
+<!-- USERS -->
+    <div id="tab-users" class="content">
+    <div class="card">
+        <h2>Recherche Joueur</h2>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="user-search" placeholder="Pseudo ou ID..." oninput="App.searchUsers()" style="flex:2;">
+            <select id="user-sort" onchange="App.searchUsers()" style="flex:1; font-size:0.8rem;">
+                <option value="active">Activité</option>
+                <option value="newest">Plus récents</option>
+                <option value="oldest">Plus anciens</option>
+                <option value="trophees">Trophées</option>
+                <option value="argent">Argent</option>
+            </select>
+        </div>
+        <div id="user-results"></div>
+    </div>    
+    <div id="user-editor" class="card hidden">
+        <h2 style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Édition de Profil</span>
+            <button style="font-size:0.8rem; padding: 5px;" onclick="document.getElementById('user-editor').classList.add('hidden')">Fermer</button>
+        </h2>
+        
+        <input type="hidden" id="edit-uid">
+        
+        <!-- SECTION: INFOS DE BASE -->
+        <div style="background: #252525; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+            <h3 style="margin-top:0; font-size:0.9rem; color:#bb86fc;">Informations Générales</h3>
+            <div class="form-group">
+                <label>Pseudo</label>
+                <input type="text" id="edit-pseudo">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Argent</label>
+                    <input type="number" id="edit-argent">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Trophées</label>
+                    <input type="number" id="edit-trophees">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Trophées Max</label>
+                    <input type="number" id="edit-tropheesMax">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Admin ?</label>
+                <select id="edit-admin">
+                    <option value="false">Non</option>
+                    <option value="true">Oui</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SECTION: ACTIONS RAPIDES (DEV) -->
+        <div style="background: #252525; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+            <h3 style="margin-top:0; font-size:0.9rem; color:#03dac6;">Actions de Développement</h3>
+            
+            <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">Ces actions modifient les données brutes. N'oubliez pas d'enregistrer en bas.</p>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('reset_daily')">🔄 Reset Quotidiennes</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('complete_daily')">✅ Finir Quotidiennes</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('reset_weekly')">🔄 Reset Hebdo</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('complete_weekly')">✅ Finir Hebdo</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('reset_weekend')">🔄 Reset Weekend</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('complete_weekend')">✅ Finir Weekend</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('reset_shop')">🛍️ Reset Boutique</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px;" onclick="App.devAction('unlock_all')">🔓 Tout débloquer</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px; background:#fbc02d;" onclick="App.devAction('unlock_premium')">💎 Pass Premium</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px; background:#fbc02d;" onclick="App.devAction('max_pass')">🔝 Pass Niveau 60</button>
+                <button class="action-btn" style="margin:0; font-size:0.75rem; padding:8px; background:#fbc02d;" onclick="App.devAction('reset_pass')">🌑 Reset Pass</button>
+            </div>
+        </div>
+
+        <!-- SECTION: DONNEES BRUTES -->
+        <div class="form-group">
+            <label>Données brutes (JSON)</label>
+            <textarea id="edit-raw" style="height: 200px; font-size: 0.8rem;"></textarea>
+        </div>
+        
+        <button class="action-btn" onclick="App.saveUser()">💾 Enregistrer tout</button>
+    </div>
+</div>
+
+<script src="scripts/admin.js?v=2"></script>
+</body>
+</html>

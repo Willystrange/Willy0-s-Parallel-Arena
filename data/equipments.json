@@ -1,0 +1,15 @@
+[
+    { "id": "gantelets_force", "name": "Gantelets de Force", "type": "Attaque", "rarity": "commun", "price": 600, "stats": { "attaque": "+25" } },
+    { "id": "plastron_cuir", "name": "Plastron en Cuir Renforcé", "type": "Défense", "rarity": "commun", "price": 600, "stats": { "pv": "+700" } },
+    { "id": "bottes_celerite", "name": "Bottes de Célérité", "type": "Agilité", "rarity": "commun", "price": 650, "stats": { "vitesse": "+23" } },
+    { "id": "anneau_vitalite", "name": "Anneau de Vitalité", "type": "Défense", "rarity": "commun", "price": 550, "stats": { "defense": "+18" } },
+    { "id": "lame_berserker", "name": "Lame du Berserker", "type": "Attaque", "rarity": "rare", "price": 1300, "stats": { "attaque": "+40", "defense": "-15" } },
+    { "id": "bouclier_energetique", "name": "Bouclier Énergétique", "type": "Défense", "rarity": "rare", "price": 1400, "stats": { "pv": "+300", "defense": "+35" } },
+    { "id": "dague_ombre", "name": "Dague de l'Ombre", "type": "Agilité", "rarity": "rare", "price": 1500, "stats": { "vitesse": "+18", "critique": "+3" } },
+    { "id": "talisman_guerrier", "name": "Talisman du Guerrier", "type": "Équilibre", "rarity": "rare", "price": 1350, "stats": { "attaque": "+20", "pv": "+400" } },
+    { "id": "hache_conquerant", "name": "Hache du Conquérant", "type": "Attaque", "rarity": "légendaire", "price": 3500, "stats": { "attaque": "+75", "critique": "+4" } },
+    { "id": "armure_gardien_royal", "name": "Armure du Gardien Royal", "type": "Défense", "rarity": "légendaire", "price": 3800, "stats": { "pv": "+1500", "defense": "+50" } },
+    { "id": "bottes_hermes", "name": "Bottes d'Hermès", "type": "Agilité", "rarity": "légendaire", "price": 3600, "stats": { "pv": "+600", "vitesse": "+45" } },
+    { "id": "sceau_roi_combattant", "name": "Sceau du Roi Combattant", "type": "Équilibre", "rarity": "légendaire", "price": 4000, "stats": { "attaque": "+50", "vitesse": "+40" } },
+    { "id": "egide_aube", "name": "Égide de l'Aube", "type": "Défense", "rarity": "légendaire", "price": 4200, "stats": { "pv": "+1200", "defense": "+75", "vitesse": "-20" } }
+]

@@ -1,0 +1,21 @@
+{
+  "name": "willy0s-parallel-arena",
+  "version": "1.0.0",
+  "description": "Serveur pour Willy0's Parallel Arena",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "mobile": "node start_mobile.js"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^13.2.2",
+    "axios": "^1.13.2",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.2.1",
+    "firebase-admin": "^13.6.0",
+    "helmet": "^8.1.0",
+    "localtunnel": "^2.0.2",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.7.2"
+  }
+}

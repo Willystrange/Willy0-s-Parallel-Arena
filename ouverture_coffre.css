@@ -1,0 +1,86 @@
+/* === LIGHT MODE (DEFAULT) === */
+body {
+    font-family: sans-serif;
+    background: linear-gradient(135deg, #ff7b54 0%, #ff9a76 50%, #ffa726 100%);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    max-width: 800px;
+}
+
+.reward-title {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.reward-item {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c3e50;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#reward-name {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+#continue-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+    color: #2c3e50;
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#continue-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #3498db;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.95));
+}
+
+
+/* === DARK MODE === */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+        color: white;
+    }
+
+    .reward-item {
+        background-color: #34495e;
+        color: white;
+    }
+
+    #continue-button {
+        background: linear-gradient(145deg, rgba(52, 73, 94, 0.9), rgba(44, 62, 80, 0.9));
+        color: #ecf0f1;
+        border: 2px solid rgba(52, 152, 219, 0.4);
+        border-radius: 15px;
+    }
+
+    #continue-button:hover {
+       background: linear-gradient(145deg, rgba(52, 73, 94, 0.95), rgba(44, 62, 80, 0.95));
+       transform: translateY(-3px);
+       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+       border-color: #3498db;
+    }
+}

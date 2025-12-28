@@ -4,36 +4,110 @@
   <link rel="icon" type="image/png" href="icon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#304457">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="localStorage.js"></script>
+<script src="scripts/parametres.js"></script>
   <script src="scripts/app.js"></script>
   <title>Willy0's Parallel Arena</title>
+  <style>
+    .volume-container {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+      backdrop-filter: blur(10px);
+      color: #2c3e50;
+      border: 2px solid rgba(52, 152, 219, 0.3);
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 300px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
     
+    .volume-container label {
+      display: block;
+      margin-bottom: 10px;
+      color: #2c3e50;
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: rgba(52, 152, 219, 0.2);
+      height: 8px;
+      border-radius: 5px;
+      outline: none;
+      width: 100%;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      background: #ff8245;
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 10px rgba(255, 130, 69, 0.5);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      background: #ff8245;
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 10px rgba(255, 130, 69, 0.5);
+    }
+
+    /* Support du mode sombre si activé sur le système */
+    @media (prefers-color-scheme: dark) {
+      .volume-container {
+        background: linear-gradient(145deg, rgba(52, 73, 94, 0.9), rgba(44, 62, 80, 0.9));
+        color: #ecf0f1;
+        border-color: rgba(52, 152, 219, 0.4);
+      }
+      .volume-container label {
+        color: #ecf0f1;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="content">
     <h1>Paramètres</h1>
     <div class="container">
-
-      <a class="button" href="#" id="importBackup">Importer une sauvegarde</a>
-      <a class="button" href="#" id="downloadBackup">Sauvegarder les données</a>
       <a class="button" href="#" id="updateBackup">Sauver la sauvegarde</a>
       <a class="button" href=# id="contactDev">Contactez le développeur</a>
       <a class="button" id="loginButton" onclick="loadPage('connection')">Se connecter</a>
       <a class="button" id="logoutButton" onclick="loadPage('connection')" style="display:none;">Se déconnecter</a>
+      <button class="button" id="addPasskeyButton" style="display:none; background: #2ecc71;">Ajouter une Passkey</button>
       
       <!-- Système audio pour la Web App (lecture séquentielle sans attribut loop) -->
 
       <!-- Bouton d'activation du son. Si l'autorisation a déjà été donnée sur une autre page, ce bouton sera caché -->
+      <div class="volume-container" style="margin-bottom: 20px; width: 100%; max-width: 300px;">
+        <label for="volumeSlider" style="display: block; margin-bottom: 10px; color: white; font-weight: bold;">Volume de la musique</label>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" style="width: 100%; cursor: pointer;">
+      </div>
       <button class="button" id="musicToggleButton">Activer le son</button>
       
-      <a class="back-button" onclick="loadPage('menu_principal')">Retour au menu principal</a>
+      
       <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
     </div>
     <a id="versionInfo" class="version-info" onclick="loadPage('patch_note')" title="Voir les notes de mise à jour"></a>
+
+    <!-- RECAPTCHA LEGAL NOTICE -->
+    <div style="font-size: 10px; color: rgba(255,255,255,0.3); text-align: center; margin-top: 30px; padding-bottom: 20px;">
+      This site is protected by reCAPTCHA and the Google 
+      <a href="https://policies.google.com/privacy" style="color: rgba(255,255,255,0.5);">Privacy Policy</a> and 
+      <a href="https://policies.google.com/terms" style="color: rgba(255,255,255,0.5);">Terms of Service</a> apply.
+    </div>
   </div>
   <script>
       

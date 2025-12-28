@@ -38,6 +38,7 @@ App.subjectColors = {
 App.createNewsItem = function ({id, title, content, date, time}) {
   const newsItem = document.createElement("div");
   newsItem.className = "news-item";
+  newsItem.style.position = "relative";
 
   const subjectKey = id.substring(2, 4);
   const subject = App.subjectDefinitions[subjectKey] || "Inconnu";
@@ -76,14 +77,17 @@ App.createNewsItem = function ({id, title, content, date, time}) {
 };
 
 // Récupère et affiche les actualités récentes
-App.fetchNews = function () {
-  const newsRef = database.ref("news/");
-  newsRef.on("value", (snapshot) => {
-    const newsData = snapshot.val();
+App.fetchNews = async function () {
+  try {
+    const response = await fetch('/api/news');
+    const newsData = await response.json();
     const newsContainer = document.getElementById("news");
     newsContainer.innerHTML = "";
 
-    if (!newsData) return;
+    if (!newsData || Object.keys(newsData).length === 0) {
+        newsContainer.innerHTML = "<p>Aucune actualité pour le moment.</p>";
+        return;
+    }
 
     const now = new Date();
     const oneWeekAgo = new Date(now);
@@ -117,7 +121,9 @@ App.fetchNews = function () {
       App.displayOldNews(newsArray, oneWeekAgo, seeOldNewsButton)
     );
     newsContainer.appendChild(seeOldNewsButton);
-  });
+  } catch (e) {
+      console.error("Erreur chargement news:", e);
+  }
 };
 
 // Affiche les actualités plus anciennes que la semaine écoulée

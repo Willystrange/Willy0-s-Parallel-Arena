@@ -1,0 +1,82 @@
+{
+  "Diva": {
+    "description": "Attaque réduite à {stat_val} pour 3 tours.",
+    "log": "{attacker} utilise sa capacité spéciale ! L'attaque de {defender} est réduite à {stat_val} pour 3 tours, et elle lui inflige {damage} points de dégâts.",
+    "effect": "diva_special"
+  },
+  "Willy": {
+    "description": "Inflige 3 coups consécutifs.",
+    "log": "{attacker} utilise sa capacité spéciale et inflige un total de {damage} points de dégâts en trois coups !"
+  },
+  "Baleine": {
+    "description": "Gagne 1000 PV.",
+    "log": "Baleine utilise sa capacité spéciale ! Il gagne 1000 PV ! Et inflige {damage} points de dégâts."
+  },
+  "Doudou": {
+    "description": "Régénère une partie de ses PV.",
+    "log": "{attacker} utilise sa capacité spéciale ! Elle régénère {regen} PV. Et inflige {damage} points de dégâts."
+  },
+  "Cocobi": {
+    "description": "Inflige 12% des PV max de l'adversaire.",
+    "log": "{attacker} utilise sa capacité spéciale ! {defender} perd {damage} PV."
+  },
+  "Coeur": {
+    "description": "Vole de la vie.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il inflige {damage} points de dégâts et récupère {heal} PV."
+  },
+  "Grours": {
+    "description": "Ignore une partie du bouclier adverse.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il inflige {damage} points de dégâts à {defender}, ignorant le bouclier."
+  },
+  "Poulpy": {
+    "description": "Ignore 40% défense et réduit défense de 15%.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il inflige {damage} points de dégâts à {defender}, ignore 40% de sa défense et réduit sa défense de 15% pour 3 tours."
+  },
+  "Oiseau": {
+    "description": "Gagne 20 de défense pour 2 tours.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il inflige {damage} points de dégâts et gagne 20 de défense pour 2 tours."
+  },
+  "Colorina": {
+    "description": "Réduit la défense adverse de 15% pour 4 tours.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il inflige {damage} points de dégâts et réduit la défense de {defender} de 15% pour 4 tours."
+  },
+  "Rosalie": {
+    "description": "Chance d'immobiliser l'adversaire.",
+    "log_normal": "{attacker} utilise sa capacité spéciale ! Elle inflige {damage} points de dégâts.",
+    "log_immobilize": "{attacker} utilise sa capacité spéciale ! Elle inflige {damage} points de dégâts et immobilise {defender} pour un tour."
+  },
+  "Sboonie": {
+    "description": "Régénère PV et réduit attaque adverse.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il régénère {regen} PV, inflige 50 de dégâts et réduit de 15% l'attaque de {defender} pour 2 tours."
+  },
+  "Inconnu": {
+    "description": "Bloque le spécial adverse et se buff.",
+    "log": "{attacker} utilise sa capacité spéciale, il augmente son attaque et sa défense de 25 pour 3 tours et {defender} ne peut pas utiliser sa capacité spéciale pendant {turns} tours ! Et inflige {damage} points de dégâts."
+  },
+  "Boompy": {
+    "description": "Surcharge Instable (Attaque ++, Défense --).",
+    "log": "{attacker} active une Surcharge Instable ! Sa défense est réduite mais ses attaques peuvent être dévastatrices pendant 2 tours."
+  },
+  "Perro": {
+    "description": "Réduit la défense adverse de 30% pour 3 tours.",
+    "log": "{attacker} utilise sa capacité spéciale, il inflige {damage} dégâts et réduit la défense de {defender} de 30% pour 3 tours !"
+  },
+  "Nautilus": {
+    "description": "3 attaques rapides avec chance de briser l'armure.",
+    "log": "{attacker} utilise sa capacité spéciale, il inflige un total de {damage} points de dégâts.",
+    "log_debuff": " De plus, la défense de {defender} diminue de {debuff} points !"
+  },
+  "Paradoxe": {
+    "description": "Change de posture (Assaut/Garde).",
+    "log_assaut": "{attacker} passe en Posture d'Assaut ! Son attaque augmente de 40% et sa défense est réduite de 50% pour 2 tours.",
+    "log_garde": "{attacker} passe en Posture de Garde ! Sa défense augmente de 60% et son attaque est réduite de 30% pour 2 tours."
+  },
+  "Korb": {
+    "description": "Augmente les chances de critique.",
+    "log": "{attacker} affûte sa dague ! Il inflige {damage} points de dégâts et augmente ses chances de critique."
+  },
+  "Default": {
+    "description": "Attaque puissante.",
+    "log": "{attacker} utilise sa capacité spéciale ! Il inflige {damage} points de dégâts."
+  }
+}

@@ -3,17 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#304457">
   <title>Récompenses</title>
-
-  <script src="scripts/app.js"></script>
+  <link rel="stylesheet" href="ouverture_coffre.css">
 </head>
 <body>
   <div class="container">
-    <div class="reward-title">Vous avez reçu une récompense !</div>
-    <div id="reward-display" class="reward-item"></div>
+    <div class="reward-title">Vous avez reçu :</div>
+    <div id="reward-display" class="reward-item">
+      <p id="reward-name"></p>
+      <p id="reward-info"></p>
+    </div>
+    <button id="continue-button">Continuer</button>
   </div>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/recompenses.js"></script>
 </body>
 </html>

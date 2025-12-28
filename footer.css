@@ -1,0 +1,111 @@
+/* === FOOTER AVEC EFFET LIQUID GLASS === */
+.footer {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  /* Effet Liquid Glass lisible */
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px) saturate(140%) brightness(105%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%) brightness(105%);
+  padding: 15px;
+  display: none;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  z-index: 1;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  max-height: 64px;
+}
+
+.footer.collapsed {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  border: none;
+}
+
+.footer.collapsed .footer-icon {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+
+.footer-icon {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.footer-icon:hover {
+  background: rgba(52, 152, 219, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: scale(1.1);
+}
+
+.footer-icon.main-menu-icon,
+.footer-icon.active-footer-icon {
+  background: rgba(255, 130, 69, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+}
+
+.footer-icon img {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+}
+
+/* ========== FIXS ADDITIONNELS ========== */
+.footer.footer-bubble-entry {
+  bottom: -50px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%) scale(0.1);
+  opacity: 0;
+  border-radius: 50%;
+  max-height: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.footer {
+  position: fixed !important;
+  box-sizing: border-box;
+  overflow: hidden;
+  will-change: max-height, padding, left, right, bottom;
+  z-index: 1 !important;
+  max-width: calc(100% - 20px);
+  margin: 0 auto;
+}
+
+.footer.collapsed {
+  overflow: hidden !important;
+  transition: max-height 0.35s cubic-bezier(0.25,0.8,0.25,1),
+              padding 0.35s cubic-bezier(0.25,0.8,0.25,1),
+              border-radius 0.35s cubic-bezier(0.25,0.8,0.25,1),
+              left 0.35s, right 0.35s, bottom 0.35s, background 0.35s;
+}
+
+/* MASQUER LE BADGE RECAPTCHA */
+.grecaptcha-badge { 
+  visibility: hidden !important; 
+}

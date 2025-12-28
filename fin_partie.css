@@ -1,0 +1,76 @@
+body.fin_partie {
+    background-color: #304457;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#content {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    width: 80%;
+    max-width: 400px;
+}
+
+#gagnant {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #ffd700;
+}
+
+.reward {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.reward.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#quit-button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+#quit-button:hover {
+    background-color: #45a049;
+}
+
+.mastery-reward {
+    margin-top: 20px;
+    border: 1px solid #ffd700;
+}
+
+.mastery-progress-bar-container {
+    background: #222;
+    height: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.mastery-progress-bar {
+    height: 100%;
+    background: #ffd700;
+}

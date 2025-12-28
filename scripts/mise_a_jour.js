@@ -40,8 +40,8 @@ App.versionCompare = function(v1, v2) {
 App.mise_a_jour = function() {
   const userData = getUserData();
   // Version actuelle du jeu
-  const currentVersion = 'B2.2.0.00';
-  const versionreset = 'B2.2.0.00';
+  const currentVersion = 'B2.2.1.20';
+  const versionreset = 'B2.2.1.20';
 
   // Valeurs par défaut pour les données utilisateur
   const defaultUserData = {
@@ -130,6 +130,10 @@ App.mise_a_jour = function() {
     Nautilus_XP: 0,
     Nautilus_Level: 1,
     Nautilus_boost: 0,
+    Korb: 0,
+    Korb_XP: 0,
+    Korb_Level: 1,
+    Korb_boost: 0,
     Double_XP: 5,
     Double_XP_acheté: 0,
     Potion_de_Santé_acheté: 0,
@@ -141,7 +145,6 @@ App.mise_a_jour = function() {
     Cape_acheté: 0,
     crystal_acheté: 0,
     lastDoubleXPCheck: 0,
-    lastFraudeReset: 0,
     boutique_recompense: false,
     semaine1: false,
     semaine2: false,
@@ -175,14 +178,6 @@ App.mise_a_jour = function() {
     localStorage.removeItem('rulesAccepted');
   }
   if (App.versionCompare(userData.version || '0.0.0', currentVersion) < 0) {
-    userData.semaine1 = false;
-    userData.semaine2 = false;
-    userData.semaine3 = false;
-    userData.semaine4 = false;
-    userData.semaine5 = false;
-    userData.semaine6 = false;
-    userData.quete_genere = false;
-
     if (userData) {
       for (let i = 1; i <= 15; i++) {
         delete userData[`Summer${i}_text`];
@@ -194,6 +189,8 @@ App.mise_a_jour = function() {
         delete userData[`Summer${i}_active`];
       }
       delete userData.summer_genere;
+      delete userData.fraude;
+      delete userData.lastFraudeReset;
       
 
       localStorage.setItem('userData', JSON.stringify(userData));
@@ -207,6 +204,13 @@ App.mise_a_jour = function() {
       userData[`free_${i}`] = false ;
       userData[`premium_${i}`] = false ;
     }
+    userData.semaine1 = false;
+    userData.semaine2 = false;
+    userData.semaine3 = false;
+    userData.semaine4 = false;
+    userData.semaine5 = false;
+    userData.semaine6 = false;
+    userData.quetes_genere = false;
   }
   // Vérification et ajout des clés manquantes avec leur valeur par défaut
   for (const key in defaultUserData) {

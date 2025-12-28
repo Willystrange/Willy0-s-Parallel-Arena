@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#304457">
   <title>Willy0's Parallel Arena</title>
@@ -15,7 +15,368 @@
 
 <body>
   <div class="container">
-    <!-- Mise à jour Version B.2.1.0.02 -->
+    <!-- Mise à jour Version B2.2.1.20 -->
+    <div class="update-block" data-type="LM" data-datetime="2026-03-21T10:00">
+      <h1 id="version-B2.2.1.20">Note de mise à jour - Version B2.2.1.20</h1>
+      <p class="update-meta">Publié le 21/03/2026 à 10:00</p>
+      <ul id="notes-B2.2.1.20" class="note-list">
+        <li><strong>Nouveautés dans la Boutique</strong>
+          <p>Trois nouveaux objets stratégiques ont été ajoutés à la boutique pour diversifier vos options en combat :</p>
+          <ul>
+            <li><strong>Marque du Chasseur :</strong> Garantit que votre prochaine attaque soit un coup critique.
+              <ul><li>Prix : 60 (x1), 165 (x3), 250 (x5) points.</li></ul>
+            </li>
+            <li><strong>Purge Spirituelle :</strong> Dissipe tous les effets négatifs (débuffs) qui vous affectent.
+              <ul><li>Prix : 40 (x1), 110 (x3), 170 (x5) points.</li></ul>
+            </li>
+            <li><strong>Orbe de Siphon :</strong> Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.
+              <ul><li>Prix : 50 (x1), 135 (x3), 210 (x5) points.</li></ul>
+            </li>
+          </ul>
+        </li>
+        <li><strong>Nouveaux Équipements</strong>
+          <p>Trois nouveaux équipements de rareté <strong>Commune</strong>, deux équipements de rareté <strong>Rare</strong> et un équipement de rareté <strong>Légendaire</strong> ont été ajoutés aux équipements des coffres pour enrichir les options d'équipement :</p>
+          <ul>
+            <p>Communs : </p>
+            <ul>
+              <li><strong>Gantelets du bagarreur</strong> (Attaque) : Attaque +20, PV +150</li>
+              <li><strong>Cape de l'esquive</strong> (Agilité) : Vitesse +15, Défense +10</li>
+              <li><strong>Broche de vitalité</strong> (Défense) : PV +250, Défense +5</li>
+            </ul>
+            <p>Rares : </p>
+            <ul>
+              <li><strong>Lames Éthéréess</strong> (Agilité) : attaque +15, Vitesse +30, PV -100, effet bonus: Si votre vitesse est supérieure à celle de votre adversaire, vos attaques ont 15% de chance de frapper une seconde fois, infligeant 50% des dégâts.</li>
+              <li><strong>Amulette du Paria</strong> (Équilibre) : attaque +10, PGV: +350, défense -10, effet bonus: Tant que vos pv sont en dessous de 50%, vous gagnez un bonus de +20  d'attaque et +15 de défense.</li>
+            </ul>
+            <p>Légendaire : </p>
+            <ul>  
+              <li><strong>Égide de l'Aube</strong> (Défense) : PV +1200, défense +75, vitesse -20, effet bonus: Annule complètement les dégâts de la première capacité spéciale ennemie qui devrait vous toucher durant le combat. Après l'annulation, vous gagnez un bouclier correspondant à 1% de vos pv max pendant 2 tours.</li>
+            </ul>
+          </ul>
+        </li>
+        <li><strong>Refonte de la Voie Parallèle</strong>
+          <p>La Voie Parallèle (le chemin de trophées) a été entièrement revue pour offrir une progression plus gratifiante et dynamique.</p>
+          <ul>
+            <li>Les récompenses sont désormais plus fréquentes et plus variées à tous les niveaux de trophées.</li>
+            <li>De nouvelles récompenses de valeur, comme des coffres d'équipement, ont été ajoutées à la voie.</li>
+            <li>L'équilibrage a été ajusté pour mieux accompagner les nouveaux joueurs et continuer à récompenser les vétérans.</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Mise à jour Version B2.2.1.10 -->
+    <div class="update-block" data-type="LM" data-datetime="2026-01-17T10:00">
+      <h1 id="version-B2.2.1.10">Note de mise à jour - Version B2.2.1.10</h1>
+      <p class="update-meta">Publié le 17/01/2026 à 10:00</p>
+      <ul id="notes-B2.2.1.10" class="note-list">
+        <li><strong>Nouveau Système de Maîtrise</strong>
+          <p>Nous sommes ravis de vous présenter une toute nouvelle manière de progresser et de montrer votre talent avec vos personnages préférés : le <strong>Système de Maîtrise</strong> !</p>
+          
+          <h4>Qu'est-ce que la Maîtrise ?</h4>
+          <p>La maîtrise est un système de progression unique pour chaque personnage. En jouant et en vous améliorant avec un personnage, vous augmenterez son niveau de Maîtrise, débloquerez des récompenses et deviendrez une légende de l'arène !</p>
+          <p>La progression se divise en <strong>Niveaux de Maîtrise</strong> (ex: <em>Écho Temporel</em>, <em>Voyageur Dimensionnel</em>) et en <strong>Grades de Maîtrise</strong> (ex: <em>Fragment</em>, <em>Éclat</em>). Gravissez les grades pour atteindre le niveau supérieur !</p>
+
+          <h4>Comment progresser ?</h4>
+          <p>C'est simple : combattez ! À la fin de chaque partie, vous gagnerez des <strong>Points de Maîtrise</strong> en fonction de vos performances :</p>
+          <ul>
+              <li><strong>Victoire</strong> : Gagnez des points pour chaque victoire.</li>
+              <li><strong>Performance au combat</strong> : Vos PV restants et les dégâts que vous infligez augmentent vos gains.</li>
+              <li><strong>Mode Survie</strong> : Allez le plus loin possible pour un bonus de points conséquent à chaque vague vaincue.</li>
+          </ul>
+          <p>Accumulez suffisamment de points pour passer au grade suivant et continuer votre ascension.</p>
+
+          <h4>Quelles sont les récompenses ?</h4>
+          <p>Chaque fois que vous montez d'un <strong>grade</strong>, votre personnage reçoit immédiatement :</p>
+          <ul>
+              <li>De l'<strong>XP de personnage</strong> pour monter en niveau plus rapidement.</li>
+              <li>De l'<strong>Argent</strong> à dépenser dans la boutique.</li>
+          </ul>
+          <p>Plus votre niveau de Maîtrise est élevé, plus ces récompenses deviennent importantes !</p>
+
+          <h4>Une difficulté qui s'adapte à vous</h4>
+          <p>Le système de Maîtrise introduit une <strong>difficulté dynamique</strong> dans les modes Classique et Weekend. Fini les adversaires au niveau fixe ! Désormais, la puissance de votre adversaire sera directement calculée en fonction du niveau et du grade de Maîtrise de votre personnage sélectionné.</p>
+          <ul>
+              <li><strong>Chaque grade de Maîtrise</strong> augmente légèrement les statistiques de l'adversaire.</li>
+              <li><strong>Chaque niveau de Maîtrise</strong> les augmente de manière plus significative.</li>
+          </ul>
+          <p>Ce système garantit que plus vous maîtrisez un personnage, plus le défi sera relevé, offrant des combats toujours intéressants et équilibrés.</p>
+        </li>
+        <li><strong>Améliorations et Ajustements Divers</strong>
+          <ul>
+            <li>
+              <h3>Modes de Jeu</h3>
+              <ul>
+                <li>Un bouton de description a été ajouté dans le choix des modes pour fournir des informations détaillées sur chaque mode de jeu.</li>
+                <li>De nouveaux effets ont été ajoutés au mode Week-end pour diversifier l'expérience de jeu :
+                  <ul>
+                    <li><strong>Rage</strong> : L'attaque du personnage augmente lorsque ses PV sont bas.</li>
+                    <li><strong>Armure fragile</strong> : La défense de tous les personnages est réduite de moitié.</li>
+                    <li><strong>Récupération rapide</strong> : Le gain de capacité spéciale est doublé.</li>
+                    <li><strong>Malédiction</strong> : Le personnage perd un petit pourcentage de ses PV maximum à chaque tour.</li>
+                    <li><strong>Bénédiction</strong> : Le personnage regagne un petit pourcentage de ses PV maximum à chaque tour.</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <h3>Équilibrage des Personnages</h3>
+              <p>Les capacités spéciales de certains personnages ont été revues pour améliorer l'équilibre du jeu :</p>
+              <ul>
+                <li><strong>Boompy :</strong> Sa capacité a été mise à jour. Nouvelle description : <em>"Active une Surcharge Instable pendant 2 tours. Ses attaques ont 40% de chance d'infliger 175% de dégâts, mais sa défense est réduite de 30%. La capacité nécessite 3 attaques pour être chargée."</em></li>
+                <li><strong>Paradoxe :</strong> Sa capacité a été entièrement revue pour mieux correspondre à son rôle de personnage stratégique alternant entre deux postures. Nouvelle description : <em>"Inversion Paradoxale : Alterne entre deux postures. <strong>Posture d'Assaut :</strong> Augmente son attaque de 40% mais réduit sa défense de 50% pendant 2 tours. <strong>Posture de Garde :</strong> Augmente sa défense de 60% mais réduit son attaque de 30% pendant 2 tours."</em></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+            <strong>Nouvelle Offre Spéciale Hebdomadaire pour les Coffres d'Équipements :</strong>
+            <p>Une nouvelle offre spéciale est désormais disponible dans la boutique, sous l'onglet "Boutique des Coffres d'équipements".</p>
+            <ul>
+                <li>Chaque semaine (du jeudi au jeudi), un type de coffre d'équipement aléatoire sera en promotion.</li>
+                <li>La réduction sera aléatoire, variant entre 5% et 35%, avec une très faible chance (5%) d'obtenir une réduction exceptionnelle de 70%.</li>
+                <li>Cette offre peut être achetée jusqu'à trois fois par semaine avant de disparaître.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Rééquilibrage des Prix des Objets :</strong>
+            <p>Nous avons procédé à un rééquilibrage des prix de plusieurs objets de la boutique afin de mieux refléter leur utilité et leur impact en jeu. Les objets offrant des bonus basés sur des pourcentages ou des utilitaires puissants ont vu leur prix augmenter, tandis que les bonus fixes sont devenus plus accessibles.</p>
+            <ul>
+                <li><strong>Double XP :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 15 points -> Nouveau prix 18 points</li>
+                        <li>x3 : Ancien prix 41 points -> Nouveau prix 48 points</li>
+                        <li>x5 : Ancien prix 65 points -> Nouveau prix 75 points</li>
+                    </ul>
+                </li>
+                <li><strong>Potion de Santé :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 10 points -> Nouveau prix 12 points</li>
+                        <li>x3 : Ancien prix 28 points -> Nouveau prix 33 points</li>
+                        <li>x5 : Ancien prix 44 points -> Nouveau prix 50 points</li>
+                    </ul>
+                </li>
+                <li><strong>Amulette de Régénération :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 28 points -> Nouveau prix 35 points</li>
+                        <li>x3 : Ancien prix 77 points -> Nouveau prix 95 points</li>
+                        <li>x5 : Ancien prix 122 points -> Nouveau prix 150 points</li>
+                    </ul>
+                </li>
+                <li><strong>Épée Tranchante :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 15 points -> Nouveau prix 18 points</li>
+                        <li>x3 : Ancien prix 41 points -> Nouveau prix 48 points</li>
+                        <li>x5 : Ancien prix 65 points -> Nouveau prix 75 points</li>
+                    </ul>
+                </li>
+                <li><strong>Élixir de Puissance :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 20 points -> Nouveau prix 15 points</li>
+                        <li>x3 : Ancien prix 55 points -> Nouveau prix 40 points</li>
+                        <li>x5 : Ancien prix 87 points -> Nouveau prix 60 points</li>
+                    </ul>
+                </li>
+                <li><strong>Bouclier solide :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 13 points -> Nouveau prix 10 points</li>
+                        <li>x3 : Ancien prix 36 points -> Nouveau prix 28 points</li>
+                        <li>x5 : Ancien prix 57 points -> Nouveau prix 40 points</li>
+                    </ul>
+                </li>
+                <li><strong>Cape de l'ombre :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 55 points -> Nouveau prix 70 points</li>
+                        <li>x3 : Ancien prix 152 points -> Nouveau prix 190 points</li>
+                        <li>x5 : Ancien prix 239 points -> Nouveau prix 300 points</li>
+                    </ul>
+                </li>
+                <li><strong>Armure de Fer :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 22 points -> Nouveau prix 28 points</li>
+                        <li>x3 : Ancien prix 61 points -> Nouveau prix 75 points</li>
+                        <li>x5 : Ancien prix 96 points -> Nouveau prix 120 points</li>
+                    </ul>
+                </li>
+                <li><strong>Crystal de renouveau :</strong>
+                    <ul>
+                        <li>x1 : Ancien prix 50 points -> Nouveau prix 45 points</li>
+                        <li>x3 : Ancien prix 138 points -> Nouveau prix 120 points</li>
+                        <li>x5 : Ancien prix 218 points -> Nouveau prix 180 points</li>
+                    </ul>
+                </li>
+                <li><strong>Coffres d'équipement par type (Attaque, Défense, Agilité, Équilibre) :</strong> Prix maintenu à 1000 points.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Mise à jour des récompenses du Parallel Pass :</strong>
+            <p>Les récompenses du Parallel Pass ont été mises à jour pour inclure des coffres d'équipement, augmentant considérablement la valeur totale du Pass.</p>
+            <ul>
+                <li><strong>Voie Gratuite :</strong> Ajout de 4 coffres d'équipement (un de chaque type : Attaque, Défense, Agilité, Équilibre).</li>
+                <li><strong>Voie Premium :</strong> Ajout de 8 coffres d'équipement supplémentaires (deux de chaque type).</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Note aux joueurs :</strong>
+            <p>Nous sommes actuellement en pleine réflexion concernant le fonctionnement et les effets de certains objets. Des modifications importantes pourraient être apportées dans de futures mises à jour afin d'améliorer l'équilibre général du jeu et l'expérience des joueurs. Vos retours sont toujours les bienvenus !</p>
+        </li>
+      </ul>
+    </div>
+    <!-- Mise à jour Version B2.2.1.00 -->
+    <div class="update-block" data-type="MM" data-datetime="2025-07-29T10:00">
+      <h1 id="version-B2.2.1.00">Note de mise à jour - Version B2.2.1.00</h1>
+      <p class="update-meta">Publié le 22/11/2025 à 10:00</p>
+      <ul id="notes-B2.2.1.00" class="note-list">
+        <li><strong>Nouvelles Fonctionnalités</strong>
+          <ul>
+            <li>
+              <h3>Système d'Équipements</h3>
+              <p>Nous sommes ravis de vous présenter le nouveau système d'équipements, ajoutant une dimension stratégique à vos combats ! Vos personnages peuvent désormais s'équiper d'objets pour améliorer leurs statistiques et bénéficier de bonus uniques.</p>
+              <h4>Acquisition des Équipements</h4>
+              <p>Les équipements s'obtiennent en ouvrant des <strong>coffres</strong> disponibles dans la boutique. Il existe quatre types de coffres, chacun garantissant un équipement de son type avec une rareté aléatoire (Commun, Rare, Légendaire) :</p>
+              <ul>
+                <li>Coffre d'Attaque</li>
+                <li>Coffre de Défense</li>
+                <li>Coffre d'Agilité</li>
+                <li>Coffre d'Équilibre</li>
+              </ul>
+              <p>Votre récompense est révélée immédiatement après l'achat.</p>
+              <h4>Équiper un Personnage</h4>
+              <p>Chaque personnage peut équiper jusqu'à <strong>trois équipements différents</strong>. Pour ce faire :</p>
+              <ol>
+                <li>Rendez-vous sur la page de vos personnages.</li>
+                <li>Sélectionnez le personnage à équiper.</li>
+                <li>Appuyez sur le bouton "Équiper" pour accéder à l'interface de gestion.</li>
+              </ol>
+              <h4>Liste des Équipements</h4>
+              <p>Découvrez une partie des équipements disponibles et leurs effets :</p>
+              <ul>
+                <li><strong>Gantelets de Force</strong> (Attaque, Commun) - Attaque: +25</li>
+                <li><strong>Plastron en Cuir Renforcé</strong> (Défense, Commun) - PV: +700</li>
+                <li><strong>Bottes de Célérité</strong> (Agilité, Commun) - Vitesse: +23</li>
+                <li><strong>Anneau de Vitalité</strong> (Défense, Commun) - Défense: +18</li>
+                <li><strong>Lame du Berserker</strong> (Attaque, Rare) - Attaque: +40, Défense: -15</li>
+                <li><strong>Bouclier Énergétique</strong> (Défense, Rare) - PV: +300, Défense: +35</li>
+                <li><strong>Dague de l'Ombre</strong> (Agilité, Rare) - Vitesse: +18, Critique: +3</li>
+                <li><strong>Talisman du Guerrier</strong> (Équilibre, Rare) - Attaque: +20, PV: +400</li>
+                <li><strong>Hache du Conquérant</strong> (Attaque, Légendaire) - Attaque: +75, Critique: +4. Bonus: Inflige 10% de dégâts supplémentaires si la cible a moins de 40% de ses PV max.</li>
+                <li><strong>Armure du Gardien Royal</strong> (Défense, Légendaire) - PV: +1500, Défense: +50. Bonus: La première fois que les PV passent sous 30%, le porteur récupère 500 PV.</li>
+                <li><strong>Bottes d'Hermès</strong> (Agilité, Légendaire) - PV: +600, Vitesse: +45. Bonus: Si le porteur agit en premier, son attaque inflige 25 dégâts supplémentaires.</li>
+                <li><strong>Sceau du Roi Combattant</strong> (Équilibre, Légendaire) - Attaque: +50, Vitesse: +40. Bonus: Après avoir utilisé une capacité spéciale, la prochaine attaque de base inflige 100 dégâts supplémentaires.</li>
+                <li><strong>Épée courte</strong> (Attaque, Commun) - Attaque: +28</li>
+                <li><strong>Masse en fer</strong> (Attaque, Commun) - Attaque: +30</li>
+                <li><strong>Poignard en acier</strong> (Attaque, Commun) - Attaque: +22</li>
+                <li><strong>Targe en bois</strong> (Défense, Commun) - Défense: +20</li>
+                <li><strong>Bracelet de vitalité</strong> (Défense, Commun) - PV: +500</li>
+                <li><strong>Gambison</strong> (Défense, Commun) - Défense: +15</li>
+                <li><strong>Sandales de voyage</strong> (Agilité, Commun) - Vitesse: +25</li>
+                <li><strong>Bottes légères</strong> (Agilité, Commun) - Vitesse: +22</li>
+                <li><strong>Amulette agile</strong> (Agilité, Commun) - Vitesse: +20</li>
+                <li><strong>Trèfle chanceux</strong> (Équilibre, Commun) - Critique: +2</li>
+                <li><strong>Lentille de précision</strong> (Équilibre, Commun) - Critique: +1</li>
+                <li><strong>Gants de précision</strong> (Attaque, Commun) - Attaque: +15, Vitesse: +5</li>
+                <li><strong>Dard venimeux</strong> (Attaque, Commun) - Attaque: +12, Critique: +1</li>
+                <li><strong>Casque de soldat</strong> (Défense, Commun) - PV: +150, Défense: +12</li>
+                <li><strong>Pourpoint matelassé</strong> (Défense, Commun) - PV: +200, Défense: +10</li>
+                <li><strong>Jambières de cuir</strong> (Agilité, Commun) - Défense: +8, Vitesse: +12</li>
+                <li><strong>Ceinture de baroudeur</strong> (Équilibre, Commun) - Attaque: +8, PV: +250</li>
+                <li><strong>Amulette de l'apprenti</strong> (Équilibre, Commun) - Attaque: +8, Défense: +8</li>
+                <li><strong>Marteau léger</strong> (Attaque, Commun) - Attaque: +35, Vitesse: -5</li>
+                <li><strong>Genouillères en fer</strong> (Défense, Commun) - Défense: +25, Vitesse: -5</li>
+                <li><strong>Éclat de verre</strong> (Équilibre, Commun) - Défense: -5, Critique: +3</li>
+                <li><strong>Hallebarde de garde</strong> (Attaque, Rare) - Attaque: +30, Défense: +20</li>
+                <li><strong>Gantelets de sprinteur</strong> (Attaque, Rare) - Attaque: +20, Vitesse: +25</li>
+                <li><strong>Hache de brute</strong> (Attaque, Rare) - Attaque: +50, Vitesse: -10</li>
+                <li><strong>Focalisateur d'énergie</strong> (Attaque, Rare) - Attaque: +15. Bonus: Les attaques de base ont 5% de chance de réduire la défense de la cible de 10 pendant 1 tour.</li>
+                <li><strong>Armure de plaques légère</strong> (Défense, Rare) - Défense: +30, Vitesse: +15</li>
+                <li><strong>Amulette du protecteur</strong> (Défense, Rare) - PV: +500, Défense: +25</li>
+                <li><strong>Cotte de mailles renforcée</strong> (Défense, Rare) - PV: +250, Défense: +40</li>
+                <li><strong>Armure lourde</strong> (Défense, Rare) - Défense: +60, Vitesse: -15</li>
+                <li><strong>Armure à épines</strong> (Défense, Rare) - Défense: +25. Bonus: Renvoie 5 points de dégâts fixes lorsqu'attaqué.</li>
+                <li><strong>Sceau de vitalité</strong> (Défense, Rare) - PV: +600, Défense: +10</li>
+                <li><strong>Bottes de combat</strong> (Agilité, Rare) - Attaque: +15, Vitesse: +15</li>
+                <li><strong>Bottes de berserker</strong> (Agilité, Rare) - Vitesse: +35, Défense: -10</li>
+                <li><strong>Bottes de l'initié</strong> (Agilité, Rare) - Vitesse: +20. Bonus: Inflige +10 dégâts sur la première attaque du combat.</li>
+                <li><strong>Épée longue équilibrée</strong> (Équilibre, Rare) - Attaque: +25, Défense: +10</li>
+                <li><strong>Dague sacrificielle</strong> (Équilibre, Rare) - Critique: +4, Défense: -10</li>
+                <li><strong>Talisman de récupération</strong> (Équilibre, Rare) - PV: +200. Bonus: Régénère 1% des PV max par tour.</li>
+                <li><strong>Manteau de la Vengeance</strong> (Équilibre, Légendaire) - Attaque: +30, PV: +700, Défense: +30. Bonus: Après avoir subi un coup critique, votre prochaine attaque est un coup critique garanti.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Informations Complémentaires :</strong>
+              <ul>
+                <li>Un coffre d'équipement aléatoire vous est offert chaque semaine ! Récupérez-le dans la boutique tous les jeudis à partir de 9h.</li>
+                <li>De nouveaux équipements seront ajoutés dans les futures mises à jour pour diversifier les stratégies.</li>
+                <li>Ce système étant complexe, n'hésitez pas à nous contacter via la section "Contacter le développeur" dans les paramètres en cas de problème. Vos retours sont essentiels.</li>
+                <li>Les statistiques et bonus des équipements pourront être ajustés à l'avenir pour garantir l'équilibre du jeu.</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><strong>Nouveaux Contenus</strong>
+          <ul>
+            <li>
+              <h3>Nouveau Personnage : Paradoxe</h3>
+              <p>Le nouveau personnage Épique, <strong>Paradoxe</strong>, est désormais disponible via le Parallel Pass 5. Il sera exclusif à ce Pass pendant toute sa durée avant de rejoindre les récompenses générales à partir du 17 janvier 2026.</p>
+            </li>
+            <li>
+              <h3>Personnage Débloquable : Nautilus</h3>
+              <p>Le personnage <strong>Nautilus</strong> est désormais accessible dans les récompenses générales.</p>
+            </li>
+          </ul>
+        </li>
+        <li><strong>Améliorations et Ajustements Divers</strong>
+          <ul>
+            <li>
+              <h3>Quêtes</h3>
+              <ul>
+                <li>Ajout de nouvelles quêtes hebdomadaires pour une plus grande diversité des objectifs.</li>
+                <li>Refonte des quêtes hebdomadaires : chaque semaine, vous trouverez 3 niveaux de difficulté (1 quête difficile, 2 quêtes moyennes, 2 quêtes faciles). La difficulté est corrélée à l'objectif et à la valeur de la récompense.</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Intelligence Artificielle</h3>
+              <p>Une nouvelle version de l'intelligence artificielle de l'adversaire est en cours de test dans le mode Classique. Son comportement pourrait sembler inhabituel. Vos retours sont précieux : n'hésitez pas à nous faire part de vos impressions sur sa difficulté, sa prévisibilité ou la logique de ses actions.</p>
+            </li>
+          </ul>
+        </li>
+        <li><strong>Corrections de Bugs et Optimisations</strong>
+          <ul>
+            <li>
+              <h3>Interface Utilisateur</h3>
+              <ul>
+                <li>Optimisation du chargement du menu principal pour une expérience plus rapide.</li>
+                <li>Correction du problème de superposition des pastilles dans la page d'actualités.</li>
+                <li>Ajustements visuels pour une compatibilité optimale avec iOS 26 sur les iPhones.</li>
+                <li>Correction d'un bug qui faisait planter la page du passe de combat au chargement.</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Modes de Jeu</h3>
+              <ul>
+                <li>Correction des problèmes de statistiques liés aux effets multiples sur les personnages. Chaque effet est désormais correctement appliqué.</li>
+                <li>Harmonisation de la structure des modes de jeu pour une meilleure cohérence entre les actions similaires.</li>
+                <li>Amélioration de l'affichage des objets dans les modes Week-end et Survie : vous aurez désormais 3 objets au choix aléatoirement, comme dans le mode Classique.</li>
+                <li>Resynchronisation, correction et ajout de textes dans les pages de combat pour une expérience plus simple et intuitive.</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Personnages</h3>
+              <ul>
+                <li>Correction d'une erreur d'affichage de la capacité spéciale d'Inconnu (15 au lieu de 25) dans la page de combat du mode Classique.</li>
+                <li>Reformulation de toutes les descriptions des capacités spéciales sur la page des personnages pour plus de clarté et de précision.</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Système de Sauvegarde</h3>
+              <p>Conformément à la dernière mise à jour, l'importation et le téléchargement manuel des sauvegardes depuis les paramètres ne sont plus possibles.</p>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <!-- Mise à jour Version B.2.2.0.00 -->
     <div class="update-block" data-type="MM" data-datetime="2025-09-20T09:00">
       <h1 id="version-B2.2.0.00">Note de mise à jour - Version B2.2.0.00</h1>
       <p class="update-meta">Publié le 20/09/2025 à 09:00</p>
@@ -36,8 +397,8 @@
         </li>
         <li><strong>Nouveau Personnage :</strong>
           <ul>
-            <li>Le nouveau personnage qui arrive avec le Parallel Pass 5 est... Nautilus. Débloquez-le au palier 70 de
-              la version premium ou patientez jusqu'au Parallel Pass 6 pour pouvoir le débloquer normalement !</li>
+            <li>Le nouveau personnage qui arrive avec le Parallel Pass 4 est... Nautilus. Débloquez-le au palier 60 de
+              la version premium ou patientez jusqu'au Parallel Pass 5 pour pouvoir le débloquer normalement !</li>
           </ul>
         </li>
         <li><strong>Modification :</strong>
@@ -45,6 +406,7 @@
             <li>La limite quotidienne d'XP passe de 2500 à 5000.</li>
           </ul>
         </li>
+        
         <li><strong>Global :</strong>
           <ul>
             <li>Refonte globale de l'interface du jeu afin de le rendre plus attractif.</li>
@@ -52,6 +414,7 @@
               l'instant seul les objets sont disponible dans la page.)</li>
             <li>Adaptation de l'interface à IOS26. En attendant la sortie de la mise à jour, il est possible que
               certains éléments ne soient pas affichés correctement. Veuillez nous le signaler si tel est le cas.</li>
+            <li>Il est important de noter que l'application est optimisée pour le format Application, il est donc fortement recommandé de l'utiliser en la mettant sur l'écran d'accueil de votre appareil pour avoir la meilleure expérience possible.</li>
             <li> D'autres changements ont eu lieu, notamment des corrections de bogues et des optimisations.</li>
             <li>‼️ Lors de la mise a jour du 22 novembre, nous supprimerons la possibilité de télécharger ou de charger les données manuellement. Le seul moyen de récupérer vos données facilement et rapidement sera en se connectant à son compte. Il est donc fortemment recommandé de se connecter ou de se créer un compte avant cette date. ‼️</li>
           </ul>

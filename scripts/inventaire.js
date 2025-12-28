@@ -29,6 +29,9 @@ App.updateInventoryDisplay = function() {
   document.getElementById('stock-cape-inv').textContent = userData.Cape_acheté || 0;
   document.getElementById('stock-armure-inv').textContent = userData.armure_fer_acheté || 0;
   document.getElementById('stock-crystal-inv').textContent = userData.crystal_acheté || 0;
+  document.getElementById('stock-marque-inv').textContent = userData.marque_chasseur_acheté || 0;
+  document.getElementById('stock-purge-inv').textContent = userData.purge_spirituelle_acheté || 0;
+  document.getElementById('stock-orbe-inv').textContent = userData.orbe_siphon_acheté || 0;
   
   // Masquer les objets avec quantité 0
   App.toggleItemVisibility('inv-xp', userData.Double_XP_acheté || 0);
@@ -40,6 +43,9 @@ App.updateInventoryDisplay = function() {
   App.toggleItemVisibility('inv-cape', userData.Cape_acheté || 0);
   App.toggleItemVisibility('inv-armure', userData.armure_fer_acheté || 0);
   App.toggleItemVisibility('inv-crystal', userData.crystal_acheté || 0);
+  App.toggleItemVisibility('inv-marque', userData.marque_chasseur_acheté || 0);
+  App.toggleItemVisibility('inv-purge', userData.purge_spirituelle_acheté || 0);
+  App.toggleItemVisibility('inv-orbe', userData.orbe_siphon_acheté || 0);
   
   // Masquer les catégories vides
   App.toggleCategoryVisibility();
@@ -56,9 +62,9 @@ App.toggleCategoryVisibility = function() {
   const categories = [
     { id: 'category-xp-inv', items: ['inv-xp'] },
     { id: 'category-soins-inv', items: ['inv-potion', 'inv-amulette'] },
-    { id: 'category-attaque-inv', items: ['inv-epee', 'inv-elixir'] },
+    { id: 'category-attaque-inv', items: ['inv-epee', 'inv-elixir', 'inv-marque'] },
     { id: 'category-defense-inv', items: ['inv-bouclier', 'inv-cape'] },
-    { id: 'category-autre-inv', items: ['inv-armure', 'inv-crystal'] }
+    { id: 'category-autre-inv', items: ['inv-armure', 'inv-crystal', 'inv-purge', 'inv-orbe'] },
   ];
   
   categories.forEach(category => {
@@ -227,7 +233,10 @@ App.checkEmptyInventory = function() {
                     (userData.bouclier_solide_acheté || 0) + 
                     (userData.Cape_acheté || 0) + 
                     (userData.armure_fer_acheté || 0) + 
-                    (userData.crystal_acheté || 0);
+                    (userData.crystal_acheté || 0) +
+                    (userData.marque_chasseur_acheté || 0) +
+                    (userData.orbe_siphon_acheté || 0) +
+                    (userData.purge_spirituelle_acheté || 0)
   
   if (totalItems === 0) {
     const content = document.querySelector('.content');
