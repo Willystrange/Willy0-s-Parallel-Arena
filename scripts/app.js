@@ -124,6 +124,12 @@ App.loadUserDataFromFirebase = async function(userId, currentUser = null) {
       const data = await response.json();
       if (data.success && data.userData) {
           localStorage.setItem('userData', JSON.stringify(data.userData));
+
+          // Mise à jour immédiate du volume si présent
+          if (data.userData.musicVolume !== undefined && typeof musicGainNode !== 'undefined' && musicGainNode && audioCtx) {
+              musicGainNode.gain.setValueAtTime(parseFloat(data.userData.musicVolume), audioCtx.currentTime);
+          }
+
           return true;
       }
       return false;
