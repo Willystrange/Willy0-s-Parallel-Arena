@@ -150,8 +150,8 @@ App.initializeCharacterProperties = function(character, isPlayer) {
     // Give AI random items at the start of a fight
     if (!isPlayer) {
         character.aiItems = [];
-        // Assumes 'equipments' global variable from equipments_info.js is available
-        const allItems = window.equipments || [];
+        // Use loaded App.equipments
+        const allItems = App.equipments || window.equipments || [];
         
         // Filter for consumable items that the AI can reasonably use.
         const consumableItems = allItems.filter(item => 
@@ -224,266 +224,137 @@ App.effectNames = {
     'egide_aube_shield': "Bouclier de l'Égide",
 };
 
-// Utilisé par le panneau de stats pour afficher les valeurs réelles
-App.getEffectiveStat = function(character, statName) {
-    const baseStatValue = character[statName + '_originale'] || character[statName];
-    
-    let additiveBonus = 0;
-    let multiplicativeBonus = 1;
+// -----------------------------------------------------------------------------
+// 6. GESTIONNAIRE DE COMBAT CENTRALISÉ (API)
+// -----------------------------------------------------------------------------
 
-    // Bonus Amulette du Paria (Visualisation seulement, le serveur fait foi)
-    if ((character.equipments || []).includes('amulette_paria') && character.pv < (character.pv_maximum * 0.5)) {
-        if (statName === 'attaque') {
-            additiveBonus += 20;
-        } else if (statName === 'defense') {
-            additiveBonus += 15;
+App.combatManager = {
+    syncCombatStart: async function(gameMode, extraData = {}) {
+        const connection = JSON.parse(localStorage.getItem('connection'));
+        if (!connection || !connection.userid) {
+            loadPage('connection');
+            return null;
         }
-    }
 
-    if (character.effects && character.effects.length > 0) {
-        character.effects.forEach(effect => {
-            if (effect.stat === statName) {
-                if (effect.type === 'additive') additiveBonus += effect.value;
-                else if (effect.type === 'multiplicative') multiplicativeBonus *= effect.value;
+        const user = firebase.auth().currentUser;
+        if (!user) return null;
+
+        // Load equipments data if needed for AI generation client-side (though most logic is server now)
+        if (typeof App.loadEquipmentsData === 'function') {
+            await App.loadEquipmentsData();
+        }
+
+        // Sync local changes first
+        if (typeof App.saveUserDataToFirebase === 'function') {
+            await App.saveUserDataToFirebase(user.uid);
+        }
+
+        const recaptchaToken = await App.getRecaptchaToken(`combat_${gameMode}_start`);
+        
+        const payload = {
+            userId: user.uid,
+            gameMode: gameMode,
+            playerCharacter: App.playerCharacter, // Note: Server expects names or simple objects, but handles full objs
+            opponentCharacter: App.opponentCharacter, // Can be null for survival
+            recaptchaToken: recaptchaToken,
+            ...extraData
+        };
+
+        try {
+            const token = await user.getIdToken();
+            const response = await fetch('/api/combat/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            console.error("Combat Start Error:", e);
+            return { success: false, error: e.message };
+        }
+    },
+
+    executeAction: async function(action, extra = {}) {
+        // UI Lock
+        const buttons = ['attack-button', 'special-button', 'defense-button', 'items-button'];
+        buttons.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = true; });
+
+        const connection = JSON.parse(localStorage.getItem('connection'));
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        try {
+            const token = await user.getIdToken();
+            const response = await fetch('/api/combat/action', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId: user.uid, action, ...extra })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // Logs
+                if (data.results.logs) {
+                    for (const log of data.results.logs) {
+                        App.addCombatLog(log.text, log.color, log.side);
+                        if (!log.text.startsWith('Tour')) await new Promise(r => setTimeout(r, 600));
+                    }
+                }
+                return data;
+            } else {
+                console.error("Action Error:", data.error);
+                // Unlock on error
+                buttons.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
+                return null;
             }
-        });
-    }
+        } catch (e) {
+            console.error("Execute Action Error:", e);
+            buttons.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
+            return null;
+        }
+    },
 
-    // Weekend Mode Effects (Visualisation)
-    if (statName === 'attaque' && character.isRaging) {
-        const pvPercentage = character.pv / character.pv_maximum;
-        if (pvPercentage <= 0.3) {
-            multiplicativeBonus *= 1.3;
-        } else if (pvPercentage <= 0.6) {
-            multiplicativeBonus *= 1.15;
+    handleGameOver: function(data, gameMode) {
+        if (data.results.updatedUserData) {
+            localStorage.setItem('userData', JSON.stringify(data.results.updatedUserData));
+        }
+        if (data.results.masteryGameResult) {
+            sessionStorage.setItem('masteryGameResult', JSON.stringify(data.results.masteryGameResult));
+        }
+        
+        sessionStorage.removeItem('playerCharacter');
+        sessionStorage.removeItem('opponentCharacter');
+        const cheatBtn = document.getElementById('cheat-btn-dev');
+        if (cheatBtn) cheatBtn.remove();
+
+        if (gameMode === 'survie') {
+            App.handleSurvivalRewards(data.game.wave);
+        } else {
+             setTimeout(() => {
+                sessionStorage.setItem("gameMode", gameMode);
+                loadPage("fin_partie");
+            }, 2000);
         }
     }
-    if (statName === 'defense' && character.fragileArmor) {
-        multiplicativeBonus *= 0.5;
+};
+
+// Fallback for survival rewards handling if not defined elsewhere
+App.handleSurvivalRewards = App.handleSurvivalRewards || function(wave) {
+    const userData = getUserData();
+    const log = document.getElementById('combat-log');
+    if (log) {
+        log.innerHTML += `<p>Vous avez été vaincu à la vague ${wave}.</p>`;
     }
-
-    return Math.round((baseStatValue + additiveBonus) * multiplicativeBonus);
+    setTimeout(() => loadPage('fin_partie_survie'), 2000);
 };
 
-// -----------------------------------------------------------------------------
-// 3. SAUVEGARDE ET CHARGEMENT LOCAL
-// -----------------------------------------------------------------------------
-
-App.getSaveKey = function() {
-    if (App.gameMode === 'classic') {
-        return 'savepartie';
-    } else if (App.gameMode === 'weekend') {
-        return 'savepartie_weekend';
-    } else if (App.gameMode === 'survie') {
-        return 'savepartie_survie';
-    }
-    return null;
-};
-
-App.saveGame = function(playerCharacter, opponentCharacter) {
-    const key = App.getSaveKey();
-    if (!key || !playerCharacter || !opponentCharacter) return;
-
-    const saveData = {
-        playerCharacter: { ...playerCharacter },
-        opponentCharacter: { ...opponentCharacter }
-    };
-    localStorage.setItem(key, JSON.stringify(saveData));
-};
-
-App.loadGame = function() {
-    const key = App.getSaveKey();
-    if (!key) return null;
-
-    const savedData = localStorage.getItem(key);
-    if (!savedData) return null;
-
-    try {
-        const s = JSON.parse(savedData);
-        // Compatibilité ascendante basique
-        if (s.playerCharacter && !s.playerCharacter.effects) s.playerCharacter.effects = [];
-        if (s.opponentCharacter && !s.opponentCharacter.effects) s.opponentCharacter.effects = [];
-        return s;
-    } catch (e) {
-        console.error(`Error loading save data for key ${key}:`, e);
-        return null;
-    }
-};
-
-// -----------------------------------------------------------------------------
-// 4. GESTION DES OBJETS (UI)
-// -----------------------------------------------------------------------------
-
-// Effets locaux pour mise à jour immédiate de l'inventaire avant confirmation serveur
-App.itemEffects = {
-  'Crystal de renouveau': (userData, player) => { userData.crystal_acheté -= 1; player.crystalUses += 1; },
-  "Cape de l'ombre": (userData, player) => { userData.Cape_acheté -= 1; player.capeUses += 1; },
-  'Potion de Santé': (userData, player) => { userData.Potion_de_Santé_acheté -= 1; },
-  'Amulette de Régénération': (userData, player) => { userData.Amulette_de_Régénération_acheté -= 1; player.amuletteUses += 1; },
-  'Épée Tranchante': (userData, player) => { userData.epee_tranchante_acheté -= 1; },
-  'Elixir de Puissance': (userData, player) => { userData.elixir_puissance_acheté -= 1; },
-  'Armure de Fer': (userData, player) => { userData.armure_fer_acheté -= 1; player.armureUses += 1; },
-  'Bouclier solide': (userData, player) => { userData.bouclier_solide_acheté -= 1; },
-  'Marque de Chasseur': (userData, player) => { userData.marque_chasseur_acheté -= 1; },
-  'Orbe de Siphon': (userData, player) => { userData.orbe_siphon_acheté -= 1; },
-  'Purge Spirituelle': (userData, player) => { userData.purge_spirituelle_acheté -= 1; },
-};
-
-App.useItem = function(itemName) {
-  // Cette fonction est souvent surchargée par les scripts spécifiques (combat.js, etc.)
-  // pour appeler executeServerAction. On la garde ici comme fallback ou utilitaire.
-  App.playerCharacter.objets_utilise = 1;
-  const effect = App.itemEffects[itemName];
-  if (effect) {
-    effect(App.userData, App.playerCharacter);
-  }
-  if (window.saveUserData) saveUserData(App.userData);
-  App.hideItemSelection();
-  App.addCombatLog(`${itemName} utilisé (en attente serveur)...`, 'grey', 'milieu');
-};
-
-App.hideItemSelection = function() {
-  const itemSelectionDiv = document.getElementById('item-selection');
-  if (itemSelectionDiv) itemSelectionDiv.style.display = 'none';
-};
-
-App.showItemSelection = function() {
-  const itemSelectionDiv = document.getElementById('item-selection');
-  if (!itemSelectionDiv || !App.playerCharacter) return;
-
-  itemSelectionDiv.style.display = 'block';
-  itemSelectionDiv.innerHTML = '<h3>Choisissez un objet à utiliser</h3>';
-
-  // Vérification spécifique mode weekend (visualisation)
-  if (App.gameMode === 'weekend' && App.playerCharacter.noobject) {
-      App.addCombatLog("Les objets sont désactivés pour cet événement !", 'red', true);
-      App.hideItemSelection();
-      return;
-  }
-
-  if (App.playerCharacter.objets_utilise > 0) {
-      itemSelectionDiv.innerHTML += '<p>Vous avez déjà utilisé un objet ce tour.</p>';
-      const cancelBtn = document.createElement('button');
-      cancelBtn.textContent = 'Annuler';
-      cancelBtn.onclick = App.hideItemSelection;
-      itemSelectionDiv.appendChild(cancelBtn);
-      return;
-  }
-
-  const availableItems = [];
-  if (App.userData.crystal_acheté > 0 && App.playerCharacter.crystalUses < 2) availableItems.push({ name: 'Crystal de renouveau', count: App.userData.crystal_acheté });
-  if (App.userData.bouclier_solide_acheté > 0) availableItems.push({ name: 'Bouclier solide', count: App.userData.bouclier_solide_acheté });
-  if (App.userData.Cape_acheté > 0 && App.playerCharacter.capeUses < 2) availableItems.push({ name: "Cape de l'ombre", count: App.userData.Cape_acheté });
-  if (App.userData.Potion_de_Santé_acheté > 0) availableItems.push({ name: 'Potion de Santé', count: App.userData.Potion_de_Santé_acheté });
-  if (App.userData.armure_fer_acheté > 0 && App.playerCharacter.armureUses < 2) availableItems.push({ name: 'Armure de Fer', count: App.userData.armure_fer_acheté });
-  if (App.userData.Amulette_de_Régénération_acheté > 0 && App.playerCharacter.amuletteUses < 1) availableItems.push({ name: 'Amulette de Régénération', count: App.userData.Amulette_de_Régénération_acheté });
-  if (App.userData.epee_tranchante_acheté > 0) availableItems.push({ name: 'Épée Tranchante', count: App.userData.epee_tranchante_acheté });
-  if (App.userData.elixir_puissance_acheté > 0) availableItems.push({ name: 'Elixir de Puissance', count: App.userData.elixir_puissance_acheté });
-  if (App.userData.marque_chasseur_acheté > 0) availableItems.push({ name: 'Marque de Chasseur', count: App.userData.marque_chasseur_acheté });
-  if (App.userData.orbe_siphon_acheté > 0) availableItems.push({ name: 'Orbe de Siphon', count: App.userData.orbe_siphon_acheté });
-  if (App.userData.purge_spirituelle_acheté > 0) availableItems.push({ name: 'Purge Spirituelle', count: App.userData.purge_spirituelle_acheté });
-
-  if (!App.playerCharacter.inventaire_objets) {
-      const shuffled = availableItems.sort(() => 0.5 - Math.random());
-      App.playerCharacter.selectedItems = shuffled.slice(0, 3);
-      App.playerCharacter.inventaire_objets = true;
-  }
-  const itemsToShow = App.playerCharacter.selectedItems || [];
-
-  if (itemsToShow.length === 0) {
-      itemSelectionDiv.innerHTML += "<p>Aucun objet disponible.</p>";
-  } else {
-      itemsToShow.forEach(item => {
-          const btn = document.createElement('button');
-          btn.textContent = `${item.name} (${item.count})`;
-          btn.onclick = () => App.useItem(item.name);
-          itemSelectionDiv.appendChild(btn);
-      });
-  }
-
-  const cancelBtn = document.createElement('button');
-  cancelBtn.textContent = 'Annuler';
-  cancelBtn.onclick = App.hideItemSelection;
-  itemSelectionDiv.appendChild(cancelBtn);
-};
-
-// -----------------------------------------------------------------------------
-// 5. PANNEAU DE STATISTIQUES
-// -----------------------------------------------------------------------------
-
-App.initStatsPanelState = function() {
-  const panel = document.getElementById('stats-panel');
-  if (!panel) return;
-  panel.classList.remove('active');
-  panel.classList.add('inactive');
-};
-
-App.renderDetailedStats = function() {
-  const container = document.getElementById('detailed-stats-content');
-  if (!container) return;
-  container.innerHTML = '';
-  if (!App.playerCharacter || !App.opponentCharacter) {
-    container.innerHTML = '<p>Aucune partie chargée…</p>';
-    return;
-  }
-
-  const characters = [
-    { data: App.playerCharacter, title: App.playerCharacter.name },
-    { data: App.opponentCharacter, title: App.opponentCharacter.name }
-  ];
-
-  let content = '';
-  characters.forEach(characterInfo => {
-    const character = characterInfo.data;
-    const maxPv = character.pv_maximum || character.pv_max;
-
-    let effectsList = '<h6>Effets actifs</h6>';
-    if (character.effects && character.effects.length > 0) {
-      effectsList += '<ul>';
-      character.effects.forEach(effect => {
-        const effectName = App.effectNames[effect.id] || effect.id;
-        const duration = effect.duration < 999 ? `${effect.duration} tour(s)` : 'Permanent';
-        effectsList += `<li>${effectName} (${duration})</li>`;
-      });
-      effectsList += '</ul>';
-    } else {
-      effectsList += '<p>Aucun effet actif.</p>';
-    }
-
-    content += `
-      <div class="stats-block">
-        <h5>${characterInfo.title}</h5>
-        <ul>
-          PV : ${character.pv} / ${maxPv}<br><br>
-          Attaque : ${App.getEffectiveStat(character, 'attaque')} / ${character.attaque_originale}<br><br>
-          Défense : ${App.getEffectiveStat(character, 'defense')} / ${character.defense_originale}<br><br>
-          Vitesse : ${App.getEffectiveStat(character, 'vitesse')} / ${character.vitesse_originale}
-        </ul>
-        ${effectsList}
-      </div>
-    `;
-  });
-
-  container.innerHTML = content;
-};
-
-App.toggleStatsPanel = function() {
-  const panel = document.getElementById('stats-panel');
-  if (!panel) return;
-
-  const isActive = panel.classList.contains('active');
-  panel.classList.toggle('active', !isActive);
-  panel.classList.toggle('inactive', isActive);
-
-  // Désactiver les boutons pendant que le panneau est ouvert pour éviter les clics accidentels
-  const buttonsDisabled = !isActive;
-  const ids = ['attack-button', 'special-button', 'defense-button', 'items-button'];
-  ids.forEach(id => {
-      const btn = document.getElementById(id);
-      if (btn) btn.disabled = buttonsDisabled;
-  });
-
-  if (!isActive) {
-    App.renderDetailedStats();
-  }
-};
+// =================================================================================
+// END CORE COMBAT
+// =================================================================================

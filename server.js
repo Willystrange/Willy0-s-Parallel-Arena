@@ -114,6 +114,7 @@ const TROPHY_ROAD = loadJSONData(path.join(__dirname, 'data', 'trophy_road.json'
 const PASS_REWARDS = loadJSONData(path.join(__dirname, 'data', 'pass_rewards.json'), { free: [], premium: [] });
 const OPPONENT_STATS_RANGES = loadJSONData(path.join(__dirname, 'data', 'survival_opponents.json'), {});
 const EQUIPMENTS_DATA = loadJSONData(path.join(__dirname, 'data', 'equipments.json'), []);
+const SHOP_ITEMS = loadJSONData(path.join(__dirname, 'data', 'shop_items.json'), []);
 const WEEKEND_EVENTS = ["PV égaux", "Chargement /2", "Sans défense", "Sans objet", "Points X2", "XP X2", "Rage", "Armure fragile", "Récupération rapide", "Malédiction", "Bénédiction"];
 
 function loadJSONData(p, def) { if (!fs.existsSync(p)) return def; try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return def; } }
@@ -131,6 +132,39 @@ function getParisCycleId(type) {
     date.setUTCDate(date.getUTCDate() - diff);
     return date.toISOString().split('T')[0];
 }
+
+app.get('/api/shop/daily-offer', verifyToken, async (req, res) => {
+    const userId = req.uid;
+    const userRef = db.collection('users').doc(userId);
+    const today = getParisCycleId('daily');
+
+    try {
+        const { offer } = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : {};
+            
+            // Check if offer exists for today
+            if (userData.daily_offer && userData.daily_offer.date === today) {
+                return { offer: userData.daily_offer };
+            }
+
+            // Generate new offer
+            const randomIndex = Math.floor(Math.random() * SHOP_ITEMS.length);
+            const baseItem = SHOP_ITEMS[randomIndex];
+            const item = { ...baseItem, discountedPrice: Math.round(baseItem.price * 0.8) }; // 20% discount
+            
+            const newOffer = { date: today, item };
+            userData.daily_offer = newOffer;
+            
+            t.set(userRef, userData, { merge: true });
+            return { offer: newOffer };
+        });
+        res.json({ success: true, offer });
+    } catch (e) {
+        console.error("Daily offer error:", e);
+        res.status(500).json({ error: "Erreur interne" });
+    }
+});
 
 function updateParallelPass(userData, gainXP) {
     if (gainXP <= 0) return;
@@ -259,6 +293,8 @@ app.get('/api/check-pseudo/:pseudo', async (req, res) => {
     const snap = await db.collection('users').where('pseudo_lower', '==', req.params.pseudo.trim().toLowerCase()).get();
     res.json({ available: snap.empty });
 });
+app.get('/api/data/equipments', (req, res) => res.json(EQUIPMENTS_DATA));
+app.get('/api/data/characters', (req, res) => res.json(CHARACTERS_DATA));
 
 // --- USER SYNC ---
 app.get('/api/user/:userId', verifyToken, async (req, res) => res.json({ success: true, userData: await getUserData(req.params.userId) }));

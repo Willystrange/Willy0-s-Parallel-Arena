@@ -380,7 +380,13 @@ App.initHelpModal = function() {
     });
 };
 
-App.initCharacters = function() {
+App.initCharacters = async function() {
+  if (!App.characters || App.characters.length === 0) {
+      if (typeof App.loadCharactersData === 'function') {
+          await App.loadCharactersData();
+      }
+  }
+
   App.loadFilter();
   const attrSel = document.getElementById('filter-attribute');
   // Supprime la récupération de orderSel

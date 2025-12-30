@@ -1,0 +1,23 @@
+[
+    { "img": "XP_2.png", "title": "Double XP x1", "description": "Profitez du double XP lors de vos combats !", "price": 18, "type": "xp", "quantity": 1 },
+    { "img": "XP_2.png", "title": "Double XP x3", "description": "Profitez du double XP lors de vos combats !", "price": 48, "type": "xp", "quantity": 3 },
+    { "img": "XP_2.png", "title": "Double XP x5", "description": "Profitez du double XP lors de vos combats !", "price": 75, "type": "xp", "quantity": 5 },
+    { "img": "Potion-1.png", "title": "Potion de Santé x1", "description": "Augmente les PV du joueur de 1100.", "price": 12, "type": "potion", "quantity": 1 },
+    { "img": "Potion-1.png", "title": "Potion de Santé x3", "description": "Augmente les PV du joueur de 1100.", "price": 33, "type": "potion", "quantity": 3 },
+    { "img": "Potion-1.png", "title": "Potion de Santé x5", "description": "Augmente les PV du joueur de 1100.", "price": 50, "type": "potion", "quantity": 5 },
+    { "img": "Amulette-1.png", "title": "Amulette de Régénération x1", "description": "Régénère 2% des PV max par tour.", "price": 35, "type": "amulette", "quantity": 1 },
+    { "img": "Amulette-1.png", "title": "Amulette de Régénération x3", "description": "Régénère 2% des PV max par tour.", "price": 95, "type": "amulette", "quantity": 3 },
+    { "img": "Amulette-1.png", "title": "Amulette de Régénération x5", "description": "Régénère 2% des PV max par tour.", "price": 150, "type": "amulette", "quantity": 5 },
+    { "img": "epee-1.png", "title": "Épée Tranchante x1", "description": "Augmente l'attaque du joueur de 5%.", "price": 18, "type": "epee", "quantity": 1 },
+    { "img": "epee-1.png", "title": "Épée Tranchante x3", "description": "Augmente l'attaque du joueur de 5%.", "price": 48, "type": "epee", "quantity": 3 },
+    { "img": "epee-1.png", "title": "Épée Tranchante x5", "description": "Augmente l'attaque du joueur de 5%.", "price": 75, "type": "epee", "quantity": 5 },
+    { "img": "elixir-1.png", "title": "Élixir de Puissance x1", "description": "Augmente l'attaque de 50 points.", "price": 15, "type": "elixir", "quantity": 1 },
+    { "img": "elixir-1.png", "title": "Élixir de Puissance x3", "description": "Augmente l'attaque de 50 points.", "price": 40, "type": "elixir", "quantity": 3 },
+    { "img": "elixir-1.png", "title": "Élixir de Puissance x5", "description": "Augmente l'attaque de 50 points.", "price": 60, "type": "elixir", "quantity": 5 },
+    { "img": "bouclier.png", "title": "Bouclier solide x1", "description": "Augmente la défense de 15 points.", "price": 10, "type": "bouclier", "quantity": 1 },
+    { "img": "bouclier.png", "title": "Bouclier solide x3", "description": "Augmente la défense de 15 points.", "price": 28, "type": "bouclier", "quantity": 3 },
+    { "img": "bouclier.png", "title": "Bouclier solide x5", "description": "Augmente la défense de 15 points.", "price": 40, "type": "bouclier", "quantity": 5 },
+    { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x1", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 70, "type": "cape", "quantity": 1 },
+    { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x3", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 190, "type": "cape", "quantity": 3 },
+    { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x5", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 300, "type": "cape", "quantity": 5 }
+]

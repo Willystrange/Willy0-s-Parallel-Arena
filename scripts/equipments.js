@@ -212,7 +212,7 @@ App.displayEquipmentDetails = function(item, characterName, isEquipped = false, 
 
 
 
-App.initEquipmentsPage = function() {
+App.initEquipmentsPage = async function() {
     console.log('DEBUG: App.initEquipmentsPage() called.');
     const characterName = sessionStorage.getItem('characterToEquip');
     console.log(`DEBUG: Character name from sessionStorage: ${characterName}`);
@@ -221,6 +221,11 @@ App.initEquipmentsPage = function() {
         console.log('DEBUG: No character name found, redirecting to perso_stats.');
         loadPage('perso_stats');
         return;
+    }
+
+    // Ensure data is loaded
+    if (!App.equipments || App.equipments.length === 0) {
+        await App.loadEquipmentsData();
     }
 
     const titleEl = document.getElementById('character-name-title');

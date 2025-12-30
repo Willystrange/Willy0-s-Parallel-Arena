@@ -14,30 +14,6 @@ App.BONUS_TEXTS = {
   crystal: { alt: "Crystal de renouveau", title: "Crystal de renouveau", description: "Recharge 0.8 points de la capacité spéciale." }
 };
 
-App.DAILY_ITEMS = [
-    { img: "XP_2.png", title: "Double XP x1", description: "Profitez du double XP lors de vos combats !", price: 18, type: "xp", quantity: 1 },
-    { img: "XP_2.png", title: "Double XP x3", description: "Profitez du double XP lors de vos combats !", price: 48, type: "xp", quantity: 3 },
-    { img: "XP_2.png", title: "Double XP x5", description: "Profitez du double XP lors de vos combats !", price: 75, type: "xp", quantity: 5 },
-    { img: "Potion-1.png", title: "Potion de Santé x1", description: "Augmente les PV du joueur de 1100.", price: 12, type: "potion", quantity: 1 },
-    { img: "Potion-1.png", title: "Potion de Santé x3", description: "Augmente les PV du joueur de 1100.", price: 33, type: "potion", quantity: 3 },
-    { img: "Potion-1.png", title: "Potion de Santé x5", description: "Augmente les PV du joueur de 1100.", price: 50, type: "potion", quantity: 5 },
-    { img: "Amulette-1.png", title: "Amulette de Régénération x1", description: "Régénère 2% des PV max par tour.", price: 35, type: "amulette", quantity: 1 },
-    { img: "Amulette-1.png", title: "Amulette de Régénération x3", description: "Régénère 2% des PV max par tour.", price: 95, type: "amulette", quantity: 3 },
-    { img: "Amulette-1.png", title: "Amulette de Régénération x5", description: "Régénère 2% des PV max par tour.", price: 150, type: "amulette", quantity: 5 },
-    { img: "epee-1.png", title: "Épée Tranchante x1", description: "Augmente l'attaque du joueur de 5%.", price: 18, type: "epee", quantity: 1 },
-    { img: "epee-1.png", title: "Épée Tranchante x3", description: "Augmente l'attaque du joueur de 5%.", price: 48, type: "epee", quantity: 3 },
-    { img: "epee-1.png", title: "Épée Tranchante x5", description: "Augmente l'attaque du joueur de 5%.", price: 75, type: "epee", quantity: 5 },
-    { img: "elixir-1.png", title: "Élixir de Puissance x1", description: "Augmente l'attaque de 50 points.", price: 15, type: "elixir", quantity: 1 },
-    { img: "elixir-1.png", title: "Élixir de Puissance x3", description: "Augmente l'attaque de 50 points.", price: 40, type: "elixir", quantity: 3 },
-    { img: "elixir-1.png", title: "Élixir de Puissance x5", description: "Augmente l'attaque de 50 points.", price: 60, type: "elixir", quantity: 5 },
-    { img: "bouclier.png", title: "Bouclier solide x1", description: "Augmente la défense de 15 points.", price: 10, type: "bouclier", quantity: 1 },
-    { img: "bouclier.png", title: "Bouclier solide x3", description: "Augmente la défense de 15 points.", price: 28, type: "bouclier", quantity: 3 },
-    { img: "bouclier.png", title: "Bouclier solide x5", description: "Augmente la défense de 15 points.", price: 40, type: "bouclier", quantity: 5 },
-    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x1", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 70, type: "cape", quantity: 1 },
-    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x3", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 190, type: "cape", quantity: 3 },
-    { img: "Cape_de_l'ombre.png", title: "Cape de l'ombre x5", description: "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", price: 300, type: "cape", quantity: 5 }
-];
-
 // Map pour lier le type d'item à la propriété correspondante dans userData
 App.ITEM_PROPERTY_MAP = {
     xp: 'Double_XP_acheté',
@@ -257,44 +233,46 @@ App.handleBuySpecialLootbox = function(button) {
     }
 };
 
-// ===================== OFFRES JOURNALIÈRES =====================
-App.generateDailyOffers = function() {
-    const today = new Date().toDateString();
-    let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers')) || {};
-    if (dailyOffers.date === today) {
-        return dailyOffers;
+// ===================== OFFRES JOURNALIÈRES (SERVEUR) =====================
+App.fetchDailyOffers = async function() {
+    const user = firebase.auth().currentUser;
+    if (!user) return null;
+
+    try {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/shop/daily-offer', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+            localStorage.setItem('dailyOffers', JSON.stringify(data.offer));
+            return data.offer;
+        }
+    } catch (e) {
+        console.error("Erreur fetch offres:", e);
     }
-
-    const randomIndex = App.getRandomInt(App.DAILY_ITEMS.length);
-    const item = { ...App.DAILY_ITEMS[randomIndex] }; // Copie pour éviter de modifier l'original
-    item.discountedPrice = App.applyDiscount(item.price);
-
-    dailyOffers = { date: today, item: item };
-    localStorage.setItem('dailyOffers', JSON.stringify(dailyOffers));
-    saveUserData(App.userData); // Sauvegarde au cas où des données auraient changé
-    return dailyOffers;
+    return null;
 };
 
-App.displayDailyOffers = function() {
-    const dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
-    const dailyCategory = document.getElementById('category-daily');
-    if (!dailyCategory || !dailyOffers) return;
+App.displayDailyOffers = async function() {
+    let dailyOffers = JSON.parse(localStorage.getItem('dailyOffers'));
+    const today = App.getParisCycleId('daily'); // Use same cycle ID as server
 
-    const today = new Date().toDateString();
-    if (dailyOffers.date !== today) {
-        App.generateDailyOffers();
-        App.displayDailyOffers();
-        return;
+    if (!dailyOffers || dailyOffers.date !== today) {
+        dailyOffers = await App.fetchDailyOffers();
+        if (!dailyOffers) return;
     }
+
+    const dailyCategory = document.getElementById('category-daily');
+    if (!dailyCategory) return;
 
     dailyCategory.innerHTML = '';
 
-    // Récompense gratuite (UPDATED FOR PARIS TIME CHECK)
+    // Récompense gratuite
     const rewardItem = document.createElement('div');
     rewardItem.classList.add('bonus-item');
     
-    const currentDailyCycle = App.getParisCycleId('daily');
-    const isClaimed = (App.userData.daily_reward_claim_id === currentDailyCycle);
+    const isClaimed = (App.userData.daily_reward_claim_id === today);
 
     rewardItem.innerHTML = `
         <img src="gratuite-rec.png" alt="Récompense Gratuite">
@@ -695,7 +673,7 @@ if (!App.shopListenersAttached) {
 // ===================== INITIALISATION =====================
 function initializeShop() {
     App.updateStaticTexts();
-    App.generateDailyOffers();
+    // App.generateDailyOffers() removed (now handled by displayDailyOffers via server)
     App.displayDailyOffers();
     App.displaySpecialWeeklyOffer(); // Afficher l'offre spéciale hebdomadaire
     App.updateStockDisplay();
