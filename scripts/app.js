@@ -978,13 +978,37 @@ function loadPage(page) {
     }
     lastPageHadFooter = currentPageHasFooter;
 
-    const script = document.createElement('script');
-    const baseSrc = (page === 'character-upgrade' || page.endsWith('amelioration')) ? 'scripts/character-upgrade.js' : 'scripts/' + page + '.js';
-    script.src = baseSrc + '?v=' + Date.now(); // Cache busting
-    script.setAttribute('data-dynamic', 'true');
-    script.onload = () => {
-      if (page === 'equipments' && typeof App.initEquipmentsPage === 'function') App.initEquipmentsPage();
-    };
-    document.body.appendChild(script);
+    // --- Inject combat-core.js if needed ---
+    if (page.startsWith('combat') && page !== 'combat-selection') { // combat, combat-weekend, combat-survie
+        const coreScript = document.createElement('script');
+        coreScript.src = 'scripts/combat-core.js?v=' + Date.now();
+        coreScript.setAttribute('data-dynamic', 'true');
+        // We need to ensure core is loaded BEFORE the main script
+        // But script loading is async by default unless we use promises or ordered appending
+        // Appending synchronously to body usually executes in order for classic scripts, but let's be safe.
+        // Actually, we can just append it first.
+        document.body.appendChild(coreScript);
+        
+        // Use onload to load the main script
+        coreScript.onload = () => {
+            const script = document.createElement('script');
+            const baseSrc = (page === 'character-upgrade' || page.endsWith('amelioration')) ? 'scripts/character-upgrade.js' : 'scripts/' + page + '.js';
+            script.src = baseSrc + '?v=' + Date.now();
+            script.setAttribute('data-dynamic', 'true');
+            script.onload = () => {
+              if (page === 'equipments' && typeof App.initEquipmentsPage === 'function') App.initEquipmentsPage();
+            };
+            document.body.appendChild(script);
+        };
+    } else {
+        const script = document.createElement('script');
+        const baseSrc = (page === 'character-upgrade' || page.endsWith('amelioration')) ? 'scripts/character-upgrade.js' : 'scripts/' + page + '.js';
+        script.src = baseSrc + '?v=' + Date.now();
+        script.setAttribute('data-dynamic', 'true');
+        script.onload = () => {
+          if (page === 'equipments' && typeof App.initEquipmentsPage === 'function') App.initEquipmentsPage();
+        };
+        document.body.appendChild(script);
+    }
   }).catch(err => console.error('Error loading page:', err));
 }
