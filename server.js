@@ -467,8 +467,13 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     if (!game) return res.status(404).json({ error: "Inconnu" });
     const results = { gameOver: false, logs: [] };
 
+    let aiParried = false;
     if (action === 'attack') {
+        const initialDefense = game.opponent.defense_bouton;
         combatEngine.handleAttack(game.player, game.opponent, true, results);
+        if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
+            aiParried = true;
+        }
     } else if (action === 'defend') {
         game.player.defense_bouton = 1;
         game.player.defense_droit = 3;
@@ -483,15 +488,19 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     }
 
     if (game.opponent.pv > 0) {
-        // Logique de l'adversaire (IA) si ce n'est pas déjà fini
-        const aiAction = combatEngine.makeAIDecision(game);
-        if (aiAction === 'attack') {
-            combatEngine.handleAttack(game.opponent, game.player, false, results);
-        } else if (aiAction === 'defend') {
-            game.opponent.defense_bouton = 1;
-            game.opponent.defense_droit = 3;
-        } else if (aiAction === 'special') {
-            combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
+        if (aiParried) {
+             // L'IA a paré, elle passe son tour d'action active (la parade EST son action)
+        } else {
+            // Logique de l'adversaire (IA) si ce n'est pas déjà fini
+            const aiAction = combatEngine.makeAIDecision(game);
+            if (aiAction === 'attack') {
+                combatEngine.handleAttack(game.opponent, game.player, false, results);
+            } else if (aiAction === 'defend') {
+                game.opponent.defense_bouton = 1;
+                game.opponent.defense_droit = 3;
+            } else if (aiAction === 'special') {
+                combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
+            }
         }
     }
 
