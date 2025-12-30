@@ -505,6 +505,8 @@ app.post('/api/character/upgrade', verifyToken, async (req, res) => {
     } else {
         const pts = (stats.PV || 0) + (stats.attaque || 0) + (stats.defense || 0);
         userData[characterName + '_PV_pts'] = (userData[characterName + '_PV_pts'] || 0) + (stats.PV || 0);
+        userData[characterName + '_attaque_pts'] = (userData[characterName + '_attaque_pts'] || 0) + (stats.attaque || 0);
+        userData[characterName + '_defense_pts'] = (userData[characterName + '_defense_pts'] || 0) + (stats.defense || 0);
         userData[characterName + '_pts'] -= pts;
     }
     await saveUserData(userId, userData); res.json({ success: true, userData });
