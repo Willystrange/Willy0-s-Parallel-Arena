@@ -323,9 +323,142 @@ app.post('/api/lootbox/open', verifyToken, async (req, res) => {
 app.post('/api/recompenses/open', verifyToken, async (req, res) => {
     const { userId, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId); if (!userData || (userData.recompense || 0) <= 0) return res.status(400).json({ error: "Pas de récompense" });
-    userData.recompense--; userData.argent = (userData.argent || 0) + 50;
-    await saveUserData(userId, userData); res.json({ success: true, userData, rewards: [{ name: "50 Points", amount: 50 }] });
+    const userData = await getUserData(userId);
+    
+    if (!userData) return res.status(404).json({ error: "Utilisateur inconnu" });
+    if ((userData.recompense || 0) <= 0 && (userData.perso_recompense || 0) <= 0) return res.status(400).json({ error: "Pas de récompense" });
+
+    const rewards = [];
+    
+    // --- HELPERS ---
+    const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const rarityProbabilities = { 1: 0.05, 2: 0.10, 3: 0.20, 4: 0.30, 5: 0.35 };
+    const xpRanges = { 1: [150, 300], 2: [100, 150], 3: [50, 100], 4: [20, 50], 5: [5, 20] };
+    const charactersRarity = { 'Doudou': 4, 'Coeur': 3, 'Grours': 3, 'Baleine': 4, 'Poulpy': 2, 'Willy': 4, 'Oiseau': 3, 'Colorina': 5, 'Cocobi': 1, 'Diva': 1, 'Sboonie': 5, 'Rosalie': 2, 'Inconnue': 2, 'Boompy': 1, 'Perro': 5 };
+    
+    const getRandomRarity = () => {
+        const r = Math.random();
+        let cum = 0;
+        for (const [lvl, prob] of Object.entries(rarityProbabilities)) {
+            cum += prob;
+            if (r < cum) return parseInt(lvl);
+        }
+        return 5;
+    };
+
+    // --- LOGIC ---
+    if ((userData.perso_recompense || 0) > 0) {
+        userData.perso_recompense--;
+        let obtained = false;
+        for (let i = 0; i < 10; i++) {
+            const targetRarity = getRandomRarity();
+            const available = Object.keys(charactersRarity).filter(c => !userData[c] && charactersRarity[c] === targetRarity);
+            if (available.length > 0) {
+                const charName = available[getRandomInt(0, available.length - 1)];
+                userData[charName] = 1; // Unlock
+                rewards.push({ name: "Personnage", info: `Vous avez débloqué : ${charName} !` });
+                obtained = true;
+                break;
+            }
+        }
+        if (!obtained) {
+             const amt = getRandomInt(1, 5);
+             userData.Double_XP = (userData.Double_XP || 0) + amt; // Note: 'Double_XP_acheté' vs 'Double_XP' inconsistency in old code? using 'Double_XP' as per server standard or 'Double_XP_acheté' if shop item? 
+             // Server uses 'Double_XP' for active bonus usually, but shop uses 'Double_XP_acheté'. Let's stick to ITEM_PROPERTY_MAP keys if possible or standard fields.
+             // Checking ITEM_PROPERTY_MAP: xp -> Double_XP_acheté. Let's use that for consistency with shop.
+             userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + amt;
+             rewards.push({ name: "Double XP", amount: amt, info: `+${amt} Double XP` });
+        }
+    } else {
+        userData.recompense--;
+        const rewardTypes = [
+          { type: 'character', chance: 0.06 },
+          { type: 'doubleXP', chance: 0.11 },
+          { type: 'healthPotion', chance: 0.11 },
+          { type: 'amulet', chance: 0.10 },
+          { type: 'xp', chance: 0.11 },
+          { type: 'money', chance: 0.12 },
+          { type: 'epee', chance: 0.10 },
+          { type: 'elixir', chance: 0.10 },
+          { type: 'armor', chance: 0.10 },
+          { type: 'bouclier', chance: 0.09 },
+          { type: 'cape', chance: 0.10 },
+          { type: 'crystal', chance: 0.10 }, // Total ~1.2? normalized loop handles it
+        ];
+        
+        const getRewardType = () => {
+            const r = Math.random() * 1.2; // Approximate sum
+            let cum = 0;
+            for (const rt of rewardTypes) {
+                cum += rt.chance;
+                if (r < cum) return rt.type;
+            }
+            return 'money';
+        };
+
+        const numRewards = Math.random() < 0.7 ? 1 : (Math.random() < 0.9 ? 2 : 3);
+
+        for (let i = 0; i < numRewards; i++) {
+            const type = getRewardType();
+            switch (type) {
+                case 'character':
+                    const rLevel = getRandomRarity();
+                    const avail = Object.keys(charactersRarity).filter(c => !userData[c] && charactersRarity[c] === rLevel);
+                    if (avail.length > 0) {
+                        const cName = avail[getRandomInt(0, avail.length - 1)];
+                        userData[cName] = 1;
+                        rewards.push({ name: "Personnage", info: `Nouveau : ${cName}` });
+                    } else {
+                        // Fallback money
+                        const m = getRandomInt(50, 150);
+                        userData.argent = (userData.argent || 0) + m;
+                        rewards.push({ name: "Points", amount: m, info: `+${m} Points (Fallback)` });
+                    }
+                    break;
+                case 'doubleXP':
+                    const dx = getRandomInt(1, 3);
+                    userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + dx;
+                    rewards.push({ name: "Double XP", amount: dx, info: `+${dx} Double XP` });
+                    break;
+                case 'healthPotion':
+                    userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + 1;
+                    rewards.push({ name: "Potion de Santé", amount: 1, info: "+1 Potion" });
+                    break;
+                case 'amulet':
+                    userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
+                    rewards.push({ name: "Amulette", amount: 1, info: "+1 Amulette de Régénération" });
+                    break;
+                case 'xp':
+                    const unlocked = Object.keys(charactersRarity).filter(c => userData[c] === 1);
+                    if (unlocked.length > 0) {
+                        const char = unlocked[getRandomInt(0, unlocked.length - 1)];
+                        // Calc random XP based on rarity logic (simplified here or reused)
+                        const xRarity = getRandomRarity();
+                        const [min, max] = xpRanges[xRarity] || [10, 50];
+                        const xVal = getRandomInt(min, max);
+                        userData[`${char}_XP`] = (userData[`${char}_XP`] || 0) + xVal;
+                        rewards.push({ name: "XP Personnage", amount: xVal, info: `+${xVal} XP pour ${char}` });
+                    } else {
+                         userData.argent = (userData.argent || 0) + 50;
+                         rewards.push({ name: "Points", amount: 50, info: "+50 Points" });
+                    }
+                    break;
+                case 'money':
+                    const mon = getRandomInt(20, 100);
+                    userData.argent = (userData.argent || 0) + mon;
+                    rewards.push({ name: "Points", amount: mon, info: `+${mon} Points` });
+                    break;
+                case 'epee': userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + 1; rewards.push({ name: "Épée Tranchante", amount: 1, info: "+1 Épée" }); break;
+                case 'elixir': userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + 1; rewards.push({ name: "Elixir", amount: 1, info: "+1 Elixir de Puissance" }); break;
+                case 'armor': userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + 1; rewards.push({ name: "Armure de Fer", amount: 1, info: "+1 Armure" }); break;
+                case 'bouclier': userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + 1; rewards.push({ name: "Bouclier Solide", amount: 1, info: "+1 Bouclier" }); break;
+                case 'cape': userData.Cape_acheté = (userData.Cape_acheté || 0) + 1; rewards.push({ name: "Cape de l'ombre", amount: 1, info: "+1 Cape" }); break;
+                case 'crystal': userData.crystal_acheté = (userData.crystal_acheté || 0) + 1; rewards.push({ name: "Crystal", amount: 1, info: "+1 Crystal de renouveau" }); break;
+            }
+        }
+    }
+
+    await saveUserData(userId, userData); res.json({ success: true, userData, rewards });
 });
 
 app.post('/api/trophy/claim', verifyToken, async (req, res) => {
