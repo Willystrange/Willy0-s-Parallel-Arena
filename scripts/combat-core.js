@@ -74,6 +74,8 @@ App.scrollToBottom = function() {
   }
 };
 
+App.updateTour = function() {}; // Géré par le serveur, conservé pour compatibilité HTML
+
 // -----------------------------------------------------------------------------
 // 2. DONNÉES D'AFFICHAGE (STATISTIQUES & EFFETS)
 // -----------------------------------------------------------------------------
@@ -222,6 +224,92 @@ App.effectNames = {
     'curse_effect': "Malédiction",
     'blessing_effect': "Bénédiction",
     'egide_aube_shield': "Bouclier de l'Égide",
+};
+
+// Utilisé par le panneau de stats pour afficher les valeurs réelles
+App.getEffectiveStat = function(character, statName) {
+    const baseStatValue = character[statName + '_originale'] || character[statName];
+    
+    let additiveBonus = 0;
+    let multiplicativeBonus = 1;
+
+    // Bonus Amulette du Paria (Visualisation seulement, le serveur fait foi)
+    if ((character.equipments || []).includes('amulette_paria') && character.pv < (character.pv_maximum * 0.5)) {
+        if (statName === 'attaque') {
+            additiveBonus += 20;
+        } else if (statName === 'defense') {
+            additiveBonus += 15;
+        }
+    }
+
+    if (character.effects && character.effects.length > 0) {
+        character.effects.forEach(effect => {
+            if (effect.stat === statName) {
+                if (effect.type === 'additive') additiveBonus += effect.value;
+                else if (effect.type === 'multiplicative') multiplicativeBonus *= effect.value;
+            }
+        });
+    }
+
+    // Weekend Mode Effects (Visualisation)
+    if (statName === 'attaque' && character.isRaging) {
+        const pvPercentage = character.pv / character.pv_maximum;
+        if (pvPercentage <= 0.3) {
+            multiplicativeBonus *= 1.3;
+        } else if (pvPercentage <= 0.6) {
+            multiplicativeBonus *= 1.15;
+        }
+    }
+    if (statName === 'defense' && character.fragileArmor) {
+        multiplicativeBonus *= 0.5;
+    }
+
+    return Math.round((baseStatValue + additiveBonus) * multiplicativeBonus);
+};
+
+// -----------------------------------------------------------------------------
+// 3. SAUVEGARDE ET CHARGEMENT LOCAL
+// -----------------------------------------------------------------------------
+
+App.getSaveKey = function() {
+    if (App.gameMode === 'classic') {
+        return 'savepartie';
+    } else if (App.gameMode === 'weekend') {
+        return 'savepartie_weekend';
+    } else if (App.gameMode === 'survie') {
+        return 'savepartie_survie';
+    }
+    return null;
+};
+
+App.saveGame = function(playerCharacter, opponentCharacter) {
+    const key = App.getSaveKey();
+    if (!key || !playerCharacter || !opponentCharacter) return;
+
+    const saveData = {
+        playerCharacter: { ...playerCharacter },
+        opponentCharacter: { ...opponentCharacter }
+    };
+    localStorage.setItem(key, JSON.stringify(saveData));
+};
+
+App.loadGame = function() {
+    const key = App.getSaveKey();
+    if (!key) return null;
+
+    const savedData = localStorage.getItem(key);
+    if (!savedData) return null;
+
+    try {
+        const s = JSON.parse(savedData);
+        // Compatibilité ascendante basique
+        if (s.playerCharacter && !s.playerCharacter.effects) s.playerCharacter.effects = [];
+        if (s.opponentCharacter && !s.opponentCharacter.effects) s.opponentCharacter.effects = [];
+        return s;
+    } catch (e) {
+        console.error(`Error loading save data for key ${key}:`, e);
+        return null;
+    }
 };
 
 // -----------------------------------------------------------------------------
