@@ -491,16 +491,22 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         if (aiParried) {
              // L'IA a paré, elle passe son tour d'action active (la parade EST son action)
         } else {
-            // Logique de l'adversaire (IA) si ce n'est pas déjà fini
-            const aiAction = combatEngine.makeAIDecision(game);
+            // Logique de l'adversaire (IA) basée sur la décision prise au tour PRÉCÉDENT
+            const aiAction = game.opponent.next_choice || 'attack'; // Fallback safe
+            
             if (aiAction === 'attack') {
+                game.opponent.defense_bouton = 0;
                 combatEngine.handleAttack(game.opponent, game.player, false, results);
             } else if (aiAction === 'defend') {
                 game.opponent.defense_bouton = 1;
                 game.opponent.defense_droit = 3;
             } else if (aiAction === 'special') {
+                game.opponent.defense_bouton = 0;
                 combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
             }
+            
+            // On prépare DÉJÀ la décision pour le PROCHAIN tour (1 tour à l'avance)
+            game.opponent.next_choice = combatEngine.makeAIDecision(game);
         }
     }
 
