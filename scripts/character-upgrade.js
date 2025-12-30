@@ -5,9 +5,18 @@ App.modificationsTemp = { PV: 0, attaque: 0, defense: 0 };
 
 App.xpPourNiveauSuivant = function(level) { return level * level * 20; };
 App.coutPourNiveauSuivant = function(level) { return level * 25; };
+
+// Fonctions de calcul de stats (inchangées dans la logique, utilisées pour le prévisionnel)
 App.loadPv = function(character, pts) { return Math.round((1 + pts * 0.02) * character.pv); };
 App.loadAttaque = function(character, pts) { return Math.round((1 + pts * 0.02) * character.attaque); };
 App.loadDefense = function(character, pts) { return Math.round((1 + pts * 0.02) * character.defense); };
+
+// Configuration des statistiques (Max points, Labels)
+App.statsConfig = [
+    { id: 'PV', label: 'PV', max: 25 },
+    { id: 'attaque', label: 'Attaque', max: 25 },
+    { id: 'defense', label: 'Défense', max: 15 }
+];
 
 App.levelUp = function() {
   const user = firebase.auth().currentUser;
@@ -33,8 +42,13 @@ App.levelUp = function() {
 App.afficherDonneesUtilisateur = function() {
   const userData = JSON.parse(localStorage.getItem('userData')) || {};
   const name = App.characterName;
-  if (!name) { loadPage('perso_stats'); return; }
+  if (!name) { 
+      // Si pas de perso sélectionné, retour stats ou menu
+      window.location.href = 'perso_stats.html'; 
+      return; 
+  }
 
+  // Attendre que les données JSON (personnages) soient chargées dans App.characters
   if (!App.characters || App.characters.length === 0) {
       setTimeout(App.afficherDonneesUtilisateur, 100);
       return;
@@ -43,91 +57,160 @@ App.afficherDonneesUtilisateur = function() {
   const character = App.characters.find(c => c.name === name);
   if (!character) return;
 
+  // Données de base
   const level = userData[name + '_Level'] || 1;
-  const xp = userData[name + '_XP'] || 0;
   const ptsDispo = userData[name + '_pts'] || 0;
-  const xpNeeded = App.xpPourNiveauSuivant(level);
-  const cost = App.coutPourNiveauSuivant(level);
-  const points = userData.argent || 0;
   
-  const pv = App.loadPv(character, userData[name + '_PV_pts'] || 0);
-  const attaque = App.loadAttaque(character, userData[name + '_attaque_pts'] || 0);
-  const defense = App.loadDefense(character, userData[name + '_defense_pts'] || 0);
-
-  const persoHTML = `
-    <div id="character-info-display" class="character-info" style="display:block;">
-      <strong>${name}</strong><br>
-      Classe: ${character.classe || 'Inconnue'}<br>
-      PV : ${pv}<br>
-      Attaque : ${attaque}<br>
-      Défense : ${defense}<br>
-      Rareté : ${character.rarete}<br>
-      <div id="points-allocation-area"></div>
-    </div>
-    <div class="level-info">
-        Niveau: ${level}${level >= 11 ? ' (Maximum !)' : ''}<br>
-        ${level < 11 ? `XP: ${xp} / ${xpNeeded}<br>` : ''}
-        ${level < 11 ? `Pièces: ${points}<br>` : ''}
-        ${level < 11 ? `<div class="cost-info">Coût passage niveau: ${cost} pièces</div>` : ''}
-        ${(xp >= xpNeeded && points >= cost && level < 11) ? `<button class="level-up-button" onclick="App.levelUp()">Monter de niveau</button>` : ''}
-    </div>
-  `;
-  
+  // Construction de l'interface
   const container = document.getElementById('characters-unlocked');
-  if (container) container.innerHTML = persoHTML;
+  if (!container) return;
 
-  if (ptsDispo > 0) {
-    App.renderAllocationButtons(userData, ptsDispo);
-  }
-};
+  let html = `
+    <div class="char-card">
+        <div class="char-header">
+            <h2>${name}</h2>
+            <div class="char-badges">
+                Classe: ${character.classe || 'Inconnue'} | Rareté: ${character.rarete}
+            </div>
+        </div>
+  `;
 
-App.renderAllocationButtons = function(userData, ptsTotal) {
-  const name = App.characterName;
-  const area = document.getElementById('points-allocation-area');
-  if (!area) return;
+  // --- SECTION STATISTIQUES (AVEC PREVISUALISATION) ---
+  html += `<div class="stats-container">`;
+  
+  const ptsUtilisesTemp = App.totalPointsUtilises();
+  const ptsRestants = ptsDispo - ptsUtilisesTemp;
 
-  const ptsUtilises = App.totalPointsUtilises();
-  const ptsRestants = ptsTotal - ptsUtilises;
+  App.statsConfig.forEach(stat => {
+      const ptsActuels = userData[name + '_' + stat.id + '_pts'] || 0;
+      const ptsTemp = App.modificationsTemp[stat.id] || 0;
+      const totalPts = ptsActuels + ptsTemp;
+      
+      // Calcul des valeurs réelles
+      let valActuelle, valPrevue;
+      
+      if (stat.id === 'PV') {
+          valActuelle = App.loadPv(character, ptsActuels);
+          valPrevue = App.loadPv(character, totalPts);
+      } else if (stat.id === 'attaque') {
+          valActuelle = App.loadAttaque(character, ptsActuels);
+          valPrevue = App.loadAttaque(character, totalPts);
+      } else if (stat.id === 'defense') {
+          valActuelle = App.loadDefense(character, ptsActuels);
+          valPrevue = App.loadDefense(character, totalPts);
+      }
 
-  area.innerHTML = `<h3>Points à attribuer (${ptsRestants})</h3>`;
+      // Affichage de la valeur
+      // Si on a des points temporaires, on affiche en vert la nouvelle valeur
+      const displayValue = (ptsTemp > 0) 
+          ? `<span class="stat-preview">${valPrevue}</span>` 
+          : `<span>${valActuelle}</span>`;
 
-  const statsCfg = [
-      { id: 'PV', label: 'PV', max: 25 },
-      { id: 'attaque', label: 'Attaque', max: 25 },
-      { id: 'defense', label: 'Défense', max: 15 }
-  ];
-
-  statsCfg.forEach(stat => {
-    const ptsActuels = userData[name + '_' + stat.id + '_pts'] || 0;
-    const temp = App.modificationsTemp[stat.id] || 0;
-    const total = ptsActuels + temp;
-    
-    const div = document.createElement('div');
-    div.className = 'stat-row';
-    div.innerHTML = `
-      <span>${stat.label} : ${total} (${ptsActuels})</span>
-      ${total < stat.max && ptsRestants > 0 ? `<button class="stat-button" onclick="App.modifierStat('${stat.id}', 1)">+</button>` : ''}
-      ${temp > 0 ? `<button class="stat-button" onclick="App.modifierStat('${stat.id}', -1)">-</button>` : ''}
-    `;
-    area.appendChild(div);
+      html += `
+        <div class="stat-row">
+            <span class="stat-name">${stat.label}</span>
+            <div class="stat-value">${displayValue}</div>
+            
+            <div class="alloc-controls">
+                ${ptsDispo > 0 ? `
+                    <button class="stat-btn" 
+                        onclick="App.modifierStat('${stat.id}', -1)"
+                        ${ptsTemp <= 0 ? 'disabled' : ''}>
+                        -
+                    </button>
+                    <span class="stat-progress">${totalPts} / ${stat.max}</span>
+                    <button class="stat-btn" 
+                        onclick="App.modifierStat('${stat.id}', 1)"
+                        ${(ptsRestants <= 0 || totalPts >= stat.max) ? 'disabled' : ''}>
+                        +
+                    </button>
+                ` : `
+                   <!-- Mode Lecture Seule -->
+                   <span class="stat-progress">Pts: ${ptsActuels} / ${stat.max}</span>
+                `}
+            </div>
+        </div>
+      `;
   });
+  html += `</div>`; // Fin stats-container
 
-  if (ptsUtilises > 0) {
-      const btn = document.createElement('button');
-      btn.textContent = 'Confirmer les points';
-      btn.className = 'stat-button confirm-button';
-      btn.onclick = App.confirmerStats;
-      area.appendChild(btn);
+  // --- SECTION ACTIONS (CONFIRMATION OU LEVEL UP) ---
+  
+  // Cas 1 : On est en train d'attribuer des points
+  if (ptsDispo > 0) {
+      html += `
+        <div class="level-section">
+            <p>Points à attribuer : <strong>${ptsRestants}</strong></p>
+            ${ptsUtilisesTemp > 0 
+                ? `<button class="level-btn confirm-btn" onclick="App.confirmerStats()">Confirmer les changements</button>` 
+                : `<p style="font-size:0.9em; opacity:0.7;">Répartissez vos points pour valider.</p>`
+            }
+        </div>
+      `;
+  } 
+  // Cas 2 : Pas de points, affichage standard Level Up
+  else {
+      const xp = userData[name + '_XP'] || 0;
+      const xpNeeded = App.xpPourNiveauSuivant(level);
+      const cost = App.coutPourNiveauSuivant(level);
+      const argent = userData.argent || 0;
+      const isMaxLevel = level >= 11;
+
+      html += `
+        <div class="level-section">
+            <h3>Niveau ${level} ${isMaxLevel ? '(Max)' : ''}</h3>
+            ${!isMaxLevel ? `
+                <p>XP: ${xp} / ${xpNeeded}</p>
+                <p>Pièces: ${argent}</p>
+                <div class="cost-info" style="margin-bottom:10px;">Coût: ${cost} pièces</div>
+            ` : ''}
+
+            ${(!isMaxLevel && xp >= xpNeeded && argent >= cost) 
+                ? `<button class="level-btn" onclick="App.levelUp()">Monter de niveau !</button>` 
+                : (!isMaxLevel ? `<button class="level-btn" disabled style="background:#7f8c8d; cursor:default;">Pas assez de ressources</button>` : '')
+            }
+        </div>
+      `;
   }
+
+  html += `</div>`; // Fin char-card
+  container.innerHTML = html;
 };
 
 App.modifierStat = function(stat, val) {
-    App.modificationsTemp[stat] = (App.modificationsTemp[stat] || 0) + val;
+    // Vérifications de sécurité
+    const userData = JSON.parse(localStorage.getItem('userData')) || {};
+    const name = App.characterName;
+    const ptsDispoTotal = userData[name + '_pts'] || 0;
+    const ptsActuelsStat = userData[name + '_' + stat + '_pts'] || 0;
+    
+    // Config max
+    const config = App.statsConfig.find(s => s.id === stat);
+    const max = config ? config.max : 25;
+
+    const currentTemp = App.modificationsTemp[stat] || 0;
+    const ptsUtilises = App.totalPointsUtilises();
+    const ptsRestants = ptsDispoTotal - ptsUtilises;
+
+    // Logique d'ajout (+)
+    if (val > 0) {
+        if (ptsRestants > 0 && (ptsActuelsStat + currentTemp) < max) {
+            App.modificationsTemp[stat] = currentTemp + 1;
+        }
+    } 
+    // Logique de retrait (-)
+    else {
+        if (currentTemp > 0) {
+            App.modificationsTemp[stat] = currentTemp - 1;
+        }
+    }
+    
+    // Mise à jour immédiate de l'affichage
     App.afficherDonneesUtilisateur();
 };
 
 App.totalPointsUtilises = function() {
-  return App.modificationsTemp.PV + App.modificationsTemp.attaque + App.modificationsTemp.defense;
+  return (App.modificationsTemp.PV || 0) + (App.modificationsTemp.attaque || 0) + (App.modificationsTemp.defense || 0);
 };
 
 App.confirmerStats = function() {
@@ -138,7 +221,13 @@ App.confirmerStats = function() {
           fetch('/api/character/upgrade', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-              body: JSON.stringify({ userId: user.uid, characterName: App.characterName, action: 'stats', stats: App.modificationsTemp, recaptchaToken: recaptchaToken })
+              body: JSON.stringify({ 
+                  userId: user.uid, 
+                  characterName: App.characterName, 
+                  action: 'stats', 
+                  stats: App.modificationsTemp, 
+                  recaptchaToken: recaptchaToken 
+              })
           })
           .then(res => res.json())
           .then(data => {
@@ -152,6 +241,8 @@ App.confirmerStats = function() {
   });
 };
 
-// Initialisation au chargement
-setTimeout(App.afficherDonneesUtilisateur, 100);
-App.afficherDonneesUtilisateur();
+// Initialisation
+document.addEventListener('DOMContentLoaded', () => {
+    // Petit délai pour s'assurer que app.js a chargé les characters si nécessaire
+    setTimeout(App.afficherDonneesUtilisateur, 100);
+});
