@@ -19,5 +19,20 @@
     { "img": "bouclier.png", "title": "Bouclier solide x5", "description": "Augmente la défense de 15 points.", "price": 40, "type": "bouclier", "quantity": 5 },
     { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x1", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 70, "type": "cape", "quantity": 1 },
     { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x3", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 190, "type": "cape", "quantity": 3 },
-    { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x5", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 300, "type": "cape", "quantity": 5 }
+    { "img": "Cape_de_l'ombre.png", "title": "Cape de l'ombre x5", "description": "Ignore les dégâts subis par la prochaine attaque directe de l'adversaire.", "price": 300, "type": "cape", "quantity": 5 },
+    { "img": "marque_chasseur.png", "title": "Marque de chasseur x1", "description": "Garanti que votre prochaine attaque soit un coup critique.", "price": 60, "type": "marque_chasseur", "quantity": 1 },
+    { "img": "marque_chasseur.png", "title": "Marque de chasseur x3", "description": "Garanti que votre prochaine attaque soit un coup critique.", "price": 165, "type": "marque_chasseur", "quantity": 3 },
+    { "img": "marque_chasseur.png", "title": "Marque de chasseur x5", "description": "Garanti que votre prochaine attaque soit un coup critique.", "price": 250, "type": "marque_chasseur", "quantity": 5 },
+    { "img": "armure-1.png", "title": "Armure de fer x1", "description": "Réduit les dégâts reçus de 10%.", "price": 28, "type": "armure", "quantity": 1 },
+    { "img": "armure-1.png", "title": "Armure de fer x3", "description": "Réduit les dégâts reçus de 10%.", "price": 75, "type": "armure", "quantity": 3 },
+    { "img": "armure-1.png", "title": "Armure de fer x5", "description": "Réduit les dégâts reçus de 10%.", "price": 120, "type": "armure", "quantity": 5 },
+    { "img": "Crystale.png", "title": "Crystal de renouveau x1", "description": "Recharge 0.8 points de la capacité spéciale.", "price": 45, "type": "crystal", "quantity": 1 },
+    { "img": "Crystale.png", "title": "Crystal de renouveau x3", "description": "Recharge 0.8 points de la capacité spéciale.", "price": 120, "type": "crystal", "quantity": 3 },
+    { "img": "Crystale.png", "title": "Crystal de renouveau x5", "description": "Recharge 0.8 points de la capacité spéciale.", "price": 180, "type": "crystal", "quantity": 5 },
+    { "img": "purge-spirituelle.png", "title": "Purge Spirituelle x1", "description": "Dissipe tous les effets négatifs qui vous affectent.", "price": 40, "type": "purge_spirituelle", "quantity": 1 },
+    { "img": "purge-spirituelle.png", "title": "Purge Spirituelle x3", "description": "Dissipe tous les effets négatifs qui vous affectent.", "price": 110, "type": "purge_spirituelle", "quantity": 3 },
+    { "img": "purge-spirituelle.png", "title": "Purge Spirituelle x5", "description": "Dissipe tous les effets négatifs qui vous affectent.", "price": 170, "type": "purge_spirituelle", "quantity": 5 },
+    { "img": "orbe-siphon.png", "title": "Orbe de Siphon x1", "description": "Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.", "price": 50, "type": "orbe_siphon", "quantity": 1 },
+    { "img": "orbe-siphon.png", "title": "Orbe de Siphon x3", "description": "Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.", "price": 135, "type": "orbe_siphon", "quantity": 3 },
+    { "img": "orbe-siphon.png", "title": "Orbe de Siphon x5", "description": "Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.", "price": 210, "type": "orbe_siphon", "quantity": 5 }
 ]
