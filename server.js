@@ -586,15 +586,128 @@ app.post('/api/quest/claim-weekend-bonus', verifyToken, async (req, res) => {
     res.json({ success: true, userData, rewards });
 });
 
+const CHARACTERS_DATA = loadJSONData(path.join(__dirname, 'data', 'characters.json'), []);
+
 // --- COMBAT ACTIONS ---
 const games = new Map();
+
+function calculatePlayerStats(userData, charName) {
+    const base = CHARACTERS_DATA.find(c => c.name === charName);
+    if (!base) return null;
+
+    // 1. Base & Upgrades
+    const pvPts = userData[`${charName}_PV_pts`] || 0;
+    const attPts = userData[`${charName}_attaque_pts`] || 0;
+    const defPts = userData[`${charName}_defense_pts`] || 0;
+
+    let pv = Math.round(base.pv * (1 + pvPts * 0.02));
+    let atk = Math.round(base.attaque * (1 + attPts * 0.02));
+    let def = Math.round(base.defense * (1 + defPts * 0.02));
+
+    // 2. Equipment Bonuses (Equipped items ONLY)
+    let equippedIds = [];
+    if (userData.characters && userData.characters[charName] && userData.characters[charName].equipments) {
+        equippedIds = userData.characters[charName].equipments;
+    }
+
+    const equippedItems = EQUIPMENTS_DATA.filter(e => equippedIds.includes(e.id));
+    
+    // Initialiser bonus
+    let bonus = { pv: 0, attaque: 0, defense: 0, vitesse: 0, critique: 0 };
+    
+    equippedItems.forEach(item => {
+        if (item.stats) {
+            const parseVal = (v) => v ? parseInt(v.toString().replace('+','')) : 0;
+            bonus.pv += parseVal(item.stats.pv);
+            bonus.attaque += parseVal(item.stats.attaque);
+            bonus.defense += parseVal(item.stats.defense);
+            bonus.vitesse += parseVal(item.stats.vitesse);
+            bonus.critique += parseVal(item.stats.critique);
+        }
+    });
+
+    return {
+        ...base,
+        pv: pv + bonus.pv,
+        pv_maximum: pv + bonus.pv,
+        pv_max: pv + bonus.pv,
+        attaque: atk + bonus.attaque,
+        attaque_originale: atk + bonus.attaque,
+        defense: def + bonus.defense,
+        defense_originale: def + bonus.defense,
+        vitesse: base.vitesse + bonus.vitesse,
+        critique: (base.critique || 0) + bonus.critique,
+        equipments: equippedIds
+    };
+}
+
 app.post('/api/combat/start', verifyToken, async (req, res) => {
-    const { userId, gameMode, playerCharacter, opponentCharacter, recaptchaToken } = req.body;
+    const { userId, gameMode, playerCharacterName, opponentName, recaptchaToken } = req.body; // Expect names, not objects
+    
+    // Backward compatibility check for client sending full objects
+    const pName = playerCharacterName || (req.body.playerCharacter ? req.body.playerCharacter.name : null);
+    const oName = opponentName || (req.body.opponentCharacter ? req.body.opponentCharacter.name : null);
+
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Bot" });
-    const game = { userId, gameMode, player: playerCharacter, opponent: opponentCharacter, wave: gameMode === 'survie' ? 1 : 0, startTime: Date.now(), lastActionTime: Date.now(), turn: 1 };
-    if (gameMode === 'survie') game.opponent = generateSurvivalOpponent(1);
+    
+    const userData = await getUserData(userId);
+    if (!userData) return res.status(404).json({ error: "User not found" });
+
+    // Validate Player Character
+    if (!userData[pName] && pName !== 'Willy') { // Willy is often default/free, but check unlocking logic
+        // If your game requires unlocking Willy explicitly, remove the '|| pName === ...'
+        if (!userData[pName]) return res.status(400).json({ error: "Personnage non débloqué" });
+    }
+
+    const player = calculatePlayerStats(userData, pName);
+    if (!player) return res.status(400).json({ error: "Personnage invalide" });
+
+    // Validate/Generate Opponent
+    let opponent;
+    if (gameMode === 'survie') {
+        opponent = generateSurvivalOpponent(1);
+    } else {
+        // Classic / Weekend
+        const targetName = oName || CHARACTERS_DATA[Math.floor(Math.random() * CHARACTERS_DATA.length)].name;
+        const baseOpp = CHARACTERS_DATA.find(c => c.name === targetName) || CHARACTERS_DATA[0];
+        
+        // Clone opponent to avoid mutating reference
+        opponent = JSON.parse(JSON.stringify(baseOpp));
+        
+        // Ensure consistent properties
+        opponent.pv_maximum = opponent.pv;
+        opponent.pv_max = opponent.pv;
+        opponent.attaque_originale = opponent.attaque;
+        opponent.defense_originale = opponent.defense;
+        opponent.equipments = [];
+        opponent.effects = [];
+        
+        // Optional: Scale opponent slightly with player level? For now, raw base stats = fair/challenging depending on match.
+    }
+
+    const game = { 
+        userId, 
+        gameMode, 
+        player: player, 
+        opponent: opponent, 
+        wave: gameMode === 'survie' ? 1 : 0, 
+        startTime: Date.now(), 
+        lastActionTime: Date.now(), 
+        turn: 1 
+    };
+
+    // Initialize AI
     game.opponent.next_choice = combatEngine.makeAIDecision(game);
-    games.set(userId, game); res.json({ success: true, gameState: game });
+    
+    // Apply Weekend Modifiers
+    if (gameMode === 'weekend') {
+        const eventName = WEEKEND_EVENTS[Math.floor(Math.random() * WEEKEND_EVENTS.length)];
+        game.event = eventName;
+        combatEngine.applyWeekendEvent(game, eventName);
+    }
+
+    games.set(userId, game); 
+    res.json({ success: true, gameState: game });
 });
 
 app.post('/api/combat/action', verifyToken, async (req, res) => {
