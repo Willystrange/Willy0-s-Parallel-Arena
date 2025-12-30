@@ -15,6 +15,11 @@ App.syncCombatStart = async function() {
     const user = firebase.auth().currentUser;
     const token = user ? await user.getIdToken() : '';
 
+    // Force synchronization
+    if (user && typeof App.saveUserDataToFirebase === 'function') {
+        await App.saveUserDataToFirebase(user.uid);
+    }
+
     const recaptchaToken = await App.getRecaptchaToken('combat_weekend_start');
     const response = await fetch('/api/combat/start', {
         method: 'POST',

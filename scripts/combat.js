@@ -72,6 +72,12 @@ App.syncCombatStart = async function() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
+    // Force synchronization of local data to server before starting combat
+    // This ensures the server has the latest stats/upgrades
+    if (typeof App.saveUserDataToFirebase === 'function') {
+        await App.saveUserDataToFirebase(user.uid);
+    }
+
     const token = await user.getIdToken();
     const recaptchaToken = await App.getRecaptchaToken('combat_start');
 
