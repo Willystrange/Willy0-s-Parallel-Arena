@@ -490,6 +490,7 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     if (game.opponent.pv > 0) {
         if (aiParried) {
              // L'IA a paré, elle passe son tour d'action active (la parade EST son action)
+             results.logs.push({ text: `${game.opponent.name} s'est défendu de l'attaque de ${game.player.name}.`, color: "white", side: false });
         } else {
             // Logique de l'adversaire (IA) basée sur la décision prise au tour PRÉCÉDENT
             const aiAction = game.opponent.next_choice || 'attack'; // Fallback safe
