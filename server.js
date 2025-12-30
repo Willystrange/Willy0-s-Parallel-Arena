@@ -180,39 +180,53 @@ function updateQuests(userData, game, isPlayerWinner) {
 }
 
 async function finalizeGame(userId, game, results) {
-    const userData = await getUserData(userId);
-    if (!userData) return;
-    const isPlayerWinner = (results.winner === 'player'), player = game.player;
-    userData.gagnant = isPlayerWinner ? player.name : game.opponent.name;
-    userData.partie_commencee = false; userData.partie_commencee_weekend = false; userData.partie_commencee_survie = false;
-    let gain_xp = 0, gain_argent = 0, gain_trophees = 0;
-    if (game.gameMode === 'survie') {
-        gain_argent = Math.round((Math.floor(Math.random() * 7) + 3) * game.wave * 0.8);
-        gain_xp = Math.round(25 * game.wave * 0.7);
-        userData.fin_manche = game.wave;
-    } else {
-        const lvl = Number(userData[player.name + "_Level"] || 1) * 0.1;
-        gain_xp = isPlayerWinner ? Math.round((2 * (player.pv / (player.pv_maximum || 1)) * 100) * (1 / (1 + lvl))) : Math.max(0, Math.round(20 - (2 * (lvl - 1))));
-        if (isPlayerWinner && gain_xp < 20) gain_xp = 20;
-        gain_argent = Math.round(gain_xp / 3);
-        if (userData.XP_jour >= 2500) gain_xp = 0; else userData.XP_jour = (userData.XP_jour || 0) + gain_xp;
-        gain_trophees = isPlayerWinner ? 10 : (userData.trophees < 150 ? -1 : (userData.trophees <= 300 ? -5 : -10));
+    const userRef = db.collection('users').doc(userId);
+    try {
+        await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            if (!doc.exists) throw new Error("User not found");
+            const userData = doc.data();
+
+            const isPlayerWinner = (results.winner === 'player'), player = game.player;
+            userData.gagnant = isPlayerWinner ? player.name : game.opponent.name;
+            userData.partie_commencee = false; userData.partie_commencee_weekend = false; userData.partie_commencee_survie = false;
+            let gain_xp = 0, gain_argent = 0, gain_trophees = 0;
+            if (game.gameMode === 'survie') {
+                gain_argent = Math.round((Math.floor(Math.random() * 7) + 3) * game.wave * 0.8);
+                gain_xp = Math.round(25 * game.wave * 0.7);
+                userData.fin_manche = game.wave;
+            } else {
+                const lvl = Number(userData[player.name + "_Level"] || 1) * 0.1;
+                gain_xp = isPlayerWinner ? Math.round((2 * (player.pv / (player.pv_maximum || 1)) * 100) * (1 / (1 + lvl))) : Math.max(0, Math.round(20 - (2 * (lvl - 1))));
+                if (isPlayerWinner && gain_xp < 20) gain_xp = 20;
+                gain_argent = Math.round(gain_xp / 3);
+                if (userData.XP_jour >= 2500) gain_xp = 0; else userData.XP_jour = (userData.XP_jour || 0) + gain_xp;
+                gain_trophees = isPlayerWinner ? 10 : (userData.trophees < 150 ? -1 : (userData.trophees <= 300 ? -5 : -10));
+            }
+            if (game.gameMode === 'weekend' && game.event === 'XP X2') gain_xp *= 2;
+            if (game.gameMode === 'weekend' && game.event === 'Points X2') gain_argent *= 2;
+            if (userData.Double_XP > 0 && gain_xp > 0) { gain_xp *= 2; userData.Double_XP--; }
+            userData.argent = (userData.argent || 0) + gain_argent;
+            userData.trophees = Math.max(0, (userData.trophees || 0) + gain_trophees);
+            if ((userData.trophees || 0) > (userData.tropheesMax || 0)) userData.tropheesMax = userData.trophees;
+            userData[player.name + "_XP"] = (userData[player.name + "_XP"] || 0) + gain_xp;
+            if (game.gameMode === 'survie') { if (game.wave > (userData.manches_max || 0)) userData.manches_max = game.wave; }
+            else { if (isPlayerWinner) userData.victoires = (userData.victoires || 0) + 1; else userData.defaites = (userData.defaites || 0) + 1; }
+            userData.fin_xp = gain_xp; userData.fin_argent = gain_argent; userData.fin_trophee = gain_trophees;
+            updateParallelPass(userData, gain_xp);
+            updateQuests(userData, game, isPlayerWinner);
+            results.masteryGameResult = combatEngine.updateMastery(userData, player.name, { gameMode: game.gameMode, hpPercentage: (player.pv / (player.pv_maximum || 1)) * 100, damageDealt: player.degats_partie || 0, damageTaken: 500, wavesCleared: game.wave });
+            
+            const cleanData = JSON.parse(JSON.stringify(userData));
+            if (cleanData.pseudo) cleanData.pseudo_lower = cleanData.pseudo.toLowerCase().trim();
+            if (cleanData.email) cleanData.email_lower = cleanData.email.toLowerCase().trim();
+            
+            t.set(userRef, cleanData, { merge: true });
+            results.updatedUserData = userData;
+        });
+    } catch (e) {
+        console.error(`[DB] Error finalizing game for ${userId}:`, e);
     }
-    if (game.gameMode === 'weekend' && game.event === 'XP X2') gain_xp *= 2;
-    if (game.gameMode === 'weekend' && game.event === 'Points X2') gain_argent *= 2;
-    if (userData.Double_XP > 0 && gain_xp > 0) { gain_xp *= 2; userData.Double_XP--; }
-    userData.argent = (userData.argent || 0) + gain_argent;
-    userData.trophees = Math.max(0, (userData.trophees || 0) + gain_trophees);
-    if ((userData.trophees || 0) > (userData.tropheesMax || 0)) userData.tropheesMax = userData.trophees;
-    userData[player.name + "_XP"] = (userData[player.name + "_XP"] || 0) + gain_xp;
-    if (game.gameMode === 'survie') { if (game.wave > (userData.manches_max || 0)) userData.manches_max = game.wave; }
-    else { if (isPlayerWinner) userData.victoires = (userData.victoires || 0) + 1; else userData.defaites = (userData.defaites || 0) + 1; }
-    userData.fin_xp = gain_xp; userData.fin_argent = gain_argent; userData.fin_trophee = gain_trophees;
-    updateParallelPass(userData, gain_xp);
-    updateQuests(userData, game, isPlayerWinner);
-    results.masteryGameResult = combatEngine.updateMastery(userData, player.name, { gameMode: game.gameMode, hpPercentage: (player.pv / (player.pv_maximum || 1)) * 100, damageDealt: player.degats_partie || 0, damageTaken: 500, wavesCleared: game.wave });
-    await saveUserData(userId, userData);
-    results.updatedUserData = userData;
 }
 
 const ITEM_PROPERTY_MAP = { xp: 'Double_XP_acheté', xp_2: 'Double_XP_acheté', potion: 'Potion_de_Santé_acheté', amulette: 'Amulette_de_Régénération_acheté', epee: 'epee_tranchante_acheté', elixir: 'elixir_puissance_acheté', armure: 'armure_fer_acheté', bouclier: 'bouclier_solide_acheté', cape: 'Cape_acheté', crystal: 'crystal_acheté', marque_chasseur: 'marque_chasseur_acheté', purge_spirituelle: 'purge_spirituelle_acheté', orbe_siphon: 'orbe_siphon_acheté' };
@@ -251,343 +265,542 @@ app.get('/api/user/:userId', verifyToken, async (req, res) => res.json({ success
 
 app.post('/api/user/:userId', verifyToken, async (req, res) => {
     const userId = req.params.userId, newData = req.body.userData;
-    const current = await getUserData(userId) || {};
+    const userRef = db.collection('users').doc(userId);
     const dailyCycle = getParisCycleId('daily'), weeklyCycle = getParisCycleId('weekly'), now = Date.now();
 
-    if (!current.pseudo) {
-        Object.assign(current, newData);
-        current.quest_daily_cycle = dailyCycle; current.quest_weekly_cycle = weeklyCycle;
-        current.createdAt = now; current.lastSeen = now;
-    } else {
-        current.lastSeen = now;
-        if (current.quest_daily_cycle !== dailyCycle) {
-            current.quest_daily_cycle = dailyCycle; current.quetes_jour = false;
-            ['quete1', 'quete2', 'quete3'].forEach(id => { delete current[`${id}_text`]; delete current[`${id}_total`]; delete current[`${id}_current`]; delete current[`${id}_type`]; delete current[`${id}_completed`]; delete current[`${id}_rewardClaimed`]; });
-        }
-        const ALLOWED = ['pseudo', 'settings', 'tutorial_menu_principal_completed', 'lastLoginDay', 'lastDoubleXPCheck', 'musicAllowed', 'autoplayEnabled', 'pass_last_notified_level', 'characterToImprove', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'classicGames', 'survivalGames', 'quest_daily_cycle', 'quest_weekly_cycle', 'daily_reward_claim_id', 'weekly_chest_claim_id', 'weekend_bonus_claimed', 'quetes_jour', 'quetes_weekend', 'weekend_period_start', 'quetes_genere', 'equipments', 'characters', 'musicVolume'];
-        Object.keys(newData).forEach(key => {
-            if (ALLOWED.includes(key)) current[key] = newData[key];
-            else if (['quete', 'weekend-quete', 'Semaine'].some(p => key.startsWith(p))) {
-                if (key.endsWith('_current')) current[key] = Math.max(parseInt(newData[key] || 0), parseInt(current[key] || 0));
-                else if ((key.endsWith('_completed') || key.endsWith('_rewardClaimed')) && current[key] === true) { /* keep true */ }
-                else current[key] = newData[key];
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const current = doc.exists ? doc.data() : {};
+
+            if (!current.pseudo) {
+                Object.assign(current, newData);
+                current.quest_daily_cycle = dailyCycle; current.quest_weekly_cycle = weeklyCycle;
+                current.createdAt = now; current.lastSeen = now;
+            } else {
+                current.lastSeen = now;
+                if (current.quest_daily_cycle !== dailyCycle) {
+                    current.quest_daily_cycle = dailyCycle; current.quetes_jour = false;
+                    ['quete1', 'quete2', 'quete3'].forEach(id => { delete current[`${id}_text`]; delete current[`${id}_total`]; delete current[`${id}_current`]; delete current[`${id}_type`]; delete current[`${id}_completed`]; delete current[`${id}_rewardClaimed`]; });
+                }
+                const ALLOWED = ['pseudo', 'settings', 'tutorial_menu_principal_completed', 'lastLoginDay', 'lastDoubleXPCheck', 'musicAllowed', 'autoplayEnabled', 'pass_last_notified_level', 'characterToImprove', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'classicGames', 'survivalGames', 'quest_daily_cycle', 'quest_weekly_cycle', 'daily_reward_claim_id', 'weekly_chest_claim_id', 'weekend_bonus_claimed', 'quetes_jour', 'quetes_weekend', 'weekend_period_start', 'quetes_genere', 'equipments', 'characters', 'musicVolume'];
+                Object.keys(newData).forEach(key => {
+                    if (ALLOWED.includes(key)) current[key] = newData[key];
+                    else if (['quete', 'weekend-quete', 'Semaine'].some(p => key.startsWith(p))) {
+                        if (key.endsWith('_current')) current[key] = Math.max(parseInt(newData[key] || 0), parseInt(current[key] || 0));
+                        else if ((key.endsWith('_completed') || key.endsWith('_rewardClaimed')) && current[key] === true) { /* keep true */ }
+                        else current[key] = newData[key];
+                    }
+                    // Allow character progression keys
+                    else if (key.endsWith('_pts') || key.endsWith('_Level') || key.endsWith('_XP') || key.endsWith('_boost')) {
+                        current[key] = newData[key];
+                    }
+                });
+                updateParallelPass(current, 0);
             }
-            // Allow character progression keys
-            else if (key.endsWith('_pts') || key.endsWith('_Level') || key.endsWith('_XP') || key.endsWith('_boost')) {
-                current[key] = newData[key];
-            }
+            
+            const cleanData = JSON.parse(JSON.stringify(current));
+            if (cleanData.pseudo) cleanData.pseudo_lower = cleanData.pseudo.toLowerCase().trim();
+            if (cleanData.email) cleanData.email_lower = cleanData.email.toLowerCase().trim();
+
+            t.set(userRef, cleanData, { merge: true });
+            return current;
         });
-        updateParallelPass(current, 0);
+        res.json({ success: true, userData });
+    } catch (e) {
+        console.error(`[DB] Error saving user ${userId}:`, e);
+        res.status(500).json({ error: "Erreur interne" });
     }
-    await saveUserData(userId, current);
-    res.json({ success: true, userData: current });
 });
 
 // --- SHOP, PASS & REWARDS ---
 app.post('/api/shop/buy', verifyToken, async (req, res) => {
     const { userId, type, itemId, quantity, price, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId);
-    if (!userData || (userData.argent || 0) < price) return res.status(400).json({ error: "Fonds insuffisants" });
-    userData.argent -= price;
-    if (type === 'equipment') { if (!userData.equipments) userData.equipments = []; userData.equipments.push(itemId); }
-    else { const prop = ITEM_PROPERTY_MAP[type]; if (prop) userData[prop] = (userData[prop] || 0) + (quantity || 1); }
-    await saveUserData(userId, userData); res.json({ success: true, userData });
+    
+    const userRef = db.collection('users').doc(userId);
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            if (!doc.exists) throw new Error("Utilisateur introuvable");
+            const data = doc.data();
+            
+            if ((data.argent || 0) < price) throw new Error("Fonds insuffisants");
+            
+            data.argent -= price;
+            if (type === 'equipment') { 
+                if (!data.equipments) data.equipments = []; 
+                data.equipments.push(itemId); 
+            } else { 
+                const prop = ITEM_PROPERTY_MAP[type]; 
+                if (prop) data[prop] = (data[prop] || 0) + (quantity || 1); 
+            }
+            
+            t.set(userRef, data, { merge: true });
+            return data;
+        });
+        res.json({ success: true, userData });
+    } catch (e) {
+        if (e.message === "Fonds insuffisants") return res.status(400).json({ error: e.message });
+        console.error("Shop buy error:", e);
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/shop/claim-daily', verifyToken, async (req, res) => {
     const { userId, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId), cycleId = getParisCycleId('daily');
-    if (userData.daily_reward_claim_id === cycleId) return res.status(400).json({ error: "Déjà fait" });
-    userData.recompense = (userData.recompense || 0) + 1; userData.daily_reward_claim_id = cycleId;
-    await saveUserData(userId, userData); res.json({ success: true, userData });
+    
+    const userRef = db.collection('users').doc(userId);
+    const cycleId = getParisCycleId('daily');
+
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            if (!doc.exists) throw new Error("Utilisateur introuvable");
+            const data = doc.data();
+
+            if (data.daily_reward_claim_id === cycleId) throw new Error("Déjà fait");
+            
+            data.recompense = (data.recompense || 0) + 1; 
+            data.daily_reward_claim_id = cycleId;
+            
+            t.set(userRef, data, { merge: true });
+            return data;
+        });
+        res.json({ success: true, userData });
+    } catch (e) {
+        if (e.message === "Déjà fait") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/shop/claim-weekly', verifyToken, async (req, res) => {
     const { userId, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId), cycleId = getParisCycleId('weekly');
-    if (userData.weekly_chest_claim_id === cycleId) return res.status(400).json({ error: "Déjà fait" });
-    const boxType = ['Attaque', 'Défense', 'Agilité', 'Équilibre'][Math.floor(Math.random() * 4)];
-    userData.weekly_chest_claim_id = cycleId; await saveUserData(userId, userData); res.json({ success: true, userData, boxType });
+    
+    const userRef = db.collection('users').doc(userId);
+    const cycleId = getParisCycleId('weekly');
+
+    try {
+        const { userData, boxType } = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            if (!doc.exists) throw new Error("Utilisateur introuvable");
+            const data = doc.data();
+
+            if (data.weekly_chest_claim_id === cycleId) throw new Error("Déjà fait");
+            
+            const boxType = ['Attaque', 'Défense', 'Agilité', 'Équilibre'][Math.floor(Math.random() * 4)];
+            data.weekly_chest_claim_id = cycleId; 
+            
+            t.set(userRef, data, { merge: true });
+            return { userData: data, boxType };
+        });
+        res.json({ success: true, userData, boxType });
+    } catch (e) {
+        if (e.message === "Déjà fait") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/lootbox/open', verifyToken, async (req, res) => {
     const { userId, boxType, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId);
-    const rarity = Math.random() < 0.05 ? 'légendaire' : (Math.random() < 0.3 ? 'rare' : 'commun');
-    const possible = EQUIPMENTS_DATA.filter(e => e.type.toLowerCase() === boxType.toLowerCase());
-    const selected = possible[Math.floor(Math.random() * possible.length)] || { id: "gantelets_force", rarity: "commun" };
-    if (!userData.equipments) userData.equipments = []; userData.equipments.push(selected.id);
-    await saveUserData(userId, userData); res.json({ success: true, userData, reward: { id: selected.id, rarity: selected.rarity, type: boxType } });
+    
+    const userRef = db.collection('users').doc(userId);
+
+    try {
+        const { userData, reward } = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const data = doc.exists ? doc.data() : {};
+            
+            const rarity = Math.random() < 0.05 ? 'légendaire' : (Math.random() < 0.3 ? 'rare' : 'commun');
+            const possible = EQUIPMENTS_DATA.filter(e => e.type.toLowerCase() === boxType.toLowerCase());
+            const selected = possible[Math.floor(Math.random() * possible.length)] || { id: "gantelets_force", rarity: "commun" };
+            
+            if (!data.equipments) data.equipments = []; 
+            data.equipments.push(selected.id);
+            
+            t.set(userRef, data, { merge: true });
+            return { userData: data, reward: { id: selected.id, rarity: selected.rarity, type: boxType } };
+        });
+        res.json({ success: true, userData, reward });
+    } catch (e) {
+        console.error("Lootbox error:", e);
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/recompenses/open', verifyToken, async (req, res) => {
     const { userId, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId);
     
-    if (!userData) return res.status(404).json({ error: "Utilisateur inconnu" });
-    if ((userData.recompense || 0) <= 0 && (userData.perso_recompense || 0) <= 0) return res.status(400).json({ error: "Pas de récompense" });
+    const userRef = db.collection('users').doc(userId);
 
-    const rewards = [];
-    
-    // --- HELPERS ---
-    const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const rarityProbabilities = { 1: 0.05, 2: 0.10, 3: 0.20, 4: 0.30, 5: 0.35 };
-    const xpRanges = { 1: [150, 300], 2: [100, 150], 3: [50, 100], 4: [20, 50], 5: [5, 20] };
-    const charactersRarity = { 'Doudou': 4, 'Coeur': 3, 'Grours': 3, 'Baleine': 4, 'Poulpy': 2, 'Willy': 4, 'Oiseau': 3, 'Colorina': 5, 'Cocobi': 1, 'Diva': 1, 'Sboonie': 5, 'Rosalie': 2, 'Inconnue': 2, 'Boompy': 1, 'Perro': 5 };
-    
-    const getRandomRarity = () => {
-        const r = Math.random();
-        let cum = 0;
-        for (const [lvl, prob] of Object.entries(rarityProbabilities)) {
-            cum += prob;
-            if (r < cum) return parseInt(lvl);
-        }
-        return 5;
-    };
+    try {
+        const { userData, rewards } = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
+            
+            if (!userData) throw new Error("Utilisateur inconnu");
+            if ((userData.recompense || 0) <= 0 && (userData.perso_recompense || 0) <= 0) throw new Error("Pas de récompense");
 
-    // --- LOGIC ---
-    if ((userData.perso_recompense || 0) > 0) {
-        userData.perso_recompense--;
-        let obtained = false;
-        for (let i = 0; i < 10; i++) {
-            const targetRarity = getRandomRarity();
-            const available = Object.keys(charactersRarity).filter(c => !userData[c] && charactersRarity[c] === targetRarity);
-            if (available.length > 0) {
-                const charName = available[getRandomInt(0, available.length - 1)];
-                userData[charName] = 1; // Unlock
-                rewards.push({ name: "Personnage", info: `Vous avez débloqué : ${charName} !` });
-                obtained = true;
-                break;
-            }
-        }
-        if (!obtained) {
-             const amt = getRandomInt(1, 5);
-             userData.Double_XP = (userData.Double_XP || 0) + amt; // Note: 'Double_XP_acheté' vs 'Double_XP' inconsistency in old code? using 'Double_XP' as per server standard or 'Double_XP_acheté' if shop item? 
-             // Server uses 'Double_XP' for active bonus usually, but shop uses 'Double_XP_acheté'. Let's stick to ITEM_PROPERTY_MAP keys if possible or standard fields.
-             // Checking ITEM_PROPERTY_MAP: xp -> Double_XP_acheté. Let's use that for consistency with shop.
-             userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + amt;
-             rewards.push({ name: "Double XP", amount: amt, info: `+${amt} Double XP` });
-        }
-    } else {
-        userData.recompense--;
-        const rewardTypes = [
-          { type: 'character', chance: 0.06 },
-          { type: 'doubleXP', chance: 0.11 },
-          { type: 'healthPotion', chance: 0.11 },
-          { type: 'amulet', chance: 0.10 },
-          { type: 'xp', chance: 0.11 },
-          { type: 'money', chance: 0.12 },
-          { type: 'epee', chance: 0.10 },
-          { type: 'elixir', chance: 0.10 },
-          { type: 'armor', chance: 0.10 },
-          { type: 'bouclier', chance: 0.09 },
-          { type: 'cape', chance: 0.10 },
-          { type: 'crystal', chance: 0.10 }, // Total ~1.2? normalized loop handles it
-        ];
-        
-        const getRewardType = () => {
-            const r = Math.random() * 1.2; // Approximate sum
-            let cum = 0;
-            for (const rt of rewardTypes) {
-                cum += rt.chance;
-                if (r < cum) return rt.type;
-            }
-            return 'money';
-        };
+            const rewards = [];
+            
+            // --- HELPERS ---
+            const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            const rarityProbabilities = { 1: 0.05, 2: 0.10, 3: 0.20, 4: 0.30, 5: 0.35 };
+            const xpRanges = { 1: [150, 300], 2: [100, 150], 3: [50, 100], 4: [20, 50], 5: [5, 20] };
+            const charactersRarity = { 'Doudou': 4, 'Coeur': 3, 'Grours': 3, 'Baleine': 4, 'Poulpy': 2, 'Willy': 4, 'Oiseau': 3, 'Colorina': 5, 'Cocobi': 1, 'Diva': 1, 'Sboonie': 5, 'Rosalie': 2, 'Inconnue': 2, 'Boompy': 1, 'Perro': 5 };
+            
+            const getRandomRarity = () => {
+                const r = Math.random();
+                let cum = 0;
+                for (const [lvl, prob] of Object.entries(rarityProbabilities)) {
+                    cum += prob;
+                    if (r < cum) return parseInt(lvl);
+                }
+                return 5;
+            };
 
-        const numRewards = Math.random() < 0.7 ? 1 : (Math.random() < 0.9 ? 2 : 3);
-
-        for (let i = 0; i < numRewards; i++) {
-            const type = getRewardType();
-            switch (type) {
-                case 'character':
-                    const rLevel = getRandomRarity();
-                    const avail = Object.keys(charactersRarity).filter(c => !userData[c] && charactersRarity[c] === rLevel);
-                    if (avail.length > 0) {
-                        const cName = avail[getRandomInt(0, avail.length - 1)];
-                        userData[cName] = 1;
-                        rewards.push({ name: "Personnage", info: `Nouveau : ${cName}` });
-                    } else {
-                        // Fallback money
-                        const m = getRandomInt(50, 150);
-                        userData.argent = (userData.argent || 0) + m;
-                        rewards.push({ name: "Points", amount: m, info: `+${m} Points (Fallback)` });
+            // --- LOGIC ---
+            if ((userData.perso_recompense || 0) > 0) {
+                userData.perso_recompense--;
+                let obtained = false;
+                for (let i = 0; i < 10; i++) {
+                    const targetRarity = getRandomRarity();
+                    const available = Object.keys(charactersRarity).filter(c => !userData[c] && charactersRarity[c] === targetRarity);
+                    if (available.length > 0) {
+                        const charName = available[getRandomInt(0, available.length - 1)];
+                        userData[charName] = 1; // Unlock
+                        rewards.push({ name: "Personnage", info: `Vous avez débloqué : ${charName} !` });
+                        obtained = true;
+                        break;
                     }
-                    break;
-                case 'doubleXP':
-                    const dx = getRandomInt(1, 3);
-                    userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + dx;
-                    rewards.push({ name: "Double XP", amount: dx, info: `+${dx} Double XP` });
-                    break;
-                case 'healthPotion':
-                    userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + 1;
-                    rewards.push({ name: "Potion de Santé", amount: 1, info: "+1 Potion" });
-                    break;
-                case 'amulet':
-                    userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
-                    rewards.push({ name: "Amulette", amount: 1, info: "+1 Amulette de Régénération" });
-                    break;
-                case 'xp':
-                    const unlocked = Object.keys(charactersRarity).filter(c => userData[c] === 1);
-                    if (unlocked.length > 0) {
-                        const char = unlocked[getRandomInt(0, unlocked.length - 1)];
-                        // Calc random XP based on rarity logic (simplified here or reused)
-                        const xRarity = getRandomRarity();
-                        const [min, max] = xpRanges[xRarity] || [10, 50];
-                        const xVal = getRandomInt(min, max);
-                        userData[`${char}_XP`] = (userData[`${char}_XP`] || 0) + xVal;
-                        rewards.push({ name: "XP Personnage", amount: xVal, info: `+${xVal} XP pour ${char}` });
-                    } else {
-                         userData.argent = (userData.argent || 0) + 50;
-                         rewards.push({ name: "Points", amount: 50, info: "+50 Points" });
+                }
+                if (!obtained) {
+                     const amt = getRandomInt(1, 5);
+                     userData.Double_XP = (userData.Double_XP || 0) + amt; // Note: 'Double_XP_acheté' vs 'Double_XP' inconsistency in old code? using 'Double_XP' as per server standard or 'Double_XP_acheté' if shop item? 
+                     // Server uses 'Double_XP' for active bonus usually, but shop uses 'Double_XP_acheté'. Let's stick to ITEM_PROPERTY_MAP keys if possible or standard fields.
+                     // Checking ITEM_PROPERTY_MAP: xp -> Double_XP_acheté. Let's use that for consistency with shop.
+                     userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + amt;
+                     rewards.push({ name: "Double XP", amount: amt, info: `+${amt} Double XP` });
+                }
+            } else {
+                userData.recompense--;
+                const rewardTypes = [
+                  { type: 'character', chance: 0.06 },
+                  { type: 'doubleXP', chance: 0.11 },
+                  { type: 'healthPotion', chance: 0.11 },
+                  { type: 'amulet', chance: 0.10 },
+                  { type: 'xp', chance: 0.11 },
+                  { type: 'money', chance: 0.12 },
+                  { type: 'epee', chance: 0.10 },
+                  { type: 'elixir', chance: 0.10 },
+                  { type: 'armor', chance: 0.10 },
+                  { type: 'bouclier', chance: 0.09 },
+                  { type: 'cape', chance: 0.10 },
+                  { type: 'crystal', chance: 0.10 }, // Total ~1.2? normalized loop handles it
+                ];
+                
+                const getRewardType = () => {
+                    const r = Math.random() * 1.2; // Approximate sum
+                    let cum = 0;
+                    for (const rt of rewardTypes) {
+                        cum += rt.chance;
+                        if (r < cum) return rt.type;
                     }
-                    break;
-                case 'money':
-                    const mon = getRandomInt(20, 100);
-                    userData.argent = (userData.argent || 0) + mon;
-                    rewards.push({ name: "Points", amount: mon, info: `+${mon} Points` });
-                    break;
-                case 'epee': userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + 1; rewards.push({ name: "Épée Tranchante", amount: 1, info: "+1 Épée" }); break;
-                case 'elixir': userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + 1; rewards.push({ name: "Elixir", amount: 1, info: "+1 Elixir de Puissance" }); break;
-                case 'armor': userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + 1; rewards.push({ name: "Armure de Fer", amount: 1, info: "+1 Armure" }); break;
-                case 'bouclier': userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + 1; rewards.push({ name: "Bouclier Solide", amount: 1, info: "+1 Bouclier" }); break;
-                case 'cape': userData.Cape_acheté = (userData.Cape_acheté || 0) + 1; rewards.push({ name: "Cape de l'ombre", amount: 1, info: "+1 Cape" }); break;
-                case 'crystal': userData.crystal_acheté = (userData.crystal_acheté || 0) + 1; rewards.push({ name: "Crystal", amount: 1, info: "+1 Crystal de renouveau" }); break;
+                    return 'money';
+                };
+
+                const numRewards = Math.random() < 0.7 ? 1 : (Math.random() < 0.9 ? 2 : 3);
+
+                for (let i = 0; i < numRewards; i++) {
+                    const type = getRewardType();
+                    switch (type) {
+                        case 'character':
+                            const rLevel = getRandomRarity();
+                            const avail = Object.keys(charactersRarity).filter(c => !userData[c] && charactersRarity[c] === rLevel);
+                            if (avail.length > 0) {
+                                const cName = avail[getRandomInt(0, avail.length - 1)];
+                                userData[cName] = 1;
+                                rewards.push({ name: "Personnage", info: `Nouveau : ${cName}` });
+                            } else {
+                                // Fallback money
+                                const m = getRandomInt(50, 150);
+                                userData.argent = (userData.argent || 0) + m;
+                                rewards.push({ name: "Points", amount: m, info: `+${m} Points (Fallback)` });
+                            }
+                            break;
+                        case 'doubleXP':
+                            const dx = getRandomInt(1, 3);
+                            userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + dx;
+                            rewards.push({ name: "Double XP", amount: dx, info: `+${dx} Double XP` });
+                            break;
+                        case 'healthPotion':
+                            userData.Potion_de_Santé_acheté = (userData.Potion_de_Santé_acheté || 0) + 1;
+                            rewards.push({ name: "Potion de Santé", amount: 1, info: "+1 Potion" });
+                            break;
+                        case 'amulet':
+                            userData.Amulette_de_Régénération_acheté = (userData.Amulette_de_Régénération_acheté || 0) + 1;
+                            rewards.push({ name: "Amulette", amount: 1, info: "+1 Amulette de Régénération" });
+                            break;
+                        case 'xp':
+                            const unlocked = Object.keys(charactersRarity).filter(c => userData[c] === 1);
+                            if (unlocked.length > 0) {
+                                const char = unlocked[getRandomInt(0, unlocked.length - 1)];
+                                // Calc random XP based on rarity logic (simplified here or reused)
+                                const xRarity = getRandomRarity();
+                                const [min, max] = xpRanges[xRarity] || [10, 50];
+                                const xVal = getRandomInt(min, max);
+                                userData[`${char}_XP`] = (userData[`${char}_XP`] || 0) + xVal;
+                                rewards.push({ name: "XP Personnage", amount: xVal, info: `+${xVal} XP pour ${char}` });
+                            } else {
+                                 userData.argent = (userData.argent || 0) + 50;
+                                 rewards.push({ name: "Points", amount: 50, info: "+50 Points" });
+                            }
+                            break;
+                        case 'money':
+                            const mon = getRandomInt(20, 100);
+                            userData.argent = (userData.argent || 0) + mon;
+                            rewards.push({ name: "Points", amount: mon, info: `+${mon} Points` });
+                            break;
+                        case 'epee': userData.epee_tranchante_acheté = (userData.epee_tranchante_acheté || 0) + 1; rewards.push({ name: "Épée Tranchante", amount: 1, info: "+1 Épée" }); break;
+                        case 'elixir': userData.elixir_puissance_acheté = (userData.elixir_puissance_acheté || 0) + 1; rewards.push({ name: "Elixir", amount: 1, info: "+1 Elixir de Puissance" }); break;
+                        case 'armor': userData.armure_fer_acheté = (userData.armure_fer_acheté || 0) + 1; rewards.push({ name: "Armure de Fer", amount: 1, info: "+1 Armure" }); break;
+                        case 'bouclier': userData.bouclier_solide_acheté = (userData.bouclier_solide_acheté || 0) + 1; rewards.push({ name: "Bouclier Solide", amount: 1, info: "+1 Bouclier" }); break;
+                        case 'cape': userData.Cape_acheté = (userData.Cape_acheté || 0) + 1; rewards.push({ name: "Cape de l'ombre", amount: 1, info: "+1 Cape" }); break;
+                        case 'crystal': userData.crystal_acheté = (userData.crystal_acheté || 0) + 1; rewards.push({ name: "Crystal", amount: 1, info: "+1 Crystal de renouveau" }); break;
+                    }
+                }
             }
-        }
+
+            t.set(userRef, userData, { merge: true });
+            return { userData, rewards };
+        });
+        res.json({ success: true, userData, rewards });
+    } catch (e) {
+        if (e.message === "Pas de récompense") return res.status(400).json({ error: e.message });
+        console.error(e);
+        res.status(500).json({ error: "Erreur interne" });
     }
-
-    await saveUserData(userId, userData); res.json({ success: true, userData, rewards });
 });
 
 app.post('/api/trophy/claim', verifyToken, async (req, res) => {
     const { userId, milestone, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId), ms = parseInt(milestone);
-    if (!userData || userData[`trophy_claimed_${ms}`] || (userData.trophees || 0) < ms) return res.status(400).json({ error: "Invalide" });
-    let config = TROPHY_ROAD.find(m => m.trophies === ms) || getProceduralTrophyReward(ms);
-    config.rewards.forEach(r => {
-        if (r.type === 'coins') userData.argent = (userData.argent || 0) + r.amount;
-        if (r.type === 'item') { const p = ITEM_PROPERTY_MAP[r.id]; if (p) userData[p] = (userData[p] || 0) + r.amount; }
-        if (r.type === 'random') userData.recompense = (userData.recompense || 0) + 1;
-    });
-    userData[`trophy_claimed_${ms}`] = true; await saveUserData(userId, userData); res.json({ success: true, userData });
+    
+    const userRef = db.collection('users').doc(userId);
+    const ms = parseInt(milestone);
+
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
+            
+            if (!userData || userData[`trophy_claimed_${ms}`] || (userData.trophees || 0) < ms) throw new Error("Invalide");
+            
+            let config = TROPHY_ROAD.find(m => m.trophies === ms) || getProceduralTrophyReward(ms);
+            config.rewards.forEach(r => {
+                if (r.type === 'coins') userData.argent = (userData.argent || 0) + r.amount;
+                if (r.type === 'item') { const p = ITEM_PROPERTY_MAP[r.id]; if (p) userData[p] = (userData[p] || 0) + r.amount; }
+                if (r.type === 'random') userData.recompense = (userData.recompense || 0) + 1;
+            });
+            userData[`trophy_claimed_${ms}`] = true;
+            
+            t.set(userRef, userData, { merge: true });
+            return userData;
+        });
+        res.json({ success: true, userData });
+    } catch (e) {
+        if (e.message === "Invalide") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/pass/buy', verifyToken, async (req, res) => {
     const { userId, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId);
-    if (!userData || userData.pass_premium || (userData.argent || 0) < 850) return res.status(400).json({ error: "Impossible" });
-    userData.argent -= 850; userData.pass_premium = true; updateParallelPass(userData, 500);
-    await saveUserData(userId, userData); res.json({ success: true, userData });
+    
+    const userRef = db.collection('users').doc(userId);
+
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
+            
+            if (!userData || userData.pass_premium || (userData.argent || 0) < 850) throw new Error("Impossible");
+            
+            userData.argent -= 850; 
+            userData.pass_premium = true; 
+            updateParallelPass(userData, 500);
+            
+            t.set(userRef, userData, { merge: true });
+            return userData;
+        });
+        res.json({ success: true, userData });
+    } catch (e) {
+        if (e.message === "Impossible") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/pass/claim', verifyToken, async (req, res) => {
     const { userId, badge, isPremium, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId), key = isPremium ? `premium_${badge}` : `free_${badge}`;
-    const reward = (isPremium ? PASS_REWARDS.premium : PASS_REWARDS.free).find(r => r.badge === parseInt(badge));
-    if (!reward || userData[key] || userData.pass_level < reward.badge) return res.status(400).json({ error: "Invalide" });
-    if (reward.type === 'coins') userData.argent = (userData.argent || 0) + reward.value;
-    userData[key] = true; await saveUserData(userId, userData); res.json({ success: true, userData });
+    
+    const userRef = db.collection('users').doc(userId);
+
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
+            
+            const key = isPremium ? `premium_${badge}` : `free_${badge}`;
+            const reward = (isPremium ? PASS_REWARDS.premium : PASS_REWARDS.free).find(r => r.badge === parseInt(badge));
+            
+            if (!reward || userData[key] || userData.pass_level < reward.badge) throw new Error("Invalide");
+            
+            if (reward.type === 'coins') userData.argent = (userData.argent || 0) + reward.value;
+            userData[key] = true;
+            
+            t.set(userRef, userData, { merge: true });
+            return userData;
+        });
+        res.json({ success: true, userData });
+    } catch (e) {
+        if (e.message === "Invalide") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 app.post('/api/character/upgrade', verifyToken, async (req, res) => {
     const { userId, characterName, action, stats, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Bot" });
-    const userData = await getUserData(userId);
-    if (action === 'levelup') {
-        const lvl = userData[characterName + '_Level'] || 1, cost = lvl * 25;
-        if (userData.argent < cost) return res.status(400).json({ error: "Points insuffisants" });
-        userData.argent -= cost; userData[characterName + '_Level'] = lvl + 1; userData[characterName + '_pts'] = (userData[characterName + '_pts'] || 0) + 4;
-    } else {
-        const pts = (stats.PV || 0) + (stats.attaque || 0) + (stats.defense || 0);
-        userData[characterName + '_PV_pts'] = (userData[characterName + '_PV_pts'] || 0) + (stats.PV || 0);
-        userData[characterName + '_attaque_pts'] = (userData[characterName + '_attaque_pts'] || 0) + (stats.attaque || 0);
-        userData[characterName + '_defense_pts'] = (userData[characterName + '_defense_pts'] || 0) + (stats.defense || 0);
-        userData[characterName + '_pts'] -= pts;
+    
+    const userRef = db.collection('users').doc(userId);
+
+    try {
+        const userData = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
+            
+            if (action === 'levelup') {
+                const lvl = userData[characterName + '_Level'] || 1, cost = lvl * 25;
+                if (userData.argent < cost) throw new Error("Points insuffisants");
+                userData.argent -= cost; 
+                userData[characterName + '_Level'] = lvl + 1; 
+                userData[characterName + '_pts'] = (userData[characterName + '_pts'] || 0) + 4;
+            } else {
+                const pts = (stats.PV || 0) + (stats.attaque || 0) + (stats.defense || 0);
+                userData[characterName + '_PV_pts'] = (userData[characterName + '_PV_pts'] || 0) + (stats.PV || 0);
+                userData[characterName + '_attaque_pts'] = (userData[characterName + '_attaque_pts'] || 0) + (stats.attaque || 0);
+                userData[characterName + '_defense_pts'] = (userData[characterName + '_defense_pts'] || 0) + (stats.defense || 0);
+                userData[characterName + '_pts'] -= pts;
+            }
+            
+            t.set(userRef, userData, { merge: true });
+            return userData;
+        });
+        res.json({ success: true, userData });
+    } catch (e) {
+        if (e.message === "Points insuffisants") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
     }
-    await saveUserData(userId, userData); res.json({ success: true, userData });
 });
 
 app.post('/api/quest/claim', verifyToken, async (req, res) => {
     const { userId, questKey, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId);
     
-    // Validate quest exists
-    if (!userData || !userData[`${questKey}_text`]) return res.status(400).json({ error: "Quête introuvable" });
-    
-    // Check if already claimed
-    if (userData[`${questKey}_rewardClaimed`]) return res.status(400).json({ error: "Déjà réclamé" });
-    
-    // Check completion
-    const current = userData[`${questKey}_current`] || 0;
-    const total = userData[`${questKey}_total`] || 1;
-    if (current < total) return res.status(400).json({ error: "Quête non terminée" });
+    const userRef = db.collection('users').doc(userId);
 
-    const rewards = [];
-    
-    // --- Weekly Logic ---
-    if (questKey.startsWith('Semaine')) {
-        const xp = userData[`${questKey}_reward_xp`] || 0;
-        const boxes = userData[`${questKey}_reward_recompense`] || 0;
-        
-        if (xp > 0) {
-            updateParallelPass(userData, xp);
-            rewards.push({ name: "XP Pass", amount: xp, info: `+${xp} XP Pass` });
-        }
-        if (boxes > 0) {
-            userData.recompense = (userData.recompense || 0) + boxes;
-            rewards.push({ name: "Récompense(s)", amount: boxes, info: `+${boxes} Récompense(s) aléatoire(s)` });
-        }
-    } 
-    // --- Daily / Weekend Logic (Standard Points) ---
-    else {
-        const amount = userData[`${questKey}_reward`] || 15; // Default 15
-        userData.argent = (userData.argent || 0) + amount;
-        rewards.push({ name: "Points", amount: amount, info: `+${amount} Points` });
+    try {
+        const { userData, rewards } = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
+            
+            if (!userData || !userData[`${questKey}_text`]) throw new Error("Quête introuvable");
+            
+            if (userData[`${questKey}_rewardClaimed`]) throw new Error("Déjà réclamé");
+            
+            const current = userData[`${questKey}_current`] || 0;
+            const total = userData[`${questKey}_total`] || 1;
+            if (current < total) throw new Error("Quête non terminée");
+
+            const rewards = [];
+            
+            // --- Weekly Logic ---
+            if (questKey.startsWith('Semaine')) {
+                const xp = userData[`${questKey}_reward_xp`] || 0;
+                const boxes = userData[`${questKey}_reward_recompense`] || 0;
+                
+                if (xp > 0) {
+                    updateParallelPass(userData, xp);
+                    rewards.push({ name: "XP Pass", amount: xp, info: `+${xp} XP Pass` });
+                }
+                if (boxes > 0) {
+                    userData.recompense = (userData.recompense || 0) + boxes;
+                    rewards.push({ name: "Récompense(s)", amount: boxes, info: `+${boxes} Récompense(s) aléatoire(s)` });
+                }
+            } 
+            // --- Daily / Weekend Logic (Standard Points) ---
+            else {
+                const amount = userData[`${questKey}_reward`] || 15; // Default 15
+                userData.argent = (userData.argent || 0) + amount;
+                rewards.push({ name: "Points", amount: amount, info: `+${amount} Points` });
+            }
+
+            userData[`${questKey}_rewardClaimed`] = true;
+            userData[`${questKey}_completed`] = true; // Ensure consistency
+            
+            t.set(userRef, userData, { merge: true });
+            return { userData, rewards };
+        });
+        res.json({ success: true, userData, rewards });
+    } catch (e) {
+         if (e.message === "Quête introuvable" || e.message === "Déjà réclamé" || e.message === "Quête non terminée") 
+             return res.status(400).json({ error: e.message });
+         res.status(500).json({ error: "Erreur interne" });
     }
-
-    userData[`${questKey}_rewardClaimed`] = true;
-    userData[`${questKey}_completed`] = true; // Ensure consistency
-    
-    await saveUserData(userId, userData);
-    res.json({ success: true, userData, rewards });
 });
 
 app.post('/api/quest/claim-weekend-bonus', verifyToken, async (req, res) => {
     const { userId, recaptchaToken } = req.body;
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Sécurité" });
-    const userData = await getUserData(userId);
+    
+    const userRef = db.collection('users').doc(userId);
 
-    if (userData.weekend_bonus_claimed) return res.status(400).json({ error: "Déjà réclamé" });
+    try {
+        const { userData, rewards } = await db.runTransaction(async (t) => {
+            const doc = await t.get(userRef);
+            const userData = doc.exists ? doc.data() : null;
 
-    // Verify all 3 quests are done
-    const allDone = ['weekend-quete1', 'weekend-quete2', 'weekend-quete3'].every(id => {
-        return (userData[`${id}_current`] || 0) >= (userData[`${id}_total`] || 1);
-    });
+            if (userData.weekend_bonus_claimed) throw new Error("Déjà réclamé");
 
-    if (!allDone) return res.status(400).json({ error: "Quêtes non terminées" });
+            const allDone = ['weekend-quete1', 'weekend-quete2', 'weekend-quete3'].every(id => {
+                return (userData[`${id}_current`] || 0) >= (userData[`${id}_total`] || 1);
+            });
 
-    // Grant Rewards: 2500 XP Pass + 2 Random Chests
-    updateParallelPass(userData, 2500);
-    userData.recompense = (userData.recompense || 0) + 2;
-    userData.weekend_bonus_claimed = true;
+            if (!allDone) throw new Error("Quêtes non terminées");
 
-    const rewards = [
-        { name: "XP Pass", amount: 2500, info: "+2500 XP Pass" },
-        { name: "Récompenses", amount: 2, info: "+2 Récompenses aléatoires" }
-    ];
+            updateParallelPass(userData, 2500);
+            userData.recompense = (userData.recompense || 0) + 2;
+            userData.weekend_bonus_claimed = true;
 
-    await saveUserData(userId, userData);
-    res.json({ success: true, userData, rewards });
+            const rewards = [
+                { name: "XP Pass", amount: 2500, info: "+2500 XP Pass" },
+                { name: "Récompenses", amount: 2, info: "+2 Récompenses aléatoires" }
+            ];
+            
+            t.set(userRef, userData, { merge: true });
+            return { userData, rewards };
+        });
+        res.json({ success: true, userData, rewards });
+    } catch (e) {
+        if (e.message === "Déjà réclamé" || e.message === "Quêtes non terminées") return res.status(400).json({ error: e.message });
+        res.status(500).json({ error: "Erreur interne" });
+    }
 });
 
 const CHARACTERS_DATA = loadJSONData(path.join(__dirname, 'data', 'characters.json'), []);
