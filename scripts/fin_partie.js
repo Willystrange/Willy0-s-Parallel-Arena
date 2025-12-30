@@ -8,34 +8,24 @@ App.afficherDonnees = function() {
   sessionStorage.removeItem("gameMode");
 
   if (userData) {
-    // Affichage du message si parties_test < 1
-    if (gameMode === "weekend" ? userData.parties_weekend_test < 1 : userData.parties_test < 1) {
-      document.getElementById('message_test').textContent = 'Pendant votre première partie dans ce mode, \'XP, les points et les trophées sont désactivés afin que vous puissiez avoir le temps de tester et de découvrir le mode !';
-      // Masquer les récompenses
-      document.getElementById('gagnant').style.display = 'none';
-      document.getElementById('fin_xp').style.display = 'none';
-      document.getElementById('fin_argent').style.display = 'none';
-      document.getElementById('fin_trophees').style.display = 'none';
-    } else {
       // Afficher le gagnant
-      document.getElementById('gagnant').textContent = 'Gagnant: ' + userData.gagnant;
+      document.getElementById('gagnant').textContent = 'Gagnant: ' + (userData.gagnant || 'Inconnu');
 
       // Afficher les récompenses avec un intervalle
       setTimeout(() => {
-        document.getElementById('fin_xp').textContent = 'XP : ' + userData.fin_xp;
+        document.getElementById('fin_xp').textContent = 'XP : ' + (userData.fin_xp !== undefined ? userData.fin_xp : 0);
         document.getElementById('fin_xp').classList.add('show');
       }, 1000);
 
       setTimeout(() => {
-        document.getElementById('fin_argent').textContent = 'Points : ' + userData.fin_argent;
+        document.getElementById('fin_argent').textContent = 'Points : ' + (userData.fin_argent !== undefined ? userData.fin_argent : 0);
         document.getElementById('fin_argent').classList.add('show');
       }, 2000);
 
       setTimeout(() => {
-        document.getElementById('fin_trophees').textContent = 'Trophées : ' + userData.fin_trophee;
+        document.getElementById('fin_trophees').textContent = 'Trophées : ' + (userData.fin_trophee !== undefined ? userData.fin_trophee : 0);
         document.getElementById('fin_trophees').classList.add('show');
       }, 3000);
-    }
 
     // Utilisation du module centralisé
     let masteryDelay = 0;
