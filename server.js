@@ -471,6 +471,7 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         combatEngine.handleAttack(game.player, game.opponent, true, results);
     } else if (action === 'defend') {
         game.player.defense_bouton = 1;
+        game.player.defense_droit = 3;
         results.logs.push({ text: "Vous vous préparez à parer la prochaine attaque !", color: "lightblue", side: "milieu" });
     } else if (action === 'special') {
         combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
@@ -488,11 +489,14 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
             combatEngine.handleAttack(game.opponent, game.player, false, results);
         } else if (aiAction === 'defend') {
             game.opponent.defense_bouton = 1;
-            results.logs.push({ text: `${game.opponent.name} se prépare à parer !`, color: "grey", side: "milieu" });
+            game.opponent.defense_droit = 3;
         } else if (aiAction === 'special') {
             combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
         }
     }
+
+    combatEngine.passerTour(game.player, results);
+    combatEngine.passerTour(game.opponent, results);
 
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
         results.gameOver = true;
