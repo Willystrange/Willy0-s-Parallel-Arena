@@ -272,6 +272,10 @@ app.post('/api/user/:userId', verifyToken, async (req, res) => {
                 else if ((key.endsWith('_completed') || key.endsWith('_rewardClaimed')) && current[key] === true) { /* keep true */ }
                 else current[key] = newData[key];
             }
+            // Allow character progression keys
+            else if (key.endsWith('_pts') || key.endsWith('_Level') || key.endsWith('_XP') || key.endsWith('_boost')) {
+                current[key] = newData[key];
+            }
         });
         updateParallelPass(current, 0);
     }
@@ -592,6 +596,10 @@ const CHARACTERS_DATA = loadJSONData(path.join(__dirname, 'data', 'characters.js
 const games = new Map();
 
 function calculatePlayerStats(userData, charName) {
+    // Reload data to ensure updates are applied immediately
+    const CHARACTERS_DATA = loadJSONData(path.join(__dirname, 'data', 'characters.json'), []);
+    const EQUIPMENTS_DATA = loadJSONData(path.join(__dirname, 'data', 'equipments.json'), []);
+
     const base = CHARACTERS_DATA.find(c => c.name === charName);
     if (!base) return null;
 
