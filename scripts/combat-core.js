@@ -77,6 +77,87 @@ App.scrollToBottom = function() {
 App.updateTour = function() {}; // Géré par le serveur, conservé pour compatibilité HTML
 
 // -----------------------------------------------------------------------------
+// 5. PANNEAU DE STATISTIQUES
+// -----------------------------------------------------------------------------
+
+App.initStatsPanelState = function() {
+  const panel = document.getElementById('stats-panel');
+  if (!panel) return;
+  panel.classList.remove('active');
+  panel.classList.add('inactive');
+};
+
+App.renderDetailedStats = function() {
+  const container = document.getElementById('detailed-stats-content');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!App.playerCharacter || !App.opponentCharacter) {
+    container.innerHTML = '<p>Aucune partie chargée…</p>';
+    return;
+  }
+
+  const characters = [
+    { data: App.playerCharacter, title: App.playerCharacter.name },
+    { data: App.opponentCharacter, title: App.opponentCharacter.name }
+  ];
+
+  let content = '';
+  characters.forEach(characterInfo => {
+    const character = characterInfo.data;
+    const maxPv = character.pv_maximum || character.pv_max;
+
+    let effectsList = '<h6>Effets actifs</h6>';
+    if (character.effects && character.effects.length > 0) {
+      effectsList += '<ul>';
+      character.effects.forEach(effect => {
+        const effectName = App.effectNames[effect.id] || effect.id;
+        const duration = effect.duration < 999 ? `${effect.duration} tour(s)` : 'Permanent';
+        effectsList += `<li>${effectName} (${duration})</li>`;
+      });
+      effectsList += '</ul>';
+    } else {
+      effectsList += '<p>Aucun effet actif.</p>';
+    }
+
+    content += `
+      <div class="stats-block">
+        <h5>${characterInfo.title}</h5>
+        <ul>
+          PV : ${character.pv} / ${maxPv}<br><br>
+          Attaque : ${App.getEffectiveStat(character, 'attaque')} / ${character.attaque_originale}<br><br>
+          Défense : ${App.getEffectiveStat(character, 'defense')} / ${character.defense_originale}<br><br>
+          Vitesse : ${App.getEffectiveStat(character, 'vitesse')} / ${character.vitesse_originale}
+        </ul>
+        ${effectsList}
+      </div>
+    `;
+  });
+
+  container.innerHTML = content;
+};
+
+App.toggleStatsPanel = function() {
+  const panel = document.getElementById('stats-panel');
+  if (!panel) return;
+
+  const isActive = panel.classList.contains('active');
+  panel.classList.toggle('active', !isActive);
+  panel.classList.toggle('inactive', isActive);
+
+  // Désactiver les boutons pendant que le panneau est ouvert pour éviter les clics accidentels
+  const buttonsDisabled = !isActive;
+  const ids = ['attack-button', 'special-button', 'defense-button', 'items-button'];
+  ids.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.disabled = buttonsDisabled;
+  });
+
+  if (!isActive) {
+    App.renderDetailedStats();
+  }
+};
+
+// -----------------------------------------------------------------------------
 // 2. DONNÉES D'AFFICHAGE (STATISTIQUES & EFFETS)
 // -----------------------------------------------------------------------------
 
