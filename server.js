@@ -104,7 +104,10 @@ async function verifyAdmin(req, res, next) {
     else res.status(403).json({ error: "Admin requis" });
 }
 
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({ 
+    contentSecurityPolicy: false,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" } 
+}));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
