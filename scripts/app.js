@@ -25,11 +25,13 @@ App.loadRecaptchaScript = function() {
         return;
     }
 
-    console.log("[reCAPTCHA] Chargement du script sur " + hostname);
+    console.log("[reCAPTCHA] Tentative de chargement sur : " + hostname);
     const script = document.createElement('script');
     script.src = "https://www.google.com/recaptcha/enterprise.js?render=" + App.RECAPTCHA_SITE_KEY;
     script.async = true;
     script.defer = true;
+    script.onload = () => console.log("[reCAPTCHA] Script chargé avec succès.");
+    script.onerror = () => console.error("[reCAPTCHA] Échec critique du chargement du script.");
     document.head.appendChild(script);
 };
 App.loadRecaptchaScript();

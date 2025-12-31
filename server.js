@@ -72,17 +72,41 @@ io.on('connection', (socket) => {
 });
 
 // --- SECURITY & RECAPTCHA ---
+// Note: Pour Enterprise, RECAPTCHA_SECRET_KEY n'est plus utilisé directement ici, on utilise l'authentification Google Cloud implicite ou la clé API.
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "6LcMZzcsAAAAABJNQwfd8Azzi45yk-KT86hK437W";
+const GOOGLE_CLOUD_PROJECT_ID = "willy0s-parallel-arena"; // ID du projet Firebase/GCloud
+
 async function verifyRecaptcha(token, userId = null) {
     if (token === "DEV_BYPASS_TOKEN") return { success: true };
     if (token && (token.startsWith("timeout_") || token.startsWith("no_") || token.startsWith("error_") || token.startsWith("exception_"))) return { success: true, bypassed: true };
+    
     try {
-        const params = new URLSearchParams();
-        params.append('secret', RECAPTCHA_SECRET_KEY);
-        params.append('response', token);
-        const resp = await axios.post('https://www.google.com/recaptcha/api/siteverify', params.toString());
-        return { success: resp.data.success || resp.data.score >= 0.3 };
-    } catch (e) { console.error("[reCAPTCHA] API Error:", e.message); return { success: true }; }
+        // Construction du nom de l'évaluation (Assessment)
+        // Format: projects/{project}/assessments
+        const assessmentUrl = `https://recaptchaenterprise.googleapis.com/v1/projects/${GOOGLE_CLOUD_PROJECT_ID}/assessments?key=${process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M"}`; // Utilisation de la clé API Web Firebase comme fallback
+        
+        const requestBody = {
+            event: {
+                token: token,
+                siteKey: "6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG", // La clé publique (Site Key)
+            }
+        };
+
+        const resp = await axios.post(assessmentUrl, requestBody);
+        
+        // Vérification de la réponse Enterprise
+        if (resp.data && resp.data.tokenProperties && resp.data.tokenProperties.valid) {
+            // Vous pouvez aussi vérifier resp.data.riskAnalysis.score ici (0.0 à 1.0)
+            return { success: true, score: resp.data.riskAnalysis.score };
+        } else {
+            console.warn("[reCAPTCHA Enterprise] Invalid token:", resp.data);
+            return { success: false };
+        }
+    } catch (e) { 
+        console.error("[reCAPTCHA Enterprise] API Error:", e.message); 
+        // En cas d'erreur API (ex: quota, config), on laisse passer pour ne pas bloquer les utilisateurs légitimes
+        return { success: true }; 
+    }
 }
 
 async function verifyToken(req, res, next) {
