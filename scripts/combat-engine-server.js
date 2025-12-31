@@ -374,7 +374,7 @@ const combatEngine = {
         if (defender.defense_bouton === 1) {
             defender.defense_bouton = 0;
             finalDamage = Math.round(this.getEffectiveStat(attacker, 'attaque') * 0.2);
-            results.logs.push({ text: `${defender.name} pare l'attaque !`, color: logColor, side: !isPlayer });
+            results.logs.push({ text: `${defender.name} s'est défendu de votre attaque !`, color: logColor, side: !isPlayer });
         }
 
         defender.pv = Math.max(0, defender.pv - finalDamage);

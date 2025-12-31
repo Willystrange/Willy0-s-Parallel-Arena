@@ -1001,21 +1001,17 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         if (game.player.pv <= 0) return;
         
         if (action === 'attack') {
-            // Priority Defense Logic: 
-            // If we are in "Standard Mode" (Player first), AI hasn't acted yet.
-            // If AI plans to defend, it MUST parry even if slower.
-            if (!game.waitingForPlayer && game.opponent.next_choice === 'defend') {
+            // PARADE PAR ANTICIPATION : Si l'IA prévoit de défendre au tour SUIVANT (ou maintenant)
+            // elle utilise cette défense immédiatement pour parer l'attaque actuelle.
+            if (game.opponent.next_choice === 'defend') {
                  game.opponent.defense_bouton = 1;
                  game.opponent.defense_droit = 3;
-                 // Mark AI as having acted to prevent double action in resolveAI
-                 game.aiHasPreActed = true; 
+                 game.aiActionConsumed = true; // L'IA sacrifie son action prévue pour parer
             }
 
             const initialDefense = game.opponent.defense_bouton;
             combatEngine.handleAttack(game.player, game.opponent, true, results);
-            if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
-                // Triggered parry
-            }
+            // La fonction handleAttack du moteur gère déjà la réduction de dégâts si defense_bouton == 1
         } else if (action === 'defend') {
             game.player.defense_bouton = 1;
             game.player.defense_droit = 3;
@@ -1032,9 +1028,13 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
 
     const resolveAI = () => {
         if (game.opponent.pv <= 0) return;
-        if (game.aiHasPreActed) {
-            game.aiHasPreActed = false; // Reset flag
-            // AI already defended via Priority Defense
+
+        // Si l'IA a déjà "cramé" son action pour parer par anticipation
+        if (game.aiActionConsumed) {
+            game.aiActionConsumed = false;
+            results.logs.push({ text: `${game.opponent.name} s'est déjà défendu de votre attaque !`, color: "white", side: false });
+            // On replanifie tout de suite pour le tour d'après comme elle vient de "finir" son action
+            game.opponent.next_choice = combatEngine.makeAIDecision(game);
             return;
         }
 
@@ -1046,51 +1046,52 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         } else if (aiAction === 'defend') {
             game.opponent.defense_bouton = 1;
             game.opponent.defense_droit = 3;
-            // If AI acts here (Standard Mode, AI Slower but didn't Priority Defend? Should not happen if logic is correct)
-            // Or AI Faster (handled in next turn prep)
+            results.logs.push({ text: `${game.opponent.name} se met en garde !`, color: "white", side: false });
         } else if (aiAction === 'special') {
             game.opponent.defense_bouton = 0;
             combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
         }
+
+        // Dès que l'IA a fini son action, elle prévoit la SUIVANTE (pour la parade par anticipation)
+        game.opponent.next_choice = combatEngine.makeAIDecision(game);
     };
 
     // --- TURN LOGIC ---
     if (game.waitingForPlayer) {
-        // 1. REACTIVE MODE: AI already acted for this turn.
-        // Player acts now.
+        // 1. REACTIVE MODE: L'IA a déjà joué au début du tour (ex: elle a attaqué).
+        // Le joueur joue maintenant.
         resolvePlayer();
         game.waitingForPlayer = false;
 
-        // End of Turn
         combatEngine.passerTour(game.player, results);
         combatEngine.passerTour(game.opponent, results);
     } else {
-        // 2. STANDARD MODE: Player acts first.
+        // 2. STANDARD MODE: Le joueur joue en premier ou simultané.
         resolvePlayer();
         resolveAI();
 
-        // End of Turn
         combatEngine.passerTour(game.player, results);
         combatEngine.passerTour(game.opponent, results);
     }
 
     // --- PREPARE NEXT TURN (Lookahead) ---
     if (game.player.pv > 0 && game.opponent.pv > 0) {
-        // AI decides for Next Turn
-        game.opponent.next_choice = combatEngine.makeAIDecision(game);
+        // Si l'IA n'a pas encore de décision pour le tour suivant (cas standard)
+        if (!game.opponent.next_choice || game.waitingForPlayer === false) {
+            game.opponent.next_choice = combatEngine.makeAIDecision(game);
+        }
         
-        // Log "Tour X" for the upcoming turn
+        // Log "Tour X"
         combatEngine.updateTour(game.player, game.opponent, true, results);
 
         const nextPSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
         const nextOSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
 
         if (nextOSpeed > nextPSpeed) {
-            // AI IS FASTER for Next Turn: ACT IMMEDIATELY
+            // L'IA est plus rapide : elle joue son début de tour TOUT DE SUITE
             resolveAI();
             game.waitingForPlayer = true; 
         } else {
-            // Player is Faster: Wait for client next request
             game.waitingForPlayer = false;
         }
     }
