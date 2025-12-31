@@ -1032,7 +1032,6 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         // Si l'IA a déjà "cramé" son action pour parer par anticipation
         if (game.aiActionConsumed) {
             game.aiActionConsumed = false;
-            results.logs.push({ text: `${game.opponent.name} s'est déjà défendu de votre attaque !`, color: "white", side: false });
             // On replanifie tout de suite pour le tour d'après comme elle vient de "finir" son action
             game.opponent.next_choice = combatEngine.makeAIDecision(game);
             return;
@@ -1046,7 +1045,7 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         } else if (aiAction === 'defend') {
             game.opponent.defense_bouton = 1;
             game.opponent.defense_droit = 3;
-            results.logs.push({ text: `${game.opponent.name} se met en garde !`, color: "white", side: false });
+            // SILENCE : On ne logue pas l'action de défense pour garder la surprise
         } else if (aiAction === 'special') {
             game.opponent.defense_bouton = 0;
             combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
@@ -1076,9 +1075,17 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
 
     // --- PREPARE NEXT TURN (Lookahead) ---
     if (game.player.pv > 0 && game.opponent.pv > 0) {
-        // Si l'IA n'a pas encore de décision pour le tour suivant (cas standard)
+        // Si l'IA n'a pas encore de décision pour le tour suivant
         if (!game.opponent.next_choice || game.waitingForPlayer === false) {
             game.opponent.next_choice = combatEngine.makeAIDecision(game);
+            
+            // PRÉ-ACTIVATION DÉFENSIVE :
+            // Si l'IA décide de défendre pour le prochain tour, elle lève le bouclier MAINTENANT.
+            // Ainsi, la prochaine attaque du joueur (même très rapide) frappera dans le bouclier.
+            if (game.opponent.next_choice === 'defend') {
+                game.opponent.defense_bouton = 1;
+                game.opponent.defense_droit = 3;
+            }
         }
         
         // Log "Tour X"
