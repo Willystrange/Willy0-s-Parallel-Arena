@@ -12,7 +12,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(window.firebaseConfig);
 }
 
-App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
+App.RECAPTCHA_SITE_KEY = '6LeLMzwsAAAAAK515L-92DM8vt26YpWQafDn-op1';
 
 // Chargement dynamique de reCAPTCHA pour éviter les erreurs 401 sur les domaines non autorisés (dev)
 App.loadRecaptchaScript = function() {
@@ -25,13 +25,11 @@ App.loadRecaptchaScript = function() {
         return;
     }
 
-    console.log("[reCAPTCHA] Tentative de chargement sur : " + hostname);
+    console.log("[reCAPTCHA] Chargement du script sur " + hostname);
     const script = document.createElement('script');
-    script.src = "https://www.google.com/recaptcha/enterprise.js?render=" + App.RECAPTCHA_SITE_KEY;
+    script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
     script.async = true;
     script.defer = true;
-    script.onload = () => console.log("[reCAPTCHA] Script chargé avec succès.");
-    script.onerror = () => console.error("[reCAPTCHA] Échec critique du chargement du script.");
     document.head.appendChild(script);
 };
 App.loadRecaptchaScript();
@@ -45,17 +43,16 @@ App.getRecaptchaToken = function(action) {
             resolve("timeout_grecaptcha_" + Date.now());
         }, 2000);
 
-        // Vérification de la présence de la librairie Enterprise
-        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.enterprise === 'undefined') {
+        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.execute !== 'function') {
             clearTimeout(timeout);
-            console.warn("[reCAPTCHA] Bibliothèque Enterprise non disponible.");
+            console.warn("[reCAPTCHA] Bibliothèque non disponible.");
             resolve("no_grecaptcha_" + Date.now());
             return;
         }
         
         try {
-            grecaptcha.enterprise.ready(function() {
-                grecaptcha.enterprise.execute(App.RECAPTCHA_SITE_KEY, { action: action })
+            grecaptcha.ready(function() {
+                grecaptcha.execute(App.RECAPTCHA_SITE_KEY, { action: action })
                     .then(function(token) {
                         clearTimeout(timeout);
                         resolve(token);
