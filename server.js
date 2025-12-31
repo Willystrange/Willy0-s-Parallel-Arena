@@ -896,94 +896,61 @@ function calculatePlayerStats(userData, charName) {
 }
 
 app.post('/api/combat/start', verifyToken, async (req, res) => {
-    const { userId, gameMode, playerCharacterName, opponentName, recaptchaToken } = req.body; // Expect names, not objects
-    
-    // Backward compatibility check for client sending full objects
+    const { userId, gameMode, playerCharacterName, opponentName, recaptchaToken } = req.body;
     const pName = playerCharacterName || (req.body.playerCharacter ? req.body.playerCharacter.name : null);
     const oName = opponentName || (req.body.opponentCharacter ? req.body.opponentCharacter.name : null);
 
     if (!(await verifyRecaptcha(recaptchaToken, userId)).success) return res.status(403).json({ error: "Bot" });
-    
     const userData = await getUserData(userId);
     if (!userData) return res.status(404).json({ error: "User not found" });
-
-    // Validate Player Character
-    if (!userData[pName] && pName !== 'Willy') { // Willy is often default/free, but check unlocking logic
-        // If your game requires unlocking Willy explicitly, remove the '|| pName === ...'
-        if (!userData[pName]) return res.status(400).json({ error: "Personnage non débloqué" });
-    }
 
     const player = calculatePlayerStats(userData, pName);
     if (!player) return res.status(400).json({ error: "Personnage invalide" });
 
-    // Validate/Generate Opponent
     let opponent;
-    if (gameMode === 'survie') {
-        opponent = generateSurvivalOpponent(1);
-    } else {
-        // Classic / Weekend
+    if (gameMode === 'survie') opponent = generateSurvivalOpponent(1);
+    else {
         const targetName = oName || CHARACTERS_DATA[Math.floor(Math.random() * CHARACTERS_DATA.length)].name;
-        const baseOpp = CHARACTERS_DATA.find(c => c.name === targetName) || CHARACTERS_DATA[0];
-        
-        // Clone opponent to avoid mutating reference
-        opponent = JSON.parse(JSON.stringify(baseOpp));
-        
-        // Ensure consistent properties
-        opponent.pv_maximum = opponent.pv;
-        opponent.pv_max = opponent.pv;
-        opponent.attaque_originale = opponent.attaque;
-        opponent.defense_originale = opponent.defense;
-        opponent.equipments = [];
-        opponent.effects = [];
-        
-        // Optional: Scale opponent slightly with player level? For now, raw base stats = fair/challenging depending on match.
+        opponent = JSON.parse(JSON.stringify(CHARACTERS_DATA.find(c => c.name === targetName) || CHARACTERS_DATA[0]));
+        opponent.pv_maximum = opponent.pv; opponent.pv_max = opponent.pv;
+        opponent.attaque_originale = opponent.attaque; opponent.defense_originale = opponent.defense;
+        opponent.equipments = []; opponent.effects = [];
     }
 
-    const game = { 
-        userId, 
-        gameMode, 
-        player: player, 
-        opponent: opponent, 
-        wave: gameMode === 'survie' ? 1 : 0, 
-        startTime: Date.now(), 
-        lastActionTime: Date.now(), 
-        turn: 1 
-    };
+    const game = { userId, gameMode, player, opponent, wave: gameMode === 'survie' ? 1 : 0, startTime: Date.now(), lastActionTime: Date.now(), turn: 1, waitingForPlayer: false };
 
-    // Initialize AI
+    // --- ANTICIPATION INITIALE (Tour 1 & 2) ---
+    // Décision pour le Tour 1
     game.opponent.next_choice = combatEngine.makeAIDecision(game);
+    // On simule une décision pour le Tour 2 pour savoir s'il faut parer dès le Tour 1
+    const secondChoice = combatEngine.makeAIDecision(game); 
     
-    // Apply Weekend Modifiers
-    if (gameMode === 'weekend') {
-        const eventName = WEEKEND_EVENTS[Math.floor(Math.random() * WEEKEND_EVENTS.length)];
-        game.event = eventName;
-        combatEngine.applyWeekendEvent(game, eventName);
-    }
-
-    // --- TURN ORDER LOGIC (START) ---
-    const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
-    const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
     const results = { logs: [] };
-
-    // Log Tour 1 immediately
     combatEngine.updateTour(game.player, game.opponent, true, results);
 
+    if (game.opponent.next_choice === 'defend' || secondChoice === 'defend') {
+        game.opponent.defense_bouton = 1;
+        game.opponent.defense_droit = 3;
+        if (game.opponent.next_choice !== 'defend' && secondChoice === 'defend') {
+            game.aiActionConsumed = true; // Il utilisera sa défense du T2 au T1
+        }
+    }
+
+    // Initiative
+    const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
+    const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
+
     if (oSpeed > pSpeed) {
-        // AI is faster: Execute AI turn immediately (Reactive Turn)
-        const aiAction = game.opponent.next_choice || 'attack';
-        
+        const aiAction = game.opponent.next_choice;
         if (aiAction === 'attack') {
             game.opponent.defense_bouton = 0;
             combatEngine.handleAttack(game.opponent, game.player, false, results);
-        } else if (aiAction === 'defend') {
-            game.opponent.defense_bouton = 1;
-            game.opponent.defense_droit = 3;
-            results.logs.push({ text: `${game.opponent.name} se met en garde !`, color: "white", side: false });
         } else if (aiAction === 'special') {
             game.opponent.defense_bouton = 0;
             combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
+        } else if (aiAction === 'defend') {
+            // Déjà géré par le bouclier silencieux
         }
-        
         game.waitingForPlayer = true;
     }
 
@@ -996,37 +963,28 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     if (!game) return res.status(404).json({ error: "Inconnu" });
     const results = { gameOver: false, logs: [] };
 
-    // 1. Log Tour Number
-    combatEngine.updateTour(game.player, game.opponent, true, results);
-
-    // --- ANTICIPATION DU FUTUR (FUTURE BORROWING) ---
-    // L'IA décide MAINTENANT de son action pour le PROCHAIN tour.
-    const futureChoice = combatEngine.makeAIDecision(game);
-    game.futureDefenseUsed = false;
-
-    // Si elle décide de défendre, elle l'applique IMMÉDIATEMENT contre l'attaque actuelle.
-    if (action === 'attack' && futureChoice === 'defend') {
-        game.opponent.defense_bouton = 1;
-        game.opponent.defense_droit = 3;
-        game.futureDefenseUsed = true; // On marque que la défense du prochain tour est consommée
+    // --- LOGIQUE DE TOUR ---
+    // Si on n'attendait pas le joueur, c'est un nouveau tour (Joueur plus rapide)
+    if (!game.waitingForPlayer) {
+        combatEngine.updateTour(game.player, game.opponent, true, results);
     }
 
-    let aiParried = false;
+    // ANTICIPATION CONTINUE : L'IA prévoit le tour d'après
+    const futureChoice = combatEngine.makeAIDecision(game);
+    let borrowedNextTurn = false;
 
-    // Helper functions
+    if (action === 'attack' && futureChoice === 'defend' && game.opponent.defense_bouton === 0) {
+        game.opponent.defense_bouton = 1;
+        game.opponent.defense_droit = 3;
+        borrowedNextTurn = true;
+    }
+
     const resolvePlayer = () => {
         if (game.player.pv <= 0) return;
-        
         if (action === 'attack') {
-            const initialDefense = game.opponent.defense_bouton;
             combatEngine.handleAttack(game.player, game.opponent, true, results);
-            
-            if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
-                aiParried = true;
-            }
         } else if (action === 'defend') {
-            game.player.defense_bouton = 1;
-            game.player.defense_droit = 3;
+            game.player.defense_bouton = 1; game.player.defense_droit = 3;
             results.logs.push({ text: "Vous vous préparez à parer la prochaine attaque !", color: "lightblue", side: "milieu" });
         } else if (action === 'special') {
             combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
@@ -1040,51 +998,55 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
 
     const resolveAI = () => {
         if (game.opponent.pv <= 0) return;
-
-        // Si l'action de ce tour a déjà été consommée (par une parade anticipée au tour précédent)
         if (game.aiActionConsumed) {
             game.aiActionConsumed = false;
             results.logs.push({ text: `${game.opponent.name} s'est déjà défendu de votre dernière attaque !`, color: "white", side: false });
             return;
         }
-
         const aiAction = game.opponent.next_choice || 'attack';
-        
         if (aiAction === 'attack') {
             game.opponent.defense_bouton = 0;
             combatEngine.handleAttack(game.opponent, game.player, false, results);
-        } else if (aiAction === 'defend') {
-            game.opponent.defense_bouton = 1;
-            game.opponent.defense_droit = 3;
-            // SILENCE (pas de log "se met en garde")
         } else if (aiAction === 'special') {
             game.opponent.defense_bouton = 0;
             combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
         }
+        // Défense silencieuse : pas de log.
     };
 
-    // --- TURN EXECUTION ---
+    // Exécution
     const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
     const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
 
-    if (pSpeed >= oSpeed) {
+    if (game.waitingForPlayer) {
         resolvePlayer();
-        resolveAI();
+        game.waitingForPlayer = false;
+        combatEngine.passerTour(game.player, results);
+        combatEngine.passerTour(game.opponent, results);
     } else {
-        resolveAI();
-        resolvePlayer();
+        if (pSpeed >= oSpeed) {
+            resolvePlayer(); resolveAI();
+        } else {
+            resolveAI(); resolvePlayer();
+        }
+        combatEngine.passerTour(game.player, results);
+        combatEngine.passerTour(game.opponent, results);
     }
 
-    // --- END OF TURN & PREPARE NEXT ---
-    combatEngine.passerTour(game.player, results);
-    combatEngine.passerTour(game.opponent, results);
+    // Fin de tour : On valide les décisions futures
+    if (game.player.pv > 0 && game.opponent.pv > 0) {
+        game.opponent.next_choice = futureChoice;
+        if (borrowedNextTurn) game.aiActionConsumed = true;
 
-    // Apply the Future Decision calculated at start
-    game.opponent.next_choice = futureChoice;
-    
-    // If Future Defense was used this turn, mark next turn's action as consumed
-    if (game.futureDefenseUsed) {
-        game.aiActionConsumed = true;
+        // Préparation du tour suivant
+        const nextPSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
+        const nextOSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
+
+        if (nextOSpeed > nextPSpeed) {
+            combatEngine.updateTour(game.player, game.opponent, true, results);
+            resolveAI();
+            game.waitingForPlayer = true;
+        }
     }
 
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
