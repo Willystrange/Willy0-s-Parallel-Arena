@@ -1044,7 +1044,7 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         // Si l'action de ce tour a déjà été consommée (par une parade anticipée au tour précédent)
         if (game.aiActionConsumed) {
             game.aiActionConsumed = false;
-            // SILENCE TOTAL (pas de log "s'est déjà défendu")
+            results.logs.push({ text: `${game.opponent.name} s'est déjà défendu de votre dernière attaque !`, color: "white", side: false });
             return;
         }
 
