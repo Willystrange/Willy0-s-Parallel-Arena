@@ -27,7 +27,7 @@ App.loadRecaptchaScript = function() {
 
     console.log("[reCAPTCHA] Chargement du script sur " + hostname);
     const script = document.createElement('script');
-    script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
+    script.src = "https://www.google.com/recaptcha/enterprise.js?render=" + App.RECAPTCHA_SITE_KEY;
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -43,16 +43,17 @@ App.getRecaptchaToken = function(action) {
             resolve("timeout_grecaptcha_" + Date.now());
         }, 2000);
 
-        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.execute !== 'function') {
+        // Vérification de la présence de la librairie Enterprise
+        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.enterprise === 'undefined') {
             clearTimeout(timeout);
-            console.warn("[reCAPTCHA] Bibliothèque non disponible.");
+            console.warn("[reCAPTCHA] Bibliothèque Enterprise non disponible.");
             resolve("no_grecaptcha_" + Date.now());
             return;
         }
         
         try {
-            grecaptcha.ready(function() {
-                grecaptcha.execute(App.RECAPTCHA_SITE_KEY, { action: action })
+            grecaptcha.enterprise.ready(function() {
+                grecaptcha.enterprise.execute(App.RECAPTCHA_SITE_KEY, { action: action })
                     .then(function(token) {
                         clearTimeout(timeout);
                         resolve(token);
