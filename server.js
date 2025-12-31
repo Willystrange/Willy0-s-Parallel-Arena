@@ -960,8 +960,33 @@ app.post('/api/combat/start', verifyToken, async (req, res) => {
         combatEngine.applyWeekendEvent(game, eventName);
     }
 
+    // --- TURN ORDER LOGIC (START) ---
+    const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
+    const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
+    const results = { logs: [] };
+
+    if (oSpeed > pSpeed) {
+        // AI is faster: Execute AI turn immediately (Reactive Turn)
+        const aiAction = game.opponent.next_choice || 'attack';
+        
+        if (aiAction === 'attack') {
+            game.opponent.defense_bouton = 0;
+            combatEngine.handleAttack(game.opponent, game.player, false, results);
+        } else if (aiAction === 'defend') {
+            game.opponent.defense_bouton = 1;
+            game.opponent.defense_droit = 3;
+            results.logs.push({ text: `${game.opponent.name} se met en garde !`, color: "white", side: false });
+        } else if (aiAction === 'special') {
+            game.opponent.defense_bouton = 0;
+            combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
+        }
+        
+        game.waitingForPlayer = true;
+        // AI has acted for Turn 1. Now waiting for Player to finish Turn 1.
+    }
+
     games.set(userId, game); 
-    res.json({ success: true, gameState: game });
+    res.json({ success: true, gameState: game, results }); // Include results for logs
 });
 
 app.post('/api/combat/action', verifyToken, async (req, res) => {
@@ -1037,21 +1062,53 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
     const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
 
-    if (pSpeed >= oSpeed) {
-        // Player is faster (or tied)
+    if (game.waitingForPlayer) {
+        // Reactive State: AI has ALREADY acted for this turn.
+        // Player acts now to finish the turn.
         resolvePlayer();
-        resolveAI();
+        game.waitingForPlayer = false;
+        
+        // Turn Complete
+        combatEngine.passerTour(game.player, results);
+        combatEngine.passerTour(game.opponent, results);
+        
+        // Prepare Next Turn (N+1)
+        if (game.player.pv > 0 && game.opponent.pv > 0) {
+            game.opponent.next_choice = combatEngine.makeAIDecision(game);
+            
+            // Check Speed for N+1
+            const nextPSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
+            const nextOSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
+            
+            if (nextOSpeed > nextPSpeed) {
+                // AI is still faster: Execute AI Turn N+1 immediately
+                resolveAI();
+                game.waitingForPlayer = true;
+            }
+        }
     } else {
-        // AI is faster
-        resolveAI();
-        resolvePlayer();
+        // Standard State: Player initiates the turn
+        if (pSpeed >= oSpeed) {
+            // Player Faster: Player -> AI
+            resolvePlayer();
+            resolveAI();
+            
+            combatEngine.passerTour(game.player, results);
+            combatEngine.passerTour(game.opponent, results);
+            
+            game.opponent.next_choice = combatEngine.makeAIDecision(game);
+        } else {
+            // AI Faster (But we are in Standard State, meaning this is the start of the turn)
+            // This happens if Player was faster before but became slower (debuff),
+            // OR if it's the first action after a "Standard" turn end.
+            
+            // Execute AI (Turn N)
+            resolveAI();
+            // Wait for Player (Turn N)
+            game.waitingForPlayer = true;
+            // Do NOT increment turn counters yet.
+        }
     }
-
-    // Always prepare decision for NEXT turn
-    game.opponent.next_choice = combatEngine.makeAIDecision(game);
-
-    combatEngine.passerTour(game.player, results);
-    combatEngine.passerTour(game.opponent, results);
 
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
         results.gameOver = true;

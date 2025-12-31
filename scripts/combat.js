@@ -56,16 +56,16 @@ App.sauvegarde = App.loadGame();
     // --- SYNC START ---
     const result = await App.combatManager.syncCombatStart('classic');
     
-    // Si l'adversaire est plus rapide et que c'est le tout début, le serveur peut avoir déjà déclenché son tour
-    // Mais ici le client force 'opponent_init' si nécessaire pour la cohérence visuelle
-    if (result && App.playerCharacter.vitesse < App.opponentCharacter.vitesse && App.playerCharacter.tourTT < 1) {
-         App.combatManager.executeAction('opponent_init').then(data => {
-            if(data && data.success) {
-                App.playerCharacter = data.game.player;
-                App.opponentCharacter = data.game.opponent;
-                App.updateUI();
+    if (result && result.success) {
+        App.playerCharacter = result.gameState.player;
+        App.opponentCharacter = result.gameState.opponent;
+        // Logs initiaux (ex: L'IA rapide a déjà attaqué)
+        if (result.results && result.results.logs) {
+            for (const log of result.results.logs) {
+                App.addCombatLog(log.text, log.color, log.side);
             }
-         });
+        }
+        App.updateUI();
     }
 })();
 
