@@ -970,32 +970,53 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     const results = { gameOver: false, logs: [] };
 
     let aiParried = false;
-    if (action === 'attack') {
-        const initialDefense = game.opponent.defense_bouton;
-        combatEngine.handleAttack(game.player, game.opponent, true, results);
-        if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
-            aiParried = true;
-        }
-    } else if (action === 'defend') {
-        game.player.defense_bouton = 1;
-        game.player.defense_droit = 3;
-        results.logs.push({ text: "Vous vous préparez à parer la prochaine attaque !", color: "lightblue", side: "milieu" });
-    } else if (action === 'special') {
-        combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
-    } else if (action === 'use_item') {
-        combatEngine.applyItem(game, itemName, results);
-    } else if (action === 'cheat_win') {
-        game.opponent.pv = 0;
-        results.logs.push({ text: "VICTOIRE INSTANTANÉE (DEV) !", color: "gold", side: "milieu" });
-    }
 
-    if (game.opponent.pv > 0) {
+    // Helper functions to execute turns based on speed
+    const resolvePlayer = () => {
+        if (game.player.pv <= 0) return; // Dead players don't act
+        
+        if (action === 'attack') {
+            // ANTICIPATION DÉFENSIVE : Si l'IA a prévu de défendre, elle active son bouclier MAINTENANT
+            // même si le joueur joue avant elle (vitesse). Cela permet la Parade Réactive.
+            if (game.opponent.next_choice === 'defend') {
+                game.opponent.defense_bouton = 1;
+                game.opponent.defense_droit = 3; 
+            }
+
+            const initialDefense = game.opponent.defense_bouton;
+            combatEngine.handleAttack(game.player, game.opponent, true, results);
+            // Check if player triggered a parry (shield was up)
+            if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
+                aiParried = true;
+            }
+        } else if (action === 'defend') {
+            game.player.defense_bouton = 1;
+            game.player.defense_droit = 3;
+            results.logs.push({ text: "Vous vous préparez à parer la prochaine attaque !", color: "lightblue", side: "milieu" });
+        } else if (action === 'special') {
+            combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
+        } else if (action === 'use_item') {
+            combatEngine.applyItem(game, itemName, results);
+        } else if (action === 'cheat_win') {
+            game.opponent.pv = 0;
+            results.logs.push({ text: "VICTOIRE INSTANTANÉE (DEV) !", color: "gold", side: "milieu" });
+        }
+    };
+
+    const resolveAI = () => {
+        if (game.opponent.pv <= 0) return; // Dead AI doesn't act
+
+        // If AI parried an attack THIS TURN (because Player went first and triggered shield),
+        // OR if AI chose 'defend' as its action (because AI went first),
+        // we handle the logic here.
+        
+        // 1. If AI went first, it executes its choice.
+        // 2. If Player went first and triggered a parry (aiParried=true), AI skips its scheduled offensive move to focus on the parry.
+        
         if (aiParried) {
-             // L'IA a paré, elle passe son tour d'action active (la parade EST son action)
              results.logs.push({ text: `${game.opponent.name} s'est défendu de l'attaque de ${game.player.name}.`, color: "white", side: false });
         } else {
-            // Logique de l'adversaire (IA) basée sur la décision prise au tour PRÉCÉDENT
-            const aiAction = game.opponent.next_choice || 'attack'; // Fallback safe
+            const aiAction = game.opponent.next_choice || 'attack';
             
             if (aiAction === 'attack') {
                 game.opponent.defense_bouton = 0;
@@ -1003,16 +1024,31 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
             } else if (aiAction === 'defend') {
                 game.opponent.defense_bouton = 1;
                 game.opponent.defense_droit = 3;
+                // Note: If AI acts first and sets this, Player acts second. 
+                // If Player attacks, resolvePlayer will see defense_bouton=1 and trigger the parry.
             } else if (aiAction === 'special') {
                 game.opponent.defense_bouton = 0;
                 combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
             }
         }
-        
-        // On prépare DÉJÀ la décision pour le PROCHAIN tour (1 tour à l'avance)
-        // Cette décision doit être prise QUOI QU'IL ARRIVE (même si l'IA a paré ce tour-ci)
-        game.opponent.next_choice = combatEngine.makeAIDecision(game);
+    };
+
+    // --- TURN ORDER LOGIC ---
+    const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
+    const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
+
+    if (pSpeed >= oSpeed) {
+        // Player is faster (or tied)
+        resolvePlayer();
+        resolveAI();
+    } else {
+        // AI is faster
+        resolveAI();
+        resolvePlayer();
     }
+
+    // Always prepare decision for NEXT turn
+    game.opponent.next_choice = combatEngine.makeAIDecision(game);
 
     combatEngine.passerTour(game.player, results);
     combatEngine.passerTour(game.opponent, results);
