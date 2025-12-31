@@ -72,17 +72,45 @@ io.on('connection', (socket) => {
 });
 
 // --- SECURITY & RECAPTCHA ---
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "6LeLMzwsAAAAAH7Z2KgL69mnh6Fm_ICG3vbmDNrD";
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "6LeLMzwsAAAAAH7Z2KgL69mnh6Fm_ICG3vbmDNrD"; // Not used for Enterprise REST call but kept for reference
+const GOOGLE_CLOUD_PROJECT_ID = "willy0s-parallel-arena";
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M"; // API Key Web par défaut
+
 async function verifyRecaptcha(token, userId = null) {
     if (token === "DEV_BYPASS_TOKEN") return { success: true };
     if (token && (token.startsWith("timeout_") || token.startsWith("no_") || token.startsWith("error_") || token.startsWith("exception_"))) return { success: true, bypassed: true };
+    
     try {
-        const params = new URLSearchParams();
-        params.append('secret', RECAPTCHA_SECRET_KEY);
-        params.append('response', token);
-        const resp = await axios.post('https://www.google.com/recaptcha/api/siteverify', params.toString());
-        return { success: resp.data.success || resp.data.score >= 0.3 };
-    } catch (e) { console.error("[reCAPTCHA] API Error:", e.message); return { success: true }; }
+        // Utilisation de l'API REST reCAPTCHA Enterprise
+        // URL: https://recaptchaenterprise.googleapis.com/v1/projects/{projectID}/assessments?key={API_KEY}
+        const url = `https://recaptchaenterprise.googleapis.com/v1/projects/${GOOGLE_CLOUD_PROJECT_ID}/assessments?key=${FIREBASE_API_KEY}`;
+        
+        const body = {
+            event: {
+                token: token,
+                siteKey: "6LeLMzwsAAAAAK515L-92DM8vt26YpWQafDn-op1", // Votre clé de site Enterprise
+                expectedAction: "" // Optionnel : vérifier l'action si nécessaire
+            }
+        };
+
+        const response = await axios.post(url, body);
+        const data = response.data;
+
+        // Vérification du résultat
+        if (data.tokenProperties && data.tokenProperties.valid) {
+             // Score entre 0.0 et 1.0 (si c'est une clé basée sur le score)
+            const score = data.riskAnalysis ? data.riskAnalysis.score : 1.0;
+            return { success: true, score: score };
+        } else {
+            console.warn("[reCAPTCHA Enterprise] Invalid token:", JSON.stringify(data));
+            // Si la clé est valide mais que Google refuse le domaine -> invalid reason: 'DOMAIN_MISMATCH' ou 'UNSUPPORTED_KEY_TYPE'
+            return { success: false }; 
+        }
+    } catch (e) {
+        console.error("[reCAPTCHA Enterprise] API Error:", e.response ? e.response.data : e.message);
+        // En cas d'erreur technique (ex: API non activée), on laisse passer pour ne pas bloquer les utilisateurs
+        return { success: true }; 
+    }
 }
 
 async function verifyToken(req, res, next) {

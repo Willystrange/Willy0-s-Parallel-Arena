@@ -25,9 +25,9 @@ App.loadRecaptchaScript = function() {
         return;
     }
 
-    console.log("[reCAPTCHA] Chargement du script sur " + hostname);
+    console.log("[reCAPTCHA] Chargement du script Enterprise sur " + hostname);
     const script = document.createElement('script');
-    script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
+    script.src = "https://www.google.com/recaptcha/enterprise.js?render=" + App.RECAPTCHA_SITE_KEY;
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -39,33 +39,31 @@ App.getRecaptchaToken = function(action) {
         // Timeout de sécurité : si reCAPTCHA ne répond pas en 2s, on bypass
         const timeout = setTimeout(() => {
             console.warn("[reCAPTCHA] Timeout, utilisation du bypass.");
-            // On ajoute un timestamp pour rendre le jeton dynamique
             resolve("timeout_grecaptcha_" + Date.now());
         }, 2000);
 
-        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.execute !== 'function') {
+        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.enterprise === 'undefined') {
             clearTimeout(timeout);
-            console.warn("[reCAPTCHA] Bibliothèque non disponible.");
+            console.warn("[reCAPTCHA] Bibliothèque Enterprise non disponible.");
             resolve("no_grecaptcha_" + Date.now());
             return;
         }
         
         try {
-            grecaptcha.ready(function() {
-                grecaptcha.execute(App.RECAPTCHA_SITE_KEY, { action: action })
+            grecaptcha.enterprise.ready(function() {
+                grecaptcha.enterprise.execute(App.RECAPTCHA_SITE_KEY, { action: action })
                     .then(function(token) {
                         clearTimeout(timeout);
                         resolve(token);
                     })
                     .catch(err => {
                         clearTimeout(timeout);
-                        console.error("[reCAPTCHA] Erreur exécution:", err);
+                        console.error("[reCAPTCHA] Erreur Enterprise:", err);
                         resolve("error_grecaptcha");
                     });
             });
         } catch (e) {
             clearTimeout(timeout);
-            console.error("[reCAPTCHA] Exception:", e);
             resolve("exception_grecaptcha");
         }
     });
