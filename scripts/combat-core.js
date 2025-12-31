@@ -504,8 +504,12 @@ App.combatManager = {
             sessionStorage.setItem('masteryGameResult', JSON.stringify(data.results.masteryGameResult));
         }
         
+        // Clear session and save data
         sessionStorage.removeItem('playerCharacter');
         sessionStorage.removeItem('opponentCharacter');
+        const saveKey = App.getSaveKey();
+        if (saveKey) localStorage.removeItem(saveKey);
+
         const cheatBtn = document.getElementById('cheat-btn-dev');
         if (cheatBtn) cheatBtn.remove();
 
