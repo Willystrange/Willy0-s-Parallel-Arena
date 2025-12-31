@@ -1007,10 +1007,11 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
                 game.opponent.defense_bouton = 0;
                 combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
             }
-            
-            // On prépare DÉJÀ la décision pour le PROCHAIN tour (1 tour à l'avance)
-            game.opponent.next_choice = combatEngine.makeAIDecision(game);
         }
+        
+        // On prépare DÉJÀ la décision pour le PROCHAIN tour (1 tour à l'avance)
+        // Cette décision doit être prise QUOI QU'IL ARRIVE (même si l'IA a paré ce tour-ci)
+        game.opponent.next_choice = combatEngine.makeAIDecision(game);
     }
 
     combatEngine.passerTour(game.player, results);
