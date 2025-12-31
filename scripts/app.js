@@ -14,6 +14,26 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 
 App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
+// Chargement dynamique de reCAPTCHA pour éviter les erreurs 401 sur les domaines non autorisés (dev)
+App.loadRecaptchaScript = function() {
+    const hostname = window.location.hostname;
+    // On ne bloque reCAPTCHA que sur localhost car la clé Google y est rarement autorisée par défaut
+    const isLocal = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+    
+    if (isLocal) {
+        console.warn("[reCAPTCHA] Script ignoré sur localhost. Utilisation du fallback.");
+        return;
+    }
+
+    console.log("[reCAPTCHA] Chargement du script sur " + hostname);
+    const script = document.createElement('script');
+    script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+};
+App.loadRecaptchaScript();
+
 App.getRecaptchaToken = function(action) {
     return new Promise((resolve) => {
         // Timeout de sécurité : si reCAPTCHA ne répond pas en 2s, on bypass
