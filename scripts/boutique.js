@@ -16,7 +16,7 @@ App.BONUS_TEXTS = {
 
 // Map pour lier le type d'item à la propriété correspondante dans userData
 App.ITEM_PROPERTY_MAP = {
-    xp: 'Double_XP_acheté',
+    xp: 'Double_XP',
     potion: 'Potion_de_Santé_acheté',
     amulette: 'Amulette_de_Régénération_acheté',
     epee: 'epee_tranchante_acheté',

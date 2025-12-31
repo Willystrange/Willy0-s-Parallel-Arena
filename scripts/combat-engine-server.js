@@ -191,6 +191,15 @@ const combatEngine = {
         let additiveBonus = 0;
         let multiplicativeBonus = 1;
 
+        // Bonus Amulette du Paria
+        if ((character.equipments || []).includes('amulette_paria') && character.pv < ((character.pv_maximum || character.pv_max) * 0.5)) {
+            if (statName === 'attaque') {
+                additiveBonus += 20;
+            } else if (statName === 'defense') {
+                additiveBonus += 15;
+            }
+        }
+
         if (character.effects && character.effects.length > 0) {
             character.effects.forEach(effect => {
                 if (effect.stat === statName) {

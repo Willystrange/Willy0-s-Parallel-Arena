@@ -263,7 +263,7 @@ async function finalizeGame(userId, game, results) {
     }
 }
 
-const ITEM_PROPERTY_MAP = { xp: 'Double_XP_acheté', xp_2: 'Double_XP_acheté', potion: 'Potion_de_Santé_acheté', amulette: 'Amulette_de_Régénération_acheté', epee: 'epee_tranchante_acheté', elixir: 'elixir_puissance_acheté', armure: 'armure_fer_acheté', bouclier: 'bouclier_solide_acheté', cape: 'Cape_acheté', crystal: 'crystal_acheté', marque_chasseur: 'marque_chasseur_acheté', purge_spirituelle: 'purge_spirituelle_acheté', orbe_siphon: 'orbe_siphon_acheté' };
+const ITEM_PROPERTY_MAP = { xp: 'Double_XP', xp_2: 'Double_XP', potion: 'Potion_de_Santé_acheté', amulette: 'Amulette_de_Régénération_acheté', epee: 'epee_tranchante_acheté', elixir: 'elixir_puissance_acheté', armure: 'armure_fer_acheté', bouclier: 'bouclier_solide_acheté', cape: 'Cape_acheté', crystal: 'crystal_acheté', marque_chasseur: 'marque_chasseur_acheté', purge_spirituelle: 'purge_spirituelle_acheté', orbe_siphon: 'orbe_siphon_acheté' };
 
 function getProceduralTrophyReward(trophies) {
     if (trophies < 2000) return null;
@@ -516,10 +516,7 @@ app.post('/api/recompenses/open', verifyToken, async (req, res) => {
                 }
                 if (!obtained) {
                      const amt = getRandomInt(1, 5);
-                     userData.Double_XP = (userData.Double_XP || 0) + amt; // Note: 'Double_XP_acheté' vs 'Double_XP' inconsistency in old code? using 'Double_XP' as per server standard or 'Double_XP_acheté' if shop item? 
-                     // Server uses 'Double_XP' for active bonus usually, but shop uses 'Double_XP_acheté'. Let's stick to ITEM_PROPERTY_MAP keys if possible or standard fields.
-                     // Checking ITEM_PROPERTY_MAP: xp -> Double_XP_acheté. Let's use that for consistency with shop.
-                     userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + amt;
+                     userData.Double_XP = (userData.Double_XP || 0) + amt;
                      rewards.push({ name: "Double XP", amount: amt, info: `+${amt} Double XP` });
                 }
             } else {
@@ -570,7 +567,7 @@ app.post('/api/recompenses/open', verifyToken, async (req, res) => {
                             break;
                         case 'doubleXP':
                             const dx = getRandomInt(1, 3);
-                            userData.Double_XP_acheté = (userData.Double_XP_acheté || 0) + dx;
+                            userData.Double_XP = (userData.Double_XP || 0) + dx;
                             rewards.push({ name: "Double XP", amount: dx, info: `+${dx} Double XP` });
                             break;
                         case 'healthPotion':
@@ -845,10 +842,6 @@ const CHARACTERS_DATA = loadJSONData(path.join(__dirname, 'data', 'characters.js
 const games = new Map();
 
 function calculatePlayerStats(userData, charName) {
-    // Reload data to ensure updates are applied immediately
-    const CHARACTERS_DATA = loadJSONData(path.join(__dirname, 'data', 'characters.json'), []);
-    const EQUIPMENTS_DATA = loadJSONData(path.join(__dirname, 'data', 'equipments.json'), []);
-
     const base = CHARACTERS_DATA.find(c => c.name === charName);
     if (!base) return null;
 
@@ -866,6 +859,10 @@ function calculatePlayerStats(userData, charName) {
     if (userData.characters && userData.characters[charName] && userData.characters[charName].equipments) {
         equippedIds = userData.characters[charName].equipments;
     }
+
+    // Verify ownership: Only allow items that are in the user's inventory
+    const ownedEquipments = userData.equipments || [];
+    equippedIds = equippedIds.filter(id => ownedEquipments.includes(id));
 
     const equippedItems = EQUIPMENTS_DATA.filter(e => equippedIds.includes(e.id));
     
