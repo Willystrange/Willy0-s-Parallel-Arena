@@ -257,13 +257,8 @@ const combatEngine = {
     getAgreement(name) { return this.isFemale(name) ? "e" : ""; },
 
     updateTour(player, opponent, isPlayer, results) {
-        if (isPlayer && player.vitesse >= opponent.vitesse) {
-            player.tourTT = (player.tourTT || 0) + 1;
-            results.logs.push({ text: 'Tour ' + player.tourTT, color: 'grey', side: 'milieu' });
-        } else if (!isPlayer && player.vitesse < opponent.vitesse) {
-            player.tourTT = (player.tourTT || 0) + 1;
-            results.logs.push({ text: 'Tour ' + player.tourTT, color: 'grey', side: 'milieu' });
-        }
+        player.tourTT = (player.tourTT || 0) + 1;
+        results.logs.push({ text: 'Tour ' + player.tourTT, color: 'grey', side: 'milieu' });
     },
 
     passerTour(character, results) {
