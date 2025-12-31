@@ -996,22 +996,34 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     if (!game) return res.status(404).json({ error: "Inconnu" });
     const results = { gameOver: false, logs: [] };
 
+    // 1. Log Tour Number
+    combatEngine.updateTour(game.player, game.opponent, true, results);
+
+    // --- ANTICIPATION DU FUTUR (FUTURE BORROWING) ---
+    // L'IA décide MAINTENANT de son action pour le PROCHAIN tour.
+    const futureChoice = combatEngine.makeAIDecision(game);
+    game.futureDefenseUsed = false;
+
+    // Si elle décide de défendre, elle l'applique IMMÉDIATEMENT contre l'attaque actuelle.
+    if (action === 'attack' && futureChoice === 'defend') {
+        game.opponent.defense_bouton = 1;
+        game.opponent.defense_droit = 3;
+        game.futureDefenseUsed = true; // On marque que la défense du prochain tour est consommée
+    }
+
+    let aiParried = false;
+
     // Helper functions
     const resolvePlayer = () => {
         if (game.player.pv <= 0) return;
         
         if (action === 'attack') {
-            // PARADE PAR ANTICIPATION : Si l'IA prévoit de défendre au tour SUIVANT (ou maintenant)
-            // elle utilise cette défense immédiatement pour parer l'attaque actuelle.
-            if (game.opponent.next_choice === 'defend') {
-                 game.opponent.defense_bouton = 1;
-                 game.opponent.defense_droit = 3;
-                 game.aiActionConsumed = true; // L'IA sacrifie son action prévue pour parer
-            }
-
             const initialDefense = game.opponent.defense_bouton;
             combatEngine.handleAttack(game.player, game.opponent, true, results);
-            // La fonction handleAttack du moteur gère déjà la réduction de dégâts si defense_bouton == 1
+            
+            if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
+                aiParried = true;
+            }
         } else if (action === 'defend') {
             game.player.defense_bouton = 1;
             game.player.defense_droit = 3;
@@ -1029,11 +1041,10 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     const resolveAI = () => {
         if (game.opponent.pv <= 0) return;
 
-        // Si l'IA a déjà "cramé" son action pour parer par anticipation
+        // Si l'action de ce tour a déjà été consommée (par une parade anticipée au tour précédent)
         if (game.aiActionConsumed) {
             game.aiActionConsumed = false;
-            // On replanifie tout de suite pour le tour d'après comme elle vient de "finir" son action
-            game.opponent.next_choice = combatEngine.makeAIDecision(game);
+            // SILENCE TOTAL (pas de log "s'est déjà défendu")
             return;
         }
 
@@ -1045,62 +1056,35 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
         } else if (aiAction === 'defend') {
             game.opponent.defense_bouton = 1;
             game.opponent.defense_droit = 3;
-            // SILENCE : On ne logue pas l'action de défense pour garder la surprise
+            // SILENCE (pas de log "se met en garde")
         } else if (aiAction === 'special') {
             game.opponent.defense_bouton = 0;
             combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
         }
-
-        // Dès que l'IA a fini son action, elle prévoit la SUIVANTE (pour la parade par anticipation)
-        game.opponent.next_choice = combatEngine.makeAIDecision(game);
     };
 
-    // --- TURN LOGIC ---
-    if (game.waitingForPlayer) {
-        // 1. REACTIVE MODE: L'IA a déjà joué au début du tour (ex: elle a attaqué).
-        // Le joueur joue maintenant.
-        resolvePlayer();
-        game.waitingForPlayer = false;
+    // --- TURN EXECUTION ---
+    const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
+    const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
 
-        combatEngine.passerTour(game.player, results);
-        combatEngine.passerTour(game.opponent, results);
-    } else {
-        // 2. STANDARD MODE: Le joueur joue en premier ou simultané.
+    if (pSpeed >= oSpeed) {
         resolvePlayer();
         resolveAI();
-
-        combatEngine.passerTour(game.player, results);
-        combatEngine.passerTour(game.opponent, results);
+    } else {
+        resolveAI();
+        resolvePlayer();
     }
 
-    // --- PREPARE NEXT TURN (Lookahead) ---
-    if (game.player.pv > 0 && game.opponent.pv > 0) {
-        // Si l'IA n'a pas encore de décision pour le tour suivant
-        if (!game.opponent.next_choice || game.waitingForPlayer === false) {
-            game.opponent.next_choice = combatEngine.makeAIDecision(game);
-            
-            // PRÉ-ACTIVATION DÉFENSIVE :
-            // Si l'IA décide de défendre pour le prochain tour, elle lève le bouclier MAINTENANT.
-            // Ainsi, la prochaine attaque du joueur (même très rapide) frappera dans le bouclier.
-            if (game.opponent.next_choice === 'defend') {
-                game.opponent.defense_bouton = 1;
-                game.opponent.defense_droit = 3;
-            }
-        }
-        
-        // Log "Tour X"
-        combatEngine.updateTour(game.player, game.opponent, true, results);
+    // --- END OF TURN & PREPARE NEXT ---
+    combatEngine.passerTour(game.player, results);
+    combatEngine.passerTour(game.opponent, results);
 
-        const nextPSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
-        const nextOSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
-
-        if (nextOSpeed > nextPSpeed) {
-            // L'IA est plus rapide : elle joue son début de tour TOUT DE SUITE
-            resolveAI();
-            game.waitingForPlayer = true; 
-        } else {
-            game.waitingForPlayer = false;
-        }
+    // Apply the Future Decision calculated at start
+    game.opponent.next_choice = futureChoice;
+    
+    // If Future Defense was used this turn, mark next turn's action as consumed
+    if (game.futureDefenseUsed) {
+        game.aiActionConsumed = true;
     }
 
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
