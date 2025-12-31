@@ -961,32 +961,9 @@ app.post('/api/combat/start', verifyToken, async (req, res) => {
     }
 
     // --- TURN ORDER LOGIC (START) ---
-    const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
-    const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
-    const results = { logs: [] };
-
-    if (oSpeed > pSpeed) {
-        // AI is faster: Execute AI turn immediately (Reactive Turn)
-        const aiAction = game.opponent.next_choice || 'attack';
-        
-        if (aiAction === 'attack') {
-            game.opponent.defense_bouton = 0;
-            combatEngine.handleAttack(game.opponent, game.player, false, results);
-        } else if (aiAction === 'defend') {
-            game.opponent.defense_bouton = 1;
-            game.opponent.defense_droit = 3;
-            results.logs.push({ text: `${game.opponent.name} se met en garde !`, color: "white", side: false });
-        } else if (aiAction === 'special') {
-            game.opponent.defense_bouton = 0;
-            combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
-        }
-        
-        game.waitingForPlayer = true;
-        // AI has acted for Turn 1. Now waiting for Player to finish Turn 1.
-    }
-
+    // Standard Start - No reactive pause anymore
     games.set(userId, game); 
-    res.json({ success: true, gameState: game, results }); // Include results for logs
+    res.json({ success: true, gameState: game, results: { logs: [] } });
 });
 
 app.post('/api/combat/action', verifyToken, async (req, res) => {
@@ -994,23 +971,27 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     if (!game) return res.status(404).json({ error: "Inconnu" });
     const results = { gameOver: false, logs: [] };
 
-    let aiParried = false;
+    // 1. Log Tour Number
+    combatEngine.updateTour(game.player, game.opponent, true, results);
 
-    // Helper functions to execute turns based on speed
+    let aiParried = false;
+    let aiHasActed = false;
+
+    // Helper functions
     const resolvePlayer = () => {
-        if (game.player.pv <= 0) return; // Dead players don't act
+        if (game.player.pv <= 0) return;
         
         if (action === 'attack') {
-            // ANTICIPATION DÉFENSIVE : Si l'IA a prévu de défendre, elle active son bouclier MAINTENANT
-            // même si le joueur joue avant elle (vitesse). Cela permet la Parade Réactive.
+            // PRIORITÉ DÉFENSE ABSOLUE : Si l'IA a prévu de défendre, elle le fait MAINTENANT.
             if (game.opponent.next_choice === 'defend') {
                 game.opponent.defense_bouton = 1;
-                game.opponent.defense_droit = 3; 
+                game.opponent.defense_droit = 3;
+                aiHasActed = true; // L'IA a consommé son action pour parer
             }
 
             const initialDefense = game.opponent.defense_bouton;
             combatEngine.handleAttack(game.player, game.opponent, true, results);
-            // Check if player triggered a parry (shield was up)
+            
             if (initialDefense === 1 && game.opponent.defense_bouton === 0) {
                 aiParried = true;
             }
@@ -1029,86 +1010,54 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
     };
 
     const resolveAI = () => {
-        if (game.opponent.pv <= 0) return; // Dead AI doesn't act
+        if (game.opponent.pv <= 0 || aiHasActed) {
+             if (aiParried) {
+                 results.logs.push({ text: `${game.opponent.name} s'est défendu de l'attaque.`, color: "white", side: false });
+             }
+             return;
+        }
 
-        // If AI parried an attack THIS TURN (because Player went first and triggered shield),
-        // OR if AI chose 'defend' as its action (because AI went first),
-        // we handle the logic here.
+        const aiAction = game.opponent.next_choice || 'attack';
         
-        // 1. If AI went first, it executes its choice.
-        // 2. If Player went first and triggered a parry (aiParried=true), AI skips its scheduled offensive move to focus on the parry.
-        
-        if (aiParried) {
-             results.logs.push({ text: `${game.opponent.name} s'est défendu de l'attaque de ${game.player.name}.`, color: "white", side: false });
-        } else {
-            const aiAction = game.opponent.next_choice || 'attack';
-            
-            if (aiAction === 'attack') {
-                game.opponent.defense_bouton = 0;
-                combatEngine.handleAttack(game.opponent, game.player, false, results);
-            } else if (aiAction === 'defend') {
-                game.opponent.defense_bouton = 1;
-                game.opponent.defense_droit = 3;
-                // Note: If AI acts first and sets this, Player acts second. 
-                // If Player attacks, resolvePlayer will see defense_bouton=1 and trigger the parry.
-            } else if (aiAction === 'special') {
-                game.opponent.defense_bouton = 0;
-                combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
-            }
+        if (aiAction === 'attack') {
+            game.opponent.defense_bouton = 0;
+            combatEngine.handleAttack(game.opponent, game.player, false, results);
+        } else if (aiAction === 'defend') {
+            game.opponent.defense_bouton = 1;
+            game.opponent.defense_droit = 3;
+            // Si l'IA joue en premier et défend, c'est son action.
+            // Si le joueur attaque ensuite (resolvePlayer), il tapera dans le bouclier.
+        } else if (aiAction === 'special') {
+            game.opponent.defense_bouton = 0;
+            combatEngine.applySpecialAbility(game.opponent, game.player, false, results);
         }
     };
 
-    // --- TURN ORDER LOGIC ---
+    // --- TURN EXECUTION ---
     const pSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
     const oSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
 
-    if (game.waitingForPlayer) {
-        // Reactive State: AI has ALREADY acted for this turn.
-        // Player acts now to finish the turn.
-        resolvePlayer();
-        game.waitingForPlayer = false;
-        
-        // Turn Complete
-        combatEngine.passerTour(game.player, results);
-        combatEngine.passerTour(game.opponent, results);
-        
-        // Prepare Next Turn (N+1)
-        if (game.player.pv > 0 && game.opponent.pv > 0) {
-            game.opponent.next_choice = combatEngine.makeAIDecision(game);
-            
-            // Check Speed for N+1
-            const nextPSpeed = combatEngine.getEffectiveStat(game.player, 'vitesse');
-            const nextOSpeed = combatEngine.getEffectiveStat(game.opponent, 'vitesse');
-            
-            if (nextOSpeed > nextPSpeed) {
-                // AI is still faster: Execute AI Turn N+1 immediately
-                resolveAI();
-                game.waitingForPlayer = true;
-            }
-        }
+    if (game.opponent.next_choice === 'defend' && action === 'attack') {
+        // CAS SPÉCIAL : Le joueur attaque ET l'IA veut défendre.
+        // On force l'ordre pour garantir la parade réactive, peu importe la vitesse.
+        resolvePlayer(); // L'IA activera son bouclier DANS cette fonction
+        resolveAI();     // Ne fera rien car aiHasActed = true
     } else {
-        // Standard State: Player initiates the turn
+        // Cas Standard
         if (pSpeed >= oSpeed) {
-            // Player Faster: Player -> AI
             resolvePlayer();
             resolveAI();
-            
-            combatEngine.passerTour(game.player, results);
-            combatEngine.passerTour(game.opponent, results);
-            
-            game.opponent.next_choice = combatEngine.makeAIDecision(game);
         } else {
-            // AI Faster (But we are in Standard State, meaning this is the start of the turn)
-            // This happens if Player was faster before but became slower (debuff),
-            // OR if it's the first action after a "Standard" turn end.
-            
-            // Execute AI (Turn N)
             resolveAI();
-            // Wait for Player (Turn N)
-            game.waitingForPlayer = true;
-            // Do NOT increment turn counters yet.
+            resolvePlayer();
         }
     }
+
+    // Always prepare decision for NEXT turn
+    game.opponent.next_choice = combatEngine.makeAIDecision(game);
+
+    combatEngine.passerTour(game.player, results);
+    combatEngine.passerTour(game.opponent, results);
 
     if (game.player.pv <= 0 || game.opponent.pv <= 0) {
         results.gameOver = true;
