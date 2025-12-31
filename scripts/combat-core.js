@@ -476,6 +476,12 @@ App.combatManager = {
                         if (!log.text.startsWith('Tour')) await new Promise(r => setTimeout(r, 600));
                     }
                 }
+                
+                // Unlock buttons on success (unless game over, handled by caller or navigation)
+                if (!data.results.gameOver) {
+                    buttons.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
+                }
+
                 return data;
             } else {
                 console.error("Action Error:", data.error);
