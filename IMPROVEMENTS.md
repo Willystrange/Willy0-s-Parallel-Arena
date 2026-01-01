@@ -9,9 +9,7 @@
 - [x] **Fichiers Orphelins** : `Paradoxeamelioration.html` et `.js` supprimés.
 
 ## 2. Architecture & Maintenance
-- [ ] **Duplication des Trophées** :
-    - *Problème :* La liste des récompenses est codée en dur dans `scripts/menu_principal.js` ET dans `data/trophy_road.json`.
-    - *Action :* Créer un endpoint `/api/data/trophy-road` et faire charger cette config par le client.
+- [x] **Duplication des Trophées** : Résolu (endpoint `/api/data/trophy-road` créé et utilisé par le client).
 - [ ] **Mapping des Objets** :
     - *Problème :* `ITEM_PROPERTY_MAP` est hardcodé dans `server.js`.
     - *Action :* Générer ce mapping dynamiquement à partir de `shop_items.json` et `equipments.json`.
