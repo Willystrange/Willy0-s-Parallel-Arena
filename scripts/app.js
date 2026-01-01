@@ -1,5 +1,7 @@
 var App = window.App = window.App || {};
 
+App.game_version = 'B2.2.1.20';
+
 // --- INITIALISATION FIREBASE IMMEDIATE ---
 window.firebaseConfig = {
   apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
