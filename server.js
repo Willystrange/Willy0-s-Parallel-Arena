@@ -9,7 +9,6 @@ const admin = require('firebase-admin');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const axios = require('axios');
-const qrcode = require('qrcode-terminal');
 const {
     generateRegistrationOptions,
     verifyRegistrationResponse,
