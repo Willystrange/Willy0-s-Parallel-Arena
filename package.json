@@ -4,8 +4,7 @@
   "description": "Serveur pour Willy0's Parallel Arena",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "mobile": "node start_mobile.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "@simplewebauthn/server": "^13.2.2",
