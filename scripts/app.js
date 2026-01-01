@@ -35,16 +35,16 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
     App.getRecaptchaToken = function(action) {
         return new Promise((resolve) => {
-            // Timeout de sécurité : si reCAPTCHA ne répond pas en 2s, on bypass
+            // Timeout de sécurité : si reCAPTCHA ne répond pas en 10s, on échoue
             const timeout = setTimeout(() => {
-                console.warn("[reCAPTCHA] Timeout, utilisation du bypass.");
-                resolve("timeout_grecaptcha_" + Date.now());
-            }, 2000);
+                console.warn("[reCAPTCHA] Timeout.");
+                resolve(null);
+            }, 10000);
 
             if (typeof grecaptcha === 'undefined') {
                 clearTimeout(timeout);
                 console.warn("[reCAPTCHA] Bibliothèque non disponible.");
-                resolve("no_grecaptcha_" + Date.now());
+                resolve(null);
                 return;
             }
 
@@ -58,13 +58,13 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
                         .catch(err => {
                             clearTimeout(timeout);
                             console.error("[reCAPTCHA] Erreur execution:", err);
-                            resolve("error_grecaptcha");
+                            resolve(null);
                         });
                 });
             } catch (e) {
                 clearTimeout(timeout);
                 console.error("[reCAPTCHA] Exception:", e);
-                resolve("exception_grecaptcha");
+                resolve(null);
             }
         });
     };

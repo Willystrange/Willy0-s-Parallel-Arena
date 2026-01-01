@@ -77,27 +77,21 @@ const GOOGLE_CLOUD_PROJECT_ID = "willy0s-parallel-arena";
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M"; // API Key Web par défaut
 
 async function verifyRecaptcha(token, userId = null) {
-    if (token === "DEV_BYPASS_TOKEN") return { success: true };
-    if (token && (token.startsWith("timeout_") || token.startsWith("no_") || token.startsWith("error_") || token.startsWith("exception_"))) return { success: true, bypassed: true };
+    if (!token) return { success: false, error: "Token manquant" };
     
     try {
         // Utilisation de l'API standard reCAPTCHA v3 (siteverify)
         const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
         
-        // La méthode standard utilise un formulaire POST (application/x-www-form-urlencoded) ou des paramètres URL
-        // axios.post gère cela si on passe une chaîne de requête
         const params = new URLSearchParams();
         params.append('secret', RECAPTCHA_SECRET_KEY);
         params.append('response', token);
-        // params.append('remoteip', userIp); // Optionnel
 
         const response = await axios.post(verifyUrl, params);
         const data = response.data;
 
-        // data format: { success: true|false, score: 0.0-1.0, action: 'string', challenge_ts: timestamp, hostname: 'string', 'error-codes': [...] }
         if (data.success) {
             const score = data.score !== undefined ? data.score : 1.0;
-            // On peut ajouter une vérification du score minimum ici si souhaité (ex: score >= 0.5)
             return { success: true, score: score };
         } else {
             console.warn("[reCAPTCHA] Invalid token:", JSON.stringify(data));
@@ -105,8 +99,7 @@ async function verifyRecaptcha(token, userId = null) {
         }
     } catch (e) {
         console.error("[reCAPTCHA] API Error:", e.response ? e.response.data : e.message);
-        // En cas d'erreur technique, on laisse passer pour ne pas bloquer les utilisateurs
-        return { success: true }; 
+        return { success: false, error: "Erreur technique de vérification" }; 
     }
 }
 
