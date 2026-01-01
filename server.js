@@ -163,6 +163,11 @@ function getParisCycleId(type) {
     return date.toISOString().split('T')[0];
 }
 
+// --- PUBLIC DATA ENDPOINTS ---
+app.get('/api/data/trophy-road', (req, res) => {
+    res.json(TROPHY_ROAD);
+});
+
 app.get('/api/shop/daily-offer', verifyToken, async (req, res) => {
     const userId = req.uid;
     const userRef = db.collection('users').doc(userId);
