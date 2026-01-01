@@ -127,6 +127,16 @@ app.use(helmet({
     referrerPolicy: { policy: "strict-origin-when-cross-origin" } 
 }));
 app.use(bodyParser.json({ limit: '10mb' }));
+
+// --- SECURITY MIDDLEWARE: BLOCK SENSITIVE FILES ---
+app.use((req, res, next) => {
+    // Block direct access to the /data folder and sensitive root files
+    if (req.path.startsWith('/data/') || req.path === '/server.js' || req.path === '/serviceAccountKey.json' || req.path.includes('.env')) {
+        return res.status(403).send('Forbidden');
+    }
+    next();
+});
+
 app.use(express.static(__dirname));
 
 // --- DATA ---

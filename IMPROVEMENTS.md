@@ -4,7 +4,7 @@
 - [x] **`localStorage.js`** : Supprimé (logique de version déplacée dans `scripts/app.js`).
 - [x] **`ml-agent.js`** : Supprimé (logique intégrée dans `scripts/combat-engine-server.js`).
 - [x] **`start_mobile.js`** : Supprimé (script de dev mobile non utilisé).
-- [ ] **`ai_model.json`** : Vérifier si ce fichier massif est bien chargé par le serveur uniquement (optimisation).
+- [x] **`ai_model.json`** : Déplacé dans `data/` et accès web bloqué via `server.js`.
 - [x] **`special .png`** : Corrigé (renommé ou supprimé par l'utilisateur).
 - [x] **Fichiers Orphelins** : `Paradoxeamelioration.html` et `.js` supprimés.
 

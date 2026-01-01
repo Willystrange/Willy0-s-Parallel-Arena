@@ -24,7 +24,7 @@ function formatLog(template, params) {
 }
 
 // --- Q-LEARNING AGENT INTEGRATION (SERVER-SIDE) ---
-const AI_MODEL_FILE = path.join(__dirname, '../ai_model.json');
+const AI_MODEL_FILE = path.join(__dirname, '../data/ai_model.json');
 
 class QLearningAgent {
     constructor(name = "UNIVERSAL", epsilon = 0.05, alpha = 0.1, gamma = 0.9) {

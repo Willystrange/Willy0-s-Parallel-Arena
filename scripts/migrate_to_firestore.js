@@ -75,7 +75,7 @@ async function migrate() {
     }
 
     // --- MIGRATION AI MODEL ---
-    const aiPath = path.join(__dirname, '../ai_model.json');
+    const aiPath = path.join(__dirname, '../data/ai_model.json');
     if (fs.existsSync(aiPath)) {
         try {
             const ai = JSON.parse(fs.readFileSync(aiPath, 'utf8'));
