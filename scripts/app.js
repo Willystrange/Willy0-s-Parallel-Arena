@@ -14,60 +14,60 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 
 App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
-// Chargement dynamique de reCAPTCHA pour éviter les erreurs 401 sur les domaines non autorisés (dev)
-App.loadRecaptchaScript = function() {
-    const hostname = window.location.hostname;
-    // On ne bloque reCAPTCHA que sur localhost car la clé Google y est rarement autorisée par défaut
-    const isLocal = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-    
-    if (isLocal) {
-        console.warn("[reCAPTCHA] Script ignoré sur localhost. Utilisation du fallback.");
-        return;
-    }
-
-    console.log("[reCAPTCHA] Chargement du script Enterprise sur " + hostname);
-    const script = document.createElement('script');
-    script.src = "https://www.google.com/recaptcha/enterprise.js?render=" + App.RECAPTCHA_SITE_KEY;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-};
-App.loadRecaptchaScript();
-
-App.getRecaptchaToken = function(action) {
-    return new Promise((resolve) => {
-        // Timeout de sécurité : si reCAPTCHA ne répond pas en 2s, on bypass
-        const timeout = setTimeout(() => {
-            console.warn("[reCAPTCHA] Timeout, utilisation du bypass.");
-            resolve("timeout_grecaptcha_" + Date.now());
-        }, 2000);
-
-        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.enterprise === 'undefined') {
-            clearTimeout(timeout);
-            console.warn("[reCAPTCHA] Bibliothèque Enterprise non disponible.");
-            resolve("no_grecaptcha_" + Date.now());
+    // Chargement dynamique de reCAPTCHA (Standard v3)
+    App.loadRecaptchaScript = function() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // On ne bloque reCAPTCHA que sur localhost car la clé Google y est rarement autorisée par défaut
+            // Sauf si vous avez ajouté "localhost" dans la console admin reCAPTCHA
+            console.warn("[reCAPTCHA] Script ignoré sur localhost. Utilisation du fallback.");
             return;
         }
-        
-        try {
-            grecaptcha.enterprise.ready(function() {
-                grecaptcha.enterprise.execute(App.RECAPTCHA_SITE_KEY, { action: action })
-                    .then(function(token) {
-                        clearTimeout(timeout);
-                        resolve(token);
-                    })
-                    .catch(err => {
-                        clearTimeout(timeout);
-                        console.error("[reCAPTCHA] Erreur Enterprise:", err);
-                        resolve("error_grecaptcha");
-                    });
-            });
-        } catch (e) {
-            clearTimeout(timeout);
-            resolve("exception_grecaptcha");
-        }
-    });
-};
+
+        console.log("[reCAPTCHA] Chargement du script Standard sur " + hostname);
+        const script = document.createElement('script');
+        script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    };
+
+    App.loadRecaptchaScript();
+
+    App.getRecaptchaToken = function(action) {
+        return new Promise((resolve) => {
+            // Timeout de sécurité : si reCAPTCHA ne répond pas en 2s, on bypass
+            const timeout = setTimeout(() => {
+                console.warn("[reCAPTCHA] Timeout, utilisation du bypass.");
+                resolve("timeout_grecaptcha_" + Date.now());
+            }, 2000);
+
+            if (typeof grecaptcha === 'undefined') {
+                clearTimeout(timeout);
+                console.warn("[reCAPTCHA] Bibliothèque non disponible.");
+                resolve("no_grecaptcha_" + Date.now());
+                return;
+            }
+
+            try {
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(App.RECAPTCHA_SITE_KEY, { action: action })
+                        .then(function(token) {
+                            clearTimeout(timeout);
+                            resolve(token);
+                        })
+                        .catch(err => {
+                            clearTimeout(timeout);
+                            console.error("[reCAPTCHA] Erreur execution:", err);
+                            resolve("error_grecaptcha");
+                        });
+                });
+            } catch (e) {
+                clearTimeout(timeout);
+                console.error("[reCAPTCHA] Exception:", e);
+                resolve("exception_grecaptcha");
+            }
+        });
+    };
 
 // --- UTILS: WEBAUTHN BINARY CONVERSION ---
 App.base64ToBuffer = (base64) => {

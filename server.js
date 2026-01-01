@@ -81,34 +81,31 @@ async function verifyRecaptcha(token, userId = null) {
     if (token && (token.startsWith("timeout_") || token.startsWith("no_") || token.startsWith("error_") || token.startsWith("exception_"))) return { success: true, bypassed: true };
     
     try {
-        // Utilisation de l'API REST reCAPTCHA Enterprise
-        // URL: https://recaptchaenterprise.googleapis.com/v1/projects/{projectID}/assessments?key={API_KEY}
-        const url = `https://recaptchaenterprise.googleapis.com/v1/projects/${GOOGLE_CLOUD_PROJECT_ID}/assessments?key=${FIREBASE_API_KEY}`;
+        // Utilisation de l'API standard reCAPTCHA v3 (siteverify)
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
         
-        const body = {
-            event: {
-                token: token,
-                siteKey: "6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG", // Votre clé de site Enterprise
-                expectedAction: "" // Optionnel : vérifier l'action si nécessaire
-            }
-        };
+        // La méthode standard utilise un formulaire POST (application/x-www-form-urlencoded) ou des paramètres URL
+        // axios.post gère cela si on passe une chaîne de requête
+        const params = new URLSearchParams();
+        params.append('secret', RECAPTCHA_SECRET_KEY);
+        params.append('response', token);
+        // params.append('remoteip', userIp); // Optionnel
 
-        const response = await axios.post(url, body);
+        const response = await axios.post(verifyUrl, params);
         const data = response.data;
 
-        // Vérification du résultat
-        if (data.tokenProperties && data.tokenProperties.valid) {
-             // Score entre 0.0 et 1.0 (si c'est une clé basée sur le score)
-            const score = data.riskAnalysis ? data.riskAnalysis.score : 1.0;
+        // data format: { success: true|false, score: 0.0-1.0, action: 'string', challenge_ts: timestamp, hostname: 'string', 'error-codes': [...] }
+        if (data.success) {
+            const score = data.score !== undefined ? data.score : 1.0;
+            // On peut ajouter une vérification du score minimum ici si souhaité (ex: score >= 0.5)
             return { success: true, score: score };
         } else {
-            console.warn("[reCAPTCHA Enterprise] Invalid token:", JSON.stringify(data));
-            // Si la clé est valide mais que Google refuse le domaine -> invalid reason: 'DOMAIN_MISMATCH' ou 'UNSUPPORTED_KEY_TYPE'
+            console.warn("[reCAPTCHA] Invalid token:", JSON.stringify(data));
             return { success: false }; 
         }
     } catch (e) {
-        console.error("[reCAPTCHA Enterprise] API Error:", e.response ? e.response.data : e.message);
-        // En cas d'erreur technique (ex: API non activée), on laisse passer pour ne pas bloquer les utilisateurs
+        console.error("[reCAPTCHA] API Error:", e.response ? e.response.data : e.message);
+        // En cas d'erreur technique, on laisse passer pour ne pas bloquer les utilisateurs
         return { success: true }; 
     }
 }
