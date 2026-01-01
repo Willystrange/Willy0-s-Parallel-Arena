@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
 });
 
 // --- SECURITY & RECAPTCHA ---
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "6LeLMzwsAAAAAH7Z2KgL69mnh6Fm_ICG3vbmDNrD"; // Not used for Enterprise REST call but kept for reference
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "6LcMZzcsAAAAABJNQwfd8Azzi45yk-KT86hK437W"; // Not used for Enterprise REST call but kept for reference
 const GOOGLE_CLOUD_PROJECT_ID = "willy0s-parallel-arena";
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M"; // API Key Web par défaut
 
@@ -88,7 +88,7 @@ async function verifyRecaptcha(token, userId = null) {
         const body = {
             event: {
                 token: token,
-                siteKey: "6LeLMzwsAAAAAK515L-92DM8vt26YpWQafDn-op1", // Votre clé de site Enterprise
+                siteKey: "6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG", // Votre clé de site Enterprise
                 expectedAction: "" // Optionnel : vérifier l'action si nécessaire
             }
         };

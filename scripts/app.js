@@ -12,7 +12,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(window.firebaseConfig);
 }
 
-App.RECAPTCHA_SITE_KEY = '6LeLMzwsAAAAAK515L-92DM8vt26YpWQafDn-op1';
+App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
 // Chargement dynamique de reCAPTCHA pour éviter les erreurs 401 sur les domaines non autorisés (dev)
 App.loadRecaptchaScript = function() {
