@@ -23,7 +23,7 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
             return;
         }
 
-        console.log("[reCAPTCHA] Chargement du script Standard sur " + hostname);
+        console.log("[reCAPTCHA] Chargement du script Standard sur " + window.location.hostname);
         const script = document.createElement('script');
         script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
         script.async = true;
