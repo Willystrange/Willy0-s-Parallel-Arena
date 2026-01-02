@@ -1,6 +1,7 @@
 {
   "name": "willy0s-parallel-arena",
   "version": "1.0.0",
+  "gameVersion": "B2.2.1.20",
   "description": "Serveur pour Willy0's Parallel Arena",
   "main": "server.js",
   "scripts": {

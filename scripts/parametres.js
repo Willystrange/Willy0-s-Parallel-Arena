@@ -148,7 +148,7 @@ App.updateBackup = function() {
     trophees: 0,
     argent: 0,
     VICTOIRE: false,
-    version: 'B2.2.1.20',
+    version: App.game_version,
     recompense: 0,
     perso_recompense: 0,
     xp_du_jour: 0,

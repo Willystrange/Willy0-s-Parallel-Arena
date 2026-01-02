@@ -13,7 +13,7 @@
 - [x] **Mapping des Objets** :
     - *Problème :* `ITEM_PROPERTY_MAP` est hardcodé dans `server.js`.
     - *Action :* Généré dynamiquement à partir de `shop_items.json`.
-- [ ] **Gestion de la Version** :
+- [x] **Gestion de la Version** :
     - *Amélioration :* Lire la version depuis `package.json` au lieu de la hardcoder dans `App.game_version`.
 
 ## 3. Sécurité

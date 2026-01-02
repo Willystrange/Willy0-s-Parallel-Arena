@@ -1,7 +1,6 @@
 // Créer ou récupérer le namespace App
 window.App = window.App || {};
 
-App.game_version = 'B2.2.1.20';
 var game_version = App.game_version;
 
 sessionStorage.setItem("lastPage", 'menu_principal');

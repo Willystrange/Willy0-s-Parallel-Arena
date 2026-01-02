@@ -1,6 +1,6 @@
 var App = window.App = window.App || {};
 
-App.game_version = 'B2.2.1.20';
+App.game_version = 'VERSION_PLACEHOLDER';
 
 // --- INITIALISATION FIREBASE IMMEDIATE ---
 window.firebaseConfig = {
