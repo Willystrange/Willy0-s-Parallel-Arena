@@ -1422,6 +1422,19 @@ app.post('/api/passkey/login-verify', async (req, res) => {
 });
 
 // --- ADMIN ENDPOINTS ---
+app.get('/api/admin/online', verifyToken, verifyAdmin, async (req, res) => {
+    const activeIds = new Set();
+    onlineUsers.forEach(u => activeIds.add(u.userId));
+    
+    const users = [];
+    for (const uid of activeIds) {
+        const uData = await getUserData(uid);
+        if (uData) users.push({ uid, pseudo: uData.pseudo, lastSeen: uData.lastSeen });
+    }
+    
+    res.json({ success: true, count: users.length, users });
+});
+
 app.get('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
     res.json({ success: true, version: packageJson.gameVersion || packageJson.version });
 });
