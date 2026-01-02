@@ -15,10 +15,14 @@ App.loadingPhrases = [
 App.loadingTextElement = document.getElementById('loadingText');
 App.updateLoadingText = function() {
   const randomIndex = Math.floor(Math.random() * App.loadingPhrases.length);
-  App.loadingTextElement.textContent = App.loadingPhrases[randomIndex];
+  if(App.loadingTextElement) App.loadingTextElement.textContent = App.loadingPhrases[randomIndex];
 }
-setInterval(App.updateLoadingText, 3000);
-setTimeout(() => { loadPage('intro'); }, 10000);
+
+// Gestion propre de l'intervalle pour pouvoir le nettoyer
+const loadingInterval = setInterval(App.updateLoadingText, 3000);
+App.cleanup = function() {
+    clearInterval(loadingInterval);
+};
 
 // Récupération et sauvegarde des données utilisateur dans le localStorage
 
@@ -242,7 +246,7 @@ App.mise_a_jour = async function() {
   }
 
   // 3. Redirection contrôlée
-  setTimeout(() => { loadPage('intro'); }, 2000);
+  setTimeout(() => { loadPage('intro'); }, 8000);
 }
 
 // Lancement de la procédure
