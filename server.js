@@ -381,7 +381,7 @@ app.post('/api/user/:userId', verifyToken, async (req, res) => {
                     current.quest_daily_cycle = dailyCycle; current.quetes_jour = false;
                     ['quete1', 'quete2', 'quete3'].forEach(id => { delete current[`${id}_text`]; delete current[`${id}_total`]; delete current[`${id}_current`]; delete current[`${id}_type`]; delete current[`${id}_completed`]; delete current[`${id}_rewardClaimed`]; });
                 }
-                const ALLOWED = ['pseudo', 'settings', 'tutorial_menu_principal_completed', 'lastLoginDay', 'lastDoubleXPCheck', 'musicAllowed', 'autoplayEnabled', 'pass_last_notified_level', 'characterToImprove', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'classicGames', 'survivalGames', 'quest_daily_cycle', 'quest_weekly_cycle', 'daily_reward_claim_id', 'weekly_chest_claim_id', 'weekend_bonus_claimed', 'quetes_jour', 'quetes_weekend', 'weekend_period_start', 'quetes_genere', 'equipments', 'characters', 'musicVolume'];
+                const ALLOWED = ['pseudo', 'version', 'settings', 'tutorial_menu_principal_completed', 'lastLoginDay', 'lastDoubleXPCheck', 'musicAllowed', 'autoplayEnabled', 'pass_last_notified_level', 'characterToImprove', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'classicGames', 'survivalGames', 'quest_daily_cycle', 'quest_weekly_cycle', 'daily_reward_claim_id', 'weekly_chest_claim_id', 'weekend_bonus_claimed', 'quetes_jour', 'quetes_weekend', 'weekend_period_start', 'quetes_genere', 'equipments', 'characters', 'musicVolume'];
                 Object.keys(newData).forEach(key => {
                     if (ALLOWED.includes(key)) current[key] = newData[key];
                     else if (['quete', 'weekend-quete', 'Semaine'].some(p => key.startsWith(p))) {
