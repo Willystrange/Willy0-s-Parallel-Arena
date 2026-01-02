@@ -298,7 +298,17 @@ async function finalizeGame(userId, game, results) {
     }
 }
 
-const ITEM_PROPERTY_MAP = { xp: 'Double_XP', xp_2: 'Double_XP', potion: 'Potion_de_Santé_acheté', amulette: 'Amulette_de_Régénération_acheté', epee: 'epee_tranchante_acheté', elixir: 'elixir_puissance_acheté', armure: 'armure_fer_acheté', bouclier: 'bouclier_solide_acheté', cape: 'Cape_acheté', crystal: 'crystal_acheté', marque_chasseur: 'marque_chasseur_acheté', purge_spirituelle: 'purge_spirituelle_acheté', orbe_siphon: 'orbe_siphon_acheté' };
+const ITEM_PROPERTY_MAP = {};
+SHOP_ITEMS.forEach(item => {
+    if (item.type && item.property) {
+        ITEM_PROPERTY_MAP[item.type] = item.property;
+    }
+    if (item.aliases && Array.isArray(item.aliases)) {
+        item.aliases.forEach(alias => {
+            if (item.property) ITEM_PROPERTY_MAP[alias] = item.property;
+        });
+    }
+});
 
 function getProceduralTrophyReward(trophies) {
     if (trophies < 2000) return null;

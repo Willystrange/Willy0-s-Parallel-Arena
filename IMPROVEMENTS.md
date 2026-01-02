@@ -10,9 +10,9 @@
 
 ## 2. Architecture & Maintenance
 - [x] **Duplication des Trophées** : Résolu (endpoint `/api/data/trophy-road` créé et utilisé par le client).
-- [ ] **Mapping des Objets** :
+- [x] **Mapping des Objets** :
     - *Problème :* `ITEM_PROPERTY_MAP` est hardcodé dans `server.js`.
-    - *Action :* Générer ce mapping dynamiquement à partir de `shop_items.json` et `equipments.json`.
+    - *Action :* Généré dynamiquement à partir de `shop_items.json`.
 - [ ] **Gestion de la Version** :
     - *Amélioration :* Lire la version depuis `package.json` au lieu de la hardcoder dans `App.game_version`.
 
