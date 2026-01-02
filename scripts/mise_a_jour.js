@@ -19,9 +19,11 @@ App.updateLoadingText = function() {
 }
 
 // Gestion propre de l'intervalle pour pouvoir le nettoyer
-const loadingInterval = setInterval(App.updateLoadingText, 3000);
+if (App.mise_a_jour_interval) clearInterval(App.mise_a_jour_interval);
+App.mise_a_jour_interval = setInterval(App.updateLoadingText, 3000);
+
 App.cleanup = function() {
-    clearInterval(loadingInterval);
+    if (App.mise_a_jour_interval) clearInterval(App.mise_a_jour_interval);
 };
 
 // Récupération et sauvegarde des données utilisateur dans le localStorage
@@ -238,6 +240,15 @@ App.mise_a_jour = async function() {
           try {
              // On force l'envoi de toutes les données modifiées pour écraser une éventuelle version obsolète du serveur
              await App.saveUserDataToFirebase(user.uid, userData);
+             
+             // Check if server reverted the version (e.g. if server wasn't restarted to include 'version' in allowed fields)
+             const check = getUserData();
+             if (check.version !== currentVersion) {
+                 console.warn("Le serveur semble avoir rejeté la version. Application forcée en local.");
+                 userData.version = currentVersion;
+                 localStorage.setItem('userData', JSON.stringify(userData));
+             }
+
              console.log("Données mises à jour synchronisées avec succès.");
           } catch(e) { 
              console.error("Erreur synchro serveur pendant màj:", e); 
