@@ -241,6 +241,8 @@ App.updateTrophyProgress = function() {
     const trophies = userData.trophees || 0;
 
     const predefinedRewards = App.getTrophyRoadRewards();
+    if (!predefinedRewards || predefinedRewards.length === 0) return;
+
     let nextReward = null;
     let previousThreshold = 0;
 
