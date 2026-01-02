@@ -113,6 +113,15 @@
             <label>Message de maintenance</label>
             <input type="text" id="maintenance-message" placeholder="Serveur en maintenance...">
         </div>
+
+        <div class="card" style="background: #252525; border: 1px solid #333; margin-top: 15px;">
+             <h3 style="font-size: 0.9rem; color: #bb86fc; margin-top: 0;">Version du Jeu</h3>
+             <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+                 <input type="text" id="game-version" placeholder="ex: B2.2.1.20">
+                 <button class="action-btn" style="margin: 0; width: auto;" onclick="App.saveVersion()">Mettre à jour</button>
+             </div>
+        </div>
+
         <div class="card" style="background: #252525; border: 1px solid #333;">
             <h3 style="font-size: 0.9rem; color: #bb86fc; margin-top: 0;">Programmer à l'avance</h3>
             <div class="form-group">
@@ -263,6 +272,5 @@
     </div>
 </div>
 
-<script src="scripts/admin.js?v=2"></script>
 </body>
 </html>

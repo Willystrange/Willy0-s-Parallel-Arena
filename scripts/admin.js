@@ -31,6 +31,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 App.adminUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
                 App.loadMaintenanceStatus();
+                App.loadVersion();
                 App.loadNews();
                 
                 // Monitorer les gens en ligne
@@ -146,6 +147,35 @@ App.loadMaintenanceStatus = async function() {
     
     if (config.scheduled_start) document.getElementById('scheduled-start').value = config.scheduled_start;
     if (config.scheduled_end) document.getElementById('scheduled-end').value = config.scheduled_end;
+};
+
+App.loadVersion = async function() {
+    const token = await App.adminUser.getIdToken();
+    const res = await fetch('/api/admin/version', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+        document.getElementById('game-version').value = data.version;
+    }
+};
+
+App.saveVersion = async function() {
+    const version = document.getElementById('game-version').value;
+    if (!version) return alert("Veuillez entrer une version.");
+
+    const token = await App.adminUser.getIdToken();
+    const res = await fetch('/api/admin/version', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ version })
+    });
+    const data = await res.json();
+    if (data.success) alert("Version mise à jour !");
+    else alert("Erreur : " + data.error);
 };
 
 App.saveMaintenance = async function() {

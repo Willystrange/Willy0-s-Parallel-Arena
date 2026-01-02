@@ -1421,98 +1421,24 @@ app.post('/api/passkey/login-verify', async (req, res) => {
     }
 });
 
-// --- ADMIN ---
-app.get('/api/admin/online', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const activeUserIds = [...new Set([...onlineUsers.values()].map(u => u.userId))];
-        const userPromises = activeUserIds.map(async uid => {
-            const u = await getUserData(uid);
-            return u ? { uid, pseudo: u.pseudo, lastSeen: u.lastSeen } : null;
-        });
-        const users = (await Promise.all(userPromises)).filter(u => u !== null);
-        res.json({ success: true, count: users.length, users });
-    } catch (e) {
-        console.error("Error in /api/admin/online:", e);
-        res.status(500).json({ error: "Internal error" });
-    }
+// --- ADMIN ENDPOINTS ---
+app.get('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
+    res.json({ success: true, version: packageJson.gameVersion || packageJson.version });
 });
 
-app.get('/api/admin/users', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const { search, sortBy } = req.query;
-        let allUsers = Object.entries(await loadAllUsersData()).map(([uid, u]) => ({ uid, ...u }));
-
-        // Search Filter
-        if (search) {
-            const term = search.toLowerCase();
-            allUsers = allUsers.filter(u => 
-                (u.pseudo && u.pseudo.toLowerCase().includes(term)) || 
-                (u.uid && u.uid.toLowerCase().includes(term))
-            );
-        }
-
-        // Sorting
-        if (sortBy) {
-            switch (sortBy) {
-                case 'active': allUsers.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0)); break;
-                case 'newest': allUsers.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); break;
-                case 'oldest': allUsers.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); break;
-                case 'trophees': allUsers.sort((a, b) => (b.trophees || 0) - (a.trophees || 0)); break;
-                case 'argent': allUsers.sort((a, b) => (b.argent || 0) - (a.argent || 0)); break;
-                default: break; // Default order (usually UID)
-            }
-        }
-
-        res.json({ success: true, users: allUsers.slice(0, 50) });
-    } catch (e) {
-        console.error("Error in /api/admin/users:", e);
-        res.status(500).json({ error: "Internal error" });
+app.post('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
+    const { version } = req.body;
+    if (!version || typeof version !== 'string') {
+        return res.status(400).json({ error: "Version invalide" });
     }
-});
 
-app.get('/api/admin/user/:userId', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const userData = await getUserData(req.params.userId);
-        if (!userData) return res.status(404).json({ error: "User not found" });
-        res.json({ success: true, user: userData });
+        packageJson.gameVersion = version;
+        fs.writeFileSync(path.join(__dirname, 'package.json'), JSON.stringify(packageJson, null, 2));
+        res.json({ success: true, version });
     } catch (e) {
-        res.status(500).json({ error: "Internal error" });
-    }
-});
-
-app.post('/api/admin/user/:userId', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const uid = req.params.userId;
-        const updates = req.body.updates || {};
-        const currentUser = await getUserData(uid) || {};
-        
-        // Merge updates carefully
-        const newData = { ...currentUser, ...updates };
-        
-        // Ensure consistency for trophies/max trophies if changed
-        if (updates.trophees !== undefined || updates.tropheesMax !== undefined) {
-            const t = updates.trophees !== undefined ? updates.trophees : (currentUser.trophees || 0);
-            const tm = updates.tropheesMax !== undefined ? updates.tropheesMax : (currentUser.tropheesMax || 0);
-            newData.trophees = Math.min(t, tm);
-            newData.tropheesMax = Math.max(t, tm);
-        }
-
-        await saveUserData(uid, newData);
-        res.json({ success: true, user: newData });
-    } catch (e) {
-        console.error("Error saving user:", e);
-        res.status(500).json({ error: "Internal error" });
-    }
-});
-
-app.post('/api/admin/news', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const newsData = req.body.news;
-        await db.collection('settings').doc('news').set({ items: newsData });
-        res.json({ success: true });
-    } catch (e) {
-        console.error("Error saving news:", e);
-        res.status(500).json({ error: "Internal error" });
+        console.error("Error updating version:", e);
+        res.status(500).json({ error: "Erreur lors de la mise à jour de la version" });
     }
 });
 
