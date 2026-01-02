@@ -37,7 +37,7 @@ App.versionCompare = function(v1, v2) {
   return 0;
 }
 
-App.mise_a_jour = function() {
+App.mise_a_jour = async function() {
   const userData = getUserData();
   // Version actuelle du jeu
   const currentVersion = App.game_version;
@@ -173,10 +173,12 @@ App.mise_a_jour = function() {
   };
 
   // Si la version enregistrée est antérieure à la version actuelle,
-  // on effectue les mises à jour spécifiques (exemple : suppression des anciennes données hebdomadaires)
+  // on effectue les mises à jour spécifiques
   if (userData.version === "B2.1.0.00") {
     localStorage.removeItem('rulesAccepted');
   }
+  
+  // Suppression des anciennes données Summer si nécessaire
   if (App.versionCompare(userData.version || '0.0.0', currentVersion) < 0) {
     if (userData) {
       for (let i = 1; i <= 15; i++) {
@@ -191,11 +193,10 @@ App.mise_a_jour = function() {
       delete userData.summer_genere;
       delete userData.fraude;
       delete userData.lastFraudeReset;
-      
-
-      localStorage.setItem('userData', JSON.stringify(userData));
     }
   }
+
+  // Reset complet si version inférieure à versionreset
   if (App.versionCompare(userData.version || '0.0.0', versionreset) < 0) {
     userData.pass_premium = false;
     userData.pass_XP = 0;
@@ -212,19 +213,37 @@ App.mise_a_jour = function() {
     userData.semaine6 = false;
     userData.quetes_genere = false;
   }
-  // Vérification et ajout des clés manquantes avec leur valeur par défaut
+
+  // Vérification et ajout des clés manquantes
   for (const key in defaultUserData) {
     if (!userData.hasOwnProperty(key)) {
       userData[key] = defaultUserData[key];
     }
   }
 
-  // On s'assure que la version est toujours à jour
+  // Mise à jour de la version
   userData.version = currentVersion;
 
-  // Sauvegarde des données mises à jour
-  saveUserData(userData);
+  // 1. Sauvegarde locale immédiate pour éviter le flicker
+  localStorage.setItem('userData', JSON.stringify(userData));
+
+  // 2. Synchronisation serveur robuste
+  if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+      const user = firebase.auth().currentUser;
+      if (user && App.saveUserDataToFirebase) {
+          try {
+             // On force l'envoi de toutes les données modifiées pour écraser une éventuelle version obsolète du serveur
+             await App.saveUserDataToFirebase(user.uid, userData);
+             console.log("Données mises à jour synchronisées avec succès.");
+          } catch(e) { 
+             console.error("Erreur synchro serveur pendant màj:", e); 
+          }
+      }
+  }
+
+  // 3. Redirection contrôlée
+  setTimeout(() => { loadPage('intro'); }, 2000);
 }
 
-// Exécution de la mise à jour dès le chargement de la page
+// Lancement de la procédure
 App.mise_a_jour();
