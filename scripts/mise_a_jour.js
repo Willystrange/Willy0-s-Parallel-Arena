@@ -244,9 +244,15 @@ App.mise_a_jour = async function() {
              // Check if server reverted the version (e.g. if server wasn't restarted to include 'version' in allowed fields)
              const check = getUserData();
              if (check.version !== currentVersion) {
-                 console.warn("Le serveur semble avoir rejeté la version. Application forcée en local.");
+                 console.warn("Le serveur a rejeté la version. Application forcée en local.");
                  userData.version = currentVersion;
                  localStorage.setItem('userData', JSON.stringify(userData));
+                 
+                 // Feedback visuel pour l'admin
+                 if (document.getElementById('loadingText')) {
+                    document.getElementById('loadingText').textContent = "Sync serveur incomplète (Redémarrez le serveur !)";
+                    document.getElementById('loadingText').style.color = "#ff4444";
+                 }
              }
 
              console.log("Données mises à jour synchronisées avec succès.");
