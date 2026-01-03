@@ -472,6 +472,14 @@ app.get('/api/check-pseudo/:pseudo', async (req, res) => {
 });
 app.get('/api/data/equipments', (req, res) => res.json(EQUIPMENTS_DATA));
 app.get('/api/data/characters', (req, res) => res.json(CHARACTERS_DATA));
+app.get('/api/data/localization', (req, res) => {
+    try {
+        const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'localization.json'), 'utf8'));
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: "Localization missing" });
+    }
+});
 
 // --- USER SYNC ---
 app.get('/api/user/:userId', verifyToken, async (req, res) => res.json({ success: true, userData: await getUserData(req.params.userId) }));

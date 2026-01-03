@@ -24,4 +24,5 @@
 
 ## 4. Conventions & Qualité
 - [x] **Nommage** : `Paradoxeamelioration` supprimé (c'était un fichier orphelin).
-- [ ] **Code Dur** : Déplacer les textes et dialogues des scripts JS vers des fichiers JSON de traduction ou de configuration.
+- [x] **Code Dur** : Déplacer les textes et dialogues des scripts JS vers des fichiers JSON de traduction ou de configuration.
+    - *Réalisé :* Création de `data/localization.json` et mise à jour de `scripts/menu_principal.js` et `scripts/intro.js` pour charger les textes dynamiquement via l'API.

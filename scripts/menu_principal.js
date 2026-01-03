@@ -267,7 +267,7 @@ App.updateTrophyProgress = function() {
         const progressFill = document.getElementById("trophiesProgressFill");
         if (progressFill) progressFill.style.width = "100%";
         const nextRewardsElem = document.getElementById("nextRewards");
-        if (nextRewardsElem) nextRewardsElem.textContent = "Vous êtes au sommet !";
+        if (nextRewardsElem) nextRewardsElem.textContent = App.localization.ui ? (App.localization.ui.rewards_max || "Vous êtes au sommet !") : "Vous êtes au sommet !";
         return;
     }
 
@@ -285,6 +285,8 @@ App.updateTrophyProgress = function() {
     if (nextRewardsElem) {
         const rewardDescriptions = nextReward.rewards.map(r => {
             const name = r.id ? r.id.replace(/_/g, ' ') : r.chestType;
+            // Note: Reward types are still hardcoded as they map to logic, but presentation could be localized later if needed.
+            // For now we keep basic French mapping here or could expand JSON.
             switch (r.type) {
                 case 'coins': return `${r.amount} pièces`;
                 case 'item': return `${r.amount}x ${name}`;
@@ -295,7 +297,9 @@ App.updateTrophyProgress = function() {
                 default: return '1x Récompense';
             }
         }).join(' et ');
-        nextRewardsElem.textContent = `Prochaine récompense à ${nextThreshold} trophées : ${rewardDescriptions}`;
+        
+        const template = App.localization.ui ? (App.localization.ui.next_reward_at || `Prochaine récompense à {threshold} trophées : {rewards}`) : `Prochaine récompense à {threshold} trophées : {rewards}`;
+        nextRewardsElem.textContent = template.replace('{threshold}', nextThreshold).replace('{rewards}', rewardDescriptions);
     }
 };
 
@@ -487,7 +491,7 @@ App.showModeSelection = function() {
 
   // ajuste le texte du bouton sans supprimer le timer
   // on vide d'abord tout, puis on remet le texte, puis le timer
-  weekendBtn.textContent = 'Week-end';
+  weekendBtn.textContent = App.localization.ui ? (App.localization.ui.weekend_button || 'Week-end') : 'Week-end';
   weekendBtn.appendChild(timer);
 
   const isWeekend = App.isWeekendPeriod();
@@ -566,6 +570,7 @@ App.resetDoubleXPIfNeeded = function() {
 };
 
 App.init = function() {
+  App.loadLocalization();
   App.loadTrophyRoadData();
   let userData = getUserData();
   if (userData.version !== game_version) {
@@ -607,7 +612,7 @@ App.updateWeekendCountdown = function() {
     timer.style.display = 'flex';
     const diff = App.getNextMonday9AM() - App.getParisDate();
     if (diff <= 0) {
-      span.textContent = 'Disponible !';
+      span.textContent = App.localization.ui ? (App.localization.ui.weekend_available || 'Disponible !') : 'Disponible !';
       return;
     }
     const h = Math.floor(diff / 3.6e6);
@@ -653,49 +658,63 @@ if (!App._initWrapper) {
   };
 }
 
+App.localization = {
+    tutorial: [],
+    gameModeExplanations: {},
+    ui: {}
+};
+
+App.loadLocalization = function() {
+    fetch('/api/data/localization')
+        .then(res => res.json())
+        .then(data => {
+            App.localization = data;
+            // Rafraîchir l'UI si nécessaire ou si le tuto est actif
+            if (document.getElementById('tutorialOverlay').style.display === 'flex') {
+                App.showTutorialStep(App.currentTutorialStep);
+            }
+        })
+        .catch(err => console.error("Erreur chargement localisation:", err));
+};
+
 // --- TUTORIAL LOGIC ---
-App.tutorialSteps = [
-  {
-    elementId: 'playButton',
-    text: "Cliquez ici pour choisir un mode de jeu et commencer une partie."
-  },
-  {
-    elementId: 'questsButton',
-    text: "Consultez vos quêtes quotidiennes, hebdomadaires et spéciales ici pour gagner des récompenses."
-  },
-  {
-    elementId: 'inventoryButton',
-    text: "Accédez à votre inventaire pour voir les objets que vous avez collectés."
-  },
-  {
-    elementId: 'header',
-    text: "Faites glisser cette barre vers le bas pour voir vos statistiques détaillées."
-  },
-  {
-    elementId: 'header',
-    text: "Faites-la glisser vers le haut pour la remonter. Essayez maintenant !"
-  }
-];
 App.currentTutorialStep = 0;
 
 App.startTutorial = function() {
   if (localStorage.getItem('tutorial_menu_principal_completed') === 'true') {
     return;
   }
+  // Attendre que la localisation soit chargée
+  if (!App.localization.tutorial || App.localization.tutorial.length === 0) {
+      setTimeout(App.startTutorial, 100);
+      return;
+  }
+  
   document.getElementById('tutorialOverlay').style.display = 'flex';
   App.showTutorialStep(App.currentTutorialStep);
 };
 
 App.showTutorialStep = function(stepIndex) {
+  const steps = App.localization.tutorial;
+  if (!steps || steps.length === 0) return;
+
   // Remove highlight and interactive class from previous step
   if (stepIndex > 0) {
-    const prevElement = document.getElementById(App.tutorialSteps[stepIndex - 1].elementId);
-    if (prevElement) {
-      prevElement.classList.remove('tutorial-highlight', 'tutorial-interactive');
+    const prevStep = steps[stepIndex - 1];
+    if (prevStep) {
+        const prevElement = document.getElementById(prevStep.elementId);
+        if (prevElement) {
+          prevElement.classList.remove('tutorial-highlight', 'tutorial-interactive');
+        }
     }
   }
 
-  const step = App.tutorialSteps[stepIndex];
+  const step = steps[stepIndex];
+  if (!step) {
+      App.endTutorial();
+      return;
+  }
+
   const element = document.getElementById(step.elementId);
   const tooltip = document.getElementById('tutorialTooltip');
   const text = document.getElementById('tutorialText');
@@ -710,7 +729,7 @@ App.showTutorialStep = function(stepIndex) {
   text.innerText = step.text;
 
   // Make the element interactive only on the last step
-  if (stepIndex === App.tutorialSteps.length - 1) {
+  if (stepIndex === steps.length - 1) {
     element.classList.add('tutorial-interactive');
   }
 
@@ -727,16 +746,16 @@ App.showTutorialStep = function(stepIndex) {
   }
 
 
-  if (stepIndex === App.tutorialSteps.length - 1) {
-    nextButton.innerText = 'Terminer';
+  if (stepIndex === steps.length - 1) {
+    nextButton.innerText = App.localization.ui.finish || 'Terminer';
   } else {
-    nextButton.innerText = 'Suivant';
+    nextButton.innerText = App.localization.ui.next || 'Suivant';
   }
 };
 
 App.nextTutorialStep = function() {
   App.currentTutorialStep++;
-  if (App.currentTutorialStep < App.tutorialSteps.length) {
+  if (App.localization.tutorial && App.currentTutorialStep < App.localization.tutorial.length) {
     App.showTutorialStep(App.currentTutorialStep);
   } else {
     App.endTutorial();
@@ -744,10 +763,13 @@ App.nextTutorialStep = function() {
 };
 
 App.endTutorial = function() {
-  const lastStep = App.tutorialSteps[App.currentTutorialStep - 1] || App.tutorialSteps[App.tutorialSteps.length - 1];
-  const lastElement = document.getElementById(lastStep.elementId);
-  if (lastElement) {
-    lastElement.classList.remove('tutorial-highlight', 'tutorial-interactive');
+  const steps = App.localization.tutorial;
+  if (steps && steps.length > 0) {
+      const lastStep = steps[App.currentTutorialStep - 1] || steps[steps.length - 1];
+      const lastElement = document.getElementById(lastStep.elementId);
+      if (lastElement) {
+        lastElement.classList.remove('tutorial-highlight', 'tutorial-interactive');
+      }
   }
   document.getElementById('tutorialOverlay').style.display = 'none';
   localStorage.setItem('tutorial_menu_principal_completed', 'true');
@@ -756,23 +778,9 @@ App.endTutorial = function() {
 
 
 // --- Game Mode Explanations ---
-App.gameModeExplanations = {
-  'classique': {
-    title: 'Mode Classique',
-    text: 'Affrontez des adversaires contrôlés par l\'ordinateur dans des combats équilibrés. L\'objectif est de réduire les points de vie de votre adversaire à zéro.'
-  },
-  'survie': {
-    title: 'Mode Survie',
-    text: 'Testez votre endurance ! Affrontez des vagues d\'ennemis de plus en plus puissants. Combien de manches pourrez-vous survivre ?'
-  },
-  'classique-weeknd': {
-    title: 'Mode Classique Weekend',
-    text: 'Un mode spécial disponible uniquement le week-end ! Profitez de bonus uniques et de récompenses accrues. Les règles de base sont similaires au mode Classique.'
-  }
-};
 
 App.showExplanation = function(mode) {
-  const explanation = App.gameModeExplanations[mode];
+  const explanation = App.localization.gameModeExplanations ? App.localization.gameModeExplanations[mode] : null;
   if (explanation) {
     document.getElementById('modalTitle').innerText = explanation.title;
     document.getElementById('modalText').innerText = explanation.text;

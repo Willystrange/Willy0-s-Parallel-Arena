@@ -1,0 +1,50 @@
+{
+  "tutorial": [
+    {
+      "elementId": "playButton",
+      "text": "Cliquez ici pour choisir un mode de jeu et commencer une partie."
+    },
+    {
+      "elementId": "questsButton",
+      "text": "Consultez vos quêtes quotidiennes, hebdomadaires et spéciales ici pour gagner des récompenses."
+    },
+    {
+      "elementId": "inventoryButton",
+      "text": "Accédez à votre inventaire pour voir les objets que vous avez collectés."
+    },
+    {
+      "elementId": "header",
+      "text": "Faites glisser cette barre vers le bas pour voir vos statistiques détaillées."
+    },
+    {
+      "elementId": "header",
+      "text": "Faites-la glisser vers le haut pour la remonter. Essayez maintenant !"
+    }
+  ],
+  "gameModeExplanations": {
+    "classique": {
+      "title": "Mode Classique",
+      "text": "Affrontez des adversaires contrôlés par l'ordinateur dans des combats équilibrés. L'objectif est de réduire les points de vie de votre adversaire à zéro."
+    },
+    "survie": {
+      "title": "Mode Survie",
+      "text": "Testez votre endurance ! Affrontez des vagues d'ennemis de plus en plus puissants. Combien de manches pourrez-vous survivre ?"
+    },
+    "classique-weeknd": {
+      "title": "Mode Classique Weekend",
+      "text": "Un mode spécial disponible uniquement le week-end ! Profitez de bonus uniques et de récompenses accrues. Les règles de base sont similaires au mode Classique."
+    }
+  },
+  "connectionStatus": {
+    "online": "En ligne",
+    "offline": "Hors ligne - échec de connexion au serveur"
+  },
+  "ui": {
+      "next": "Suivant",
+      "finish": "Terminer",
+      "weekend_available": "Disponible !",
+      "weekend_button": "Week-end",
+      "rewards_max": "Vous êtes au sommet !",
+      "next_reward_at": "Prochaine récompense à {threshold} trophées : {rewards}"
+  }
+}

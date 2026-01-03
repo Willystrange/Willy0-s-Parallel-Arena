@@ -12,11 +12,30 @@ App.connectionStatus.style.zIndex = '9999';
 App.connectionStatus.style.fontFamily = 'sans-serif';
 document.body.appendChild(App.connectionStatus);
 
+App.introLocalization = null;
+
+// Charger la localisation pour l'intro
+fetch('/api/data/localization')
+    .then(res => res.json())
+    .then(data => {
+        App.introLocalization = data;
+        // Rafraîchir si déjà affiché
+        if (App.connectionStatus.style.display === 'block') {
+             const isOnline = App.connectionStatus.style.color === 'green';
+             App.setConnectionStatus(isOnline);
+        }
+    })
+    .catch(() => {}); // Silencieux si échec
+
 App.setConnectionStatus = function(online) {
   if (!App.connectionStatus) return;
-  App.connectionStatus.textContent = online
-    ? 'En ligne'
-    : 'Hors ligne - échec de connexion au serveur';
+  
+  let text = online ? 'En ligne' : 'Hors ligne - échec de connexion au serveur';
+  if (App.introLocalization && App.introLocalization.connectionStatus) {
+      text = online ? App.introLocalization.connectionStatus.online : App.introLocalization.connectionStatus.offline;
+  }
+  
+  App.connectionStatus.textContent = text;
   App.connectionStatus.style.color = online ? 'green' : 'red';
   App.connectionStatus.style.display = 'block';
 };
