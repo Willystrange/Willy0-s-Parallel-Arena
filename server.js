@@ -137,11 +137,35 @@ io.on('connection', (socket) => {
 });
 
 // --- SECURITY & RECAPTCHA ---
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+let RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+
+// Tentative de chargement depuis un fichier local ou secret Render (JSON)
+if (!RECAPTCHA_SECRET_KEY) {
+    try {
+        if (fs.existsSync('./recaptchaSecretKey.json')) {
+            const data = require('./recaptchaSecretKey.json');
+            RECAPTCHA_SECRET_KEY = data.key;
+            console.log("[reCAPTCHA] Clé chargée depuis fichier local.");
+        } else if (fs.existsSync('/etc/secrets/recaptchaSecretKey.json')) {
+            const data = require('/etc/secrets/recaptchaSecretKey.json');
+            RECAPTCHA_SECRET_KEY = data.key;
+            console.log("[reCAPTCHA] Clé chargée depuis Render Secret File.");
+        }
+    } catch (e) {
+        console.warn("[reCAPTCHA] Erreur lecture fichier clé:", e.message);
+    }
+}
+
 const GOOGLE_CLOUD_PROJECT_ID = "willy0s-parallel-arena";
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M"; // API Key Web par défaut
 
 async function verifyRecaptcha(token, userId = null) {
+    // Si la clé secrète n'est pas configurée, on bypass (Mode Dev sans clé)
+    if (!RECAPTCHA_SECRET_KEY) {
+        console.warn("[reCAPTCHA] Clé secrète manquante. Bypass activé.");
+        return { success: true, score: 1.0 };
+    }
+
     if (!token) return { success: false, error: "Token manquant" };
     
     try {

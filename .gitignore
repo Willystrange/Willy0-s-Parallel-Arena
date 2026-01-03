@@ -2,4 +2,4 @@ node_modules/
 serviceAccountKey.json
 .env
 .DS_Store
-*.log
+*.logrecaptchaSecretKey.json
