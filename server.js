@@ -18,15 +18,54 @@ const {
 } = require('@simplewebauthn/server');
 
 // --- INITIALIZATION ---
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    const serviceAccount = require(path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS));
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-} else if (fs.existsSync('./serviceAccountKey.json')) {
-    const serviceAccount = require("./serviceAccountKey.json");
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+let serviceAccount;
+
+try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        // Option 1: JSON brut dans variable d'env (Idéal pour Render/Heroku)
+        try {
+            serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+            console.log("[FIREBASE] Chargement via variable d'env FIREBASE_SERVICE_ACCOUNT");
+        } catch (e) {
+            console.error("[FIREBASE] Erreur de parsing du JSON FIREBASE_SERVICE_ACCOUNT:", e);
+        }
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        // Option 2: Chemin fichier dans variable d'env
+        const p = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+        if (fs.existsSync(p)) {
+            serviceAccount = require(p);
+            console.log("[FIREBASE] Chargement via GOOGLE_APPLICATION_CREDENTIALS");
+        }
+    } else if (fs.existsSync('./serviceAccountKey.json')) {
+        // Option 3: Fichier local standard
+        serviceAccount = require("./serviceAccountKey.json");
+        console.log("[FIREBASE] Chargement via fichier local serviceAccountKey.json");
+    }
+
+    if (serviceAccount) {
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+        console.log("[FIREBASE] Initialisation réussie.");
+    } else {
+        console.warn("[FIREBASE] AVERTISSEMENT : Aucune clé de service trouvée. Le serveur va démarrer mais les fonctions BDD échoueront.");
+    }
+} catch (error) {
+    console.error("[FIREBASE] CRITICAL ERROR during init:", error);
 }
 
-const db = admin.firestore();
+// Sécurisation de l'accès DB pour éviter le crash immédiat au démarrage si init échoué
+let db;
+try {
+    if (admin.apps.length > 0) {
+        db = admin.firestore();
+    } else {
+        console.error("[FIREBASE] Pas d'application initialisée. DB non disponible.");
+        // Mock DB pour éviter crash immédiat sur db.collection (optionnel, ou laisser crash plus tard)
+        db = { collection: () => ({ doc: () => ({ get: async () => ({ exists: false }), set: async () => {} }) }) };
+    }
+} catch (e) {
+    console.error("[FIREBASE] Erreur acces Firestore:", e);
+}
+
 const app = express();
 app.set('trust proxy', 1);
 const server = http.createServer(app);
