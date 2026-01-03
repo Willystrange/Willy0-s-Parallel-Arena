@@ -327,13 +327,25 @@ App.initBackupInterface = function() {
       
       updateButtonText(currentLang);
 
-      languageButton.addEventListener('click', () => {
+      languageButton.addEventListener('click', async () => {
           const userData = getUserData();
           const current = userData.language || 'fr';
           const next = current === 'fr' ? 'en' : 'fr';
           
           userData.language = next;
-          saveUserData(userData);
+          
+          // Sauvegarde locale synchrone
+          localStorage.setItem('userData', JSON.stringify(userData));
+          
+          // Sauvegarde serveur asynchrone (on attend qu'elle finisse)
+          if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+              const user = firebase.auth().currentUser;
+              if (user && window.App && typeof App.saveUserDataToFirebase === 'function') {
+                  try {
+                      await App.saveUserDataToFirebase(user.uid);
+                  } catch(e) { console.error("Erreur sauvegarde langue serveur:", e); }
+              }
+          }
           
           if (next !== 'fr') {
               alert("⚠️ Attention : La version anglaise est en Bêta. \n\nLes traductions peuvent être manquantes ou incorrectes sur certaines pages.");
