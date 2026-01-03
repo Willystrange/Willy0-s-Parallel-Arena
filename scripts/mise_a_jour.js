@@ -254,8 +254,6 @@ App.mise_a_jour = async function() {
                     document.getElementById('loadingText').style.color = "#ff4444";
                  }
              }
-
-             console.log("Données mises à jour synchronisées avec succès.");
           } catch(e) { 
              console.error("Erreur synchro serveur pendant màj:", e); 
           }
@@ -274,12 +272,9 @@ App.initMiseAJour = async function() {
             const data = await res.json();
             if (data.version) {
                 App.game_version = data.version;
-                console.log("[Update] Version serveur récupérée :", App.game_version);
             }
         }
-    } catch(e) {
-        console.warn("[Update] Impossible de récupérer la version serveur. Utilisation du fallback.");
-    }
+    } catch(e) {}
     
     // Si la version n'est toujours pas définie, fallback sécurisé
     if (!App.game_version || App.game_version === 'VERSION_PLACEHOLDER') {

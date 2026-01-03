@@ -8,10 +8,9 @@ fetch('/api/version')
     .then(d => { 
         if(d.version) {
             App.game_version = d.version;
-            console.log("[App] Version chargée :", App.game_version);
         }
     })
-    .catch(e => console.warn("[App] Version non disponible (offline ?)", e));
+    .catch(e => {});
 
 // --- INITIALISATION FIREBASE IMMEDIATE ---
 window.firebaseConfig = {
@@ -168,7 +167,6 @@ App.loadUserDataFromFirebase = async function(userId, currentUser = null) {
           const local = JSON.parse(localStorage.getItem('userData') || '{}');
           if (local.version && data.userData.version && typeof App.versionCompare === 'function') {
               if (App.versionCompare(local.version, data.userData.version) > 0) {
-                  console.warn(`[Sync] Protection Rollback : Version locale (${local.version}) > Serveur (${data.userData.version}). On conserve la locale.`);
                   data.userData.version = local.version;
                   // On force aussi une nouvelle sauvegarde vers le serveur pour corriger le tir
                   setTimeout(() => App.saveUserDataToFirebase(userId, { version: local.version }), 2000);

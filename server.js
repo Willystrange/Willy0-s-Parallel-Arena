@@ -25,7 +25,6 @@ try {
         // Option 1: JSON brut dans variable d'env (Idéal pour Render/Heroku)
         try {
             serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-            console.log("[FIREBASE] Chargement via variable d'env FIREBASE_SERVICE_ACCOUNT");
         } catch (e) {
             console.error("[FIREBASE] Erreur de parsing du JSON FIREBASE_SERVICE_ACCOUNT:", e);
         }
@@ -34,23 +33,17 @@ try {
         const p = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         if (fs.existsSync(p)) {
             serviceAccount = require(p);
-            console.log("[FIREBASE] Chargement via GOOGLE_APPLICATION_CREDENTIALS");
         }
     } else if (fs.existsSync('./serviceAccountKey.json')) {
         // Option 3: Fichier local standard
         serviceAccount = require("./serviceAccountKey.json");
-        console.log("[FIREBASE] Chargement via fichier local serviceAccountKey.json");
     } else if (fs.existsSync('/etc/secrets/serviceAccountKey.json')) {
         // Option 4: Render Secret Files (Chemin standard)
         serviceAccount = require("/etc/secrets/serviceAccountKey.json");
-        console.log("[FIREBASE] Chargement via Render Secret File (/etc/secrets/serviceAccountKey.json)");
     }
 
     if (serviceAccount) {
         admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-        console.log("[FIREBASE] Initialisation réussie.");
-    } else {
-        console.warn("[FIREBASE] AVERTISSEMENT : Aucune clé de service trouvée. Le serveur va démarrer mais les fonctions BDD échoueront.");
     }
 } catch (error) {
     console.error("[FIREBASE] CRITICAL ERROR during init:", error);
@@ -80,7 +73,6 @@ try {
     if (admin.apps.length > 0) {
         db = admin.firestore();
     } else {
-        console.error("[FIREBASE] Pas d'application initialisée. DB non disponible (Mode Mock).");
         isDbMocked = true;
         db = { 
             collection: () => mockChainable(),
@@ -145,15 +137,11 @@ if (!RECAPTCHA_SECRET_KEY) {
         if (fs.existsSync('./recaptchaSecretKey.json')) {
             const data = require('./recaptchaSecretKey.json');
             RECAPTCHA_SECRET_KEY = data.key;
-            console.log("[reCAPTCHA] Clé chargée depuis fichier local.");
         } else if (fs.existsSync('/etc/secrets/recaptchaSecretKey.json')) {
             const data = require('/etc/secrets/recaptchaSecretKey.json');
             RECAPTCHA_SECRET_KEY = data.key;
-            console.log("[reCAPTCHA] Clé chargée depuis Render Secret File.");
         }
-    } catch (e) {
-        console.warn("[reCAPTCHA] Erreur lecture fichier clé:", e.message);
-    }
+    } catch (e) {}
 }
 
 const GOOGLE_CLOUD_PROJECT_ID = "willy0s-parallel-arena";
@@ -162,7 +150,6 @@ const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63y
 async function verifyRecaptcha(token, userId = null) {
     // Si la clé secrète n'est pas configurée, on bypass (Mode Dev sans clé)
     if (!RECAPTCHA_SECRET_KEY) {
-        console.warn("[reCAPTCHA] Clé secrète manquante. Bypass activé.");
         return { success: true, score: 1.0 };
     }
 
@@ -183,11 +170,9 @@ async function verifyRecaptcha(token, userId = null) {
             const score = data.score !== undefined ? data.score : 1.0;
             return { success: true, score: score };
         } else {
-            console.warn("[reCAPTCHA] Invalid token:", JSON.stringify(data));
             return { success: false }; 
         }
     } catch (e) {
-        console.error("[reCAPTCHA] API Error:", e.response ? e.response.data : e.message);
         return { success: false, error: "Erreur technique de vérification" }; 
     }
 }
@@ -1608,8 +1593,6 @@ server.listen(PORT, '0.0.0.0', async () => {
     console.log(`🚀 SERVEUR FULL OP SUR PORT ${PORT}`);
     if (!isDbMocked) {
         await cleanupDatabase();
-    } else {
-        console.warn("[DB] Cleanup skipped because DB is mocked (Local Mode).");
     }
 });
 
