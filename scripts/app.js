@@ -78,6 +78,20 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
         });
     };
 
+// --- UTILS: VERSION COMPARE ---
+App.versionCompare = function(v1, v2) {
+  const cleanVersion = v => v.replace(/[^0-9.]/g, '');
+  const v1Parts = cleanVersion(v1).split('.').map(Number);
+  const v2Parts = cleanVersion(v2).split('.').map(Number);
+  for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+    const num1 = v1Parts[i] || 0;
+    const num2 = v2Parts[i] || 0;
+    if (num1 > num2) return 1;
+    if (num1 < num2) return -1;
+  }
+  return 0;
+};
+
 // --- UTILS: WEBAUTHN BINARY CONVERSION ---
 App.base64ToBuffer = (base64) => {
     let padded = base64.replace(/-/g, '+').replace(/_/g, '/');
@@ -150,6 +164,17 @@ App.loadUserDataFromFirebase = async function(userId, currentUser = null) {
       
       const data = await response.json();
       if (data.success && data.userData) {
+          // PROTECTION ANTI-ROLLBACK : Si la version locale est plus récente (ex: juste après une mise à jour), on ne l'écrase pas avec une vieille version serveur (latence DB)
+          const local = JSON.parse(localStorage.getItem('userData') || '{}');
+          if (local.version && data.userData.version && typeof App.versionCompare === 'function') {
+              if (App.versionCompare(local.version, data.userData.version) > 0) {
+                  console.warn(`[Sync] Protection Rollback : Version locale (${local.version}) > Serveur (${data.userData.version}). On conserve la locale.`);
+                  data.userData.version = local.version;
+                  // On force aussi une nouvelle sauvegarde vers le serveur pour corriger le tir
+                  setTimeout(() => App.saveUserDataToFirebase(userId, { version: local.version }), 2000);
+              }
+          }
+
           localStorage.setItem('userData', JSON.stringify(data.userData));
 
           // Mise à jour immédiate du volume si présent
