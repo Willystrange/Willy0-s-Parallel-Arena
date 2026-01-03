@@ -1446,8 +1446,18 @@ app.post('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
     }
 
     try {
+        // Mise à jour de la mémoire pour l'injection immédiate (app.get /scripts/app.js)
         packageJson.gameVersion = version;
-        fs.writeFileSync(path.join(__dirname, 'package.json'), JSON.stringify(packageJson, null, 2));
+
+        // Mise à jour persistante du fichier
+        const packagePath = path.join(__dirname, 'package.json');
+        const fileContent = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        
+        fileContent.gameVersion = version;
+        
+        fs.writeFileSync(packagePath, JSON.stringify(fileContent, null, 2));
+        console.log(`[ADMIN] Version du jeu mise à jour vers : ${version}`);
+        
         res.json({ success: true, version });
     } catch (e) {
         console.error("Error updating version:", e);
