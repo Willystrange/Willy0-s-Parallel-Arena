@@ -48,7 +48,8 @@ App.displayUserInfo = function() {
   const userData = getUserData();
   const pseudoTitle = document.getElementById('pseudoTitle');
   if (pseudoTitle) {
-    pseudoTitle.querySelector('span').innerText = userData.pseudo || 'Pseudo inconnu';
+    const fallback = App.localization && App.localization.ui ? (App.localization.ui.unknown_pseudo || 'Pseudo inconnu') : 'Pseudo inconnu';
+    pseudoTitle.querySelector('span').innerText = userData.pseudo || fallback;
   }
 };
 
@@ -489,10 +490,15 @@ App.showModeSelection = function() {
     weekendBtn.appendChild(timer);
   }
 
-  // ajuste le texte du bouton sans supprimer le timer
-  // on vide d'abord tout, puis on remet le texte, puis le timer
-  weekendBtn.textContent = App.localization.ui ? (App.localization.ui.weekend_button || 'Week-end') : 'Week-end';
-  weekendBtn.appendChild(timer);
+  // Mise à jour du texte via le span data-i18n s'il existe, sinon fallback
+  let textSpan = weekendBtn.querySelector('[data-i18n="menu_principal.mode_selection.weekend"]');
+  if (textSpan && App.localization && App.localization.menu_principal) {
+      textSpan.textContent = App.localization.menu_principal.mode_selection.weekend;
+  } else if (!textSpan) {
+       // Fallback si la structure HTML n'est pas celle attendue (ex: ancien cache)
+       weekendBtn.textContent = App.localization.ui ? (App.localization.ui.weekend_button || 'Week-end') : 'Week-end';
+       weekendBtn.appendChild(timer);
+  }
 
   const isWeekend = App.isWeekendPeriod();
 
@@ -664,6 +670,23 @@ App.localization = {
     ui: {}
 };
 
+App.translateUI = function() {
+    if (!App.localization) return;
+
+    // Helper to access nested keys
+    const getNestedValue = (obj, path) => {
+        return path.split('.').reduce((prev, curr) => prev ? prev[curr] : null, obj);
+    };
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const text = getNestedValue(App.localization, key);
+        if (text) {
+            el.textContent = text;
+        }
+    });
+};
+
 App.loadLocalization = function() {
     const userData = getUserData();
     const lang = userData.language || 'fr';
@@ -671,8 +694,10 @@ App.loadLocalization = function() {
         .then(res => res.json())
         .then(data => {
             App.localization = data;
+            App.translateUI(); // Apply translations
+            
             // Rafraîchir l'UI si nécessaire ou si le tuto est actif
-            if (document.getElementById('tutorialOverlay').style.display === 'flex') {
+            if (document.getElementById('tutorialOverlay') && document.getElementById('tutorialOverlay').style.display === 'flex') {
                 App.showTutorialStep(App.currentTutorialStep);
             }
         })

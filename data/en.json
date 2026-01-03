@@ -45,6 +45,30 @@
       "weekend_available": "Available !",
       "weekend_button": "Weekend",
       "rewards_max": "You're at the top !",
-      "next_reward_at": "Next reward at {threshold} trophies : {rewards}"
+      "next_reward_at": "Next reward at {threshold} trophies : {rewards}",
+      "unknown_pseudo": "Unknown Pseudo"
+  },
+  "menu_principal": {
+      "stats": {
+          "current_trophies": "Current Trophies",
+          "max_trophies": "Max Trophies",
+          "classic_wins": "Classic Wins",
+          "survival_max_waves": "Max Survival Waves",
+          "classic_games_launched": "Classic Games Launched",
+          "survival_games_launched": "Survival Games Launched",
+          "trophy_progression": "Trophy Progression"
+      },
+      "buttons": {
+          "play": "Play",
+          "quests": "Quests",
+          "inventory": "Inventory"
+      },
+      "mode_selection": {
+          "title": "Choose Game Mode",
+          "classic": "Classic",
+          "survival": "Survival",
+          "weekend": "Weekend",
+          "cancel": "Cancel"
+      }
   }
 }

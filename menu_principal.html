@@ -24,14 +24,14 @@
     <div class="interaction-zone"></div>
     <!-- Statistiques -->
     <div class="stats">
-      <div class="stat">Trophées actuels: <span id="currentTrophies">0</span></div>
-      <div class="stat">Trophées maximum: <span id="maxTrophies">0</span></div>
-      <div class="stat">Parties gagnées en classique: <span id="classicWins">0</span></div>
-      <div class="stat">Manches maximum gagnées en survie: <span id="survivalWins">0</span></div>
-      <div class="stat">Parties lancées en classique: <span id="classicGames">0</span></div>
-      <div class="stat">Parties lancées en survie: <span id="survivalGames">0</span></div>
+      <div class="stat"><span data-i18n="menu_principal.stats.current_trophies"></span>: <span id="currentTrophies">0</span></div>
+      <div class="stat"><span data-i18n="menu_principal.stats.max_trophies"></span>: <span id="maxTrophies">0</span></div>
+      <div class="stat"><span data-i18n="menu_principal.stats.classic_wins"></span>: <span id="classicWins">0</span></div>
+      <div class="stat"><span data-i18n="menu_principal.stats.survival_max_waves"></span>: <span id="survivalWins">0</span></div>
+      <div class="stat"><span data-i18n="menu_principal.stats.classic_games_launched"></span>: <span id="classicGames">0</span></div>
+      <div class="stat"><span data-i18n="menu_principal.stats.survival_games_launched"></span>: <span id="survivalGames">0</span></div>
       <div>
-        Progression des trophées:
+        <span data-i18n="menu_principal.stats.trophy_progression"></span>:
         <div class="trophies-bar">
           <div id="trophiesProgressFill"></div>
         </div>
@@ -47,33 +47,33 @@
       <source src="music/B1.mp3" type="audio/mpeg">
       Votre navigateur ne supporte pas l'audio.
     </audio>
-    <button class="button" id="playButton" onclick="App.showModeSelection()">Jouer</button>
-    <button class="button" id="questsButton" onclick="App.viewQuests()">Quêtes</button>
-    <button class="button" id="inventoryButton" onclick="App.viewInventory()">Inventaire</button>
+    <button class="button" id="playButton" onclick="App.showModeSelection()" data-i18n="menu_principal.buttons.play"></button>
+    <button class="button" id="questsButton" onclick="App.viewQuests()" data-i18n="menu_principal.buttons.quests"></button>
+    <button class="button" id="inventoryButton" onclick="App.viewInventory()" data-i18n="menu_principal.buttons.inventory"></button>
   </div>
 
   <!-- Dialogue de sélection du mode de jeu -->
   <div class="dialog-overlay" id="modeDialog">
     <div class="dialog">
-      <h2>Choisissez le mode de jeu</h2>
+      <h2 data-i18n="menu_principal.mode_selection.title"></h2>
       <div class="mode-button-container">
-        <button class="mode-button" onclick="App.startGame('classique')">Classique</button>
+        <button class="mode-button" onclick="App.startGame('classique')" data-i18n="menu_principal.mode_selection.classic"></button>
         <button class="info-button" data-mode="classique">?</button>
       </div>
       <div class="mode-button-container">
-        <button class="mode-button" onclick="App.startGame('survie')">Survie</button>
+        <button class="mode-button" onclick="App.startGame('survie')" data-i18n="menu_principal.mode_selection.survival"></button>
         <button class="info-button" data-mode="survie">?</button>
       </div>
       <div class="mode-button-container">
         <button class="mode-button" id="weekendButton" onclick="App.startGame('classique-weeknd')">
-          Week-end
+          <span data-i18n="menu_principal.mode_selection.weekend"></span>
           <div class="weekend-timer" id="weekendTimer" style="display: none;">
             <span id="countdown"></span>
           </div>
         </button>
         <button class="info-button" data-mode="classique-weeknd">?</button>
       </div>
-      <button class="cancel-button" onclick="App.closeModeSelection()">Annuler</button>
+      <button class="cancel-button" onclick="App.closeModeSelection()" data-i18n="menu_principal.mode_selection.cancel"></button>
     </div>
   </div>
 

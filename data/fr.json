@@ -45,6 +45,30 @@
       "weekend_available": "Disponible !",
       "weekend_button": "Week-end",
       "rewards_max": "Vous êtes au sommet !",
-      "next_reward_at": "Prochaine récompense à {threshold} trophées : {rewards}"
+      "next_reward_at": "Prochaine récompense à {threshold} trophées : {rewards}",
+      "unknown_pseudo": "Pseudo inconnu"
+  },
+  "menu_principal": {
+      "stats": {
+          "current_trophies": "Trophées actuels",
+          "max_trophies": "Trophées maximum",
+          "classic_wins": "Parties gagnées en classique",
+          "survival_max_waves": "Manches maximum gagnées en survie",
+          "classic_games_launched": "Parties lancées en classique",
+          "survival_games_launched": "Parties lancées en survie",
+          "trophy_progression": "Progression des trophées"
+      },
+      "buttons": {
+          "play": "Jouer",
+          "quests": "Quêtes",
+          "inventory": "Inventaire"
+      },
+      "mode_selection": {
+          "title": "Choisissez le mode de jeu",
+          "classic": "Classique",
+          "survival": "Survie",
+          "weekend": "Week-end",
+          "cancel": "Annuler"
+      }
   }
 }
