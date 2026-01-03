@@ -33,31 +33,16 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
     App.getRecaptchaToken = function(action) {
         return new Promise((resolve) => {
-            // Timeout de sécurité : si reCAPTCHA ne répond pas en 10s, on échoue ou on bypass en local
+            // Timeout de sécurité : si reCAPTCHA ne répond pas en 10s, on échoue
             const timeout = setTimeout(() => {
                 console.warn("[reCAPTCHA] Timeout.");
-                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                     console.log("[reCAPTCHA] Bypass Localhost activé.");
-                     resolve("localhost_bypass");
-                } else {
-                     resolve(null);
-                }
+                resolve(null);
             }, 10000);
 
             if (typeof grecaptcha === 'undefined') {
-                // Attendre un peu au cas où le script charge
-                setTimeout(() => {
-                     if (typeof grecaptcha === 'undefined') {
-                        clearTimeout(timeout);
-                        console.warn("[reCAPTCHA] Bibliothèque non disponible.");
-                         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                             console.log("[reCAPTCHA] Bypass Localhost activé.");
-                             resolve("localhost_bypass");
-                         } else {
-                             resolve(null);
-                         }
-                     }
-                }, 1000);
+                clearTimeout(timeout);
+                console.warn("[reCAPTCHA] Bibliothèque non disponible.");
+                resolve(null);
                 return;
             }
 
@@ -71,21 +56,13 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
                         .catch(err => {
                             clearTimeout(timeout);
                             console.error("[reCAPTCHA] Erreur execution:", err);
-                            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                                 resolve("localhost_bypass");
-                            } else {
-                                 resolve(null);
-                            }
+                            resolve(null);
                         });
                 });
             } catch (e) {
                 clearTimeout(timeout);
                 console.error("[reCAPTCHA] Exception:", e);
-                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                     resolve("localhost_bypass");
-                } else {
-                     resolve(null);
-                }
+                resolve(null);
             }
         });
     };
