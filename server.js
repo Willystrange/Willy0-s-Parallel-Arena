@@ -137,6 +137,17 @@ app.use((req, res, next) => {
     next();
 });
 
+// --- HELPER: GAME VERSION ---
+function getGameVersion() {
+    try {
+        if (fs.existsSync(path.join(__dirname, 'game_version.json'))) {
+            const vData = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_version.json'), 'utf8'));
+            return vData.gameVersion;
+        }
+    } catch (e) { console.error("Error reading version file:", e); }
+    return packageJson.gameVersion || packageJson.version;
+}
+
 // --- VERSION INJECTION FOR APP.JS ---
 app.get('/scripts/app.js', (req, res) => {
     const appJsPath = path.join(__dirname, 'scripts', 'app.js');
@@ -145,7 +156,7 @@ app.get('/scripts/app.js', (req, res) => {
             console.error("Error reading app.js:", err);
             return res.status(404).send('Script not found');
         }
-        const version = packageJson.gameVersion || packageJson.version;
+        const version = getGameVersion();
         // Replace the hardcoded version with the one from package.json
         const updatedData = data.replace(/App\.game_version\s*=\s*['"][^'"]*['"];/, `App.game_version = '${version}';`);
         res.set('Content-Type', 'application/javascript');
@@ -1436,7 +1447,7 @@ app.get('/api/admin/online', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 app.get('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
-    res.json({ success: true, version: packageJson.gameVersion || packageJson.version });
+    res.json({ success: true, version: getGameVersion() });
 });
 
 app.post('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
@@ -1446,17 +1457,14 @@ app.post('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
     }
 
     try {
-        // Mise à jour de la mémoire pour l'injection immédiate (app.get /scripts/app.js)
-        packageJson.gameVersion = version;
-
-        // Mise à jour persistante du fichier
-        const packagePath = path.join(__dirname, 'package.json');
-        const fileContent = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        // Mise à jour persistante du fichier dédié (ne déclenche pas de restart serveur si non surveillé)
+        const versionPath = path.join(__dirname, 'game_version.json');
+        fs.writeFileSync(versionPath, JSON.stringify({ gameVersion: version }, null, 2));
         
-        fileContent.gameVersion = version;
-        
-        fs.writeFileSync(packagePath, JSON.stringify(fileContent, null, 2));
         console.log(`[ADMIN] Version du jeu mise à jour vers : ${version}`);
+        
+        // Optionnel : Mettre à jour packageJson en mémoire si utilisé ailleurs (fallback)
+        packageJson.gameVersion = version;
         
         res.json({ success: true, version });
     } catch (e) {
