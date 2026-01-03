@@ -667,7 +667,7 @@ App.localization = {
 App.loadLocalization = function() {
     const userData = getUserData();
     const lang = userData.language || 'fr';
-    fetch(`/api/data/${lang}`)
+    fetch(`/api/data/localization/${lang}`)
         .then(res => res.json())
         .then(data => {
             App.localization = data;
