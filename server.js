@@ -210,19 +210,53 @@ app.use((req, res, next) => {
 });
 
 // --- HELPER: GAME VERSION ---
-function getGameVersion() {
+async function getGameVersion() {
+    try {
+        // En mode local sans DB, on utilise le fichier
+        if (isDbMocked) {
+             if (fs.existsSync(path.join(__dirname, 'game_version.json'))) {
+                const vData = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_version.json'), 'utf8'));
+                return vData.gameVersion;
+            }
+            return packageJson.gameVersion || packageJson.version;
+        }
+
+        // Sur le serveur, on utilise Firestore pour la persistance
+        const doc = await db.collection('settings').doc('game_version').get();
+        if (doc.exists && doc.data().version) {
+            return doc.data().version;
+        }
+    } catch (e) { console.error("Error reading version from DB:", e); }
+    
+    // Fallback fichier si DB vide ou erreur
     try {
         if (fs.existsSync(path.join(__dirname, 'game_version.json'))) {
             const vData = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_version.json'), 'utf8'));
             return vData.gameVersion;
         }
-    } catch (e) { console.error("Error reading version file:", e); }
+    } catch(e) {}
+
     return packageJson.gameVersion || packageJson.version;
 }
 
 // --- PUBLIC VERSION ENDPOINT ---
-app.get('/api/version', (req, res) => {
-    res.json({ version: getGameVersion() });
+app.get('/api/version', async (req, res) => {
+    res.json({ version: await getGameVersion() });
+});
+
+// --- VERSION INJECTION FOR APP.JS ---
+app.get('/scripts/app.js', async (req, res) => {
+    const appJsPath = path.join(__dirname, 'scripts', 'app.js');
+    fs.readFile(appJsPath, 'utf8', async (err, data) => {
+        if (err) {
+            console.error("Error reading app.js:", err);
+            return res.status(404).send('Script not found');
+        }
+        const version = await getGameVersion();
+        const updatedData = data.replace(/App\.game_version\s*=\s*['"][^'"]*['"];/, `App.game_version = '${version}';`);
+        res.set('Content-Type', 'application/javascript');
+        res.send(updatedData);
+    });
 });
 
 app.use(express.static(__dirname));
@@ -1507,22 +1541,28 @@ app.get('/api/admin/online', verifyToken, verifyAdmin, async (req, res) => {
     res.json({ success: true, count: users.length, users });
 });
 
-app.get('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
-    res.json({ success: true, version: getGameVersion() });
+app.get('/api/admin/version', verifyToken, verifyAdmin, async (req, res) => {
+    res.json({ success: true, version: await getGameVersion() });
 });
 
-app.post('/api/admin/version', verifyToken, verifyAdmin, (req, res) => {
+app.post('/api/admin/version', verifyToken, verifyAdmin, async (req, res) => {
     const { version } = req.body;
     if (!version || typeof version !== 'string') {
         return res.status(400).json({ error: "Version invalide" });
     }
 
     try {
-        // Mise à jour persistante du fichier dédié (ne déclenche pas de restart serveur si non surveillé)
-        const versionPath = path.join(__dirname, 'game_version.json');
-        fs.writeFileSync(versionPath, JSON.stringify({ gameVersion: version }, null, 2));
-        
-        console.log(`[ADMIN] Version du jeu mise à jour vers : ${version}`);
+        // Sauvegarde dans Firestore (PERSISTANT SUR RENDER)
+        if (!isDbMocked) {
+            await db.collection('settings').doc('game_version').set({ version });
+            console.log(`[ADMIN] Version sauvegardée en DB : ${version}`);
+        }
+
+        // Sauvegarde fichier (Optionnel, pour le cache local ou dev)
+        try {
+            const versionPath = path.join(__dirname, 'game_version.json');
+            fs.writeFileSync(versionPath, JSON.stringify({ gameVersion: version }, null, 2));
+        } catch(e) { console.warn("Impossible d'écrire le fichier local (normal sur Render):", e.message); }
         
         // Optionnel : Mettre à jour packageJson en mémoire si utilisé ailleurs (fallback)
         packageJson.gameVersion = version;
