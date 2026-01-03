@@ -17,9 +17,10 @@
     - *Amélioration :* Lire la version depuis `package.json` au lieu de la hardcoder dans `App.game_version`.
 
 ## 3. Sécurité
-- [ ] **Validation Serveur** :
-    - *Critique :* `App.trophyVerif` dans `menu_principal.js` corrige les trophées côté client. Le serveur doit rejeter toute modification suspecte.
-    - *Critique :* Les endpoints API (ex: `/api/trophy/claim`) doivent valider strictement les types de données (vérifier que `milestone` est un nombre positif).
+- [x] **Validation Serveur** :
+    - [x] Sécurisation de `/api/trophy/claim` : Validation stricte des types de données (milestone entier positif) et vérification de l'existence de la récompense.
+    - [x] Restriction des modifications client : Suppression de `tropheesMax` des champs modifiables par le client pour prévenir la triche.
+- [ ] **Système de Trophées** :
 
 ## 4. Conventions & Qualité
 - [x] **Nommage** : `Paradoxeamelioration` supprimé (c'était un fichier orphelin).

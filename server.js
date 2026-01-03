@@ -496,7 +496,7 @@ app.post('/api/user/:userId', verifyToken, async (req, res) => {
                     current.quest_daily_cycle = dailyCycle; current.quetes_jour = false;
                     ['quete1', 'quete2', 'quete3'].forEach(id => { delete current[`${id}_text`]; delete current[`${id}_total`]; delete current[`${id}_current`]; delete current[`${id}_type`]; delete current[`${id}_completed`]; delete current[`${id}_rewardClaimed`]; });
                 }
-                const ALLOWED = ['pseudo', 'version', 'settings', 'tutorial_menu_principal_completed', 'lastLoginDay', 'lastDoubleXPCheck', 'musicAllowed', 'autoplayEnabled', 'pass_last_notified_level', 'characterToImprove', 'tropheesMax', 'victoires', 'defaites', 'manches_max', 'classicGames', 'survivalGames', 'quest_daily_cycle', 'quest_weekly_cycle', 'daily_reward_claim_id', 'weekly_chest_claim_id', 'weekend_bonus_claimed', 'quetes_jour', 'quetes_weekend', 'weekend_period_start', 'quetes_genere', 'equipments', 'characters', 'musicVolume'];
+                const ALLOWED = ['pseudo', 'version', 'settings', 'tutorial_menu_principal_completed', 'lastLoginDay', 'lastDoubleXPCheck', 'musicAllowed', 'autoplayEnabled', 'pass_last_notified_level', 'characterToImprove', 'victoires', 'defaites', 'manches_max', 'classicGames', 'survivalGames', 'quest_daily_cycle', 'quest_weekly_cycle', 'daily_reward_claim_id', 'weekly_chest_claim_id', 'weekend_bonus_claimed', 'quetes_jour', 'quetes_weekend', 'weekend_period_start', 'quetes_genere', 'equipments', 'characters', 'musicVolume'];
                 Object.keys(newData).forEach(key => {
                     if (ALLOWED.includes(key)) current[key] = newData[key];
                     else if (['quete', 'weekend-quete', 'Semaine'].some(p => key.startsWith(p))) {
@@ -803,14 +803,21 @@ app.post('/api/trophy/claim', verifyToken, async (req, res) => {
     const userRef = db.collection('users').doc(userId);
     const ms = parseInt(milestone);
 
+    if (isNaN(ms) || ms < 0) return res.status(400).json({ error: "Milestone invalide" });
+
     try {
         const userData = await db.runTransaction(async (t) => {
             const doc = await t.get(userRef);
             const userData = doc.exists ? doc.data() : null;
             
-            if (!userData || userData[`trophy_claimed_${ms}`] || (userData.trophees || 0) < ms) throw new Error("Invalide");
+            if (!userData) throw new Error("Utilisateur introuvable");
+            if (userData[`trophy_claimed_${ms}`]) throw new Error("Déjà réclamé");
+            if ((userData.trophees || 0) < ms) throw new Error("Trophées insuffisants");
             
             let config = TROPHY_ROAD.find(m => m.trophies === ms) || getProceduralTrophyReward(ms);
+            
+            if (!config) throw new Error("Récompense inexistante");
+
             config.rewards.forEach(r => {
                 if (r.type === 'coins') userData.argent = (userData.argent || 0) + r.amount;
                 if (r.type === 'item') { const p = ITEM_PROPERTY_MAP[r.id]; if (p) userData[p] = (userData[p] || 0) + r.amount; }
@@ -823,7 +830,10 @@ app.post('/api/trophy/claim', verifyToken, async (req, res) => {
         });
         res.json({ success: true, userData });
     } catch (e) {
-        if (e.message === "Invalide") return res.status(400).json({ error: e.message });
+        if (e.message === "Utilisateur introuvable" || e.message === "Déjà réclamé" || e.message === "Trophées insuffisants" || e.message === "Récompense inexistante") {
+            return res.status(400).json({ error: e.message });
+        }
+        console.error("[TROPHY CLAIM ERROR]", e);
         res.status(500).json({ error: "Erreur interne" });
     }
 });
