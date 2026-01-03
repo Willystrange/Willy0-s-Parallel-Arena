@@ -40,6 +40,10 @@ try {
         // Option 3: Fichier local standard
         serviceAccount = require("./serviceAccountKey.json");
         console.log("[FIREBASE] Chargement via fichier local serviceAccountKey.json");
+    } else if (fs.existsSync('/etc/secrets/serviceAccountKey.json')) {
+        // Option 4: Render Secret Files (Chemin standard)
+        serviceAccount = require("/etc/secrets/serviceAccountKey.json");
+        console.log("[FIREBASE] Chargement via Render Secret File (/etc/secrets/serviceAccountKey.json)");
     }
 
     if (serviceAccount) {
