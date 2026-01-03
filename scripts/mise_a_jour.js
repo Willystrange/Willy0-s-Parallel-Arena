@@ -266,5 +266,27 @@ App.mise_a_jour = async function() {
   setTimeout(() => { loadPage('intro'); }, 8000);
 }
 
-// Lancement de la procédure
-App.mise_a_jour();
+// Lancement de la procédure avec récupération dynamique de la version
+App.initMiseAJour = async function() {
+    try {
+        const res = await fetch('/api/version');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.version) {
+                App.game_version = data.version;
+                console.log("[Update] Version serveur récupérée :", App.game_version);
+            }
+        }
+    } catch(e) {
+        console.warn("[Update] Impossible de récupérer la version serveur. Utilisation du fallback.");
+    }
+    
+    // Si la version n'est toujours pas définie, fallback sécurisé
+    if (!App.game_version || App.game_version === 'VERSION_PLACEHOLDER') {
+         App.game_version = 'B2.2.1.20'; 
+    }
+    
+    App.mise_a_jour();
+};
+
+App.initMiseAJour();

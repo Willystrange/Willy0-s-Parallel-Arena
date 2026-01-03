@@ -220,20 +220,9 @@ function getGameVersion() {
     return packageJson.gameVersion || packageJson.version;
 }
 
-// --- VERSION INJECTION FOR APP.JS ---
-app.get('/scripts/app.js', (req, res) => {
-    const appJsPath = path.join(__dirname, 'scripts', 'app.js');
-    fs.readFile(appJsPath, 'utf8', (err, data) => {
-        if (err) {
-            console.error("Error reading app.js:", err);
-            return res.status(404).send('Script not found');
-        }
-        const version = getGameVersion();
-        // Replace the hardcoded version with the one from package.json
-        const updatedData = data.replace(/App\.game_version\s*=\s*['"][^'"]*['"];/, `App.game_version = '${version}';`);
-        res.set('Content-Type', 'application/javascript');
-        res.send(updatedData);
-    });
+// --- PUBLIC VERSION ENDPOINT ---
+app.get('/api/version', (req, res) => {
+    res.json({ version: getGameVersion() });
 });
 
 app.use(express.static(__dirname));

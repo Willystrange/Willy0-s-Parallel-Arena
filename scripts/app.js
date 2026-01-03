@@ -2,6 +2,17 @@ var App = window.App = window.App || {};
 
 App.game_version = 'VERSION_PLACEHOLDER';
 
+// Récupération immédiate de la version réelle
+fetch('/api/version')
+    .then(r => r.json())
+    .then(d => { 
+        if(d.version) {
+            App.game_version = d.version;
+            console.log("[App] Version chargée :", App.game_version);
+        }
+    })
+    .catch(e => console.warn("[App] Version non disponible (offline ?)", e));
+
 // --- INITIALISATION FIREBASE IMMEDIATE ---
 window.firebaseConfig = {
   apiKey: "AIzaSyAwIIKfoYwdtFD63yKhVggZOAnooQion-M",
