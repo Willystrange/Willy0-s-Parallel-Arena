@@ -31,7 +31,6 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
         // En local, cela fonctionnera SEULEMENT si "localhost" est ajouté aux domaines autorisés dans la console Google reCAPTCHA
         // Sinon, vous aurez des erreurs "Invalid domain" dans la console JS, mais c'est le comportement attendu si on force l'activation.
         
-        console.log("[reCAPTCHA] Chargement du script Standard sur " + window.location.hostname);
         const script = document.createElement('script');
         script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
         script.async = true;
@@ -785,7 +784,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (isConnected) {
     const userData = localStorage.getItem('userData');
     if (userData) {
-        console.log("Session restored, skipping intro.");
         
         // Tentative de rafraîchissement des données en arrière-plan (si Firebase init déjà fait ou se fera via onAuthStateChanged)
         if (typeof firebase !== 'undefined' && firebase.auth) {

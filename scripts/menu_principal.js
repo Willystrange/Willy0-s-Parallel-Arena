@@ -171,7 +171,6 @@ App.loadTrophyRoadData = function() {
         .then(response => response.json())
         .then(data => {
             App.trophyRoadRewardsData = data;
-            console.log("Données de la route des trophées chargées.");
             App.updateTrophyProgress(); // Mettre à jour l'affichage une fois chargé
         })
         .catch(err => console.error("Erreur chargement trophées:", err));
