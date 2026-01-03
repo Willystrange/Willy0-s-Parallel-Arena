@@ -2,7 +2,7 @@
   "tutorial": [
     {
       "elementId": "playButton",
-      "text": "Click here to choose a game mode and start a part.
+      "text": "Click here to choose a game mode and start a part."
     },
     {
       "elementId": "questsButton",
@@ -24,7 +24,7 @@
   "gameModeExplanations": {
     "classique": {
       "title": "Classic game mode",
-      "text": "Face opponents in balanced fights. The objective is to put health points of your opponent to 0.
+      "text": "Face opponents in balanced fights. The objective is to put health points of your opponent to 0."
     },
     "survie": {
       "title": "Survival game mode",
@@ -41,7 +41,7 @@
   },
   "ui": {
       "next": "Next",
-      "finish": "Fiish",
+      "finish": "Finish",
       "weekend_available": "Available !",
       "weekend_button": "Weekend",
       "rewards_max": "You're at the top !",
