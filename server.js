@@ -174,6 +174,13 @@ async function verifyToken(req, res, next) {
         if (req.path === '/api/config/maintenance' || req.path === '/api/news') return next();
         return res.status(401).json({ error: "Authentification requise" });
     }
+
+    // BYPASS: Si on est en mode local sans clé (Mock DB), on accepte tout le monde
+    if (isDbMocked) {
+        req.uid = "local_dev_user"; 
+        return next();
+    }
+
     try {
         const decodedToken = await admin.auth().verifyIdToken(authHeader.split('Bearer ')[1]);
         req.uid = decodedToken.uid;
