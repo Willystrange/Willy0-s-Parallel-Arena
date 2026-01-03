@@ -2,49 +2,49 @@
   "tutorial": [
     {
       "elementId": "playButton",
-      "text": "Cliquez ici pour choisir un mode de jeu et commencer une partie."
+      "text": "Click here to choose a game mode and start a part.
     },
     {
       "elementId": "questsButton",
-      "text": "Consultez vos quêtes quotidiennes, hebdomadaires et spéciales ici pour gagner des récompenses."
+      "text": "Check your daily, weekly, and special quests here to earn rewards."
     },
     {
       "elementId": "inventoryButton",
-      "text": "Accédez à votre inventaire pour voir les objets que vous avez collectés."
+      "text": "Access to your inventory to see the objects you've collected"
     },
     {
       "elementId": "header",
-      "text": "Faites glisser cette barre vers le bas pour voir vos statistiques détaillées."
+      "text": "Drag this bar down to see your detailed stats."
     },
     {
       "elementId": "header",
-      "text": "Faites-la glisser vers le haut pour la remonter. Essayez maintenant !"
+      "text": "Slide it up to pull it up. Try it now !"
     }
   ],
   "gameModeExplanations": {
     "classique": {
-      "title": "Mode Classique",
-      "text": "Affrontez des adversaires contrôlés par l'ordinateur dans des combats équilibrés. L'objectif est de réduire les points de vie de votre adversaire à zéro."
+      "title": "Classic game mode",
+      "text": "Face opponents in balanced fights. The objective is to put health points of your opponent to 0.
     },
     "survie": {
-      "title": "Mode Survie",
-      "text": "Testez votre endurance ! Affrontez des vagues d'ennemis de plus en plus puissants. Combien de manches pourrez-vous survivre ?"
+      "title": "Survival game mode",
+      "text": "Test your endurance ! Face waves of increasingly powerful opponents. How many rounds will you be able to survive ?"
     },
     "classique-weeknd": {
-      "title": "Mode Classique Weekend",
-      "text": "Un mode spécial disponible uniquement le week-end ! Profitez de bonus uniques et de récompenses accrues. Les règles de base sont similaires au mode Classique."
+      "title": "Classic weekend mode",
+      "text": "A special game mode who is only available in weekend ! Enjoy unique bonuses and more rewards. The basic rules are the same as the classic game mode."
     }
   },
   "connectionStatus": {
-    "online": "En ligne",
-    "offline": "Hors ligne - échec de connexion au serveur"
+    "online": "Online",
+    "offline": "Offline - Failure to connect to the server."
   },
   "ui": {
-      "next": "Suivant",
-      "finish": "Terminer",
-      "weekend_available": "Disponible !",
-      "weekend_button": "Week-end",
-      "rewards_max": "Vous êtes au sommet !",
-      "next_reward_at": "Prochaine récompense à {threshold} trophées : {rewards}"
+      "next": "Next",
+      "finish": "Fiish",
+      "weekend_available": "Available !",
+      "weekend_button": "Weekend",
+      "rewards_max": "You're at the top !",
+      "next_reward_at": "Next reward at {threshold} trophies : {rewards}"
   }
 }
