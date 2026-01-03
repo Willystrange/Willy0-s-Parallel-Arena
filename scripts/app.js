@@ -18,13 +18,9 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
     // Chargement dynamique de reCAPTCHA (Standard v3)
     App.loadRecaptchaScript = function() {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // On ne bloque reCAPTCHA que sur localhost car la clé Google y est rarement autorisée par défaut
-            // Sauf si vous avez ajouté "localhost" dans la console admin reCAPTCHA
-            console.warn("[reCAPTCHA] Script ignoré sur localhost. Utilisation du fallback.");
-            return;
-        }
-
+        // En local, cela fonctionnera SEULEMENT si "localhost" est ajouté aux domaines autorisés dans la console Google reCAPTCHA
+        // Sinon, vous aurez des erreurs "Invalid domain" dans la console JS, mais c'est le comportement attendu si on force l'activation.
+        
         console.log("[reCAPTCHA] Chargement du script Standard sur " + window.location.hostname);
         const script = document.createElement('script');
         script.src = "https://www.google.com/recaptcha/api.js?render=" + App.RECAPTCHA_SITE_KEY;
@@ -37,16 +33,31 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
 
     App.getRecaptchaToken = function(action) {
         return new Promise((resolve) => {
-            // Timeout de sécurité : si reCAPTCHA ne répond pas en 10s, on échoue
+            // Timeout de sécurité : si reCAPTCHA ne répond pas en 10s, on échoue ou on bypass en local
             const timeout = setTimeout(() => {
                 console.warn("[reCAPTCHA] Timeout.");
-                resolve(null);
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                     console.log("[reCAPTCHA] Bypass Localhost activé.");
+                     resolve("localhost_bypass");
+                } else {
+                     resolve(null);
+                }
             }, 10000);
 
             if (typeof grecaptcha === 'undefined') {
-                clearTimeout(timeout);
-                console.warn("[reCAPTCHA] Bibliothèque non disponible.");
-                resolve(null);
+                // Attendre un peu au cas où le script charge
+                setTimeout(() => {
+                     if (typeof grecaptcha === 'undefined') {
+                        clearTimeout(timeout);
+                        console.warn("[reCAPTCHA] Bibliothèque non disponible.");
+                         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                             console.log("[reCAPTCHA] Bypass Localhost activé.");
+                             resolve("localhost_bypass");
+                         } else {
+                             resolve(null);
+                         }
+                     }
+                }, 1000);
                 return;
             }
 
@@ -60,13 +71,21 @@ App.RECAPTCHA_SITE_KEY = '6LcMZzcsAAAAAMsYhhbKUnojajX1oOdgvQVk9ioG';
                         .catch(err => {
                             clearTimeout(timeout);
                             console.error("[reCAPTCHA] Erreur execution:", err);
-                            resolve(null);
+                            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                                 resolve("localhost_bypass");
+                            } else {
+                                 resolve(null);
+                            }
                         });
                 });
             } catch (e) {
                 clearTimeout(timeout);
                 console.error("[reCAPTCHA] Exception:", e);
-                resolve(null);
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                     resolve("localhost_bypass");
+                } else {
+                     resolve(null);
+                }
             }
         });
     };

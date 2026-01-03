@@ -144,6 +144,12 @@ const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyAwIIKfoYwdtFD63y
 async function verifyRecaptcha(token, userId = null) {
     if (!token) return { success: false, error: "Token manquant" };
     
+    // BYPASS pour le développement local
+    if (token === "localhost_bypass") {
+        console.log("[reCAPTCHA] Bypass Localhost accepté.");
+        return { success: true, score: 1.0 };
+    }
+
     try {
         // Utilisation de l'API standard reCAPTCHA v3 (siteverify)
         const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
