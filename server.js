@@ -472,9 +472,18 @@ app.get('/api/check-pseudo/:pseudo', async (req, res) => {
 });
 app.get('/api/data/equipments', (req, res) => res.json(EQUIPMENTS_DATA));
 app.get('/api/data/characters', (req, res) => res.json(CHARACTERS_DATA));
-app.get('/api/data/localization', (req, res) => {
+app.get('/api/data/localization/:lang?', (req, res) => {
     try {
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'localization.json'), 'utf8'));
+        const lang = req.params.lang || 'fr';
+        // Security: allow only alphanumeric characters to prevent directory traversal
+        const safeLang = lang.replace(/[^a-z0-9]/gi, '');
+        let filePath = path.join(__dirname, 'data', `${safeLang}.json`);
+
+        if (!fs.existsSync(filePath)) {
+            filePath = path.join(__dirname, 'data', 'fr.json');
+        }
+
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         res.json(data);
     } catch (e) {
         res.status(500).json({ error: "Localization missing" });

@@ -15,7 +15,15 @@ document.body.appendChild(App.connectionStatus);
 App.introLocalization = null;
 
 // Charger la localisation pour l'intro
-fetch('/api/data/localization')
+const userDataStr = localStorage.getItem('userData');
+let lang = 'fr';
+if (userDataStr) {
+    try {
+        lang = JSON.parse(userDataStr).language || 'fr';
+    } catch(e) {}
+}
+
+fetch(`/api/data/localization/${lang}`)
     .then(res => res.json())
     .then(data => {
         App.introLocalization = data;

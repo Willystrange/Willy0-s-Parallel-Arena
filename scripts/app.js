@@ -645,6 +645,7 @@ function getUserData() {
       classicGames: 0,
       music: true,
       musicVolume: 0.5,
+      language: "fr",
       dailyClaims: {},
       equipments: [],
       characters: {},

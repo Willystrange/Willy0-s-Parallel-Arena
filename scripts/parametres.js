@@ -314,6 +314,35 @@ App.initBackupInterface = function() {
     App.logout();
   });
 
+  // Gestion de la langue
+  const languageButton = document.getElementById('languageButton');
+  if (languageButton) {
+      const userData = getUserData();
+      const currentLang = userData.language || 'fr';
+      
+      const updateButtonText = (lang) => {
+          const label = lang === 'fr' ? 'Français' : 'English';
+          languageButton.innerHTML = `Langue: ${label} <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; margin-left: 5px;">Bêta</span>`;
+      };
+      
+      updateButtonText(currentLang);
+
+      languageButton.addEventListener('click', () => {
+          const userData = getUserData();
+          const current = userData.language || 'fr';
+          const next = current === 'fr' ? 'en' : 'fr';
+          
+          userData.language = next;
+          saveUserData(userData);
+          
+          if (next !== 'fr') {
+              alert("⚠️ Attention : La version anglaise est en Bêta. \n\nLes traductions peuvent être manquantes ou incorrectes sur certaines pages.");
+          }
+          
+          location.reload();
+      });
+  }
+
   // Gestion du volume
   const volumeSlider = document.getElementById('volumeSlider');
   if (volumeSlider) {
