@@ -58,16 +58,38 @@ try {
 
 // Sécurisation de l'accès DB pour éviter le crash immédiat au démarrage si init échoué
 let db;
+let isDbMocked = false;
+
+// Helper pour le Mock DB
+const mockChainable = () => ({
+    where: () => mockChainable(),
+    orderBy: () => mockChainable(),
+    limit: () => mockChainable(),
+    get: async () => ({ empty: true, forEach: () => {}, docs: [], exists: false, data: () => ({}) }),
+    doc: () => ({ 
+        get: async () => ({ exists: false, data: () => null }), 
+        set: async () => {}, 
+        update: async () => {},
+        delete: async () => {} 
+    }),
+    add: async () => ({ id: 'mock_id' }),
+    set: async () => {}
+});
+
 try {
     if (admin.apps.length > 0) {
         db = admin.firestore();
     } else {
-        console.error("[FIREBASE] Pas d'application initialisée. DB non disponible.");
-        // Mock DB pour éviter crash immédiat sur db.collection (optionnel, ou laisser crash plus tard)
-        db = { collection: () => ({ doc: () => ({ get: async () => ({ exists: false }), set: async () => {} }) }) };
+        console.error("[FIREBASE] Pas d'application initialisée. DB non disponible (Mode Mock).");
+        isDbMocked = true;
+        db = { 
+            collection: () => mockChainable(),
+            runTransaction: async (cb) => { throw new Error("Database unavailable in local mode (no credentials)."); }
+        };
     }
 } catch (e) {
     console.error("[FIREBASE] Erreur acces Firestore:", e);
+    isDbMocked = true;
 }
 
 const app = express();
@@ -1524,7 +1546,11 @@ app.post('/api/admin/maintenance', verifyToken, verifyAdmin, async (req, res) =>
 // --- START ---
 server.listen(PORT, '0.0.0.0', async () => {
     console.log(`🚀 SERVEUR FULL OP SUR PORT ${PORT}`);
-    await cleanupDatabase();
+    if (!isDbMocked) {
+        await cleanupDatabase();
+    } else {
+        console.warn("[DB] Cleanup skipped because DB is mocked (Local Mode).");
+    }
 });
 
 // --- DATABASE CLEANUP & MIGRATION ---
