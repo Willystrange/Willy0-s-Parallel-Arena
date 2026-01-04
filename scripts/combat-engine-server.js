@@ -4,23 +4,18 @@
 const fs = require('fs');
 const path = require('path');
 
-const ABILITIES_FILE = path.join(__dirname, '../data/abilities.json');
-let ABILITIES_DATA = {};
-try {
-    if (fs.existsSync(ABILITIES_FILE)) {
-        ABILITIES_DATA = JSON.parse(fs.readFileSync(ABILITIES_FILE, 'utf8'));
-    }
-} catch (e) {
-    console.error("Error loading abilities data:", e);
-}
+// Chargement des traductions
+const TRANSLATIONS = {
+    fr: loadJSON('../data/fr.json'),
+    en: loadJSON('../data/en.json')
+};
 
-// Helper for formatting logs
-function formatLog(template, params) {
-    let text = template || "";
-    for (const key in params) {
-        text = text.replace(new RegExp(`{${key}}`, 'g'), params[key]);
-    }
-    return text;
+function loadJSON(relativePath) {
+    try {
+        const absPath = path.join(__dirname, relativePath);
+        if (fs.existsSync(absPath)) return JSON.parse(fs.readFileSync(absPath, 'utf8'));
+    } catch (e) { console.error("Error loading JSON:", relativePath, e); }
+    return {};
 }
 
 // --- Q-LEARNING AGENT INTEGRATION (SERVER-SIDE) ---
@@ -168,22 +163,24 @@ const aiAgent = new QLearningAgent();
 // ------------------------------------------------------------------------------------------------
 
 const combatEngine = {
-    effectNames: {
-        'orbe_siphon_effect': "Gain d'énergie réduit",
-        'purge_spirituelle': "Purge Spirituelle",
-        'diva_special': "Attaque réduite",
-        'poulpy_special': "Défense fragilisée",
-        'oiseau_special': "Défense renforcée",
-        'colorina_special': "Défense affaiblie",
-        'sboonie_special': "Attaque affaiblie",
-        'inconnu_buff_att': "Attaque augmentée",
-        'inconnu_buff_def': "Défense augmentée",
-        'perro_special': "Défense perforée",
-        'nautilus_debuff': "Défense brisée",
-        'epee_tranchante': "Bonus de l'Épée Tranchante",
-        'elixir_puissance': "Bonus de l'Elixir de Puissance",
-        'armure_fer_debuff': "Malus de l'Armure de Fer",
-        'bouclier_solide': "Bonus du Bouclier Solide",
+    // Fonction de traduction interne
+    t(key, params = {}, lang = 'fr') {
+        const dict = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
+        
+        // Support clés imbriquées (ex: "server_logs.turn")
+        const keys = key.split('.');
+        let value = dict;
+        for (const k of keys) {
+            value = value ? value[k] : null;
+        }
+
+        if (!value) return key;
+
+        let text = value;
+        for (const p in params) {
+            text = text.replace(new RegExp(`{${p}}`, 'g'), params[p]);
+        }
+        return text;
     },
 
     getEffectiveStat(character, statName) {
@@ -253,21 +250,23 @@ const combatEngine = {
     },
 
     isFemale(name) { return ["Diva", "Rosalie", "Doudou", "Colorina"].includes(name); },
-    getPronoun(name, capitalize = true) { const p = this.isFemale(name) ? "elle" : "il"; return capitalize ? p.charAt(0).toUpperCase() + p.slice(1) : p; },
     getAgreement(name) { return this.isFemale(name) ? "e" : ""; },
 
     updateTour(player, opponent, isPlayer, results) {
         player.tourTT = (player.tourTT || 0) + 1;
-        results.logs.push({ text: 'Tour ' + player.tourTT, color: 'grey', side: 'milieu' });
+        const lang = results.lang || 'fr';
+        results.logs.push({ text: this.t('server_logs.turn', { n: player.tourTT }, lang), color: 'grey', side: 'milieu' });
     },
 
     passerTour(character, results) {
+        const lang = results.lang || 'fr';
         if (character.effects && character.effects.length > 0) {
             character.effects = character.effects.filter(effect => {
                 if (effect.duration !== 999) effect.duration--;
                 if (effect.duration <= 0) {
-                    const effectName = this.effectNames[effect.id] || effect.id;
-                    results.logs.push({ text: `L'effet "${effectName}" sur ${character.name} est terminé.`, color: 'grey', side: 'milieu' });
+                    // Traduction du nom de l'effet
+                    const effectName = this.t(`effects.${effect.id}`, {}, lang);
+                    results.logs.push({ text: this.t('server_logs.effect_end', { effect: effectName, name: character.name }, lang), color: 'grey', side: 'milieu' });
                     return false;
                 }
                 return true;
@@ -280,130 +279,144 @@ const combatEngine = {
         if (character.cursed) {
             const damage = Math.round((character.pv_maximum || character.pv_max) * 0.02);
             character.pv = Math.max(0, character.pv - damage);
-            results.logs.push({ text: `${character.name} est maudit${this.getAgreement(character.name)} et perd ${damage} PV !`, color: 'red', side: 'milieu' });
+            const agreement = this.getAgreement(character.name);
+            results.logs.push({ text: this.t('server_logs.cursed', { name: character.name, damage: damage, agreement: agreement }, lang), color: 'red', side: 'milieu' });
         }
         if (character.blessed) {
             const heal = Math.round((character.pv_maximum || character.pv_max) * 0.02);
             character.pv = Math.min((character.pv_maximum || character.pv_max), character.pv + heal);
-            results.logs.push({ text: `${character.name} est béni${this.getAgreement(character.name)} et regagne ${heal} PV !`, color: 'lightgreen', side: 'milieu' });
+            const agreement = this.getAgreement(character.name);
+            results.logs.push({ text: this.t('server_logs.blessed', { name: character.name, heal: heal, agreement: agreement }, lang), color: 'lightgreen', side: 'milieu' });
         }
     },
 
     applyItem(game, itemName, results) {
         const player = game.player;
         const opponent = game.opponent;
+        const lang = results.lang || 'fr';
         player.objets_partie = (player.objets_partie || 0) + 1;
         player.objets_utilise = 1;
-        let logText = `${itemName} utilisé !`;
+        let logText = this.t('server_logs.item_used', { item: itemName }, lang);
+        
         switch (itemName) {
             case 'Potion de Santé':
                 player.pv = Math.min((player.pv_maximum || player.pv_max), player.pv + 1100);
                 player.soin = (player.soin || 0) + 1100;
                 player.objets_soin = (player.objets_soin || 0) + 1;
-                logText = `Vous utilisez une Potion de Santé et récupérez 1100 PV.`;
+                logText = this.t('server_logs.potion_use', {}, lang);
                 break;
             case 'Amulette de Régénération':
                 player.amulette_soin = 1;
                 player.objets_soin = (player.objets_soin || 0) + 1;
-                logText = `Vous équipez l'Amulette de Régénération.`;
+                logText = this.t('server_logs.amulet_equip', {}, lang);
                 break;
             case 'Épée Tranchante':
                 this.addEffect(player, { id: 'epee_tranchante', stat: 'attaque', type: 'multiplicative', value: 1.05, duration: 999 });
-                logText = `Vous utilisez une Épée Tranchante (+5% Attaque).`;
+                logText = this.t('server_logs.sword_use', {}, lang);
                 break;
             case 'Elixir de Puissance':
                 this.addEffect(player, { id: 'elixir_puissance', stat: 'attaque', type: 'additive', value: 50, duration: 999 });
-                logText = `Vous buvez un Elixir de Puissance (+50 Attaque).`;
+                logText = this.t('server_logs.elixir_use', {}, lang);
                 break;
             case 'Armure de Fer':
                 this.addEffect(opponent, { id: 'armure_fer_debuff', stat: 'attaque', type: 'multiplicative', value: 0.90, duration: 3 });
-                logText = `Vous utilisez une Armure de Fer. L'attaque de l'adversaire est réduite de 10%.`;
+                logText = this.t('server_logs.armor_use', {}, lang);
                 break;
             case 'Bouclier solide':
                 this.addEffect(player, { id: 'bouclier_solide', stat: 'defense', type: 'additive', value: 15, duration: 999 });
-                logText = `Vous équipez un Bouclier Solide (+15 Défense).`;
+                logText = this.t('server_logs.shield_equip', {}, lang);
                 break;
             case 'Marque de Chasseur':
                  this.addEffect(player, { id: 'marque_chasseur', stat: 'critique', type: 'additive', value: 100, duration: 1});
-                 logText = `Vous utilisez Marque de Chasseur (Critique garanti).`;
+                 logText = this.t('server_logs.hunter_mark_use', {}, lang);
                  break;
             case 'Orbe de Siphon':
                  this.addEffect(opponent, { id: 'orbe_siphon_effect', value: 0.5, duration: 3 });
-                 logText = `Vous utilisez l'Orbe de Siphon.`;
+                 logText = this.t('server_logs.siphon_use', {}, lang);
                  break;
             case 'Purge Spirituelle':
                  const negIds = ['diva_special', 'poulpy_special', 'colorina_special', 'sboonie_special', 'perro_special', 'nautilus_debuff', 'armure_fer_debuff', 'focalisateur_debuff', 'riposte_affaiblie', 'boompy_surcharge_instable', 'frostbite_debuff_def', 'inferno_debuff_att', 'thunderstrike_debuff_att', 'stormbringer_debuff_def', 'earthshaker_debuff_def', 'paradoxe_assaut_def', 'paradoxe_garde_att', 'curse_effect', 'fragile_armor_effect'];
                 player.effects = player.effects.filter(e => !negIds.includes(e.id));
-                logText = `Vous utilisez Purge Spirituelle.`;
+                logText = this.t('server_logs.purge_use', {}, lang);
                 break;
             case 'Crystal de renouveau':
                 player.spe = Math.min(1, player.spe + 0.8);
-                logText = `Vous utilisez un Crystal de renouveau (+80% Spécial).`;
+                logText = this.t('server_logs.crystal_use', {}, lang);
                 break;
             case "Cape de l'ombre":
                 player.cape = true;
-                logText = `Vous utilisez la Cape de l'ombre.`;
+                logText = this.t('server_logs.cape_use', {}, lang);
                 break;
         }
         results.logs.push({ text: logText, color: 'white', side: 'milieu' });
     },
 
     handleAttack(attacker, defender, isPlayer, results) {
+        const lang = results.lang || 'fr';
         const logColor = 'white';
-        const pronoun = this.getPronoun(attacker.name);
-        const agreement = this.getAgreement(attacker.name);
         let gainSpe = 0.25;
         if (["Doudou", "Diva", "Cocobi"].includes(attacker.name)) gainSpe = 0.20;
         if (["Boompy"].includes(attacker.name)) gainSpe = 0.34;
         
-        // Weekend Event: Chargement /2 (Double speed)
         if (attacker.fastCharge) gainSpe *= 2;
 
         const siphon = attacker.effects && attacker.effects.find(e => e.id === 'orbe_siphon_effect');
         if (siphon) gainSpe *= siphon.value;
         attacker.spe = Math.min(1, attacker.spe + gainSpe);
 
-        if (attacker.immobilisation > 0) { results.logs.push({ text: `${attacker.name} est immobilisé${agreement} !`, color: logColor, side: isPlayer }); return; }
-        if (defender.cape) { results.logs.push({ text: `${attacker.name} rate sa cible à cause de la cape de l'ombre !`, color: logColor, side: isPlayer }); return; }
+        if (attacker.immobilisation > 0) { 
+            const agreement = this.getAgreement(attacker.name);
+            results.logs.push({ text: this.t('server_logs.immobilized', { name: attacker.name, agreement: agreement }, lang), color: logColor, side: isPlayer }); 
+            return; 
+        }
+        if (defender.cape) { 
+            results.logs.push({ text: this.t('server_logs.missed_cape', { name: attacker.name }, lang), color: logColor, side: isPlayer }); 
+            return; 
+        }
 
         const { damage, isCritical, isGuaranteedCrit } = this.calculateDamage(attacker, defender, true);
         let finalDamage = damage;
         if (isCritical) attacker.coups_critiques_partie = (attacker.coups_critiques_partie || 0) + 1;
-        if ((attacker.equipments || []).includes('bottes_initie') && !attacker.bottesInitieUsed) { finalDamage += 10; attacker.bottesInitieUsed = true; results.logs.push({ text: `${attacker.name} inflige 10 dégâts bonus (Bottes de l'initié) !`, color: 'cyan', side: isPlayer }); }
+        if ((attacker.equipments || []).includes('bottes_initie') && !attacker.bottesInitieUsed) { 
+            finalDamage += 10; 
+            attacker.bottesInitieUsed = true; 
+            results.logs.push({ text: this.t('server_logs.bonus_boots', { name: attacker.name }, lang), color: 'cyan', side: isPlayer }); 
+        }
 
         if (defender.defense_bouton === 1) {
             defender.defense_bouton = 0;
             finalDamage = Math.round(this.getEffectiveStat(attacker, 'attaque') * 0.2);
-            results.logs.push({ text: `${defender.name} s'est défendu de votre attaque !`, color: logColor, side: !isPlayer });
+            results.logs.push({ text: this.t('server_logs.defended', { name: defender.name }, lang), color: logColor, side: !isPlayer });
         }
 
         defender.pv = Math.max(0, defender.pv - finalDamage);
         attacker.degats_partie = (attacker.degats_partie || 0) + finalDamage;
 
         let text = "";
-        if (isPlayer) {
-            if (isGuaranteedCrit) text = `Grâce au Manteau de la Vengeance, vous lancez une attaque critique garantie ! Vous infligez ${finalDamage} points de dégâts à ${defender.name}.`;
-            else if (isCritical) text = `Vous attaquez et faites un coup critique ! Vous infligez ${finalDamage} points de dégâts à ${defender.name}.`;
-            else text = `Vous attaquez et infligez ${finalDamage} points de dégâts à ${defender.name}.`;
-        } else {
-            if (isGuaranteedCrit) text = `Grâce au Manteau de la Vengeance, ${attacker.name} lance une attaque critique garantie ! ${pronoun} inflige ${finalDamage} points de dégâts.`;
-            else if (isCritical) text = `${attacker.name} attaque et fait un coup critique ! ${pronoun} inflige ${finalDamage} points de dégâts.`;
-            else text = `${attacker.name} attaque et inflige ${finalDamage} points de dégâts.`;
-        }
+        const role = isPlayer ? 'player' : 'opponent';
+        const params = { attacker: attacker.name, defender: defender.name, damage: finalDamage };
+
+        if (isGuaranteedCrit) text = this.t(`server_logs.attack_guaranteed_crit_${role}`, params, lang);
+        else if (isCritical) text = this.t(`server_logs.attack_crit_${role}`, params, lang);
+        else text = this.t(`server_logs.attack_normal_${role}`, params, lang);
+
         results.logs.push({ text, color: logColor, side: isPlayer });
-        if ((defender.equipments || []).includes('armure_epines')) { attacker.pv -= 5; results.logs.push({ text: `${defender.name} renvoie 5 dégâts (Armure à épines) !`, color: 'orange', side: !isPlayer }); }
+        if ((defender.equipments || []).includes('armure_epines')) { 
+            attacker.pv -= 5; 
+            results.logs.push({ text: this.t('server_logs.thorns_reflect', { name: defender.name }, lang), color: 'orange', side: !isPlayer }); 
+        }
     },
 
     applySpecialAbility(character, opponent, isPlayer, results) {
+        const lang = results.lang || 'fr';
         const logColor = 'white';
         let damage = 0;
         let text = "";
-        const data = ABILITIES_DATA[character.name] || ABILITIES_DATA["Default"];
 
         if (opponent.defense_bouton === 1 || opponent.isCountering) {
             opponent.defense_bouton = 0; opponent.isCountering = false; character.spe = 0;
             if (!isPlayer) opponent.special_countered_partie = (opponent.special_countered_partie || 0) + 1;
-            results.logs.push({ text: `${character.name} utilise sa capacité spéciale mais ${opponent.name} l'anticipe et l'annule !`, color: logColor, side: isPlayer });
+            results.logs.push({ text: this.t('server_logs.special_countered', { name: character.name, opponent: opponent.name }, lang), color: logColor, side: isPlayer });
             return;
         }
         character.spe = 0;
@@ -416,91 +429,91 @@ const combatEngine = {
                 this.addEffect(opponent, { id: 'diva_special', stat: 'attaque', type: 'multiplicative', value: 0.75, duration: 3 });
                 const effAtt = this.getEffectiveStat(opponent, 'attaque');
                 damage = this.calculateDamage(character, opponent, false).damage;
-                text = formatLog(data.log, { ...commonParams, stat_val: effAtt, damage: damage });
+                text = this.t('abilities.Diva', { ...commonParams, stat_val: effAtt, damage: damage }, lang);
                 break;
             case "Willy":
                 for (let i = 0; i < 3; i++) damage += this.calculateDamage(character, opponent, false).damage;
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Willy', { ...commonParams, damage: damage }, lang);
                 break;
             case "Baleine":
                 character.pv = Math.min(character.pv_maximum, character.pv + 1000);
                 damage = this.calculateDamage(character, opponent, false).damage;
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Baleine', { ...commonParams, damage: damage }, lang);
                 break;
             case "Doudou":
                 const regen = Math.ceil(character.pv * (character.pv < character.pv_maximum / 2 ? 0.15 : 0.05));
                 character.pv = Math.min(character.pv_maximum, character.pv + regen);
                 damage = this.calculateDamage(character, opponent, false).damage;
-                text = formatLog(data.log, { ...commonParams, regen: regen, damage: damage });
+                text = this.t('abilities.Doudou', { ...commonParams, regen: regen, damage: damage }, lang);
                 break;
             case "Cocobi":
                 damage = Math.ceil(opponent.pv_maximum * 0.12);
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Cocobi', { ...commonParams, damage: damage }, lang);
                 break;
             case "Coeur":
                 damage = Math.round(this.getEffectiveStat(character, 'attaque') * 1.5);
                 const heal = Math.round(damage * (character.pv > character.pv_maximum / 2 ? 0.1 : 0.15));
                 character.pv = Math.min(character.pv_maximum, character.pv + heal);
                 opponent.pv -= damage;
-                text = formatLog(data.log, { ...commonParams, damage: damage, heal: heal });
+                text = this.t('abilities.Coeur', { ...commonParams, damage: damage, heal: heal }, lang);
                 break;
             case "Grours":
                 damage = (500 + this.getEffectiveStat(character, 'attaque')) - Math.round(this.getEffectiveStat(opponent, 'defense') * 0.5);
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Grours', { ...commonParams, damage: damage }, lang);
                 break;
             case "Poulpy":
                 damage = Math.max(0, Math.round(this.getEffectiveStat(character, 'attaque') * 1.75 - this.getEffectiveStat(opponent, 'defense') * 0.6));
                 this.addEffect(opponent, { id: 'poulpy_special', stat: 'defense', type: 'multiplicative', value: 0.85, duration: 3 });
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Poulpy', { ...commonParams, damage: damage }, lang);
                 break;
             case "Oiseau":
                 damage = Math.round(this.getEffectiveStat(character, 'attaque') * 2.5);
                 this.addEffect(character, { id: 'oiseau_special', stat: 'defense', type: 'additive', value: 20, duration: 2 });
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Oiseau', { ...commonParams, damage: damage }, lang);
                 break;
             case "Colorina":
                 damage = Math.round(this.getEffectiveStat(character, 'attaque') * 0.85);
                 this.addEffect(opponent, { id: 'colorina_special', stat: 'defense', type: 'multiplicative', value: 0.85, duration: 4 });
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Colorina', { ...commonParams, damage: damage }, lang);
                 break;
             case "Rosalie":
                 damage = Math.round(this.getEffectiveStat(character, 'attaque') * 2);
                 if (Math.random() < 0.25) {
                     opponent.immobilisation = 1;
-                    text = formatLog(data.log_immobilize, { ...commonParams, damage: damage });
-                } else text = formatLog(data.log_normal, { ...commonParams, damage: damage });
+                    text = this.t('abilities.Rosalie_immobilize', { ...commonParams, damage: damage }, lang);
+                } else text = this.t('abilities.Rosalie_normal', { ...commonParams, damage: damage }, lang);
                 break;
             case "Sboonie":
                 const pvsupp = Math.round(character.pv_maximum * 0.08);
                 character.pv = Math.min(character.pv_maximum, character.pv + pvsupp);
                 damage = 50;
                 this.addEffect(opponent, { id: 'sboonie_special', stat: 'attaque', type: 'multiplicative', value: 0.85, duration: 2 });
-                text = formatLog(data.log, { ...commonParams, regen: pvsupp });
+                text = this.t('abilities.Sboonie', { ...commonParams, regen: pvsupp }, lang);
                 break;
             case "Inconnu":
                 opponent.inconnu_super += 4;
                 this.addEffect(character, { id: 'inconnu_buff_att', stat: 'attaque', type: 'additive', value: 25, duration: 3 });
                 this.addEffect(character, { id: 'inconnu_buff_def', stat: 'defense', type: 'additive', value: 25, duration: 3 });
                 damage = this.calculateDamage(character, opponent, false).damage;
-                text = formatLog(data.log, { ...commonParams, turns: opponent.inconnu_super, damage: damage });
+                text = this.t('abilities.Inconnu', { ...commonParams, turns: opponent.inconnu_super, damage: damage }, lang);
                 break;
             case "Boompy":
                 this.addEffect(character, { id: 'boompy_surcharge_instable', stat: 'defense', type: 'multiplicative', value: 0.70, duration: 3 });
-                text = formatLog(data.log, commonParams);
+                text = this.t('abilities.Boompy', commonParams, lang);
                 break;
             case "Perro":
                 damage = Math.round(this.getEffectiveStat(character, 'attaque') * 0.85);
                 this.addEffect(opponent, { id: 'perro_special', stat: 'defense', type: 'multiplicative', value: 0.70, duration: 3 });
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Perro', { ...commonParams, damage: damage }, lang);
                 break;
             case "Nautilus":
                 let totalDmg = 0; const rAtt = this.getEffectiveStat(character, 'attaque') * 0.6;
                 for (let i = 0; i < 3; i++) totalDmg += Math.max(0, Math.round(rAtt - this.getEffectiveStat(opponent, 'defense') * (0.9 + Math.random() * 0.2)));
-                damage = totalDmg; text = formatLog(data.log, { ...commonParams, damage: damage });
+                damage = totalDmg; text = this.t('abilities.Nautilus', { ...commonParams, damage: damage }, lang);
                 let tDefL = 0; for (let i = 0; i < 3; i++) if (Math.random() < 0.5) tDefL += 10;
                 if (tDefL > 0) { 
                     this.addEffect(opponent, { id: 'nautilus_debuff', stat: 'defense', type: 'additive', value: -tDefL, duration: 999 }); 
-                    text += formatLog(data.log_debuff, { ...commonParams, debuff: tDefL }); 
+                    text += this.t('abilities.Nautilus_debuff', { ...commonParams, debuff: tDefL }, lang); 
                 }
                 break;
             case "Paradoxe":
@@ -510,22 +523,22 @@ const combatEngine = {
                     character.paradoxePosture = 'assaut';
                     this.addEffect(character, { id: 'paradoxe_assaut_att', stat: 'attaque', type: 'multiplicative', value: 1.40, duration: 3 });
                     this.addEffect(character, { id: 'paradoxe_assaut_def', stat: 'defense', type: 'multiplicative', value: 0.50, duration: 3 });
-                    text = formatLog(data.log_assaut, commonParams);
+                    text = this.t('abilities.Paradoxe_assaut', commonParams, lang);
                 } else {
                     character.paradoxePosture = 'garde';
                     this.addEffect(character, { id: 'paradoxe_garde_def', stat: 'defense', type: 'multiplicative', value: 1.60, duration: 3 });
                     this.addEffect(character, { id: 'paradoxe_garde_att', stat: 'attaque', type: 'multiplicative', value: 0.70, duration: 3 });
-                    text = formatLog(data.log_garde, commonParams);
+                    text = this.t('abilities.Paradoxe_garde', commonParams, lang);
                 }
                 break;
             case "Korb":
                 damage = Math.round(this.getEffectiveStat(character, 'attaque') * 0.75);
                 this.addEffect(character, { id: 'korb_special', stat: 'critique', type: 'additive', value: 15, duration: 2 });
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Korb', { ...commonParams, damage: damage }, lang);
                 break;
             default:
                 damage = Math.round(this.calculateDamage(character, opponent, false).damage * 1.5);
-                text = formatLog(data.log, { ...commonParams, damage: damage });
+                text = this.t('abilities.Default', { ...commonParams, damage: damage }, lang);
         }
         if (character.name !== 'Coeur') opponent.pv -= damage;
         if (isPlayer) character.degats_partie = (character.degats_partie || 0) + damage;

@@ -1121,7 +1121,18 @@ app.post('/api/combat/start', verifyToken, async (req, res) => {
         opponent.equipments = []; opponent.effects = [];
     }
 
-    const game = { userId, gameMode, player, opponent, wave: gameMode === 'survie' ? 1 : 0, startTime: Date.now(), lastActionTime: Date.now(), turn: 1, waitingForPlayer: false };
+    const game = { 
+        userId, 
+        gameMode, 
+        player, 
+        opponent, 
+        wave: gameMode === 'survie' ? 1 : 0, 
+        startTime: Date.now(), 
+        lastActionTime: Date.now(), 
+        turn: 1, 
+        waitingForPlayer: false,
+        lang: userData.language || 'fr' 
+    };
 
     // --- ANTICIPATION INITIALE (Tour 1 & 2) ---
     // Décision pour le Tour 1
@@ -1129,7 +1140,7 @@ app.post('/api/combat/start', verifyToken, async (req, res) => {
     // On simule une décision pour le Tour 2 pour savoir s'il faut parer dès le Tour 1
     const secondChoice = combatEngine.makeAIDecision(game); 
     
-    const results = { logs: [] };
+    const results = { logs: [], lang: game.lang };
     combatEngine.updateTour(game.player, game.opponent, true, results);
 
     if (game.opponent.next_choice === 'defend' || secondChoice === 'defend') {
@@ -1165,7 +1176,7 @@ app.post('/api/combat/start', verifyToken, async (req, res) => {
 app.post('/api/combat/action', verifyToken, async (req, res) => {
     const { userId, action, itemName } = req.body, game = games.get(userId);
     if (!game) return res.status(404).json({ error: "Inconnu" });
-    const results = { gameOver: false, logs: [] };
+    const results = { gameOver: false, logs: [], lang: game.lang || 'fr' };
 
     // --- LOGIQUE DE TOUR ---
     // Si on n'attendait pas le joueur, c'est un nouveau tour (Joueur plus rapide)
