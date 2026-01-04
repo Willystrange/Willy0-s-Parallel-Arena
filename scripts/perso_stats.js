@@ -193,9 +193,6 @@ App.hideStats = function() {
   });
 };
 
-App.masteryLevelNames = ["Écho Temporel", "Voyageur Dimensionnel", "Gardien du Paradoxe", "Conquérant des Failles", "Maître des Réalités", "Titan Parallèle", "Singularité Vivante"];
-App.masteryGradeNames = ["Fragment", "Éclat", "Noyau", "Essence", "Nexus", "Harmonie", "Zénith", "Apogée", "Infinité", "Singularité"];
-
 App.displayCharacterStats = function(character, element) {
   const stats = document.querySelector('.stats');
   const ud = getUserData();
@@ -215,8 +212,13 @@ App.displayCharacterStats = function(character, element) {
     const masteryLevel = characterData.masteryLevel || 0;
     const masteryGrade = characterData.masteryGrade || 0;
     const masteryPoints = characterData.masteryPoints || 0;
-    const levelName = App.masteryLevelNames[masteryLevel] || `Niveau ${masteryLevel}`;
-    const gradeName = App.masteryGradeNames[masteryGrade] || `Grade ${masteryGrade + 1}`;
+    
+    // Noms de maîtrise traduits
+    let levelName = App.t(`mastery.levels.${masteryLevel}`);
+    if (levelName === `mastery.levels.${masteryLevel}`) levelName = App.t('mastery.fallback_level', { level: masteryLevel });
+
+    let gradeName = App.t(`mastery.grades.${masteryGrade}`);
+    if (gradeName === `mastery.grades.${masteryGrade}`) gradeName = App.t('mastery.fallback_grade', { grade: masteryGrade + 1 });
 
     function getPointsRequired(level, grade) {
         const gradesPerLevel = [3, 4, 5, 5, 5, 10]; 
@@ -268,20 +270,39 @@ App.displayCharacterStats = function(character, element) {
       return base;
     };
 
+    // Traductions des stats
+    const translatedRarity = App.t('perso_stats.stats_rarity', { value: character.rarete });
+    const translatedClass = App.t('perso_stats.stats_class', { value: character.classe });
+    const translatedPV = App.t('perso_stats.stats_pv', { value: formatStat(basePV, equipmentBonuses.pv) });
+    const translatedAt = App.t('perso_stats.stats_attack', { value: formatStat(baseAt, equipmentBonuses.attaque) });
+    const translatedDef = App.t('perso_stats.stats_defense', { value: formatStat(baseDef, equipmentBonuses.defense) });
+    const translatedVit = App.t('perso_stats.stats_speed', { value: formatStat(baseVit, equipmentBonuses.vitesse) });
+    const translatedCrit = App.t('perso_stats.stats_crit', { value: formatStat(baseCrit, equipmentBonuses.critique) });
+    
+    // Traduction de la capacité spéciale (Description statique)
+    // On utilise la clé spell_descriptions.{NomDuPerso} si elle existe, sinon on fallback sur le texte brut.
+    const spellKey = `spell_descriptions.${character.name}`;
+    let spellDesc = App.t(spellKey);
+    // Si la traduction n'existe pas (App.t retourne la clé), on utilise character.spe
+    if (spellDesc === spellKey) {
+        spellDesc = character.spe;
+    }
+    const translatedSpe = App.t('perso_stats.stats_special', { value: spellDesc });
+
     html = `
       <button id="mastery-help-icon" class="help-icon">?</button>
       <strong>${character.name}</strong><br>
-      Rareté : ${character.rarete}<br>
-      Classe : ${character.classe}<br>
-      PV : ${formatStat(basePV, equipmentBonuses.pv)}<br>
-      Attaque : ${formatStat(baseAt, equipmentBonuses.attaque)}<br>
-      Défense : ${formatStat(baseDef, equipmentBonuses.defense)}<br>
-      Vitesse : ${formatStat(baseVit, equipmentBonuses.vitesse)}<br>
-      Chance de coup critique : ${formatStat(baseCrit, equipmentBonuses.critique)}%<br>
-      Spéciale : ${character.spe}<br>
+      ${translatedRarity}<br>
+      ${translatedClass}<br>
+      ${translatedPV}<br>
+      ${translatedAt}<br>
+      ${translatedDef}<br>
+      ${translatedVit}<br>
+      ${translatedCrit}<br>
+      ${translatedSpe}<br>
       
       <div class="mastery-display">
-        <div class="mastery-title">Maîtrise</div>
+        <div class="mastery-title">${App.t('perso_stats.mastery_title')}</div>
         <div class="mastery-rank"><span class="mastery-level-name">${levelName}</span> <span class="mastery-grade-name">${gradeName}</span></div>
         <div class="mastery-progress-bar-container">
           <div class="mastery-progress-bar" style="width: ${progressPercentage}%;"></div>
@@ -292,24 +313,25 @@ App.displayCharacterStats = function(character, element) {
       <br>
       <button class="button-improve"
               onclick="App.GoPerso('${character.name}')">
-        Améliorer ${character.name}
+        ${App.t('perso_stats.button_improve', { name: character.name })}
       </button>
       <button class="button-improve"
               onclick="App.goToEquipments('${character.name}')">
-        Équiper
+        ${App.t('perso_stats.button_equip')}
       </button>
     `;
   } else {
+    // Version verrouillée
     html = `
       <strong>${character.name}</strong><br>
-      Rareté : ${character.rarete}<br>
-      Classe : ${character.classe}<br>
-      PV : ${character.pv}<br>
-      Attaque : ${character.attaque}<br>
-      Défense : ${character.defense}<br>
-      Vitesse : ${character.vitesse} <br>
-      Chance de coup critique : ${character.chanceCritique}%<br>
-      Spéciale : ${character.spe} <br>
+      ${App.t('perso_stats.stats_rarity', { value: character.rarete })}<br>
+      ${App.t('perso_stats.stats_class', { value: character.classe })}<br>
+      ${App.t('perso_stats.stats_pv', { value: character.pv })}<br>
+      ${App.t('perso_stats.stats_attack', { value: character.attaque })}<br>
+      ${App.t('perso_stats.stats_defense', { value: character.defense })}<br>
+      ${App.t('perso_stats.stats_speed', { value: character.vitesse })}<br>
+      ${App.t('perso_stats.stats_crit', { value: character.chanceCritique })}<br>
+      ${App.t('perso_stats.stats_special', { value: character.spe })}<br>
     `;
   }
 
@@ -358,9 +380,12 @@ App.initHelpModal = function() {
 
     if (!closeBtn || !levelsList || !gradesList) return;
 
-    // Populate lists
-    levelsList.innerHTML = App.masteryLevelNames.map(name => `<li>${name}</li>`).join('');
-    gradesList.innerHTML = App.masteryGradeNames.map(name => `<li>${name}</li>`).join('');
+    // Populate lists using App.t for dynamic arrays
+    const levels = App.translations && App.translations.mastery && App.translations.mastery.levels ? App.translations.mastery.levels : [];
+    const grades = App.translations && App.translations.mastery && App.translations.mastery.grades ? App.translations.mastery.grades : [];
+
+    levelsList.innerHTML = levels.map(name => `<li>${name}</li>`).join('');
+    gradesList.innerHTML = grades.map(name => `<li>${name}</li>`).join('');
 
     // Event delegation for the help icon
     document.body.addEventListener('click', (event) => {
@@ -402,6 +427,9 @@ App.initCharacters = async function() {
     stats.style.display = 'none';
     stats.classList.add('hide');
   }
+  
+  // Traduction de la page statique
+  App.translatePage();
 
   App.initHelpModal();
   App.renderCharacters();

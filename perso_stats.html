@@ -16,13 +16,13 @@
 <body>
   <div class="content">
     <div class="header">
-      <div class="title">Personnages</div>
+      <div class="title" data-i18n="perso_stats.title">Personnages</div>
       <div class="filters">
         <select id="filter-attribute">
-          <option value="name">Nom</option>
-          <option value="level">Niveau</option>
-          <option value="rarete">Rareté</option>
-          <option value="classe">Classe</option>
+          <option value="name" data-i18n="perso_stats.filter_name">Nom</option>
+          <option value="level" data-i18n="perso_stats.filter_level">Niveau</option>
+          <option value="rarete" data-i18n="perso_stats.filter_rarity">Rareté</option>
+          <option value="classe" data-i18n="perso_stats.filter_class">Classe</option>
         </select>
       </div>
     </div>
@@ -39,17 +39,17 @@
   <div id="mastery-help-modal" class="modal">
     <div class="modal-content">
       <span class="close-button">&times;</span>
-      <h2>Système de Maîtrise</h2>
-      <p>La maîtrise représente votre habileté avec un personnage. Elle est divisée en Niveaux et en Grades.</p>
+      <h2 data-i18n="perso_stats.modal_title">Système de Maîtrise</h2>
+      <p data-i18n="perso_stats.modal_desc">La maîtrise représente votre habileté avec un personnage. Elle est divisée en Niveaux et en Grades.</p>
       
-      <h3>Niveaux de Maîtrise</h3>
-      <p>Chaque personnage progresse à travers plusieurs niveaux de maîtrise, débloquant des récompenses et affirmant votre expertise. L'ordre est le suivant :</p>
+      <h3 data-i18n="perso_stats.modal_levels_title">Niveaux de Maîtrise</h3>
+      <p data-i18n="perso_stats.modal_levels_desc">Chaque personnage progresse à travers plusieurs niveaux de maîtrise, débloquant des récompenses et affirmant votre expertise. L'ordre est le suivant :</p>
       <ul id="mastery-levels-list">
         <!-- JS will populate this -->
       </ul>
   
-      <h3>Grades de Maîtrise</h3>
-      <p>Dans chaque niveau, vous devez gravir plusieurs grades. Chaque grade requiert un certain nombre de points de maîtrise, qui s'obtiennent en jouant avec le personnage. L'ordre est le suivant :</p>
+      <h3 data-i18n="perso_stats.modal_grades_title">Grades de Maîtrise</h3>
+      <p data-i18n="perso_stats.modal_grades_desc">Dans chaque niveau, vous devez gravir plusieurs grades. Chaque grade requiert un certain nombre de points de maîtrise, qui s'obtiennent en jouant avec le personnage. L'ordre est le suivant :</p>
       <ul id="mastery-grades-list">
         <!-- JS will populate this -->
       </ul>

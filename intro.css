@@ -809,11 +809,11 @@ body.menu_principal {
 .menu_principal header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
-  width: 100%;
+  width: 80%;
   position: fixed;
   top: 0;
-  left: 0;
-  height: 60px;
+  left: 10%;
+  height: 20px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
