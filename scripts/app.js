@@ -122,8 +122,11 @@ App.loadTranslations = function() {
     App.currentLang = userData.language || 'fr';
     
     // OPTIMISATION : On ne charge QUE le fichier de langue nécessaire pour économiser la bande passante et la mémoire client.
-    return fetch(`data/${App.currentLang}.json`)
-        .then(response => response.json())
+    return fetch(`/api/data/localization/${App.currentLang}`)
+        .then(response => {
+            if (!response.ok) throw new Error("Erreur réseau traduction");
+            return response.json();
+        })
         .then(data => {
             App.translations = data;
             // console.log("Traductions chargées:", App.currentLang);
@@ -135,8 +138,8 @@ App.loadTranslations = function() {
             console.error("Erreur chargement traductions:", err);
             // Fallback sur fr si en échec ?
             if (App.currentLang !== 'fr') {
-                console.log("Tentative de fallback sur fr.json");
-                return fetch(`data/fr.json`).then(r=>r.json()).then(d=>App.translations=d);
+                console.log("Tentative de fallback sur fr");
+                return fetch(`/api/data/localization/fr`).then(r=>r.json()).then(d=>App.translations=d);
             }
         });
 };
