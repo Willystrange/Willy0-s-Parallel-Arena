@@ -270,5 +270,33 @@
     "quit_button": "Return to Main Menu",
     "no_data": "No data found.",
     "unknown": "Unknown"
+  },
+  "mastery": {
+    "levels": [
+      "Temporal Echo",
+      "Dimensional Traveler",
+      "Paradox Guardian",
+      "Rift Conqueror",
+      "Reality Master",
+      "Parallel Titan",
+      "Living Singularity"
+    ],
+    "grades": [
+      "Fragment",
+      "Shard",
+      "Core",
+      "Essence",
+      "Nexus",
+      "Harmony",
+      "Zenith",
+      "Apogee",
+      "Infinity",
+      "Singularity"
+    ],
+    "fallback_level": "Level {level}",
+    "fallback_grade": "Grade {grade}",
+    "title_levelup": "{name} Mastery Upgraded!",
+    "title_normal": "{name} Mastery",
+    "xp_earned": "+{amount} Mastery XP"
   }
 }

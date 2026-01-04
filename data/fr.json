@@ -270,5 +270,33 @@
     "quit_button": "Revenir au Menu Principal",
     "no_data": "Aucune donnée trouvée.",
     "unknown": "Inconnu"
+  },
+  "mastery": {
+    "levels": [
+      "Écho Temporel",
+      "Voyageur Dimensionnel",
+      "Gardien du Paradoxe",
+      "Conquérant des Failles",
+      "Maître des Réalités",
+      "Titan Parallèle",
+      "Singularité Vivante"
+    ],
+    "grades": [
+      "Fragment",
+      "Éclat",
+      "Noyau",
+      "Essence",
+      "Nexus",
+      "Harmonie",
+      "Zénith",
+      "Apogée",
+      "Infinité",
+      "Singularité"
+    ],
+    "fallback_level": "Niveau {level}",
+    "fallback_grade": "Grade {grade}",
+    "title_levelup": "Maîtrise de {name} augmentée !",
+    "title_normal": "Maîtrise de {name}",
+    "xp_earned": "+{amount} XP de maîtrise"
   }
 }

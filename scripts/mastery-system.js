@@ -10,9 +10,6 @@ App.MasterySystem = (function() {
         basePointsPerGrade: 100 
     };
 
-    const masteryLevelNames = ["Écho Temporel", "Voyageur Dimensionnel", "Gardien du Paradoxe", "Conquérant des Failles", "Maître des Réalités", "Titan Parallèle", "Singularité Vivante"];
-    const masteryGradeNames = ["Fragment", "Éclat", "Noyau", "Essence", "Nexus", "Harmonie", "Zénith", "Apogée", "Infinité", "Singularité"];
-
     /**
      * Calcule le nombre de points de maîtrise requis pour atteindre le grade/niveau suivant.
      * La courbe est exponentielle pour que la progression soit de plus en plus difficile.
@@ -51,16 +48,29 @@ App.MasterySystem = (function() {
         const masteryGrade = characterData.masteryGrade || 0;
         const masteryPoints = characterData.masteryPoints || 0;
 
-        const levelName = masteryLevelNames[masteryLevel] || `Niveau ${masteryLevel}`;
-        const gradeName = masteryGradeNames[masteryGrade] || `Grade ${masteryGrade + 1}`;
+        // Récupération dynamique des traductions
+        // App.t supporte l'accès aux tableaux via la notation point (ex: mastery.levels.0)
+        let levelName = App.t(`mastery.levels.${masteryLevel}`);
+        // Fallback si la clé n'existe pas ou retourne la clé elle-même
+        if (levelName === `mastery.levels.${masteryLevel}`) {
+             levelName = App.t('mastery.fallback_level', { level: masteryLevel });
+        }
+
+        let gradeName = App.t(`mastery.grades.${masteryGrade}`);
+        if (gradeName === `mastery.grades.${masteryGrade}`) {
+             gradeName = App.t('mastery.fallback_grade', { grade: masteryGrade + 1 });
+        }
+        
         const masteryFullName = `${levelName} ${gradeName}`;
 
         const pointsRequired = getPointsRequired(masteryLevel, masteryGrade);
         const progressPercentage = pointsRequired > 0 ? Math.min((masteryPoints / pointsRequired) * 100, 100) : 0;
 
         const title = result.hasLeveledUp 
-            ? `Maîtrise de ${result.character} augmentée !`
-            : `Maîtrise de ${result.character}`;
+            ? App.t('mastery.title_levelup', { name: result.character })
+            : App.t('mastery.title_normal', { name: result.character });
+
+        const xpText = App.t('mastery.xp_earned', { amount: result.pointsEarned });
 
         const masteryElement = document.createElement('div');
         masteryElement.className = 'reward mastery-reward show';
@@ -73,7 +83,7 @@ App.MasterySystem = (function() {
                     <div class="mastery-progress-bar" style="width: ${progressPercentage}%;"></div>
                 </div>
                 <div class="mastery-points">${masteryPoints} / ${pointsRequired} pts</div>
-                <p style="text-align: center; margin-top: 10px; color: #4CAF50;">+${result.pointsEarned} XP de maîtrise</p>
+                <p style="text-align: center; margin-top: 10px; color: #4CAF50;">${xpText}</p>
             </div>
         `;
         
