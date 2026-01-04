@@ -22,6 +22,13 @@ App.sauvegarde = App.loadGame();
     }
 
     const storedUserData = getUserData();
+    
+    // TRADUCTION
+    if (App.translationPromise) {
+        await App.translationPromise;
+        App.translatePage();
+    }
+
     if (storedUserData.partie_commencee && App.sauvegarde) {
       App.playerCharacter = App.sauvegarde.playerCharacter;
       App.opponentCharacter = App.sauvegarde.opponentCharacter;
@@ -46,7 +53,7 @@ App.sauvegarde = App.loadGame();
         const hasHermesBoots = (firstActor.equipments || []).includes('bottes_hermes');
         if (hasHermesBoots && !firstActor.hermesBootsTriggered) {
             firstActor.hermesBootsTriggered = true;
-            App.addCombatLog(`(Visuel) Bottes d'Hermès activées pour ${firstActor.name}`, 'cyan', 'milieu');
+            App.addCombatLog(App.t('combat.logs.hermes_boots', { name: firstActor.name }), 'cyan', 'milieu');
         }
     }
 

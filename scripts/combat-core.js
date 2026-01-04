@@ -28,7 +28,7 @@ App.updateSpecialButton = function() {
 
   if (specialValue >= 1) {
     btn.classList.add('bright', 'grow');
-    btn.textContent = 'Capacité spéciale';
+    btn.textContent = App.t('combat.actions.special');
   } else {
     btn.classList.remove('bright', 'grow');
     btn.textContent = `${specialValue.toFixed(2)} / 1`;
@@ -42,12 +42,14 @@ App.updateUI = function() {
   App.playerCharacter.pv = Math.round(App.playerCharacter.pv);
   App.opponentCharacter.pv = Math.round(App.opponentCharacter.pv);
 
+  const pvLabel = App.t('combat.stats_panel.stat_pv');
+
   document.getElementById('player-name').textContent = App.playerCharacter.name;
-  document.getElementById('player-pv').textContent = `PV: ${App.playerCharacter.pv}`;
+  document.getElementById('player-pv').textContent = `${pvLabel} ${App.playerCharacter.pv}`;
   App.updateSpecialBar(App.playerCharacter, 'player-special-bar');
 
   document.getElementById('opponent-name').textContent = App.opponentCharacter.name;
-  document.getElementById('opponent-pv').textContent = `PV: ${App.opponentCharacter.pv}`;
+  document.getElementById('opponent-pv').textContent = `${pvLabel} ${App.opponentCharacter.pv}`;
   App.updateSpecialBar(App.opponentCharacter, 'opponent-special-bar');
 };
 
@@ -92,7 +94,7 @@ App.renderDetailedStats = function() {
   if (!container) return;
   container.innerHTML = '';
   if (!App.playerCharacter || !App.opponentCharacter) {
-    container.innerHTML = '<p>Aucune partie chargée…</p>';
+    container.innerHTML = `<p>${App.t('combat.stats_panel.no_game')}</p>`;
     return;
   }
 
@@ -106,27 +108,30 @@ App.renderDetailedStats = function() {
     const character = characterInfo.data;
     const maxPv = character.pv_maximum || character.pv_max;
 
-    let effectsList = '<h6>Effets actifs</h6>';
+    let effectsList = `<h6>${App.t('combat.stats_panel.active_effects')}</h6>`;
     if (character.effects && character.effects.length > 0) {
       effectsList += '<ul>';
       character.effects.forEach(effect => {
-        const effectName = App.effectNames[effect.id] || effect.id;
-        const duration = effect.duration < 999 ? `${effect.duration} tour(s)` : 'Permanent';
+        // TRADUCTION DES EFFETS
+        const effectName = App.t(`effects.${effect.id}`);
+        const duration = effect.duration < 999 
+            ? App.t('combat.stats_panel.duration_turns', { n: effect.duration }) 
+            : App.t('combat.stats_panel.permanent');
         effectsList += `<li>${effectName} (${duration})</li>`;
       });
       effectsList += '</ul>';
     } else {
-      effectsList += '<p>Aucun effet actif.</p>';
+      effectsList += `<p>${App.t('combat.stats_panel.no_effects')}</p>`;
     }
 
     content += `
       <div class="stats-block">
         <h5>${characterInfo.title}</h5>
         <ul>
-          PV : ${character.pv} / ${maxPv}<br><br>
-          Attaque : ${App.getEffectiveStat(character, 'attaque')} / ${character.attaque_originale}<br><br>
-          Défense : ${App.getEffectiveStat(character, 'defense')} / ${character.defense_originale}<br><br>
-          Vitesse : ${App.getEffectiveStat(character, 'vitesse')} / ${character.vitesse_originale}
+          ${App.t('combat.stats_panel.stat_pv')} ${character.pv} / ${maxPv}<br><br>
+          ${App.t('combat.stats_panel.stat_attack')} ${App.getEffectiveStat(character, 'attaque')} / ${character.attaque_originale}<br><br>
+          ${App.t('combat.stats_panel.stat_defense')} ${App.getEffectiveStat(character, 'defense')} / ${character.defense_originale}<br><br>
+          ${App.t('combat.stats_panel.stat_speed')} ${App.getEffectiveStat(character, 'vitesse')} / ${character.vitesse_originale}
         </ul>
         ${effectsList}
       </div>
@@ -529,7 +534,7 @@ App.handleSurvivalRewards = App.handleSurvivalRewards || function(wave) {
     const userData = getUserData();
     const log = document.getElementById('combat-log');
     if (log) {
-        log.innerHTML += `<p>Vous avez été vaincu à la vague ${wave}.</p>`;
+        log.innerHTML += `<p>${App.t('combat.survival.defeat_wave', { wave: wave })}</p>`;
     }
     setTimeout(() => loadPage('fin_partie_survie'), 2000);
 };

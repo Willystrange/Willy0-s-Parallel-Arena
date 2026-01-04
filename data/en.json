@@ -99,5 +99,96 @@
     "rare": "rare",
     "epique": "epic",
     "legendaire": "legendary"
+  },
+  "combat": {
+    "stats_panel": {
+      "title": "Detailed Statistics",
+      "no_game": "No game loaded…",
+      "active_effects": "Active effects",
+      "no_effects": "No active effect.",
+      "stat_pv": "HP:",
+      "stat_attack": "Attack:",
+      "stat_defense": "Defense:",
+      "stat_speed": "Speed:",
+      "duration_turns": "{n} turn(s)",
+      "permanent": "Permanent"
+    },
+    "actions": {
+      "attack": "Attack",
+      "defense": "Defense",
+      "special": "Special Ability",
+      "items": "Items",
+      "cancel": "Cancel"
+    },
+    "logs": {
+      "hermes_boots": "(Visual) Hermes Boots activated for {name}"
+    },
+    "survival": {
+      "upgrade_title": "Choose an upgrade",
+      "upgrade_pv": "Increase HP",
+      "upgrade_attack": "Increase Attack",
+      "upgrade_defense": "Increase Defense",
+      "upgrade_log": "{name} upgraded {stat}.",
+      "defeat_wave": "You were defeated at wave {wave}."
+    },
+    "weekend": {
+      "spinning": "Rolling event...",
+      "events": {
+        "PV égaux": "Equal HP",
+        "Chargement /2": "Charge /2",
+        "Sans défense": "No defense",
+        "Sans objet": "No items",
+        "Points X2": "Points X2",
+        "XP X2": "XP X2",
+        "Rage": "Rage",
+        "Armure fragile": "Fragile Armor",
+        "Récupération rapide": "Quick Recovery",
+        "Malédiction": "Curse",
+        "Bénédiction": "Blessing"
+      }
+    }
+  },
+  "effects": {
+    "orbe_siphon_effect": "Energy gain reduced",
+    "purge_spirituelle": "Spiritual Purge",
+    "diva_special": "Attack reduced",
+    "poulpy_special": "Weakened defense",
+    "oiseau_special": "Reinforced defense",
+    "colorina_special": "Weakened defense",
+    "sboonie_special": "Weakened attack",
+    "inconnu_buff_att": "Attack increased",
+    "inconnu_buff_def": "Defense increased",
+    "perro_special": "Pierced defense",
+    "nautilus_debuff": "Broken defense",
+    "epee_tranchante": "Sharp Sword Bonus",
+    "elixir_puissance": "Power Elixir Bonus",
+    "armure_fer_debuff": "Iron Armor Debuff",
+    "bouclier_solide": "Solid Shield Bonus",
+    "marque_chasseur": "Hunter Mark Bonus",
+    "focalisateur_debuff": "Focalizer Debuff",
+    "riposte_affaiblie": "Weakened counter-attack",
+    "boompy_surcharge_instable": "Unstable Overload",
+    "frostbite_buff_def": "Frost Defense",
+    "frostbite_debuff_def": "Frozen Defense",
+    "inferno_debuff_att": "Incinerated Attack",
+    "steel_sentinel_buff_def": "Steel Barrier",
+    "shadow_stalker_buff_def": "Shadow Veil",
+    "thunderstrike_debuff_att": "Concussion",
+    "giga_titan_buff_att": "Titan Rage",
+    "giga_titan_buff_def": "Titan Skin",
+    "stormbringer_debuff_def": "Thunderstruck Defense",
+    "stormbringer_buff_def": "Stormy Aura",
+    "earthshaker_debuff_def": "Fractured Defense",
+    "earthshaker_buff_def": "Stone Skin",
+    "paradoxe_assaut_att": "Assault Stance (Attack)",
+    "paradoxe_assaut_def": "Assault Stance (Defense)",
+    "paradoxe_garde_att": "Guard Stance (Attack)",
+    "paradoxe_garde_def": "Guard Stance (Defense)",
+    "rage_effect": "Rage",
+    "fragile_armor_effect": "Fragile armor",
+    "quick_recovery_effect": "Quick recovery",
+    "curse_effect": "Curse",
+    "blessing_effect": "Blessing",
+    "egide_aube_shield": "Shield of Aegis"
   }
 }

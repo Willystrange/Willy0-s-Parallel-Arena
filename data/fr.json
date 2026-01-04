@@ -99,5 +99,96 @@
     "rare": "rare",
     "epique": "épique",
     "legendaire": "légendaire"
+  },
+  "combat": {
+    "stats_panel": {
+      "title": "Statistiques détaillées",
+      "no_game": "Aucune partie chargée…",
+      "active_effects": "Effets actifs",
+      "no_effects": "Aucun effet actif.",
+      "stat_pv": "PV :",
+      "stat_attack": "Attaque :",
+      "stat_defense": "Défense :",
+      "stat_speed": "Vitesse :",
+      "duration_turns": "{n} tour(s)",
+      "permanent": "Permanent"
+    },
+    "actions": {
+      "attack": "Attaque",
+      "defense": "Défense",
+      "special": "Capacité spéciale",
+      "items": "Objets",
+      "cancel": "Annuler"
+    },
+    "logs": {
+      "hermes_boots": "(Visuel) Bottes d'Hermès activées pour {name}"
+    },
+    "survival": {
+      "upgrade_title": "Choisissez une amélioration",
+      "upgrade_pv": "Augmenter PV",
+      "upgrade_attack": "Augmenter Attaque",
+      "upgrade_defense": "Augmenter Défense",
+      "upgrade_log": "{name} a amélioré la stat {stat}.",
+      "defeat_wave": "Vous avez été vaincu à la vague {wave}."
+    },
+    "weekend": {
+      "spinning": "Tirage de l'événement...",
+      "events": {
+        "PV égaux": "PV égaux",
+        "Chargement /2": "Chargement /2",
+        "Sans défense": "Sans défense",
+        "Sans objet": "Sans objet",
+        "Points X2": "Points X2",
+        "XP X2": "XP X2",
+        "Rage": "Rage",
+        "Armure fragile": "Armure fragile",
+        "Récupération rapide": "Récupération rapide",
+        "Malédiction": "Malédiction",
+        "Bénédiction": "Bénédiction"
+      }
+    }
+  },
+  "effects": {
+    "orbe_siphon_effect": "Gain d'énergie réduit",
+    "purge_spirituelle": "Purge Spirituelle",
+    "diva_special": "Attaque réduite",
+    "poulpy_special": "Défense fragilisée",
+    "oiseau_special": "Défense renforcée",
+    "colorina_special": "Défense affaiblie",
+    "sboonie_special": "Attaque affaiblie",
+    "inconnu_buff_att": "Attaque augmentée",
+    "inconnu_buff_def": "Défense augmentée",
+    "perro_special": "Défense perforée",
+    "nautilus_debuff": "Défense brisée",
+    "epee_tranchante": "Bonus de l'Épée Tranchante",
+    "elixir_puissance": "Bonus de l'Elixir de Puissance",
+    "armure_fer_debuff": "Malus de l'Armure de Fer",
+    "bouclier_solide": "Bonus du Bouclier Solide",
+    "marque_chasseur": "Bonus Marque de Chasseur",
+    "focalisateur_debuff": "Malus du Focalisateur",
+    "riposte_affaiblie": "Riposte affaiblie",
+    "boompy_surcharge_instable": "Surcharge Instable",
+    "frostbite_buff_def": "Défense de Givre",
+    "frostbite_debuff_def": "Défense Gelée",
+    "inferno_debuff_att": "Attaque Incinérée",
+    "steel_sentinel_buff_def": "Barrière d'Acier",
+    "shadow_stalker_buff_def": "Voile d'Ombre",
+    "thunderstrike_debuff_att": "Commotion",
+    "giga_titan_buff_att": "Rage de Titan",
+    "giga_titan_buff_def": "Peau de Titan",
+    "stormbringer_debuff_def": "Défense Foudroyée",
+    "stormbringer_buff_def": "Aura Tempétueuse",
+    "earthshaker_debuff_def": "Défense Fracturée",
+    "earthshaker_buff_def": "Peau de Pierre",
+    "paradoxe_assaut_att": "Posture d'Assaut (Attaque)",
+    "paradoxe_assaut_def": "Posture d'Assaut (Défense)",
+    "paradoxe_garde_att": "Posture de Garde (Attaque)",
+    "paradoxe_garde_def": "Posture de Garde (Défense)",
+    "rage_effect": "Rage",
+    "fragile_armor_effect": "Armure fragile",
+    "quick_recovery_effect": "Récupération rapide",
+    "curse_effect": "Malédiction",
+    "blessing_effect": "Bénédiction",
+    "egide_aube_shield": "Bouclier de l'Égide"
   }
 }

@@ -40,7 +40,7 @@
   </div>
 
   <div id="stats-panel" class="stats-panel inactive">
-    <h4>Statistiques détaillées</h4>
+    <h4 data-i18n="combat.stats_panel.title">Statistiques détaillées</h4>
     <div id="detailed-stats-content"></div>
   </div>
 
@@ -48,13 +48,13 @@
     <div id="combat-log"></div>
     <div class="combat-actions-wrapper">
       <div class="combat-actions">
-        <button id="attack-button" onclick="App.handleAttack()"></button>
-        <button id="defense-button" onclick="App.handlePlayerDefense()"></button>
-        <button id="special-button" onclick="App.useSpecialAbility()"></button>
-        <button id="items-button" onclick="App.showItemSelection()"></button>
+        <button id="attack-button" onclick="App.handleAttack()" data-i18n="combat.actions.attack"></button>
+        <button id="defense-button" onclick="App.handlePlayerDefense()" data-i18n="combat.actions.defense"></button>
+        <button id="special-button" onclick="App.useSpecialAbility()" data-i18n="combat.actions.special"></button>
+        <button id="items-button" onclick="App.showItemSelection()" data-i18n="combat.actions.items"></button>
       </div>
       <div id="item-selection" style="display:none;">
-        <button onclick="App.hideItemSelection()">Annuler</button>
+        <button onclick="App.hideItemSelection()" data-i18n="combat.actions.cancel">Annuler</button>
       </div>
     </div>
   </div>

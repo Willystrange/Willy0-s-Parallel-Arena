@@ -8,6 +8,12 @@ App.currentEvent = null;
 
 // --- INITIALIZATION ---
 (async function() {
+    // TRADUCTION
+    if (App.translationPromise) {
+        await App.translationPromise;
+        App.translatePage();
+    }
+
     // Ensure equipments data is loaded for AI item generation
     if (typeof App.loadEquipmentsData === 'function') {
         await App.loadEquipmentsData();
@@ -38,7 +44,7 @@ App.doCombatStart = async function() {
         App.currentEvent = data.gameState.event;
         
         const label = document.getElementById("event-name");
-        if (label) label.innerText = App.currentEvent;
+        if (label) label.innerText = App.t(`combat.weekend.events.${App.currentEvent}`);
         
         App.updateUI();
         App.updateSpecialButton();
@@ -79,7 +85,7 @@ App.spinEventWheel = () => {
 
   const interval = setInterval(() => {
     const idx = Math.floor(Math.random() * App.events.length);
-    if (label) label.innerText = App.events[idx];
+    if (label) label.innerText = App.t(`combat.weekend.events.${App.events[idx]}`);
     spinCount++;
 
     if (spinCount > totalSpins) {

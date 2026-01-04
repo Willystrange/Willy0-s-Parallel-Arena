@@ -16,6 +16,12 @@ App.currentWave = 1;
         
         // Sync Start
         (async function() {
+            // TRADUCTION
+            if (App.translationPromise) {
+                await App.translationPromise;
+                App.translatePage();
+            }
+
             const data = await App.combatManager.syncCombatStart('survie', { 
                 playerCharacter: App.playerCharacter, // override default behavior slightly if needed
                 opponentCharacter: null 
@@ -89,7 +95,8 @@ App.upgradeStat = async function(stat) {
         App.currentWave = data.game.wave;
         
         const logColor = App.isDarkMode ? 'white' : 'black';
-        App.addCombatLog(`${App.playerCharacter.name} a amélioré la stat ${stat}.`, logColor, "center");
+        const statLabel = App.t(`combat.survival.upgrade_${stat}`).replace(/^(Augmenter|Increase) /, '');
+        App.addCombatLog(App.t('combat.survival.upgrade_log', { name: App.playerCharacter.name, stat: statLabel }), logColor, "center");
         
         App.updateUI();
         App.hideUpgradeOptions();
@@ -103,12 +110,12 @@ App.showUpgradeOptions = function() {
   const div = document.getElementById('upgrade-options');
   const last = App.playerCharacter.last_upgrade;
   div.style.display = 'block';
-  div.innerHTML = '<h3>Choisissez une amélioration</h3>';
+  div.innerHTML = `<h3>${App.t('combat.survival.upgrade_title')}</h3>`;
 
   ['pv', 'attaque', 'defense'].forEach(stat => {
     if (last === stat) return;
     const btn = document.createElement('button');
-    btn.textContent = stat === 'pv' ? 'Augmenter PV' : stat === 'attaque' ? 'Augmenter Attaque' : 'Augmenter Défense';
+    btn.textContent = App.t(`combat.survival.upgrade_${stat}`);
     btn.onclick = () => App.upgradeStat(stat);
     div.appendChild(btn);
   });
