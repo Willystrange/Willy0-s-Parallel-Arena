@@ -260,5 +260,15 @@
     "curse_effect": "Curse",
     "blessing_effect": "Blessing",
     "egide_aube_shield": "Shield of Aegis"
+  },
+  "fin_partie": {
+    "winner": "Winner: {name}",
+    "waiting": "Waiting...",
+    "xp": "XP: {amount}",
+    "money": "Points: {amount}",
+    "trophies": "Trophies: {amount}",
+    "quit_button": "Return to Main Menu",
+    "no_data": "No data found.",
+    "unknown": "Unknown"
   }
 }

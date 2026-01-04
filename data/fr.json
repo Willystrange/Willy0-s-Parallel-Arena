@@ -260,5 +260,15 @@
     "curse_effect": "Malédiction",
     "blessing_effect": "Bénédiction",
     "egide_aube_shield": "Bouclier de l'Égide"
+  },
+  "fin_partie": {
+    "winner": "Gagnant : {name}",
+    "waiting": "En attente...",
+    "xp": "XP : {amount}",
+    "money": "Points : {amount}",
+    "trophies": "Trophées : {amount}",
+    "quit_button": "Revenir au Menu Principal",
+    "no_data": "Aucune donnée trouvée.",
+    "unknown": "Inconnu"
   }
 }
