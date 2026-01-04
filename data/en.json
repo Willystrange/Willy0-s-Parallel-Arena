@@ -319,6 +319,16 @@
     "Paradoxe": "Paradoxical Inversion: Switches between two stances. **Assault Stance:** Increases attack by 40% but reduces defense by 50% for 2 turns. **Guard Stance:** Increases defense by 60% but reduces attack by 30% for 2 turns.",
     "Korb": "Sharpens dagger, dealing 75% of attack damage and increasing critical hit chance by 15% for the next turn."
   },
+  "classes": {
+    "Lame de l’Ombre": "Shadow Blade",
+    "Briseur de Défense": "Defense Breaker",
+    "Assassin Sauvage": "Savage Assassin",
+    "Colosse Invincible": "Invincible Colossus",
+    "Gardien Résolu": "Resolute Guardian",
+    "Régénérateur Mystique": "Mystic Regenerator",
+    "Soigneur d’Élite": "Elite Healer",
+    "Maître des Arcanes": "Arcane Master"
+  },
   "perso_stats": {
     "title": "Characters",
     "filter_label": "Sort by:",

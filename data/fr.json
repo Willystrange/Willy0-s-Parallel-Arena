@@ -319,6 +319,16 @@
     "Paradoxe": "Inversion Paradoxale : Alterne entre deux postures. **Posture d'Assaut :** Augmente son attaque de 40% mais réduit sa défense de 50% pendant 2 tours. **Posture de Garde :** Augmente sa défense de 60% mais réduit son attaque de 30% pendant 2 tours.",
     "Korb": "Affûte sa dague, infligeant 75% de ses dégâts d'attaque et augmentant ses chances de coup critique de 15% pour son prochain tour."
   },
+  "classes": {
+    "Lame de l’Ombre": "Lame de l’Ombre",
+    "Briseur de Défense": "Briseur de Défense",
+    "Assassin Sauvage": "Assassin Sauvage",
+    "Colosse Invincible": "Colosse Invincible",
+    "Gardien Résolu": "Gardien Résolu",
+    "Régénérateur Mystique": "Régénérateur Mystique",
+    "Soigneur d’Élite": "Soigneur d’Élite",
+    "Maître des Arcanes": "Maître des Arcanes"
+  },
   "perso_stats": {
     "title": "Personnages",
     "filter_label": "Trier par :",

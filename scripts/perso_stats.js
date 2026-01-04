@@ -269,10 +269,23 @@ App.displayCharacterStats = function(character, element) {
       }
       return base;
     };
+    
+    // Helper pour traduire la classe et la description du sort
+    const translateClass = (className) => {
+        const key = `classes.${className}`;
+        const val = App.t(key);
+        return val === key ? className : val;
+    };
+
+    const translateSpell = (charName, defaultDesc) => {
+        const key = `spell_descriptions.${charName}`;
+        const val = App.t(key);
+        return val === key ? defaultDesc : val;
+    };
 
     // Traductions des stats
     const translatedRarity = App.t('perso_stats.stats_rarity', { value: character.rarete });
-    const translatedClass = App.t('perso_stats.stats_class', { value: character.classe });
+    const translatedClass = App.t('perso_stats.stats_class', { value: translateClass(character.classe) });
     const translatedPV = App.t('perso_stats.stats_pv', { value: formatStat(basePV, equipmentBonuses.pv) });
     const translatedAt = App.t('perso_stats.stats_attack', { value: formatStat(baseAt, equipmentBonuses.attaque) });
     const translatedDef = App.t('perso_stats.stats_defense', { value: formatStat(baseDef, equipmentBonuses.defense) });
@@ -280,13 +293,7 @@ App.displayCharacterStats = function(character, element) {
     const translatedCrit = App.t('perso_stats.stats_crit', { value: formatStat(baseCrit, equipmentBonuses.critique) });
     
     // Traduction de la capacité spéciale (Description statique)
-    // On utilise la clé spell_descriptions.{NomDuPerso} si elle existe, sinon on fallback sur le texte brut.
-    const spellKey = `spell_descriptions.${character.name}`;
-    let spellDesc = App.t(spellKey);
-    // Si la traduction n'existe pas (App.t retourne la clé), on utilise character.spe
-    if (spellDesc === spellKey) {
-        spellDesc = character.spe;
-    }
+    const spellDesc = translateSpell(character.name, character.spe);
     const translatedSpe = App.t('perso_stats.stats_special', { value: spellDesc });
 
     html = `
@@ -322,16 +329,30 @@ App.displayCharacterStats = function(character, element) {
     `;
   } else {
     // Version verrouillée
+    // Helper pour traduire la classe et la description du sort (répété ou sorti du bloc if)
+    const translateClass = (className) => {
+        const key = `classes.${className}`;
+        const val = App.t(key);
+        return val === key ? className : val;
+    };
+    const translateSpell = (charName, defaultDesc) => {
+        const key = `spell_descriptions.${charName}`;
+        const val = App.t(key);
+        return val === key ? defaultDesc : val;
+    };
+    
+    const spellDesc = translateSpell(character.name, character.spe);
+
     html = `
       <strong>${character.name}</strong><br>
       ${App.t('perso_stats.stats_rarity', { value: character.rarete })}<br>
-      ${App.t('perso_stats.stats_class', { value: character.classe })}<br>
+      ${App.t('perso_stats.stats_class', { value: translateClass(character.classe) })}<br>
       ${App.t('perso_stats.stats_pv', { value: character.pv })}<br>
       ${App.t('perso_stats.stats_attack', { value: character.attaque })}<br>
       ${App.t('perso_stats.stats_defense', { value: character.defense })}<br>
       ${App.t('perso_stats.stats_speed', { value: character.vitesse })}<br>
       ${App.t('perso_stats.stats_crit', { value: character.chanceCritique })}<br>
-      ${App.t('perso_stats.stats_special', { value: character.spe })}<br>
+      ${App.t('perso_stats.stats_special', { value: spellDesc })}<br>
     `;
   }
 
