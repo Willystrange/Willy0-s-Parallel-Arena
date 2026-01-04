@@ -126,8 +126,4 @@ if (App.playerCharacter && App.playerCharacter.name === "Boompy") {
     document.body.appendChild(btn);
 })();
 
-// Surcharge locale pour useItem (qui appelle ensuite le serveur)
-App.useItem = function(itemName) {
-  App.hideItemSelection();
-  App.executeServerAction('use_item', { itemName: itemName });
-};
+

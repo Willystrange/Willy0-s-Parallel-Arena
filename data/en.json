@@ -118,7 +118,8 @@
       "defense": "Defense",
       "special": "Special Ability",
       "items": "Items",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "no_items": "No items available"
     },
     "logs": {
       "hermes_boots": "(Visual) Hermes Boots activated for {name}"

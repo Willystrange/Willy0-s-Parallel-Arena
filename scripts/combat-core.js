@@ -6,9 +6,9 @@
 
 window.App = window.App || {};
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 // 1. GESTION DE L'INTERFACE (UI)
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 
 App.updateSpecialBar = function(character, elementId) {
   const specialBar = document.getElementById(elementId);
@@ -78,9 +78,9 @@ App.scrollToBottom = function() {
 
 App.updateTour = function() {}; // Géré par le serveur, conservé pour compatibilité HTML
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 // 5. PANNEAU DE STATISTIQUES
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 
 App.initStatsPanelState = function() {
   const panel = document.getElementById('stats-panel');
@@ -162,9 +162,9 @@ App.toggleStatsPanel = function() {
   }
 };
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 // 2. DONNÉES D'AFFICHAGE (STATISTIQUES & EFFETS)
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 
 // Initialisation complète des personnages (RESTORED)
 App.initializeCharacterProperties = function(character, isPlayer) {
@@ -353,9 +353,9 @@ App.getEffectiveStat = function(character, statName) {
     return Math.round((baseStatValue + additiveBonus) * multiplicativeBonus);
 };
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 // 3. SAUVEGARDE ET CHARGEMENT LOCAL
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 
 App.getSaveKey = function() {
     if (App.gameMode === 'classic') {
@@ -398,9 +398,9 @@ App.loadGame = function() {
     }
 };
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 // 6. GESTIONNAIRE DE COMBAT CENTRALISÉ (API)
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------- 
 
 App.combatManager = {
     syncCombatStart: async function(gameMode, extraData = {}) {
@@ -537,6 +537,75 @@ App.handleSurvivalRewards = App.handleSurvivalRewards || function(wave) {
         log.innerHTML += `<p>${App.t('combat.survival.defeat_wave', { wave: wave })}</p>`;
     }
     setTimeout(() => loadPage('fin_partie_survie'), 2000);
+};
+
+// ----------------------------------------------------------------------------- 
+// 7. GESTION DES OBJETS (CLIENT)
+// ----------------------------------------------------------------------------- 
+
+App.availableCombatItems = [
+    { name: 'Potion de Santé', prop: 'Potion_de_Santé_acheté', desc: 'combat.items.potion_desc' },
+    { name: 'Amulette de Régénération', prop: 'Amulette_de_Régénération_acheté', desc: 'combat.items.amulet_desc' },
+    { name: 'Épée Tranchante', prop: 'epee_tranchante_acheté', desc: 'combat.items.sword_desc' },
+    { name: 'Elixir de Puissance', prop: 'elixir_puissance_acheté', desc: 'combat.items.elixir_desc' },
+    { name: 'Armure de Fer', prop: 'armure_fer_acheté', desc: 'combat.items.armor_desc' },
+    { name: 'Bouclier solide', prop: 'bouclier_solide_acheté', desc: 'combat.items.shield_desc' },
+    { name: 'Crystal de renouveau', prop: 'crystal_acheté', desc: 'combat.items.crystal_desc' },
+    { name: "Cape de l'ombre", prop: 'Cape_acheté', desc: 'combat.items.cape_desc' },
+    { name: 'Marque de Chasseur', prop: 'marque_chasseur_acheté', desc: 'combat.items.hunter_desc' },
+    { name: 'Purge Spirituelle', prop: 'purge_spirituelle_acheté', desc: 'combat.items.purge_desc' },
+    { name: 'Orbe de Siphon', prop: 'orbe_siphon_acheté', desc: 'combat.items.siphon_desc' }
+];
+
+App.showItemSelection = function() {
+    const container = document.getElementById('item-selection');
+    if (!container) return;
+
+    let contentHtml = `
+        <div class="items-grid" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 10px;">
+    `;
+
+    let hasItems = false;
+    App.availableCombatItems.forEach(item => {
+        const quantity = App.userData[item.prop] || 0;
+        if (quantity > 0) {
+            hasItems = true;
+            contentHtml += `
+                <button class="combat-item-btn" onclick="App.useItem('${item.name.replace(/'/g, "\'")}')" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: rgba(0,0,0,0.5); color: white; cursor: pointer;">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-qty" style="font-weight: bold; margin-left: 5px; color: gold;">x${quantity}</span>
+                </button>
+            `;
+        }
+    });
+
+    if (!hasItems) {
+        contentHtml += `<p class="no-items">${App.t('combat.actions.no_items')}</p>`;
+    }
+
+    contentHtml += `
+        </div>
+        <button class="cancel-btn" onclick="App.hideItemSelection()" style="padding: 8px 16px; margin-top: 10px;">${App.t('combat.actions.cancel')}</button>
+    `;
+
+    container.innerHTML = contentHtml;
+    container.style.display = 'block';
+    
+    const actions = document.querySelector('.combat-actions');
+    if (actions) actions.style.display = 'none';
+};
+
+App.hideItemSelection = function() {
+    const container = document.getElementById('item-selection');
+    if (container) container.style.display = 'none';
+    
+    const actions = document.querySelector('.combat-actions');
+    if (actions) actions.style.display = 'flex';
+};
+
+App.useItem = function(itemName) {
+  App.hideItemSelection();
+  App.executeServerAction('use_item', { itemName: itemName });
 };
 
 // =================================================================================

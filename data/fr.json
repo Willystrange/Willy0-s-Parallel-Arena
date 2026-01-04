@@ -118,7 +118,8 @@
       "defense": "Défense",
       "special": "Capacité spéciale",
       "items": "Objets",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "no_items": "Aucun objet disponible"
     },
     "logs": {
       "hermes_boots": "(Visuel) Bottes d'Hermès activées pour {name}"
