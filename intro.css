@@ -4389,7 +4389,7 @@ html {
 .combat #item-selection {
   display: none;
   position: fixed;
-  top: -500px;
+  top: -150px;
   left: 50%;
   transform: translate(-50%, -50%);
   background: rgba(255, 255, 255, 0.95);
