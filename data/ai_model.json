@@ -10012,8 +10012,8 @@
         0
       ],
       "Cocobi_VS_Willy_attacker_EQ_CHG_CHG_YES": [
-        3.9177186269622557,
-        3.1957090141828455,
+        3.8780074530251927,
+        3.1086770153034635,
         0
       ],
       "Cocobi_VS_Willy_attacker_EQ_CHG_RDY_YES": [
@@ -10054,7 +10054,7 @@
       "Cocobi_VS_Willy_utiliser capacité spéciale_EQ_RDY_CHG_YES": [
         4.377732851712182,
         3.567244074353432,
-        5.336633604516495
+        6.1132152552610854
       ],
       "Cocobi_VS_Willy_attacker_EQ_RDY_CHG_YES": [
         6.074172507841663,
@@ -10154,7 +10154,7 @@
       "Cocobi_VS_Willy_attacker_EQ_RDY_CHG_NO": [
         4.429067294928806,
         0,
-        6.124329171546293
+        5.972086808691678
       ],
       "Cocobi_VS_Willy_utiliser capacité spéciale_A_CHG_CHG_NO": [
         6.139057537547388,
@@ -99518,6 +99518,11 @@
       ],
       "Nautilus_VS_Willy_se défendre_EQ_CHG_RDY_NO": [
         2.333190389659543,
+        0,
+        0
+      ],
+      "Cocobi_VS_Willy_se défendre_EQ_RDY_RDY_NO": [
+        -0.4579012836517419,
         0,
         0
       ]
