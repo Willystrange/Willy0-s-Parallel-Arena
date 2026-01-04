@@ -571,7 +571,7 @@ App.showItemSelection = function() {
         if (quantity > 0) {
             hasItems = true;
             contentHtml += `
-                <button id="item-selection button" class="combat-item-btn" onclick="App.useItem('${item.name.replace(/'/g, "\'")}')">
+                <button class="item-selection" onclick="App.useItem('${item.name.replace(/'/g, "\'")}')">
                     <span class="item-name">${item.name}</span>
                     <span class="item-qty" style="font-weight: bold; margin-left: 5px; color: gold;">x${quantity}</span>
                 </button>
