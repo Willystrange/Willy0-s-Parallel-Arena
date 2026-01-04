@@ -36,7 +36,7 @@ App.initCharacterSelection = function() {
     {name: "Boompy", pv: 11800, attaque: 500, defense: 80, spe: 0, vitesse: 280, critique: 7, pv_max: 11800, attaque_originale: 500, defense_originale: 80, rarity: "légendaire"},
     {name: "Perro", pv: 9700, attaque: 420, defense: 85, spe: 0.5, vitesse: 41, critique: 3, pv_max: 9700, attaque_originale: 420, defense_originale: 85, rarity: "commun"},
     {name: "Nautilus", pv: 11280, attaque: 470, defense: 74, spe: 0.5, vitesse: 240, critique: 5, pv_max: 11280, attaque_originale: 470, defense_originale: 74, rarity: "épique"},
-    { name: "Paradoxe", pv: 10950, attaque: 450, defense: 100, spe: 0.5, vitesse: 170, critique: 4.5, pv_max: 10950, attaque_originale: 450, defense_originale: 100, rarity: 'épique' },
+    {name: "Paradoxe", pv: 10950, attaque: 450, defense: 100, spe: 0.5, vitesse: 170, critique: 4.5, pv_max: 10950, attaque_originale: 450, defense_originale: 100, rarity: 'épique' },
     {name: "Korb", pv: 9750, attaque: 425, defense: 75, spe: 0.5, vitesse: 95, critique: 3.5, pv_max: 9750, attaque_originale: 425, defense_originale: 75, rarity: 'commun'},
   ];
 
@@ -119,7 +119,8 @@ App.initCharacterSelection = function() {
           if (!unlockMessage || !unlockMessage.classList.contains('unlock-message')) {
             unlockMessage = document.createElement('div');
             unlockMessage.classList.add('unlock-message');
-            unlockMessage.textContent = "Ce personnage n'est pas encore débloqué !";
+            // TRADUCTION ICI
+            unlockMessage.textContent = App.t('character_selection.locked_message');
             button.parentNode.insertBefore(unlockMessage, button.nextSibling);
           }
           unlockMessage.classList.add('show');
@@ -184,14 +185,19 @@ App.initCharacterSelection = function() {
         return base;
     };
 
+    // --- TRADUCTION ---
+    const getStatLabel = (key) => App.t(`character_selection.stats.${key}`);
+    const normalizeRarity = (str) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const rarityLabel = App.t(`rarity.${normalizeRarity(character.rarity)}`);
+
     statsDiv.innerHTML = `
-      <h3>${character.name} (Niveau ${currentLevel})</h3>
-      <p>Rareté: ${character.rarity}</p>
-      <p>PV: ${formatStat(finalPV, equipmentBonus.pv)}</p>
-      <p>Attaque: ${formatStat(finalAttaque, equipmentBonus.attaque)}</p>
-      <p>Défense: ${formatStat(finalDefense, equipmentBonus.defense)}</p>
-      <p>Vitesse: ${formatStat(finalVitesse, equipmentBonus.vitesse)}</p>
-      <p>Chances de coup critique: ${formatStat(finalCritique, equipmentBonus.critique)}</p>
+      <h3>${character.name} (${getStatLabel('level')} ${currentLevel})</h3>
+      <p>${getStatLabel('rarity')} ${rarityLabel}</p>
+      <p>${getStatLabel('pv')} ${formatStat(finalPV, equipmentBonus.pv)}</p>
+      <p>${getStatLabel('attack')} ${formatStat(finalAttaque, equipmentBonus.attaque)}</p>
+      <p>${getStatLabel('defense')} ${formatStat(finalDefense, equipmentBonus.defense)}</p>
+      <p>${getStatLabel('speed')} ${formatStat(finalVitesse, equipmentBonus.vitesse)}</p>
+      <p>${getStatLabel('crit')} ${formatStat(finalCritique, equipmentBonus.critique)}</p>
       ${equipmentDescription}
       <button class="choose-button"
         onclick="chooseCharacter({
@@ -208,7 +214,7 @@ App.initCharacterSelection = function() {
           vitesse_originale: ${character.vitesse},
           critique_originale: ${character.critique},
         }); startMusicC(); ">
-  Choisir
+  ${getStatLabel('choose_button')}
 </button>
     `;
     button.parentNode.insertBefore(statsDiv, button.nextSibling);
@@ -338,4 +344,12 @@ App.initCharacterSelection = function() {
   renderCharacterList('alphabetical');
 };
 
-App.initCharacterSelection();
+// Attendre le chargement des traductions avant d'initialiser
+if (App.translationPromise) {
+    App.translationPromise.then(() => {
+        App.translatePage(); // Traduit les éléments statiques avec data-i18n
+        App.initCharacterSelection();
+    });
+} else {
+    App.initCharacterSelection();
+}

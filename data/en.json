@@ -70,5 +70,34 @@
           "weekend": "Weekend",
           "cancel": "Cancel"
       }
+  },
+  "character_selection": {
+    "title": "Choose a character",
+    "sort": {
+      "label": "Sort by:",
+      "alphabetical": "Alphabetical order",
+      "level_asc": "Level ascending",
+      "level_desc": "Level descending",
+      "rarity_asc": "Rarity ascending",
+      "rarity_desc": "Rarity descending"
+    },
+    "locked_message": "This character is not unlocked yet!",
+    "stats": {
+      "level": "Level",
+      "rarity": "Rarity:",
+      "pv": "HP:",
+      "attack": "Attack:",
+      "defense": "Defense:",
+      "speed": "Speed:",
+      "crit": "Critical strike chance:",
+      "choose_button": "Choose"
+    }
+  },
+  "rarity": {
+    "commun": "common",
+    "inhabituel": "uncommon",
+    "rare": "rare",
+    "epique": "epic",
+    "legendaire": "legendary"
   }
 }

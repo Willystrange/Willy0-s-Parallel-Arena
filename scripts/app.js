@@ -98,16 +98,87 @@ App.base64ToBuffer = (base64) => {
     }
     const binary = window.atob(padded);
     const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes.buffer;
 };
 
 App.bufferToBase64 = (buffer) => {
     const bytes = new Uint8Array(buffer);
     let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-    return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
 };
+
+// --- SYSTEME DE TRADUCTION ---
+App.translations = {};
+App.currentLang = 'fr'; // Défaut
+
+App.loadTranslations = function() {
+    const userData = getUserData(); // Supposant que getUserData est global ou dans app.js (il semble être global via scripts/connection.js ou similaire)
+    App.currentLang = userData.language || 'fr';
+    
+    // OPTIMISATION : On ne charge QUE le fichier de langue nécessaire pour économiser la bande passante et la mémoire client.
+    return fetch(`data/${App.currentLang}.json`)
+        .then(response => response.json())
+        .then(data => {
+            App.translations = data;
+            // console.log("Traductions chargées:", App.currentLang);
+            // Déclencher un événement personnalisé si besoin
+            const event = new CustomEvent('translationsLoaded');
+            window.dispatchEvent(event);
+        })
+        .catch(err => {
+            console.error("Erreur chargement traductions:", err);
+            // Fallback sur fr si en échec ?
+            if (App.currentLang !== 'fr') {
+                console.log("Tentative de fallback sur fr.json");
+                return fetch(`data/fr.json`).then(r=>r.json()).then(d=>App.translations=d);
+            }
+        });
+};
+
+App.t = function(key, replacements = {}) {
+    // Support pour les clés imbriquées (ex: "menu.title")
+    const keys = key.split('.');
+    let value = App.translations;
+    
+    for (const k of keys) {
+        if (value && value[k] !== undefined) {
+            value = value[k];
+        } else {
+            return key; // Retourne la clé si non trouvé
+        }
+    }
+    
+    if (typeof value !== 'string') return key;
+
+    // Remplacements dynamiques {variable}
+    Object.keys(replacements).forEach(r => {
+        value = value.replace(new RegExp(`{${r}}`, 'g'), replacements[r]);
+    });
+    
+    return value;
+};
+
+App.translatePage = function() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const translation = App.t(key);
+        
+        if (el.tagName === 'INPUT' && el.type === 'placeholder') {
+            el.placeholder = translation;
+        } else {
+            el.textContent = translation;
+        }
+    });
+};
+
+// Lancer le chargement immédiatement
+App.translationPromise = App.loadTranslations();
 
 // --- Gestion de l'état de connexion ---
 App.saveConnectionState = function(userId, est_connecte) {
