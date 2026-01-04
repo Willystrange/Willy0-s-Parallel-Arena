@@ -1200,7 +1200,6 @@ app.post('/api/combat/action', verifyToken, async (req, res) => {
             combatEngine.handleAttack(game.player, game.opponent, true, results);
         } else if (action === 'defend') {
             game.player.defense_bouton = 1; game.player.defense_droit = 3;
-            results.logs.push({ text: "Vous vous préparez à parer la prochaine attaque !", color: "lightblue", side: "milieu" });
         } else if (action === 'special') {
             combatEngine.applySpecialAbility(game.player, game.opponent, true, results);
         } else if (action === 'use_item') {
