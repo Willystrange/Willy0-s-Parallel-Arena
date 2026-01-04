@@ -132,6 +132,19 @@
       "upgrade_log": "{name} upgraded {stat}.",
       "defeat_wave": "You were defeated at wave {wave}."
     },
+    "items": {
+      "potion": "Health Potion",
+      "amulet": "Amulet of Regeneration",
+      "sword": "Sharp Sword",
+      "elixir": "Power Elixir",
+      "armor": "Iron Armor",
+      "shield": "Solid Shield",
+      "crystal": "Renewal Crystal",
+      "cape": "Shadow Cape",
+      "hunter_mark": "Hunter's Mark",
+      "purge": "Spiritual Purge",
+      "siphon": "Siphon Orb"
+    },
     "weekend": {
       "spinning": "Rolling event...",
       "events": {

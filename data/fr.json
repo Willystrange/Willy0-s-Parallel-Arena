@@ -132,6 +132,19 @@
       "upgrade_log": "{name} a amélioré la stat {stat}.",
       "defeat_wave": "Vous avez été vaincu à la vague {wave}."
     },
+    "items": {
+      "potion": "Potion de Santé",
+      "amulet": "Amulette de Régénération",
+      "sword": "Épée Tranchante",
+      "elixir": "Elixir de Puissance",
+      "armor": "Armure de Fer",
+      "shield": "Bouclier solide",
+      "crystal": "Crystal de renouveau",
+      "cape": "Cape de l'ombre",
+      "hunter_mark": "Marque de Chasseur",
+      "purge": "Purge Spirituelle",
+      "siphon": "Orbe de Siphon"
+    },
     "weekend": {
       "spinning": "Tirage de l'événement...",
       "events": {

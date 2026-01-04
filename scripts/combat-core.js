@@ -544,17 +544,17 @@ App.handleSurvivalRewards = App.handleSurvivalRewards || function(wave) {
 // ----------------------------------------------------------------------------- 
 
 App.availableCombatItems = [
-    { name: 'Potion de Santé', prop: 'Potion_de_Santé_acheté', desc: 'combat.items.potion_desc' },
-    { name: 'Amulette de Régénération', prop: 'Amulette_de_Régénération_acheté', desc: 'combat.items.amulet_desc' },
-    { name: 'Épée Tranchante', prop: 'epee_tranchante_acheté', desc: 'combat.items.sword_desc' },
-    { name: 'Elixir de Puissance', prop: 'elixir_puissance_acheté', desc: 'combat.items.elixir_desc' },
-    { name: 'Armure de Fer', prop: 'armure_fer_acheté', desc: 'combat.items.armor_desc' },
-    { name: 'Bouclier solide', prop: 'bouclier_solide_acheté', desc: 'combat.items.shield_desc' },
-    { name: 'Crystal de renouveau', prop: 'crystal_acheté', desc: 'combat.items.crystal_desc' },
-    { name: "Cape de l'ombre", prop: 'Cape_acheté', desc: 'combat.items.cape_desc' },
-    { name: 'Marque de Chasseur', prop: 'marque_chasseur_acheté', desc: 'combat.items.hunter_desc' },
-    { name: 'Purge Spirituelle', prop: 'purge_spirituelle_acheté', desc: 'combat.items.purge_desc' },
-    { name: 'Orbe de Siphon', prop: 'orbe_siphon_acheté', desc: 'combat.items.siphon_desc' }
+    { id: 'potion', name: 'Potion de Santé', prop: 'Potion_de_Santé_acheté', desc: 'combat.items.potion_desc' },
+    { id: 'amulet', name: 'Amulette de Régénération', prop: 'Amulette_de_Régénération_acheté', desc: 'combat.items.amulet_desc' },
+    { id: 'sword', name: 'Épée Tranchante', prop: 'epee_tranchante_acheté', desc: 'combat.items.sword_desc' },
+    { id: 'elixir', name: 'Elixir de Puissance', prop: 'elixir_puissance_acheté', desc: 'combat.items.elixir_desc' },
+    { id: 'armor', name: 'Armure de Fer', prop: 'armure_fer_acheté', desc: 'combat.items.armor_desc' },
+    { id: 'shield', name: 'Bouclier solide', prop: 'bouclier_solide_acheté', desc: 'combat.items.shield_desc' },
+    { id: 'crystal', name: 'Crystal de renouveau', prop: 'crystal_acheté', desc: 'combat.items.crystal_desc' },
+    { id: 'cape', name: "Cape de l'ombre", prop: 'Cape_acheté', desc: 'combat.items.cape_desc' },
+    { id: 'hunter_mark', name: 'Marque de Chasseur', prop: 'marque_chasseur_acheté', desc: 'combat.items.hunter_desc' },
+    { id: 'purge', name: 'Purge Spirituelle', prop: 'purge_spirituelle_acheté', desc: 'combat.items.purge_desc' },
+    { id: 'siphon', name: 'Orbe de Siphon', prop: 'orbe_siphon_acheté', desc: 'combat.items.siphon_desc' }
 ];
 
 App.showItemSelection = function() {
@@ -594,10 +594,11 @@ App.showItemSelection = function() {
     if (itemsToDisplay.length > 0) {
         itemsToDisplay.forEach(item => {
             const quantity = App.userData[item.prop] || 0;
+            const translatedName = App.t(`combat.items.${item.id}`);
             // Utilisation de la structure simple attendue par le CSS
             contentHtml += `
                 <button onclick="App.useItem('${item.name.replace(/'/g, "\\'")}')">
-                    ${item.name} (x${quantity})
+                    ${translatedName} (x${quantity})
                 </button>
             `;
         });
