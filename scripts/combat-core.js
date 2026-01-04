@@ -561,31 +561,53 @@ App.showItemSelection = function() {
     const container = document.getElementById('item-selection');
     if (!container) return;
 
-    let contentHtml = `
-        <div class="items-grid" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 10px;">
-    `;
+    // Ajout du titre selon le style intro.css
+    let contentHtml = `<h3>${App.t('combat.actions.items')}</h3>`;
 
-    let hasItems = false;
-    App.availableCombatItems.forEach(item => {
-        const quantity = App.userData[item.prop] || 0;
-        if (quantity > 0) {
-            hasItems = true;
-            contentHtml += `
-                <button class="item-selection" onclick="App.useItem('${item.name.replace(/'/g, "\'")}')">
-                    <span class="item-name">${item.name}</span>
-                    <span class="item-qty" style="font-weight: bold; margin-left: 5px; color: gold;">x${quantity}</span>
-                </button>
-            `;
-        }
+    // 1. Filtrer les objets disponibles (quantité > 0)
+    const availableItems = App.availableCombatItems.filter(item => {
+        return (App.userData[item.prop] || 0) > 0;
     });
 
-    if (!hasItems) {
+    let itemsToDisplay = [];
+
+    if (availableItems.length <= 3) {
+        itemsToDisplay = availableItems;
+    } else {
+        // 2. Gestion de la rotation aléatoire par tour
+        const currentTurn = App.playerCharacter ? (App.playerCharacter.tourTT || 1) : 1;
+        
+        // Vérifier le cache
+        if (App.itemSelectionCache && App.itemSelectionCache.turn === currentTurn) {
+             itemsToDisplay = App.itemSelectionCache.items.filter(item => (App.userData[item.prop] || 0) > 0);
+        } else {
+            const shuffled = [...availableItems].sort(() => 0.5 - Math.random());
+            itemsToDisplay = shuffled.slice(0, 3);
+            
+            App.itemSelectionCache = {
+                turn: currentTurn,
+                items: itemsToDisplay
+            };
+        }
+    }
+
+    if (itemsToDisplay.length > 0) {
+        itemsToDisplay.forEach(item => {
+            const quantity = App.userData[item.prop] || 0;
+            // Utilisation de la structure simple attendue par le CSS
+            contentHtml += `
+                <button onclick="App.useItem('${item.name.replace(/'/g, "\\'")}')">
+                    ${item.name} (x${quantity})
+                </button>
+            `;
+        });
+    } else {
         contentHtml += `<p class="no-items">${App.t('combat.actions.no_items')}</p>`;
     }
 
+    // Bouton annuler
     contentHtml += `
-        </div>
-        <button class="cancel-btn" onclick="App.hideItemSelection()" style="padding: 8px 16px; margin-top: 10px;">${App.t('combat.actions.cancel')}</button>
+        <button class="cancel-btn" onclick="App.hideItemSelection()">${App.t('combat.actions.cancel')}</button>
     `;
 
     container.innerHTML = contentHtml;
