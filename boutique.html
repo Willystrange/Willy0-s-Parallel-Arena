@@ -16,20 +16,20 @@
 <body>
   <div class="header">
     <div class="balance" id="balance">Solde : 0</div>
-    <input type="text" id="search-bar" placeholder="Rechercher un objet" class="search-bar">
+    <input type="text" id="search-bar" data-i18n="shop.search_placeholder" placeholder="Rechercher un objet" class="search-bar">
     <div id="search-results" class="search-results"></div>
   </div>
   <div class="scroll-container">
     <div class="content">
       <div class="shop-tabs">
-        <button class="tab-link active" data-tab="items-content">Objets</button>
-        <button class="tab-link" data-tab="equipment-content">Équipement</button>
+        <button class="tab-link active" data-tab="items-content" data-i18n="shop.tabs.items">Objets</button>
+        <button class="tab-link" data-tab="equipment-content" data-i18n="shop.tabs.equipment">Équipement</button>
       </div>
 
       <!-- ========== BOUTIQUE OBJETS ========== -->
       <div id="items-content" class="tab-content active">
-        <h1>Boutique d'Objets</h1>
-        <h2 id="dailyoffers">Offres Journalières</h2>
+        <h1 data-i18n="shop.titles.items_shop">Boutique d'Objets</h1>
+        <h2 id="dailyoffers" data-i18n="shop.titles.daily_offers">Offres Journalières</h2>
         <div id="daily-timer" class="timer"></div>
         <div class="category-wrapper">
           <div class="category" id="category-daily">
@@ -38,191 +38,191 @@
         </div>
 
         <!-- Catégorie XP -->
-        <h2 id="xptitle">Catégorie XP</h2>
+        <h2 id="xptitle" data-i18n="shop.titles.category_xp">Catégorie XP</h2>
         <div class="category-wrapper">
           <div class="category" id="category-xp">
             <div class="bonus-item" id="xp-2">
               <img src="XP_2.png" alt="Double XP Bonus">
-              <h2>Double XP</h2>
-              <p>Profitez du double XP lors de vos combats !</p>
-              <p><span class="stock-label"></span><span id="stock-xp"></span></p>
+              <h2><span data-i18n="shop.items.xp_2.title">Double XP</span></h2>
+              <p data-i18n="shop.items.xp_2.desc">Profitez du double XP lors de vos combats !</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-xp"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="18">1 (18 points)</option>
                 <option value="3" data-price="48">3 (48 points)</option>
                 <option value="5" data-price="75">5 (75 points)</option>
               </select>
-              <button class="buyButton" data-type="xp">Acheter</button>
+              <button class="buyButton" data-type="xp" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
           </div>
         </div>
 
         <!-- Catégorie Soins -->
-        <h2 id="soinstitle">Catégorie Soins</h2>
+        <h2 id="soinstitle" data-i18n="shop.titles.category_care">Catégorie Soins</h2>
         <div class="category-wrapper">
           <div class="category" id="category-soins">
             <div class="bonus-item" id="potion">
               <img src="Potion-1.png" alt="Potion de Santé">
-              <h2>Potion de Santé</h2>
-              <p>Augmente les PV du joueur de 1100.</p>
-              <p><span class="stock-label"></span><span id="stock-potion"></span></p>
+              <h2><span data-i18n="shop.items.potion.title">Potion de Santé</span></h2>
+              <p data-i18n="shop.items.potion.desc">Augmente les PV du joueur de 1100.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-potion"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="12">1 (12 points)</option>
                 <option value="3" data-price="33">3 (33 points)</option>
                 <option value="5" data-price="50">5 (50 points)</option>
               </select>
-              <button class="buyButton" data-type="potion">Acheter</button>
+              <button class="buyButton" data-type="potion" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="amulette">
               <img src="Amulette-1.png" alt="Amulette de Régénération">
-              <h2>Amulette de Régénération</h2>
-              <p>Régénère 2% des PV max par tour.</p>
-              <p><span class="stock-label"></span><span id="stock-amulette"></span></p>
+              <h2><span data-i18n="shop.items.amulette.title">Amulette de Régénération</span></h2>
+              <p data-i18n="shop.items.amulette.desc">Régénère 2% des PV max par tour.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-amulette"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="35">1 (35 points)</option>
                 <option value="3" data-price="95">3 (95 points)</option>
                 <option value="5" data-price="150">5 (150 points)</option>
               </select>
-              <button class="buyButton" data-type="amulette">Acheter</button>
+              <button class="buyButton" data-type="amulette" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
           </div>
         </div>
 
         <!-- Catégorie Attaque -->
-        <h2 id="attaquetitle">Catégorie Attaque</h2>
+        <h2 id="attaquetitle" data-i18n="shop.titles.category_attack">Catégorie Attaque</h2>
         <div class="category-wrapper">
           <div class="category" id="category-attaque">
             <div class="bonus-item" id="epee">
               <img src="epee-1.png" alt="Épée Tranchante">
-              <h2>Épée Tranchante</h2>
-              <p>Augmente l'attaque du joueur de 5%.</p>
-              <p><span class="stock-label"></span><span id="stock-epee"></span></p>
+              <h2><span data-i18n="shop.items.epee.title">Épée Tranchante</span></h2>
+              <p data-i18n="shop.items.epee.desc">Augmente l'attaque du joueur de 5%.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-epee"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="18">1 (18 points)</option>
                 <option value="3" data-price="48">3 (48 points)</option>
                 <option value="5" data-price="75">5 (75 points)</option>
               </select>
-              <button class="buyButton" data-type="epee">Acheter</button>
+              <button class="buyButton" data-type="epee" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="elixir">
               <img src="elixir-1.png" alt="Élixir de Puissance">
-              <h2>Élixir de Puissance</h2>
-              <p>Augmente l'attaque de 50 points.</p>
-              <p><span class="stock-label"></span><span id="stock-elixir"></span></p>
+              <h2><span data-i18n="shop.items.elixir.title">Élixir de Puissance</span></h2>
+              <p data-i18n="shop.items.elixir.desc">Augmente l'attaque de 50 points.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-elixir"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="15">1 (15 points)</option>
                 <option value="3" data-price="40">3 (40 points)</option>
                 <option value="5" data-price="60">5 (60 points)</option>
               </select>
-              <button class="buyButton" data-type="elixir">Acheter</button>
+              <button class="buyButton" data-type="elixir" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="marque_chasseur">
               <img src="marque_chasseur.png" alt="Marque de Chasseur">
-              <h2>Marque de chasseur</h2>
-              <p>Garantit que votre prochaine attaque soit un coup critique.</p>
-              <p><span class="stock-label"></span><span id="stock-marque_chasseur"></span></p>
+              <h2><span data-i18n="shop.items.marque_chasseur.title">Marque de chasseur</span></h2>
+              <p data-i18n="shop.items.marque_chasseur.desc">Garantit que votre prochaine attaque soit un coup critique.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-marque_chasseur"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="60">1 (60 points)</option>
                 <option value="3" data-price="165">3 (165 points)</option>
                 <option value="5" data-price="250">5 (250 points)</option>
               </select>
-              <button class="buyButton" data-type="marque_chasseur">Acheter</button>
+              <button class="buyButton" data-type="marque_chasseur" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
           </div>
         </div>
 
         <!-- Catégorie Défense -->
-        <h2 id="defensetitle">Catégorie Défense</h2>
+        <h2 id="defensetitle" data-i18n="shop.titles.category_defense">Catégorie Défense</h2>
         <div class="category-wrapper">
           <div class="category" id="category-defense">
             <div class="bonus-item" id="bouclier">
               <img src="bouclier.png" alt="Bouclier solide">
-              <h2>Bouclier solide</h2>
-              <p>Augmente la défense de 15 points.</p>
-              <p><span class="stock-label"></span><span id="stock-bouclier"></span></p>
+              <h2><span data-i18n="shop.items.bouclier.title">Bouclier solide</span></h2>
+              <p data-i18n="shop.items.bouclier.desc">Augmente la défense de 15 points.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-bouclier"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="10">1 (10 points)</option>
                 <option value="3" data-price="28">3 (28 points)</option>
                 <option value="5" data-price="40">5 (40 points)</option>
               </select>
-              <button class="buyButton" data-type="bouclier">Acheter</button>
+              <button class="buyButton" data-type="bouclier" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="cape">
               <img src="Cape_de_l'ombre.png" alt="Cape de l'ombre">
-              <h2>Cape de l'ombre</h2>
-              <p>Ignore les dégâts subit par la prochaine attaque directe.</p>
-              <p><span class="stock-label"></span><span id="stock-cape"></span></p>
+              <h2><span data-i18n="shop.items.cape.title">Cape de l'ombre</span></h2>
+              <p data-i18n="shop.items.cape.desc">Ignore les dégâts subit par la prochaine attaque directe.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-cape"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="70">1 (70 points)</option>
                 <option value="3" data-price="190">3 (190 points)</option>
                 <option value="5" data-price="300">5 (300 points)</option>
               </select>
-              <button class="buyButton" data-type="cape">Acheter</button>
+              <button class="buyButton" data-type="cape" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
           </div>
         </div>
 
         <!-- Catégorie Autre -->
-        <h2 id="autretitle">Catégorie Autre</h2>
+        <h2 id="autretitle" data-i18n="shop.titles.category_other">Catégorie Autre</h2>
         <div class="category-wrapper">
           <div class="category" id="category-autre">
             <div class="bonus-item" id="armure">
               <img src="armure-1.png" alt="Armure de Fer">
-              <h2>Armure de Fer</h2>
-              <p>Réduit les dégâts reçus de 10%.</p>
-              <p><span class="stock-label"></span><span id="stock-armure"></span></p>
+              <h2><span data-i18n="shop.items.armure.title">Armure de Fer</span></h2>
+              <p data-i18n="shop.items.armure.desc">Réduit les dégâts reçus de 10%.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-armure"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="28">1 (28 points)</option>
                 <option value="3" data-price="75">3 (75 points)</option>
                 <option value="5" data-price="120">5 (120 points)</option>
               </select>
-              <button class="buyButton" data-type="armure">Acheter</button>
+              <button class="buyButton" data-type="armure" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="crystal">
               <img src="Crystale.png" alt="Crystal de renouveau">
-              <h2>Crystal de renouveau</h2>
-              <p>Recharge 0.8 points de la capacité spéciale.</p>
-              <p><span class="stock-label"></span><span id="stock-crystal"></span></p>
+              <h2><span data-i18n="shop.items.crystal.title">Crystal de renouveau</span></h2>
+              <p data-i18n="shop.items.crystal.desc">Recharge 0.8 points de la capacité spéciale.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-crystal"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="45">1 (45 points)</option>
                 <option value="3" data-price="120">3 (120 points)</option>
                 <option value="5" data-price="180">5 (180 points)</option>
               </select>
-              <button class="buyButton" data-type="crystal">Acheter</button>
+              <button class="buyButton" data-type="crystal" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="purge-spirituelle">
               <img src="purge-spirituelle.png" alt="Purge Spirituelle">
-              <h2>Purge Spirituelle</h2>
-              <p>Dissipe tous les effets négatifs qui vous affectent.</p>
-              <p><span class="stock-label"></span><span id="stock-purge_spirituelle"></span></p>
+              <h2><span data-i18n="shop.items.purge_spirituelle.title">Purge Spirituelle</span></h2>
+              <p data-i18n="shop.items.purge_spirituelle.desc">Dissipe tous les effets négatifs qui vous affectent.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-purge_spirituelle"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="40">1 (40 points)</option>
                 <option value="3" data-price="110">3 (110 points)</option>
                 <option value="5" data-price="170">5 (170 points)</option>
               </select>
-              <button class="buyButton" data-type="purge_spirituelle">Acheter</button>
+              <button class="buyButton" data-type="purge_spirituelle" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item" id="orbe-siphon">
               <img src="orbe-siphon.png" alt="Orbe de Siphon">
-              <h2>Orbe de Siphon</h2>
-              <p>Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.</p>
-              <p><span class="stock-label"></span><span id="stock-orbe_siphon"></span></p>
+              <h2><span data-i18n="shop.items.orbe_siphon.title">Orbe de Siphon</span></h2>
+              <p data-i18n="shop.items.orbe_siphon.desc">Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.</p>
+              <p><span class="stock-label" data-i18n="shop.labels.stock">En stock : </span><span id="stock-orbe_siphon"></span></p>
               <select class="quantity-select">
                 <option value="1" data-price="50">1 (50 points)</option>
                 <option value="3" data-price="135">3 (135 points)</option>
                 <option value="5" data-price="210">5 (210 points)</option>
               </select>
-              <button class="buyButton" data-type="orbe_siphon">Acheter</button>
+              <button class="buyButton" data-type="orbe_siphon" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
           </div>
@@ -231,25 +231,25 @@
 
       <!-- ========== BOUTIQUE ÉQUIPEMENT ========== -->
       <div id="equipment-content" class="tab-content">
-        <h1>Boutique des Coffres d'équipements</h1>
+        <h1 data-i18n="shop.titles.equipment_shop">Boutique des Coffres d'équipements</h1>
 
         <!-- Lootbox Gratuite -->
-        <h2>Coffre de la semaine</h2>
+        <h2 data-i18n="shop.titles.weekly_chest">Coffre de la semaine</h2>
         <div id="weekly-timer" class="timer"></div>
         <div class="category-wrapper">
           <div class="category">
             <div class="bonus-item" id="daily_lootbox">
               <img src="coffre_sem.png" alt="Lootbox Gratuite">
-              <h2>Coffre Gratuit</h2>
-              <p>Un coffre d'équipement aléatoire.</p>
-              <button id="claim-daily-lootbox">Réclamer</button>
+              <h2><span data-i18n="shop.items.weekly_chest.title">Coffre Gratuit</span></h2>
+              <p data-i18n="shop.items.weekly_chest.desc">Un coffre d'équipement aléatoire.</p>
+              <button id="claim-daily-lootbox" data-i18n="shop.buttons.claim">Réclamer</button>
               <p class="error-message"></p>
             </div>
           </div>
         </div>
 
         <!-- Offre Spéciale de la Semaine -->
-        <h2>Offre Spéciale de la Semaine</h2>
+        <h2 data-i18n="shop.titles.special_weekly">Offre Spéciale de la Semaine</h2>
         <div id="special-weekly-offer-timer" class="timer"></div>
         <div class="category-wrapper">
           <div class="category" id="category-special-weekly-offer">
@@ -258,49 +258,48 @@
         </div>
 
         <!-- Lootbox par Type -->
-        <h2>Coffre par Type</h2>
+        <h2 data-i18n="shop.titles.chest_by_type">Coffre par Type</h2>
         <div class="category-wrapper">
           <div class="category" id="category-lootbox-equip">
             <div class="bonus-item">
               <img src="coffre_att.png" alt="Coffre Attaque">
-              <h2>Attaque</h2>
-              <p>Contient un équipement d'Attaque de rareté aléatoire.</p>
-              <p>Prix: 1000 points</p>
+              <h2><span data-i18n="shop.items.chest_attack.title">Attaque</span></h2>
+              <p data-i18n="shop.items.chest_attack.desc">Contient un équipement d'Attaque de rareté aléatoire.</p>
+              <p data-i18n="shop.labels.price" data-i18n-params='{"price": "1000"}'>Prix: 1000 points</p>
               <button class="buyButton" data-type="lootbox" data-lootbox-type="Attaque"
-                data-price="1000">Acheter</button>
+                data-price="1000" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item">
               <img src="coffre_def.png" alt="Coffre Défense">
-              <h2>Défense</h2>
-              <p>Contient un équipement de Défense de rareté aléatoire.</p>
-              <p>Prix: 1000 points</p>
+              <h2><span data-i18n="shop.items.chest_defense.title">Défense</span></h2>
+              <p data-i18n="shop.items.chest_defense.desc">Contient un équipement de Défense de rareté aléatoire.</p>
+              <p data-i18n="shop.labels.price" data-i18n-params='{"price": "1000"}'>Prix: 1000 points</p>
               <button class="buyButton" data-type="lootbox" data-lootbox-type="Défense"
-                data-price="1000">Acheter</button>
+                data-price="1000" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item">
               <img src="coffre_agi.png" alt="Coffre Agilité">
-              <h2>Agilité</h2>
-              <p>Contient un équipement d'Agilité de rareté aléatoire.</p>
-              <p>Prix: 1000 points</p>
+              <h2><span data-i18n="shop.items.chest_agility.title">Agilité</span></h2>
+              <p data-i18n="shop.items.chest_agility.desc">Contient un équipement d'Agilité de rareté aléatoire.</p>
+              <p data-i18n="shop.labels.price" data-i18n-params='{"price": "1000"}'>Prix: 1000 points</p>
               <button class="buyButton" data-type="lootbox" data-lootbox-type="Agilité"
-                data-price="1000">Acheter</button>
+                data-price="1000" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
             <div class="bonus-item">
               <img src="coffre_equ.png" alt="Coffre Équilibre">
-              <h2>Équilibre</h2>
-              <p>Contient un équipement d'Équilibre de rareté aléatoire.</p>
-              <p>Prix: 1000 points</p>
+              <h2><span data-i18n="shop.items.chest_balance.title">Équilibre</span></h2>
+              <p data-i18n="shop.items.chest_balance.desc">Contient un équipement d'Équilibre de rareté aléatoire.</p>
+              <p data-i18n="shop.labels.price" data-i18n-params='{"price": "1000"}'>Prix: 1000 points</p>
               <button class="buyButton" data-type="lootbox" data-lootbox-type="Équilibre"
-                data-price="1000">Acheter</button>
+                data-price="1000" data-i18n="shop.buttons.buy">Acheter</button>
               <p class="error-message"></p>
             </div>
           </div>
         </div>
       </div>
-      <script src="scripts/equipements.js"></script>
 
       <!-- RECAPTCHA LEGAL NOTICE -->
       <div style="font-size: 10px; color: rgba(255,255,255,0.3); text-align: center; margin-top: 20px; padding-bottom: 80px;">

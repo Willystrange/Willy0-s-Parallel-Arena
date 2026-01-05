@@ -170,7 +170,17 @@ App.t = function(key, replacements = {}) {
 App.translatePage = function() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        const translation = App.t(key);
+        let params = {};
+        const paramsStr = el.getAttribute('data-i18n-params');
+        if (paramsStr) {
+            try {
+                params = JSON.parse(paramsStr);
+            } catch (e) {
+                console.error("Erreur parsing data-i18n-params:", e);
+            }
+        }
+        
+        const translation = App.t(key, params);
         
         if (el.tagName === 'INPUT' && el.type === 'placeholder') {
             el.placeholder = translation;

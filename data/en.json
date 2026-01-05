@@ -353,5 +353,76 @@
     "mastery_title": "Mastery",
     "button_improve": "Upgrade {name}",
     "button_equip": "Equip"
+  },
+  "shop": {
+    "balance": "Balance : {amount}",
+    "search_placeholder": "Search for an item",
+    "welcome": "Welcome to the Game Shop",
+    "tabs": {
+      "items": "Items",
+      "equipment": "Equipment"
+    },
+    "titles": {
+      "items_shop": "Item Shop",
+      "equipment_shop": "Equipment Chest Shop",
+      "daily_offers": "Daily Offers",
+      "weekly_chest": "Weekly Chest",
+      "special_weekly": "Special Weekly Offer",
+      "chest_by_type": "Chest by Type",
+      "category_xp": "XP Category",
+      "category_care": "Healing Category",
+      "category_attack": "Attack Category",
+      "category_defense": "Defense Category",
+      "category_other": "Other Category"
+    },
+    "labels": {
+      "stock": "In stock : ",
+      "price": "Price : {price} Points",
+      "price_simple": "Price : {price}",
+      "normal_price": "Normal price : {price} points",
+      "discounted_price": "Discounted price : {price} points",
+      "free": "Free",
+      "x_chest": "1x {type} Chest"
+    },
+    "buttons": {
+      "buy": "Buy",
+      "claim": "Claim",
+      "claimed": "Claimed",
+      "owned": "Owned",
+      "exhausted": "Out of Stock"
+    },
+    "errors": {
+      "insufficient_funds": "Insufficient funds!",
+      "not_connected": "Not connected",
+      "limit_reached": "You have reached the purchase limit for this offer.",
+      "network_error": "Network error",
+      "unavailable": "Offer unavailable.",
+      "claim_error": "Error claiming reward",
+      "chest_error": "Unable to claim chest"
+    },
+    "timers": {
+      "weekly_chest": "Next chest in : {time}",
+      "special_offer": "Offer ends in : {time}"
+    },
+    "items": {
+      "xp_2": { "title": "Double XP", "desc": "Enjoy double XP during your fights!" },
+      "potion": { "title": "Health Potion", "desc": "Increases player HP by 1100." },
+      "amulette": { "title": "Regeneration Amulet", "desc": "Regenerates 2% of max HP per turn." },
+      "epee": { "title": "Sharp Sword", "desc": "Increases player attack by 5%." },
+      "elixir": { "title": "Power Elixir", "desc": "Increases attack by 50 points." },
+      "bouclier": { "title": "Solid Shield", "desc": "Increases defense by 15 points." },
+      "cape": { "title": "Shadow Cape", "desc": "Ignores damage taken from the next attack." },
+      "armure": { "title": "Iron Armor", "desc": "Reduces damage taken by 10%." },
+      "crystal": { "title": "Renewal Crystal", "desc": "Recharges 0.8 points of special ability." },
+      "marque_chasseur": { "title": "Hunter's Mark", "desc": "Guarantees your next attack is a critical hit." },
+      "purge_spirituelle": { "title": "Spiritual Purge", "desc": "Dispels all negative effects affecting you." },
+      "orbe_siphon": { "title": "Siphon Orb", "desc": "Reduces opponent's special energy gain by 50% for 3 turns." },
+      "daily_reward": { "title": "Free Reward", "desc": "Enjoy a free reward today!" },
+      "weekly_chest": { "title": "Free Chest", "desc": "A random equipment chest." },
+      "chest_attack": { "title": "Attack", "desc": "Contains an Attack equipment of random rarity." },
+      "chest_defense": { "title": "Defense", "desc": "Contains a Defense equipment of random rarity." },
+      "chest_agility": { "title": "Agility", "desc": "Contains an Agility equipment of random rarity." },
+      "chest_balance": { "title": "Balance", "desc": "Contains a Balance equipment of random rarity." }
+    }
   }
 }

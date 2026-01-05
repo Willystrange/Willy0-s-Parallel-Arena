@@ -3,15 +3,18 @@ window.App = window.App || {};
 // ===================== CONSTANTES ET CONFIGURATION =====================
 // Données statiques pour éviter de les recréer dans les fonctions.
 App.BONUS_TEXTS = {
-  xp_2: { alt: "Double XP Bonus", title: "Double XP", description: "Profitez du double XP lors de vos combats !" },
-  potion: { alt: "Potion de Santé", title: "Potion de Santé", description: "Augmente les PV du joueur de 1100." },
-  amulette: { alt: "Amulette de Régénération", title: "Amulette de Régénération", description: "Régénère 2% des PV max par tour." },
-  epee: { alt: "Épée Tranchante", title: "Épée Tranchante", description: "Augmente l'attaque du joueur de 5%." },
-  elixir: { alt: "Élixir de Puissance", title: "Élixir de Puissance", description: "Augmente l'attaque de 50 points." },
-  bouclier: { alt: "Bouclier solide", title: "Bouclier solide", description: "Augmente la défense de 15 points." },
-  cape: { alt: "Cape de l'ombre", title: "Cape de l'ombre", description: "Ignore les dégâts subis par la prochaine attaque." },
-  armure: { alt: "Armure de Fer", title: "Armure de Fer", description: "Réduit les dégâts reçus de 10%." },
-  crystal: { alt: "Crystal de renouveau", title: "Crystal de renouveau", description: "Recharge 0.8 points de la capacité spéciale." }
+  xp_2: { alt: "Double XP Bonus", titleKey: "shop.items.xp_2.title", descriptionKey: "shop.items.xp_2.desc" },
+  potion: { alt: "Potion de Santé", titleKey: "shop.items.potion.title", descriptionKey: "shop.items.potion.desc" },
+  amulette: { alt: "Amulette de Régénération", titleKey: "shop.items.amulette.title", descriptionKey: "shop.items.amulette.desc" },
+  epee: { alt: "Épée Tranchante", titleKey: "shop.items.epee.title", descriptionKey: "shop.items.epee.desc" },
+  elixir: { alt: "Élixir de Puissance", titleKey: "shop.items.elixir.title", descriptionKey: "shop.items.elixir.desc" },
+  bouclier: { alt: "Bouclier solide", titleKey: "shop.items.bouclier.title", descriptionKey: "shop.items.bouclier.desc" },
+  cape: { alt: "Cape de l'ombre", titleKey: "shop.items.cape.title", descriptionKey: "shop.items.cape.desc" },
+  armure: { alt: "Armure de Fer", titleKey: "shop.items.armure.title", descriptionKey: "shop.items.armure.desc" },
+  crystal: { alt: "Crystal de renouveau", titleKey: "shop.items.crystal.title", descriptionKey: "shop.items.crystal.desc" },
+  marque_chasseur: { alt: "Marque de Chasseur", titleKey: "shop.items.marque_chasseur.title", descriptionKey: "shop.items.marque_chasseur.desc" },
+  purge_spirituelle: { alt: "Purge Spirituelle", titleKey: "shop.items.purge_spirituelle.title", descriptionKey: "shop.items.purge_spirituelle.desc" },
+  orbe_siphon: { alt: "Orbe de Siphon", titleKey: "shop.items.orbe_siphon.title", descriptionKey: "shop.items.orbe_siphon.desc" }
 };
 
 // Map pour lier le type d'item à la propriété correspondante dans userData
@@ -53,59 +56,87 @@ App.applyDiscount = (price) => Math.round(price * 0.8); // 20% de réduction
 
 // Fonction pour créer le HTML d'un item, évite la duplication de code
 function createItemHTML(item) {
+    let title = item.title;
+    let description = item.description;
+
+    // Tentative de traduction basée sur le type si disponible dans BONUS_TEXTS
+    let typeKey = item.type;
+    if (typeKey === 'xp') typeKey = 'xp_2'; // Alias pour le Double XP
+
+    if (typeKey && App.BONUS_TEXTS[typeKey]) {
+        // On récupère le titre de base (ex: "Double XP")
+        let baseTitle = App.t(App.BONUS_TEXTS[typeKey].titleKey);
+        
+        // Si l'item a une quantité > 1, on l'ajoute au titre traduit
+        if (item.quantity && item.quantity > 1) {
+            title = `${baseTitle} x${item.quantity}`;
+        } else {
+            title = baseTitle;
+        }
+        
+        description = App.t(App.BONUS_TEXTS[typeKey].descriptionKey);
+    } 
+
     const discountedPrice = item.discountedPrice !== undefined ? item.discountedPrice : App.applyDiscount(item.price);
     const priceHTML = item.discountedPrice !== undefined
-        ? `<p>Prix normal : ${item.price} points</p><p>Prix réduit : ${discountedPrice} points</p>`
-        : `<p>Prix : ${item.price} Points</p>`;
+        ? `<p>${App.t("shop.labels.normal_price", {price: item.price})}</p><p>${App.t("shop.labels.discounted_price", {price: discountedPrice})}</p>`
+        : `<p>${App.t("shop.labels.price", {price: item.price})}</p>`;
 
     return `
-        <img src="${item.img}" alt="${item.title}">
-        <h2>${item.title}</h2>
-        <p>${item.description}</p>
+        <img src="${item.img}" alt="${title}">
+        <h2><span>${title}</span></h2>
+        <p>${description}</p>
         ${priceHTML}
-        <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">Acheter</button>
+        <button class="buyButton" data-type="${item.type}" data-price="${discountedPrice}" data-quantity="${item.quantity}">${App.t("shop.buttons.buy")}</button>
         <p class="error-message"></p>
     `;
 }
 
 // ===================== MISE À JOUR DE L'INTERFACE (DOM) =====================
 App.updateStaticTexts = function() {
-    document.querySelectorAll('.stock-label').forEach(el => el.textContent = "En stock : ");
-    document.getElementById('balance').textContent = `Solde : ${App.userData.argent || 0}`;
-    document.getElementById('search-bar').placeholder = "Rechercher un objet";
-    document.getElementById('dailyoffers').textContent = "Offres Journalières";
+    App.translatePage(); // Utilise le système de traduction global
 
-    const content = document.querySelector('.content');
-    if (content) {
-        content.querySelector('h1').textContent = "Bienvenue dans la Boutique de Jeux";
-        document.getElementById('xptitle').textContent = "Catégorie XP";
-        document.getElementById('soinstitle').textContent = "Catégorie Soins";
-        document.getElementById('attaquetitle').textContent = "Catégorie Attaque";
-        document.getElementById('defensetitle').textContent = "Catégorie Défense";
-        document.getElementById('autretitle').textContent = "Catégorie Autre";
-    }
+    document.querySelectorAll('.stock-label').forEach(el => el.textContent = App.t("shop.labels.stock"));
+    document.getElementById('balance').textContent = App.t("shop.balance", {amount: App.userData.argent || 0});
+    
+    // Les titres et placeholders sont gérés par data-i18n dans App.translatePage()
+    // Mais on peut forcer la mise à jour ici si besoin pour le contenu dynamique non couvert par data-i18n
 
     // Mise à jour groupée des bonus
     Object.keys(App.BONUS_TEXTS).forEach(key => {
         const el = document.getElementById(key.replace('_', '-'));
         if (el) {
             const texts = App.BONUS_TEXTS[key];
-            el.querySelector('img').alt = texts.alt;
-            el.querySelector('h2').textContent = texts.title;
-            const p = el.querySelector('p');
-            if (p) p.textContent = texts.description;
+            const titleEl = el.querySelector('h2');
+            const pEl = el.querySelector('p:nth-of-type(1)'); // Description est le premier p
+            
+            if (titleEl) {
+                const span = titleEl.querySelector('span');
+                if (span && !span.hasAttribute('data-i18n')) {
+                    span.textContent = App.t(texts.titleKey);
+                } else if (!span && !titleEl.hasAttribute('data-i18n')) {
+                    // Fallback si pas de span (ne devrait pas arriver avec le nouveau HTML)
+                     titleEl.textContent = App.t(texts.titleKey);
+                }
+            }
+            if (pEl && !pEl.hasAttribute('data-i18n')) pEl.textContent = App.t(texts.descriptionKey);
         }
     });
 
     const footerImgs = document.querySelectorAll('.footer img');
     if (footerImgs.length >= 4) {
-        footerImgs[0].alt = "Personnages";
-        footerImgs[1].alt = "Menu Principal";
-        footerImgs[2].alt = "Passe de combat";
-        footerImgs[3].alt = "Boutique";
+        // footerImgs[0].alt = "Personnages";
+        // footerImgs[1].alt = "Menu Principal";
+        // footerImgs[2].alt = "Passe de combat";
+        // footerImgs[3].alt = "Boutique";
     }
 
-    document.querySelectorAll('.bonus-item .buyButton').forEach(button => button.textContent = "Acheter");
+    // Update 'Acheter' buttons just in case
+    document.querySelectorAll('.bonus-item .buyButton').forEach(button => {
+        if (!button.disabled && button.textContent === "Acheter") { // Avoid overwriting 'Possédé' or 'Épuisé'
+             button.textContent = App.t("shop.buttons.buy");
+        }
+    });
 };
 
 App.updateStockDisplay = function() {
@@ -122,7 +153,7 @@ App.updateEquipmentButtonsState = function() {
     const ownedEquipments = App.userData.equipments || [];
     document.querySelectorAll('.buyButton[data-type="equipment"]').forEach(button => {
         if (ownedEquipments.includes(button.dataset.id)) {
-            button.textContent = 'Possédé';
+            button.textContent = App.t('shop.buttons.owned');
             button.disabled = true;
         }
     });
@@ -135,15 +166,18 @@ App.updateWeeklyLootboxButtonState = function() {
     const currentCycle = App.getParisCycleId('weekly');
     if (App.userData.weekly_chest_claim_id === currentCycle) {
         button.disabled = true;
-        button.textContent = "Déjà pris";
+        button.textContent = App.t('shop.buttons.claimed');
     } else {
         button.disabled = false;
-        button.textContent = "Réclamer";
+        button.textContent = App.t('shop.buttons.claim');
     }
 };
 
 // ===================== OFFRE SPÉCIALE HEBDOMADAIRE =====================
 App.generateSpecialWeeklyOffer = function() {
+    // Cette fonction semble générer localement l'offre si elle n'existe pas,
+    // mais idéalement cela devrait venir du serveur pour être synchrone pour tout le monde.
+    // Pour l'instant on garde la logique existante.
     const today = new Date();
     const currentThursday = new Date();
     currentThursday.setDate(today.getDate() - (today.getDay() + 3) % 7); // Le jeudi de cette semaine
@@ -178,27 +212,173 @@ App.generateSpecialWeeklyOffer = function() {
 };
 
 App.displaySpecialWeeklyOffer = function(userData) {
-  const specialOffer = App.specialWeeklyOffer;
-  if (!specialOffer) return;
+  // console.log("DEBUG: Calling displaySpecialWeeklyOffer");
+  let specialOffer = App.specialWeeklyOffer; // Note: defined where? Assuming global or passed
+  // Fallback to local generation if not present (logic from previous version)
+  if (!specialOffer) {
+       // Logic moved to initialization potentially, but let's check localStorage
+       const stored = JSON.parse(localStorage.getItem('specialWeeklyOffer'));
+       if (stored) App.specialWeeklyOffer = stored;
+       else App.specialWeeklyOffer = App.generateSpecialWeeklyOffer();
+       specialOffer = App.specialWeeklyOffer;
+  }
+  
+  // console.log("DEBUG: specialOffer object:", specialOffer);
 
-  const container = document.getElementById('special-weekly-offer');
-  if (!container) return;
+  if (!specialOffer) {
+      console.warn("DEBUG: No special offer available to display.");
+      return;
+  }
 
-  // Normalisation du type pour le nom du fichier (suppression des accents pour éviter les 404)
-  const normalizedType = specialOffer.type.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").substring(0, 3);
+    const container = document.getElementById('category-special-weekly-offer');
 
-  container.innerHTML = `
-    <div class="weekly-offer-card">
-      <div class="weekly-offer-title">Offre Spéciale de la Semaine</div>
-      <img src="coffre_${normalizedType}.png" alt="Coffre ${specialOffer.type} en promotion">
-      <div class="weekly-offer-details">
-        <span>1x Coffre ${specialOffer.type}</span>
-        <span class="weekly-offer-price">${specialOffer.price} Crystaux</span>
-      </div>
-      <button class="buy-button" onclick="App.buySpecialWeeklyOffer()">Acheter</button>
-    </div>
-  `;
-};
+    // console.log("DEBUG: Container found:", container);
+
+    
+
+    if (!container) return;
+
+  
+
+    // Normalisation du type pour le nom du fichier et la traduction
+
+    const typeMap = {
+
+        'Attack': 'Attaque', 'Defense': 'Défense', 'Agility': 'Agilité', 'Balance': 'Équilibre',
+
+        'Attaque': 'Attaque', 'Défense': 'Défense', 'Agilité': 'Agilité', 'Équilibre': 'Équilibre'
+
+    };
+
+    const normalizedTypeBase = typeMap[specialOffer.type] || specialOffer.type;
+
+    const normalizedType = normalizedTypeBase.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").substring(0, 3);
+
+    
+
+    const typeKeyMap = {
+
+        'Attaque': 'chest_attack',
+
+        'Défense': 'chest_defense',
+
+        'Agilité': 'chest_agility',
+
+        'Équilibre': 'chest_balance'
+
+    };
+
+    
+
+    // Construction des données pour createItemHTML
+
+    const itemData = {
+
+        img: `coffre_${normalizedType}.png`,
+
+        title: specialOffer.type, // Sera écrasé par la traduction si la clé est trouvée
+
+        description: "", // Idem
+
+        price: specialOffer.originalPrice,
+
+        discountedPrice: specialOffer.discountedPrice,
+
+        type: 'special-lootbox',
+
+        quantity: 1
+
+    };
+
+  
+
+    // Récupération des textes traduits
+
+    if (typeKeyMap[normalizedTypeBase]) {
+
+        itemData.title = App.t(`shop.items.${typeKeyMap[normalizedTypeBase]}.title`);
+
+        itemData.description = App.t(`shop.items.${typeKeyMap[normalizedTypeBase]}.desc`);
+
+    }
+
+  
+
+    // Création de l'élément DOM
+
+    const offerItem = document.createElement('div');
+
+    offerItem.classList.add('bonus-item');
+
+    offerItem.innerHTML = createItemHTML(itemData);
+
+  
+
+    // Ajout de l'attribut spécifique manquant pour le handler
+
+    const btn = offerItem.querySelector('.buyButton');
+
+    if (btn) {
+
+        btn.dataset.lootboxType = specialOffer.type;
+
+        
+
+        // Gestion de l'état "Epuisé" si nécessaire
+
+        if (specialOffer.purchasesLeft !== undefined) {
+
+           // Si on voulait gérer l'affichage du stock restant, on pourrait le faire ici.
+
+           // Mais le système actuel utilise App.userData.special_weekly_offer_purchases côté logique d'achat.
+
+           // Pour l'affichage initial, on peut vérifier si max atteint.
+
+           if (App.userData.special_weekly_offer_purchases >= 3) {
+
+               btn.disabled = true;
+
+               btn.textContent = App.t("shop.buttons.exhausted");
+
+           }
+
+        }
+
+    }
+
+  
+
+      container.innerHTML = '';
+
+  
+
+      container.appendChild(offerItem);
+
+  
+
+      
+
+  
+
+      setTimeout(App.checkTitleOverflow, 50);
+
+  
+
+    };
+
+  
+
+    
+
+  
+
+    // Missing buySpecialWeeklyOffer function wrapper? 
+// The original code had App.handleBuySpecialLootbox called from handleBuyButtonClick, 
+// but the HTML in displaySpecialWeeklyOffer calls App.buySpecialWeeklyOffer() directly? 
+// The previous file content showed `onclick="App.buySpecialWeeklyOffer()"` in the injected HTML string, 
+// but didn't define `App.buySpecialWeeklyOffer`.
+// It seems `App.handleBuySpecialLootbox` deals with it. 
+// I will map `App.buySpecialWeeklyOffer` to trigger the buy logic.
 
 App.handleBuySpecialLootbox = function(button) {
     const price = parseInt(button.dataset.price, 10);
@@ -208,7 +388,7 @@ App.handleBuySpecialLootbox = function(button) {
     if (App.userData.argent >= price) {
         let specialOffer = JSON.parse(localStorage.getItem('specialWeeklyOffer'));
         if (!specialOffer) {
-            errorMessage.textContent = "Offre non disponible.";
+            errorMessage.textContent = App.t("shop.errors.unavailable");
             return;
         }
 
@@ -224,12 +404,12 @@ App.handleBuySpecialLootbox = function(button) {
             saveUserData(App.userData);
             loadPage('ouverture_coffre');
         } else {
-            errorMessage.textContent = "Vous avez atteint la limite d'achat pour cette offre.";
+            errorMessage.textContent = App.t("shop.errors.limit_reached");
             button.disabled = true;
-            button.textContent = "Épuisé";
+            button.textContent = App.t("shop.buttons.exhausted");
         }
     } else {
-        errorMessage.textContent = "Solde insuffisant !";
+        errorMessage.textContent = App.t("shop.errors.insufficient_funds");
     }
 };
 
@@ -276,19 +456,34 @@ App.displayDailyOffers = async function() {
 
     rewardItem.innerHTML = `
         <img src="gratuite-rec.png" alt="Récompense Gratuite">
-        <h2>Récompense Gratuite</h2>
-        <p>Profitez d'une récompense gratuite aujourd'hui !</p>
-        <p>Prix : 0 Points</p>
-        <button class="claimButton"${isClaimed ? ' disabled' : ''}>${isClaimed ? 'Déjà pris' : 'Réclamer'}</button>
+        <h2><span>${App.t("shop.items.daily_reward.title")}</span></h2>
+        <p>${App.t("shop.items.daily_reward.desc")}</p>
+        <p>${App.t("shop.labels.price", {price: 0})}</p>
+        <button class="claimButton"${isClaimed ? ' disabled' : ''}>${isClaimed ? App.t("shop.buttons.claimed") : App.t("shop.buttons.claim")}</button>
         <p class="error-message"></p>
     `;
     dailyCategory.appendChild(rewardItem);
 
     // Offre du jour
+    // Need to translate dynamic item if possible. 
+    // Assuming 'item' has title/desc which are keys or static strings? 
+    // The server returns item object. If it matches one of standard items, we can translate title/desc.
+    // For now, let's use the object returned by server but try to translate title if it matches a key.
+    
+    // Server returns constructed object. Ideally server sends ID and we reconstruct or server sends keys.
+    // Assuming server sends text. We'll use it as is for now or improve later.
     const offerItem = document.createElement('div');
     offerItem.classList.add('bonus-item');
-    offerItem.innerHTML = createItemHTML(dailyOffers.item);
+    
+    // Override description/title if they match standard items
+    let item = dailyOffers.item;
+    // Basic translation attempt if title matches
+    // (This part depends on what server sends. If it sends French text, we can't easily translate back without mapping)
+    
+    offerItem.innerHTML = createItemHTML(item);
     dailyCategory.appendChild(offerItem);
+    
+    setTimeout(App.checkTitleOverflow, 50);
 };
 
 // ===================== GESTIONNAIRES D'ÉVÉNEMENTS (HANDLERS) =====================
@@ -309,14 +504,14 @@ App.handleBuyButtonClick = function(button) {
             saveUserData(App.userData);
             loadPage('ouverture_coffre');
         } else {
-            errorMessage.textContent = "Solde insuffisant !";
+            errorMessage.textContent = App.t("shop.errors.insufficient_funds");
         }
     } else if (type === 'special-lootbox') {
         App.handleBuySpecialLootbox(button);
     } else {
         // --- AUTHORITATIVE SERVER BUY (Equipments & Consumables) ---
         const user = firebase.auth().currentUser;
-        if (!user) { errorMessage.textContent = "Non connecté"; return; }
+        if (!user) { errorMessage.textContent = App.t("shop.errors.not_connected"); return; }
 
         let payload = { userId: user.uid, type: type };
         
@@ -348,11 +543,11 @@ App.handleBuyButtonClick = function(button) {
                 .then(data => {
                     if (data.success) {
                         App.userData = data.userData;
-                        document.getElementById('balance').textContent = `Solde : ${App.userData.argent}`;
+                        document.getElementById('balance').textContent = App.t("shop.balance", {amount: App.userData.argent});
                         saveUserData(App.userData);
                         
                         if (type === 'equipment') {
-                            button.textContent = 'Possédé';
+                            button.textContent = App.t("shop.buttons.owned");
                             button.disabled = true;
                         } else {
                             App.updateStockDisplay();
@@ -362,7 +557,7 @@ App.handleBuyButtonClick = function(button) {
                     }
                 })
                 .catch(err => {
-                    errorMessage.textContent = "Erreur réseau";
+                    errorMessage.textContent = App.t("shop.errors.network_error");
                 });
             });
         });
@@ -371,7 +566,7 @@ App.handleBuyButtonClick = function(button) {
 
 App.handleClaimButtonClick = function(button) {
     const user = firebase.auth().currentUser;
-    if (!user) { alert("Veuillez vous connecter"); return; }
+    if (!user) { alert(App.t("shop.errors.not_connected")); return; }
 
     const currentDailyCycle = App.getParisCycleId('daily');
     if (App.userData.daily_reward_claim_id !== currentDailyCycle) {
@@ -395,10 +590,10 @@ App.handleClaimButtonClick = function(button) {
                         App.userData = data.userData;
                         saveUserData(App.userData);
                         button.disabled = true;
-                        button.textContent = "Déjà pris";
+                        button.textContent = App.t("shop.buttons.claimed");
                         loadPage('recompenses');
                     } else {
-                        alert(data.error || "Erreur lors de la récupération");
+                        alert(data.error || App.t("shop.errors.claim_error"));
                         button.disabled = false;
                     }
                 });
@@ -409,7 +604,7 @@ App.handleClaimButtonClick = function(button) {
 
 App.handleClaimWeeklyLootboxButtonClick = function(button) {
     const user = firebase.auth().currentUser;
-    if (!user) { alert("Veuillez vous connecter"); return; }
+    if (!user) { alert(App.t("shop.errors.not_connected")); return; }
 
     button.disabled = true;
     
@@ -433,14 +628,16 @@ App.handleClaimWeeklyLootboxButtonClick = function(button) {
                     boxesToOpen.push(data.boxType);
                     sessionStorage.setItem('boxesToOpen', JSON.stringify(boxesToOpen));
                     
-                    button.textContent = "Déjà pris";
+                    button.textContent = App.t("shop.buttons.claimed");
                     loadPage('ouverture_coffre');
                 } else {
-                    alert(data.error || "Impossible de récupérer le coffre");
-                    if (data.error !== "Déjà récupéré cette semaine (Reviens Jeudi à 9h00 Paris)") {
+                    alert(data.error || App.t("shop.errors.chest_error"));
+                    // Check specific error message from server if needed, or rely on success flag
+                    // Simple logic: if error, re-enable unless it's "Already claimed"
+                    if (!data.error.includes("Déjà récupéré")) { 
                          button.disabled = false;
                     } else {
-                         button.textContent = "Déjà pris";
+                         button.textContent = App.t("shop.buttons.claimed");
                     }
                 }
             })
@@ -533,7 +730,8 @@ App.updateWeeklyTimer = function() {
     const hours = Math.floor((timeLeft % 86400000) / 3600000);
     const minutes = Math.floor((timeLeft % 3600000) / 60000);
     const seconds = Math.floor((timeLeft % 60000) / 1000);
-    timerElement.textContent = `Prochain coffre dans : ${days}j ${hours}h ${minutes}m ${seconds}s`;
+    
+    timerElement.textContent = App.t("shop.timers.weekly_chest", {time: `${days}j ${hours}h ${minutes}m ${seconds}s`});
     App.weeklyTimerId = setTimeout(App.updateWeeklyTimer, 1000);
 };
 
@@ -555,7 +753,7 @@ App.updateSpecialWeeklyOfferTimer = function() {
     const minutes = Math.floor((timeLeft % 3600000) / 60000);
     const seconds = Math.floor((timeLeft % 60000) / 1000);
 
-    timerElement.textContent = `Fin de l'offre dans : ${days}j ${hours}h ${minutes}m ${seconds}s`;
+    timerElement.textContent = App.t("shop.timers.special_offer", {time: `${days}j ${hours}h ${minutes}m ${seconds}s`});
     App.specialWeeklyOfferTimerId = setTimeout(App.updateSpecialWeeklyOfferTimer, 1000);
 };
 
@@ -607,6 +805,22 @@ App.handleSearch = function(searchBar) {
     }
 };
 
+// ===================== ANIMATIONS & UI =====================
+App.checkTitleOverflow = function() {
+    document.querySelectorAll('.boutique .bonus-item h2').forEach(h2 => {
+        const span = h2.querySelector('span');
+        if (!span) return;
+        
+        // Reset pour mesure précise
+        h2.classList.remove('is-scrolling');
+        
+        // On compare la largeur du contenu (span) avec celle du conteneur (h2)
+        if (span.offsetWidth > h2.clientWidth) {
+            h2.classList.add('is-scrolling');
+        }
+    });
+};
+
 // ===================== GESTION DES ONGLETS =====================
 App.switchTab = (activeTab) => {
     if (!activeTab) return;
@@ -616,6 +830,7 @@ App.switchTab = (activeTab) => {
     activeTab.classList.add('active');
     const activeContent = document.getElementById(activeContentId);
     if (activeContent) activeContent.classList.add('active');
+    setTimeout(App.checkTitleOverflow, 50);
 };
 
 // ===================== DÉLÉGATION D'ÉVÉNEMENTS =====================
@@ -693,6 +908,9 @@ function initializeShop() {
         const initialTab = document.querySelector('.tab-link.active');
         App.switchTab(initialTab);
     }
+    
+    // Vérification des débordements de texte après le rendu
+    setTimeout(App.checkTitleOverflow, 100);
 }
 
 // Lancer l'initialisation une fois que le DOM est prêt
@@ -704,4 +922,3 @@ window.addEventListener('unload', function() {
     if (App.weeklyTimerId) clearTimeout(App.weeklyTimerId);
     if (App.specialWeeklyOfferTimerId) clearTimeout(App.specialWeeklyOfferTimerId);
 });
-

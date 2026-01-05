@@ -353,5 +353,76 @@
     "mastery_title": "Maîtrise",
     "button_improve": "Améliorer {name}",
     "button_equip": "Équiper"
+  },
+  "shop": {
+    "balance": "Solde : {amount}",
+    "search_placeholder": "Rechercher un objet",
+    "welcome": "Bienvenue dans la Boutique de Jeux",
+    "tabs": {
+      "items": "Objets",
+      "equipment": "Équipement"
+    },
+    "titles": {
+      "items_shop": "Boutique d'Objets",
+      "equipment_shop": "Boutique des Coffres d'équipements",
+      "daily_offers": "Offres Journalières",
+      "weekly_chest": "Coffre de la semaine",
+      "special_weekly": "Offre Spéciale de la Semaine",
+      "chest_by_type": "Coffre par Type",
+      "category_xp": "Catégorie XP",
+      "category_care": "Catégorie Soins",
+      "category_attack": "Catégorie Attaque",
+      "category_defense": "Catégorie Défense",
+      "category_other": "Catégorie Autre"
+    },
+    "labels": {
+      "stock": "En stock : ",
+      "price": "Prix : {price} Points",
+      "price_simple": "Prix : {price}",
+      "normal_price": "Prix normal : {price} points",
+      "discounted_price": "Prix réduit : {price} points",
+      "free": "Gratuit",
+      "x_chest": "1x Coffre {type}"
+    },
+    "buttons": {
+      "buy": "Acheter",
+      "claim": "Réclamer",
+      "claimed": "Déjà pris",
+      "owned": "Possédé",
+      "exhausted": "Épuisé"
+    },
+    "errors": {
+      "insufficient_funds": "Solde insuffisant !",
+      "not_connected": "Non connecté",
+      "limit_reached": "Vous avez atteint la limite d'achat pour cette offre.",
+      "network_error": "Erreur réseau",
+      "unavailable": "Offre non disponible.",
+      "claim_error": "Erreur lors de la récupération",
+      "chest_error": "Impossible de récupérer le coffre"
+    },
+    "timers": {
+      "weekly_chest": "Prochain coffre dans : {time}",
+      "special_offer": "Fin de l'offre dans : {time}"
+    },
+    "items": {
+      "xp_2": { "title": "Double XP", "desc": "Profitez du double XP lors de vos combats !" },
+      "potion": { "title": "Potion de Santé", "desc": "Augmente les PV du joueur de 1100." },
+      "amulette": { "title": "Amulette de Régénération", "desc": "Régénère 2% des PV max par tour." },
+      "epee": { "title": "Épée Tranchante", "desc": "Augmente l'attaque du joueur de 5%." },
+      "elixir": { "title": "Élixir de Puissance", "desc": "Augmente l'attaque de 50 points." },
+      "bouclier": { "title": "Bouclier solide", "desc": "Augmente la défense de 15 points." },
+      "cape": { "title": "Cape de l'ombre", "desc": "Ignore les dégâts subis par la prochaine attaque." },
+      "armure": { "title": "Armure de Fer", "desc": "Réduit les dégâts reçus de 10%." },
+      "crystal": { "title": "Crystal de renouveau", "desc": "Recharge 0.8 points de la capacité spéciale." },
+      "marque_chasseur": { "title": "Marque de chasseur", "desc": "Garantit que votre prochaine attaque soit un coup critique." },
+      "purge_spirituelle": { "title": "Purge Spirituelle", "desc": "Dissipe tous les effets négatifs qui vous affectent." },
+      "orbe_siphon": { "title": "Orbe de Siphon", "desc": "Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours." },
+      "daily_reward": { "title": "Récompense Gratuite", "desc": "Profitez d'une récompense gratuite aujourd'hui !" },
+      "weekly_chest": { "title": "Coffre Gratuit", "desc": "Un coffre d'équipement aléatoire." },
+      "chest_attack": { "title": "Attaque", "desc": "Contient un équipement d'Attaque de rareté aléatoire." },
+      "chest_defense": { "title": "Défense", "desc": "Contient un équipement de Défense de rareté aléatoire." },
+      "chest_agility": { "title": "Agilité", "desc": "Contient un équipement d'Agilité de rareté aléatoire." },
+      "chest_balance": { "title": "Équilibre", "desc": "Contient un équipement d'Équilibre de rareté aléatoire." }
+    }
   }
 }
