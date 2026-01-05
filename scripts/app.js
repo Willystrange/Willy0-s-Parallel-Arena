@@ -399,12 +399,16 @@ App.setMusicVolume = function(volume) {
 
 // Fonction pour charger et décoder un son
 async function loadAudioBuffer(url) {
-  initAudioContext();
+  // Supprimé : initAudioContext() ici car cette fonction est appelée de manière asynchrone
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const arrayBuffer = await response.arrayBuffer();
-    return await audioCtx.decodeAudioData(arrayBuffer);
+    // On n'appelle decodeAudioData que si audioCtx existe déjà
+    if (audioCtx) {
+        return await audioCtx.decodeAudioData(arrayBuffer);
+    }
+    return null;
   } catch (e) {
     console.error("Erreur chargement audio:", url, e);
     return null;
@@ -413,8 +417,7 @@ async function loadAudioBuffer(url) {
 
 // Fonction pour jouer un buffer
 function playBuffer(buffer, onEndedCallback) {
-  if (!buffer) return;
-  initAudioContext();
+  if (!buffer || !audioCtx || !musicGainNode) return;
   
   if (currentSource) {
     currentSource.onended = null;
@@ -886,11 +889,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   loadPage('intro');
 });
-
-setTimeout(() => {
-  initMusicPlayerC();
-  initMusicPlayer();
-}, 5000);
 
 /* ========== Footer behavior simple & robuste pour SPA ========== */
 (function() {

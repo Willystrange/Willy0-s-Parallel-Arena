@@ -86,6 +86,15 @@ try {
 
 const app = express();
 app.set('trust proxy', 1);
+
+// Security Headers to suppress console warnings (reCAPTCHA etc)
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Permissions-Policy', 'private-state-token-issuance=(), private-state-token-redemption=(), searching=()');
+    next();
+});
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
 
