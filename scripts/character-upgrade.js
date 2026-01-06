@@ -10,9 +10,9 @@ App.loadAttaque = function(character, pts) { return Math.round((1 + pts * 0.02) 
 App.loadDefense = function(character, pts) { return Math.round((1 + pts * 0.02) * character.defense); };
 
 App.statsConfig = [
-    { id: 'PV', label: 'PV', max: 25 },
-    { id: 'attaque', label: 'Attaque', max: 25 },
-    { id: 'defense', label: 'Défense', max: 15 }
+    { id: 'PV', labelKey: 'character_upgrade.stat_pv', max: 25 },
+    { id: 'attaque', labelKey: 'character_upgrade.stat_attack', max: 25 },
+    { id: 'defense', labelKey: 'character_upgrade.stat_defense', max: 15 }
 ];
 
 App.levelUp = function() {
@@ -30,7 +30,7 @@ App.levelUp = function() {
               if (data.success) {
                   localStorage.setItem('userData', JSON.stringify(data.userData));
                   App.afficherDonneesUtilisateur();
-              } else { alert(data.error || "Impossible de monter de niveau"); }
+              } else { alert(data.error || App.t('character_upgrade.error_levelup')); }
           });
       });
   });
@@ -57,11 +57,14 @@ App.afficherDonneesUtilisateur = function() {
   const container = document.getElementById('characters-unlocked');
   if (!container) return;
 
+  const classeTrad = character.classe ? App.t('classes.' + character.classe) : App.t('character_upgrade.unknown');
+  const rareteTrad = App.t('rarity.' + character.rarete);
+
   // Construction du HTML "Base mais Propre"
   let html = `
     <div class="character-info" style="display:block; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px;">
       <h2 style="margin-top:0;">${name}</h2>
-      <p style="opacity:0.8;">Classe: ${character.classe || 'Inconnue'} | Rareté: ${character.rarete}</p>
+      <p style="opacity:0.8;">${App.t('character_upgrade.class', {value: classeTrad})} | ${App.t('character_upgrade.rarity', {value: rareteTrad})}</p>
       
       <div style="margin: 20px 0;">
   `;
@@ -85,14 +88,15 @@ App.afficherDonneesUtilisateur = function() {
 
       const diff = valPrevue - valActuelle;
       const color = diff > 0 ? '#2ecc71' : 'inherit';
+      const label = App.t(stat.labelKey);
 
       html += `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
             <div style="flex: 1;">
-                <strong>${stat.label}</strong>: 
+                <strong>${label}</strong>: 
                 <span style="font-size: 1.2em; color: ${color}">${valPrevue}</span>
                 ${diff > 0 ? `<small style="color:#2ecc71; margin-left:5px;">(+${diff})</small>` : ''}
-                <div style="font-size: 0.8em; opacity: 0.6;">Points: ${totalPts} / ${stat.max}</div>
+                <div style="font-size: 0.8em; opacity: 0.6;">${App.t('character_upgrade.points_progress', {current: totalPts, max: stat.max})}</div>
             </div>
             ${ptsDispo > 0 ? `
                 <div style="display: flex; gap: 10px;">
@@ -112,10 +116,10 @@ App.afficherDonneesUtilisateur = function() {
   if (ptsDispo > 0) {
       html += `
         <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <p>Points à attribuer : <strong>${ptsRestants}</strong></p>
+            <p>${App.t('character_upgrade.points_available', {amount: ptsRestants})}</p>
             ${ptsUtilises > 0 ? `
                 <button onclick="App.confirmerStats()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    Confirmer les points
+                    ${App.t('character_upgrade.confirm_button')}
                 </button>
             ` : ''}
         </div>
@@ -129,16 +133,16 @@ App.afficherDonneesUtilisateur = function() {
 
       html += `
         <div class="level-info" style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <p>Niveau: ${level}${isMaxLevel ? ' (Maximum !)' : ''}</p>
+            <p>${App.t('character_upgrade.level', {level: level})}${isMaxLevel ? App.t('character_upgrade.level_max') : ''}</p>
             ${!isMaxLevel ? `
-                <p>XP: ${xp} / ${xpNeeded}</p>
-                <p>Pièces: ${points}</p>
-                <p style="font-size: 0.9em; opacity: 0.8;">Coût passage niveau: ${cost} pièces</p>
+                <p>${App.t('character_upgrade.xp_progress', {current: xp, max: xpNeeded})}</p>
+                <p>${App.t('character_upgrade.coins', {amount: points})}</p>
+                <p style="font-size: 0.9em; opacity: 0.8;">${App.t('character_upgrade.upgrade_cost', {cost: cost})}</p>
                 ${(xp >= xpNeeded && points >= cost) ? `
                     <button class="level-up-button" onclick="App.levelUp()" style="padding: 10px 20px; background: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        Monter de niveau
+                        ${App.t('character_upgrade.levelup_button')}
                     </button>
-                ` : `<button disabled style="padding: 10px 20px; background: #7f8c8d; color: white; border: none; border-radius: 5px; opacity: 0.5;">Ressources insuffisantes</button>`}
+                ` : `<button disabled style="padding: 10px 20px; background: #7f8c8d; color: white; border: none; border-radius: 5px; opacity: 0.5;">${App.t('character_upgrade.insufficient_resources')}</button>`}
             ` : ''}
         </div>
       `;
@@ -173,12 +177,28 @@ App.confirmerStats = function() {
                   localStorage.setItem('userData', JSON.stringify(data.userData));
                   App.modificationsTemp = { PV: 0, attaque: 0, defense: 0 };
                   App.afficherDonneesUtilisateur();
-              } else { alert(data.error || "Erreur lors de l'attribution des points"); }
+              } else { alert(data.error || App.t('character_upgrade.error_stats')); }
           });
       });
   });
 };
 
 // Initialisation
-setTimeout(App.afficherDonneesUtilisateur, 100);
-App.afficherDonneesUtilisateur();
+const initPage = () => {
+    // Si les traductions sont déjà là (non vide)
+    if (App.translations && Object.keys(App.translations).length > 0) {
+        App.afficherDonneesUtilisateur();
+    } else {
+        // Sinon on attend l'événement
+        window.addEventListener('translationsLoaded', () => {
+             App.afficherDonneesUtilisateur();
+        }, { once: true });
+        
+        // Sécurité : si l'événement a déjà eu lieu ou échoue, on force l'affichage après un délai
+        // (App.translationPromise est aussi une option si on veut être plus propre, mais l'event est standardisé ici)
+        setTimeout(App.afficherDonneesUtilisateur, 500);
+    }
+};
+
+// On lance l'init
+initPage();

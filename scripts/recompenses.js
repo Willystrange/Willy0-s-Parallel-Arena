@@ -56,16 +56,16 @@ App.displayReward = function() {
     if (App.currentRewards.length === 0) {
         const pending = sessionStorage.getItem('pendingRewards');
         if (pending) {
-            console.log("[RECOMPENSES] Chargement quêtes...");
+            console.log("[RECOMPENSES] " + App.t('rewards.loading_quests'));
             App.currentRewards = JSON.parse(pending);
             sessionStorage.removeItem('pendingRewards');
             App.currentIndex = 0;
         } else if (userData.recompense > 0 || userData.perso_recompense > 0) {
-            console.log("[RECOMPENSES] Chargement aléatoire...");
+            console.log("[RECOMPENSES] " + App.t('rewards.loading_random'));
             App.ouvrirRecompense();
             return;
         } else {
-            console.log("[RECOMPENSES] Vide, retour menu.");
+            console.log("[RECOMPENSES] " + App.t('rewards.empty'));
             loadPage('menu_principal');
             return;
         }
@@ -75,7 +75,7 @@ App.displayReward = function() {
     const reward = App.currentRewards[App.currentIndex];
     if (reward) {
         nameEl.innerText = reward.name;
-        infoEl.innerHTML = reward.info || `Quantité : ${reward.amount || 1}`;
+        infoEl.innerHTML = reward.info || App.t('rewards.quantity', {amount: reward.amount || 1});
     } else {
         loadPage('menu_principal');
     }
@@ -96,7 +96,23 @@ App.showNextReward = function() {
 App.initRecompenses = function() {
     const btn = document.getElementById('continue-button');
     if (btn) btn.onclick = App.showNextReward;
-    App.displayReward();
+
+    // Attendre les traductions avant le premier rendu
+    if (App.translations && Object.keys(App.translations).length > 0) {
+        App.translatePage();
+        App.displayReward();
+    } else {
+        window.addEventListener('translationsLoaded', () => {
+             App.translatePage();
+             App.displayReward();
+        }, { once: true });
+        
+        // Sécurité
+        setTimeout(() => {
+             App.translatePage();
+             App.displayReward();
+        }, 500);
+    }
 };
 
 // Lancement unique

@@ -16,38 +16,23 @@
   <!-- Formulaire des règles -->
   <div id="rules-container">
     <div class="rules-box">
-      <h2>Règles de Willy0’s Parallel Arena</h2>
-      <p>Veuillez lire et accepter les règles avant de jouer :</p>
+      <h2 data-i18n="intro.rules_title">Règles de Willy0’s Parallel Arena</h2>
+      <p data-i18n="intro.rules_intro">Veuillez lire et accepter les règles avant de jouer :</p>
       <ul>
-        <li><strong>Accès au jeu :</strong> Willy0’s Parallel Arena est un jeu de combat au tour par tour totalement
-          gratuit. Il est accessible à tous, sans achats intégrés.</li>
-        <li><strong>Utilisation du compte : </strong>Chaque joueur est responsable de la sécurité de son compte. Ne
-          partagez pas vos informations de connexion.</li>
-        <li><strong>Fair-play : </strong>Il est strictement interdit de tricher ou d'exploiter des failles du jeu pour
-          obtenir un
-          avantage injuste. Toute utilisation de logiciels tiers, bots, ou scripts automatisés est interdite.</li>
-        <li><strong>Mises à jour : </strong>Le jeu est régulièrement mis à jour afin d'améliorer l'expérience et de
-          corriger les
-          bugs. Veuillez vous assurer que vous utilisez toujours la dernière version du jeu.</li>
-        <li><strong>Boutique : </strong>Bien que le jeu dispose d'une boutique, tous les contenus disponibles sont
-          gratuits et ne
-          nécessitent aucun achat.</li>
-        <li><strong>Respect des règles du jeu : </strong>Même s'il n'y a pas d'interactions avec d'autres joueurs pour
-          le moment,
-          il est important de respecter le déroulement naturel des combats contre les bots.</li>
-        <li><strong>Collecte de données : </strong>Nous collectons les données de performanced pour améliorer votre
-          expérience de jeu et à
-          des fins de statistiques. Ces données sont recueillies dans le respect de votre vie privée et conformément à
-          notre politique de confidentialité.</li>
-        <li><strong>Sanctions : </strong>Tout manquement aux présentes règles peut entraîner des avertissements, des
-          suspensions
-          temporaires ou permanentes du compte.</li>
+        <li><strong data-i18n="intro.rule_1_title">Accès au jeu :</strong> <span data-i18n="intro.rule_1_desc">Willy0’s Parallel Arena est un jeu de combat au tour par tour totalement gratuit. Il est accessible à tous, sans achats intégrés.</span></li>
+        <li><strong data-i18n="intro.rule_2_title">Utilisation du compte : </strong><span data-i18n="intro.rule_2_desc">Chaque joueur est responsable de la sécurité de son compte. Ne partagez pas vos informations de connexion.</span></li>
+        <li><strong data-i18n="intro.rule_3_title">Fair-play : </strong><span data-i18n="intro.rule_3_desc">Il est strictement interdit de tricher ou d'exploiter des failles du jeu pour obtenir un avantage injuste. Toute utilisation de logiciels tiers, bots, ou scripts automatisés est interdite.</span></li>
+        <li><strong data-i18n="intro.rule_4_title">Mises à jour : </strong><span data-i18n="intro.rule_4_desc">Le jeu est régulièrement mis à jour afin d'améliorer l'expérience et de corriger les bugs. Veuillez vous assurer que vous utilisez toujours la dernière version du jeu.</span></li>
+        <li><strong data-i18n="intro.rule_5_title">Boutique : </strong><span data-i18n="intro.rule_5_desc">Bien que le jeu dispose d'une boutique, tous les contenus disponibles sont gratuits et ne nécessitent aucun achat.</span></li>
+        <li><strong data-i18n="intro.rule_6_title">Respect des règles du jeu : </strong><span data-i18n="intro.rule_6_desc">Même s'il n'y a pas d'interactions avec d'autres joueurs pour le moment, il est important de respecter le déroulement naturel des combats contre les bots.</span></li>
+        <li><strong data-i18n="intro.rule_7_title">Collecte de données : </strong><span data-i18n="intro.rule_7_desc">Nous collectons les données de performanced pour améliorer votre expérience de jeu et à des fins de statistiques. Ces données sont recueillies dans le respect de votre vie privée et conformément à notre politique de confidentialité.</span></li>
+        <li><strong data-i18n="intro.rule_8_title">Sanctions : </strong><span data-i18n="intro.rule_8_desc">Tout manquement aux présentes règles peut entraîner des avertissements, des suspensions temporaires ou permanentes du compte.</span></li>
       </ul>
       <label>
-        <input type="checkbox" id="accept-rules" /> J'accepte les règles.
+        <input type="checkbox" id="accept-rules" /> <span data-i18n="intro.accept_rules">J'accepte les règles.</span>
       </label>
       <br />
-      <button id="start-game" disabled>Commencer</button>
+      <button id="start-game" disabled data-i18n="intro.start_button">Commencer</button>
     </div>
   </div>
 
@@ -58,7 +43,7 @@
 
   <!-- Écran gris avec le texte animé "Toucher pour commencer" -->
   <div id="touch-screen">
-    <span id="touch-text">Toucher pour commencer</span>
+    <span id="touch-text" data-i18n="intro.touch_to_start">Toucher pour commencer</span>
   </div>
 </body>
 

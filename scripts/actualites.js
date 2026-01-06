@@ -21,6 +21,9 @@ App.subjectDefinitions = {
   EV: "Événement"
 };
 
+// Map des sujets pour traduction (optionnel, on garde les clés pour l'instant ou on pourrait les traduire aussi)
+// Pour l'instant on garde le hardcodé ou on pourrait ajouter une section 'news_subjects'
+
 App.subjectColors = {
   TE: "#FFD700",
   SO: "#32CD32",
@@ -33,14 +36,33 @@ App.subjectColors = {
   EV: "#FF8C00",
 };
 
+// Helper traduction safe
+const t = (key, def) => (App.t && typeof App.t === 'function') ? App.t(key) : def;
+
 /************ Gestion des actualités ************/
 // Crée un élément d’actualité
-App.createNewsItem = function ({id, title, content, date, time}) {
+App.createNewsItem = function (item) {
+  const userData = getUserData();
+  const lang = userData.language || 'fr';
+
+  let title = item.title;
+  let content = item.content;
+
+  // Support multilingue
+  if (item[lang] && item[lang].title) {
+      title = item[lang].title;
+      content = item[lang].content;
+  } else if (item.fr) {
+      // Fallback FR si la langue demandée n'existe pas
+      title = item.fr.title;
+      content = item.fr.content;
+  }
+
   const newsItem = document.createElement("div");
   newsItem.className = "news-item";
   newsItem.style.position = "relative";
 
-  const subjectKey = id.substring(2, 4);
+  const subjectKey = item.id.substring(2, 4);
   const subject = App.subjectDefinitions[subjectKey] || "Inconnu";
   const subjectColor = App.subjectColors[subjectKey] || "#000";
 
@@ -61,7 +83,8 @@ App.createNewsItem = function ({id, title, content, date, time}) {
   titleElement.textContent = title;
 
   const dateElement = document.createElement("div");
-  dateElement.textContent = `Publié le ${date} à ${time}`;
+  const format = t("news_page.published_on", "Publié le {date} à {time}");
+  dateElement.textContent = format.replace("{date}", item.date).replace("{time}", item.time);
   dateElement.style.fontSize = "0.9em";
   dateElement.style.color = "#666";
 
@@ -79,13 +102,20 @@ App.createNewsItem = function ({id, title, content, date, time}) {
 // Récupère et affiche les actualités récentes
 App.fetchNews = async function () {
   try {
-    const response = await fetch('/api/news');
-    const newsData = await response.json();
+    // Si déjà chargé, on ne fetch pas à nouveau sauf si forcé
+    let newsData = App._cachedNewsData;
+    if (!newsData) {
+        const response = await fetch('/api/news');
+        newsData = await response.json();
+        App._cachedNewsData = newsData;
+    }
+    
     const newsContainer = document.getElementById("news");
+    if (!newsContainer) return;
     newsContainer.innerHTML = "";
 
     if (!newsData || Object.keys(newsData).length === 0) {
-        newsContainer.innerHTML = "<p>Aucune actualité pour le moment.</p>";
+        newsContainer.innerHTML = `<p>${t("news_page.no_news", "Aucune actualité pour le moment.")}</p>`;
         return;
     }
 
@@ -101,21 +131,26 @@ App.fetchNews = async function () {
     // Trier par date décroissante
     newsArray.sort((a, b) => {
       const toDate = x =>
-        new Date(x.date.split("/").reverse().join("-") + "T" + x.time);
+        new Date(x.date.split("/").reverse().join("-") + "T" + (x.time || "00:00"));
       return toDate(b) - toDate(a);
     });
 
     // Afficher la semaine écoulée
+    let hasRecent = false;
     newsArray.forEach(news => {
-      const dt = new Date(news.date.split("/").reverse().join("-") + "T" + news.time);
+      const dt = new Date(news.date.split("/").reverse().join("-") + "T" + (news.time || "00:00"));
       if (dt > oneWeekAgo && dt <= now) {
         newsContainer.appendChild(App.createNewsItem(news));
+        hasRecent = true;
       }
     });
+    
+    // Si pas de news récente, afficher tout ou un message ?
+    // Pour l'instant on garde la logique "Bouton pour voir les vieilles"
 
     // Bouton pour afficher les anciennes infos
     const seeOldNewsButton = document.createElement("button");
-    seeOldNewsButton.textContent = "Voir les anciennes infos";
+    seeOldNewsButton.textContent = t("news_page.see_old", "Voir les anciennes infos");
     seeOldNewsButton.classList.add("news-toggle-btn");
     seeOldNewsButton.addEventListener("click", () =>
       App.displayOldNews(newsArray, oneWeekAgo, seeOldNewsButton)
@@ -132,7 +167,7 @@ App.displayOldNews = function (newsArray, cutoffDate, seeOldNewsButton) {
   newsContainer.innerHTML = "";
 
   const oldNews = newsArray.filter(({date, time}) => {
-    const dt = new Date(date.split("/").reverse().join("-") + "T" + time);
+    const dt = new Date(date.split("/").reverse().join("-") + "T" + (time || "00:00"));
     return dt <= cutoffDate;
   });
 
@@ -141,17 +176,20 @@ App.displayOldNews = function (newsArray, cutoffDate, seeOldNewsButton) {
   );
 
   const returnToCurrentNewsButton = document.createElement("button");
-  returnToCurrentNewsButton.textContent = "Retour aux infos actuelles";
+  returnToCurrentNewsButton.textContent = t("news_page.see_recent", "Retour aux infos actuelles");
   returnToCurrentNewsButton.classList.add("news-toggle-btn");
   returnToCurrentNewsButton.addEventListener("click", () => {
-    App.fetchNews();
-    returnToCurrentNewsButton.style.display = "none";
-    seeOldNewsButton.style.display = "inline-block";
+    App.fetchNews(); // Recharge la vue par défaut
   });
 
   newsContainer.appendChild(returnToCurrentNewsButton);
-  seeOldNewsButton.style.display = "none";
+  if(seeOldNewsButton) seeOldNewsButton.style.display = "none";
 };
 
-// Démarrage de la récupération des actualités
+// Ecouteur pour rafraîchir quand les traductions sont prêtes
+window.addEventListener('translationsLoaded', () => {
+    App.fetchNews();
+});
+
+// Démarrage
 App.fetchNews();

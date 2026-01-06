@@ -7,102 +7,51 @@ App.continueButton = document.getElementById('continue-button');
 
 App.boxesToOpen = JSON.parse(sessionStorage.getItem('boxesToOpen')) || [];
 
-function getEquipment(type, userData) {
-    const MAX_UNLOCKS_PER_ITEM = 6;
-    const probabilities = { commun: 0.7, rare: 0.25, legendaire: 0.05 };
-    const rand = Math.random();
-    let rarity;
-
-    if (rand < probabilities.legendaire) {
-        rarity = 'Légendaire';
-    } else if (rand < probabilities.legendaire + probabilities.rare) {
-        rarity = 'Rare';
-    } else {
-        rarity = 'Commun';
-    }
-
-    const userEquipments = userData.equipments || [];
-    const equipmentCounts = userEquipments.reduce((acc, id) => {
-        acc[id] = (acc[id] || 0) + 1;
-        return acc;
-    }, {});
-
-    // Robust access to equipment list
-    const allEquipments = (window.App && window.App.equipments && window.App.equipments.length > 0) 
-                          ? window.App.equipments 
-                          : (window.equipments || []);
-
-    console.log(`DEBUG: Attempting to open chest type: ${type}, Rarity: ${rarity}`);
-    console.log(`DEBUG: Total equipments available: ${allEquipments.length}`);
-
-    if (allEquipments.length === 0) {
-        console.error("DEBUG: Equipment list is empty!");
-        return null;
-    }
-
-    let possibleItems = allEquipments.filter(e => 
-        e.type.toLowerCase() === type.toLowerCase() && 
-        e.rarity.toLowerCase() === rarity.toLowerCase() &&
-        (equipmentCounts[e.id] || 0) < MAX_UNLOCKS_PER_ITEM
-    );
-
-    if (possibleItems.length === 0) {
-        console.log("DEBUG: No items match rarity and type, falling back to type only.");
-        possibleItems = allEquipments.filter(e =>
-            e.type.toLowerCase() === type.toLowerCase() &&
-            (equipmentCounts[e.id] || 0) < MAX_UNLOCKS_PER_ITEM
-        );
-        if (possibleItems.length === 0) {
-            console.log("DEBUG: No items match type, falling back to any item.");
-            possibleItems = allEquipments.filter(e =>
-                (equipmentCounts[e.id] || 0) < MAX_UNLOCKS_PER_ITEM
-            );
-            if (possibleItems.length === 0) {
-                console.warn("DEBUG: Absolutely no items available to unlock!");
-                return null;
-            }
-        }
-    }
-
-    // Reduce the chance of getting duplicates
-    const weightedItems = [];
-    possibleItems.forEach(item => {
-        const count = equipmentCounts[item.id] || 0;
-        // Assign a higher weight to items the user has fewer of.
-        // The weight is inversely proportional to the number of copies owned.
-        const weight = 1 / (count + 1);
-        for (let i = 0; i < Math.ceil(weight * 10); i++) {
-            weightedItems.push(item);
-        }
-    });
-
-    return weightedItems[Math.floor(Math.random() * weightedItems.length)];
-}
-
 function displayReward(equipment, userData) {
     if (!equipment) {
-        App.rewardName.textContent = "Inventaire plein";
-        App.rewardStats.innerHTML = "Vous avez atteint le nombre maximum d'exemplaires pour tous les équipements possibles de ce coffre.";
+        App.rewardName.textContent = App.t('lootbox.inventory_full_title');
+        App.rewardStats.innerHTML = App.t('lootbox.inventory_full_desc');
         return; // Stop here if no reward was given
     }
 
-    App.rewardName.textContent = equipment.name;
-    let statsText = `Rareté: ${equipment.rarity}`;
+    // Traduction du nom de l'équipement
+    const nameKey = equipment.id ? `equipment_names.${equipment.id}` : null;
+    const translatedName = nameKey ? App.t(nameKey) : equipment.name;
+    // Si la traduction n'est pas trouvée (retourne la clé), on utilise le nom par défaut
+    App.rewardName.textContent = (translatedName !== nameKey) ? translatedName : equipment.name;
+    
+    // Traduction de la rareté avec première lettre majuscule pour correspondre aux clés JSON
+    // Clés attendues : "Commun", "Rare", "Légendaire" (data/fr.json -> equipments.rarities)
+    let rarityKey = equipment.rarity;
+    if (rarityKey) {
+        rarityKey = rarityKey.charAt(0).toUpperCase() + rarityKey.slice(1).toLowerCase();
+    }
+    const rarityTrad = App.t('equipments.rarities.' + rarityKey);
+    // Fallback si la trad échoue
+    const finalRarity = (rarityTrad !== `equipments.rarities.${rarityKey}`) ? rarityTrad : equipment.rarity;
+
+    let statsText = `${App.t('lootbox.rarity', {value: finalRarity})}`;
+    
     for (const [stat, value] of Object.entries(equipment.stats)) {
         if (parseInt(value) !== 0) {
-            statsText += `<br>${stat}: ${value}`;
+            const statName = App.t('equipments.stats.' + stat);
+            // Fallback pour le nom de stat
+            const finalStatName = (statName !== `equipments.stats.${stat}`) ? statName : stat;
+            statsText += `<br>${finalStatName}: ${value}`;
         }
     }
-    if (equipment.bonus && equipment.bonus.description) {
-        statsText += `<br>${equipment.bonus.description}`;
+    if (equipment.bonus) {
+        const bonusDesc = App.t('equipment_bonuses.' + equipment.id);
+        const finalBonusDesc = (bonusDesc !== 'equipment_bonuses.' + equipment.id) ? bonusDesc : equipment.bonus.description;
+        if (finalBonusDesc) {
+            statsText += `<br><strong>${App.t('equipments.detail_effect')}</strong> ${finalBonusDesc}`;
+        }
     }
     App.rewardStats.innerHTML = statsText;
 
-    if (!userData.equipments) {
-        userData.equipments = [];
-    }
-    userData.equipments.push(equipment.id);
-    saveUserData(userData);
+    // Suppression du code de duplication ici. 
+    // Les données utilisateur (userData) reçues du serveur contiennent déjà le nouvel équipement.
+    // displayReward ne sert qu'à l'affichage.
 }
 
 async function openNextBox() {
@@ -137,7 +86,11 @@ async function openNextBox() {
         
         // Fallback si l'ID généré par le serveur n'est pas dans la liste client
         if (!equipment) {
-            equipment = { name: "Nouvel Équipement", rarity: data.reward.rarity, stats: {} };
+            equipment = { 
+                name: App.t('lootbox.new_equipment'), 
+                rarity: data.reward.rarity, 
+                stats: {} 
+            };
         }
 
         displayReward(equipment, data.userData);
@@ -149,4 +102,22 @@ App.continueButton.onclick = () => {
     openNextBox();
 };
 
-openNextBox();
+// Initialisation avec attente des traductions
+App.initLootbox = function() {
+    if (App.translations && Object.keys(App.translations).length > 0) {
+        App.translatePage();
+        openNextBox();
+    } else {
+        window.addEventListener('translationsLoaded', () => {
+             App.translatePage();
+             openNextBox();
+        }, { once: true });
+        
+        setTimeout(() => {
+             App.translatePage();
+             openNextBox();
+        }, 500);
+    }
+};
+
+App.initLootbox();

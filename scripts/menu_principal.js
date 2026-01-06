@@ -285,19 +285,28 @@ App.updateTrophyProgress = function() {
     const nextRewardsElem = document.getElementById("nextRewards");
     if (nextRewardsElem) {
         const rewardDescriptions = nextReward.rewards.map(r => {
-            const name = r.id ? r.id.replace(/_/g, ' ') : r.chestType;
-            // Note: Reward types are still hardcoded as they map to logic, but presentation could be localized later if needed.
-            // For now we keep basic French mapping here or could expand JSON.
-            switch (r.type) {
-                case 'coins': return `${r.amount} pièces`;
-                case 'item': return `${r.amount}x ${name}`;
-                case 'chest': return `1x Coffre ${name}`;
-                case 'random_character': return `1x Nouveau personnage`;
-                case 'random': return '1x Récompense Aléatoire';
-                case 'random_chest': return '1x Coffre Aléatoire';
-                default: return '1x Récompense';
+            const tr = App.localization.trophy_road || {};
+            let name = r.id || r.chestType;
+            
+            // Try to resolve name
+            if (r.type === 'item' && App.localization.shop && App.localization.shop.items && App.localization.shop.items[r.id]) {
+                name = App.localization.shop.items[r.id].title;
+            } else if (r.type === 'chest' && App.localization.equipments && App.localization.equipments.types && App.localization.equipments.types[r.chestType]) {
+                name = App.localization.equipments.types[r.chestType];
+            } else if (name) {
+                 name = name.replace(/_/g, ' ');
             }
-        }).join(' et ');
+
+            switch (r.type) {
+                case 'coins': return (tr.coins || "{amount} pièces").replace('{amount}', r.amount);
+                case 'item': return (tr.item || "{amount}x {name}").replace('{amount}', r.amount).replace('{name}', name);
+                case 'chest': return (tr.chest || "1x Coffre {name}").replace('{name}', name);
+                case 'random_character': return tr.random_character || "1x Nouveau personnage";
+                case 'random': return tr.random || "1x Récompense Aléatoire";
+                case 'random_chest': return tr.random_chest || "1x Coffre Aléatoire";
+                default: return tr.default || "1x Récompense";
+            }
+        }).join(App.localization.language === 'en' ? ' and ' : ' et ');
         
         const template = App.localization.ui ? (App.localization.ui.next_reward_at || `Prochaine récompense à {threshold} trophées : {rewards}`) : `Prochaine récompense à {threshold} trophées : {rewards}`;
         nextRewardsElem.textContent = template.replace('{threshold}', nextThreshold).replace('{rewards}', rewardDescriptions);

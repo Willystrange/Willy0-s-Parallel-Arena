@@ -141,7 +141,7 @@
 <!-- NEWS -->
 <div id="tab-news" class="content">
     <div class="card">
-        <h2>Ajouter / Modifier une News</h2>
+        <h2 id="news-card-title">Ajouter / Modifier une News (Étape 1 : Français)</h2>
         <input type="hidden" id="news-id">
         <div class="form-group">
             <label>Type d'Actualité</label>
@@ -158,12 +158,12 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Titre</label>
-            <input type="text" id="news-title" placeholder="Le titre de la news...">
+            <label id="label-title">Titre</label>
+            <input type="text" id="news-title" placeholder="Titre en Français...">
         </div>
         <div class="form-group">
-            <label>Contenu</label>
-            <textarea id="news-content" placeholder="Détails de l'actualité..."></textarea>
+            <label id="label-content">Contenu</label>
+            <textarea id="news-content" placeholder="Contenu en Français..."></textarea>
         </div>
         <div style="display:flex; gap:10px;">
             <div class="form-group" style="flex:1;">
@@ -175,8 +175,8 @@
                 <input type="time" id="news-time">
             </div>
         </div>
-        <button class="action-btn" id="btn-save-news" onclick="App.saveNews()">Publier News</button>
-        <button class="action-btn hidden" id="btn-cancel-news" style="background:#555;" onclick="App.resetNewsForm()">Annuler Modification</button>
+        <button class="action-btn" id="btn-save-news" onclick="App.handleNewsSubmit()">Suivant (Vers Anglais)</button>
+        <button class="action-btn hidden" id="btn-cancel-news" style="background:#555;" onclick="App.resetNewsForm()">Annuler / Recommencer</button>
     </div>
 
     <div class="card">

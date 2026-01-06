@@ -61,14 +61,16 @@ App.createEquipmentElement = function(item, characterName, isEquipped) {
     // Création de la pastille de couleur
     const indicator = document.createElement('div');
     indicator.classList.add('equipment-indicator');
-    const rarityColor = App.rarityColors[item.rarity] || '#ffffff';
+    // Normalisation de la clé de rareté (Majuscule au début) pour correspondre aux clés
+    const rarityKey = item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1);
+    const rarityColor = App.rarityColors[rarityKey] || '#ffffff';
     const typeColor = App.typeColors[item.type] || '#ffffff';
     indicator.style.background = `linear-gradient(to right, ${rarityColor} 0%, ${rarityColor} 50%, ${typeColor} 50%, ${typeColor} 100%)`;
 
     // Création du nom de l'équipement
     const name = document.createElement('div');
     name.classList.add('equipment-name');
-    name.textContent = item.name;
+    name.textContent = App.t('equipment_names.' + item.id) || item.name;
 
     // Assemblage
     const infoContainer = document.createElement('div');
@@ -103,7 +105,7 @@ App.renderEquipmentUI = function(characterName) {
     } else {
         equippedContainer.innerHTML = '';
         if (equippedIds.length === 0) {
-            equippedContainer.innerHTML = '<div>Aucun équipement équipé</div>';
+            equippedContainer.innerHTML = `<div>${App.t('equipments.no_equipped')}</div>`;
         } else {
             equippedIds.forEach(itemId => {
                 const item = App.getEquipmentById(itemId);
@@ -136,7 +138,7 @@ App.renderEquipmentUI = function(characterName) {
     }
     inventoryContainer.innerHTML = '';
     if (inventoryIds.length === 0) {
-        inventoryContainer.innerHTML = '<div>Aucun équipement dans l’inventaire</div>';
+        inventoryContainer.innerHTML = `<div>${App.t('equipments.no_inventory')}</div>`;
     } else {
         inventoryIds.forEach(itemId => {
             const item = App.getEquipmentById(itemId);
@@ -162,25 +164,31 @@ App.displayEquipmentDetails = function(item, characterName, isEquipped = false, 
     // Génération de la liste des stats non nulles
     const statsHtml = Object.entries(item.stats)
         .filter(([_, value]) => value !== 0)
-        .map(([key, value]) => `<li>${key} : ${value}</li>`)
+        .map(([key, value]) => `<li>${App.t('equipments.stats.' + key) || key} : ${value}</li>`)
         .join('');
 
     // Texte pour le bonus si présent
-    const bonusHtml = item.bonus
-        ? `<p><strong>Effet :</strong> ${item.bonus.description}</p>`
-        : `<p>Aucun effet spécial.</p>`;
+    let bonusDesc = item.bonus ? (App.t('equipment_bonuses.' + item.id)) : null;
+    if (bonusDesc === 'equipment_bonuses.' + item.id) bonusDesc = item.bonus.description;
+
+    const bonusHtml = bonusDesc
+        ? `<p><strong>${App.t('equipments.detail_effect')}</strong> ${bonusDesc}</p>`
+        : `<p>${App.t('equipments.detail_no_effect')}</p>`;
 
     // Détermination du libellé et de l’action du bouton
-    const btnText   = isEquipped ? 'Retirer' : 'Équiper';
+    const btnText   = isEquipped ? App.t('equipments.btn_remove') : App.t('equipments.btn_equip');
     const btnAction = isEquipped
         ? () => { App.unequipItem(characterName, item.id); }
         : () => { App.equipItem(characterName, item.id); };
 
+    const rarityKey = item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1);
+    const rarityTrad = App.t('equipments.rarities.' + rarityKey) || item.rarity;
+
     // Injection du contenu
     detailDiv.innerHTML = `
-        <h3>${item.name}</h3>
+        <h3>${App.t('equipment_names.' + item.id) || item.name}</h3>
         <p class="rarity-${item.rarity}">
-            <strong>Rareté :</strong> ${item.rarity}
+            <strong>${App.t('equipments.detail_rarity')}</strong> ${rarityTrad}
         </p>
         <ul>${statsHtml}</ul>
         ${bonusHtml}
@@ -244,7 +252,22 @@ App.initEquipmentsPage = async function() {
         });
     }
 
-    App.renderEquipmentUI(characterName);
+    // Attendre les traductions avant le premier rendu
+    if (App.translations && Object.keys(App.translations).length > 0) {
+        App.translatePage();
+        App.renderEquipmentUI(characterName);
+    } else {
+        window.addEventListener('translationsLoaded', () => {
+             App.translatePage();
+             App.renderEquipmentUI(characterName);
+        }, { once: true });
+        
+        // Sécurité en cas de raté de l'événement
+        setTimeout(() => {
+             App.translatePage();
+             App.renderEquipmentUI(characterName);
+        }, 500);
+    }
 
     // Gestion de la modale d'aide
     const helpIcon = document.getElementById('help-icon');
@@ -295,14 +318,14 @@ App.equipItem = function(characterName, itemId) {
 
     // Vérifier la limite de 3 équipements
     if (characterEquipments.length >= 3) {
-        alert("Vous ne pouvez équiper que 3 objets au maximum.");
+        alert(App.t('equipments.error_limit'));
         console.log("Tentative d'équiper un 4ème objet alors que l'inventaire est plein.");
         return;
     }
 
     // Vérifier si l'équipement est déjà équipé par ce personnage
     if (characterEquipments.includes(itemId)) {
-        alert("Cet équipement est déjà équipé par ce personnage.");
+        alert(App.t('equipments.error_already_equipped'));
         console.log(`Tentative d'équiper l'objet ${itemId} qui est déjà équipé.`);
         return;
     }

@@ -5,6 +5,22 @@ if (window.firebaseConfig && !firebase.apps.length) {
     firebase.initializeApp(window.firebaseConfig);
 }
 
+// Helper pour les traductions des paramètres
+App.t_settings = function(key, params = {}) {
+    if (!App.localization || !App.localization.settings) return null;
+    let val = App.localization.settings;
+    const keys = key.split('.');
+    for (const k of keys) {
+        val = val[k];
+        if (!val) return null;
+    }
+    if (typeof val === 'string') {
+        Object.keys(params).forEach(p => val = val.replace(`{${p}}`, params[p]));
+        return val;
+    }
+    return null;
+};
+
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     App.User = true;
@@ -32,20 +48,30 @@ App.updateUIP = function() {
   }
 
   // Ajout du bouton Admin si l'utilisateur est administrateur
+  App.renderAdminButton();
+};
+
+App.renderAdminButton = function() {
   const userData = getUserData();
   const container = document.querySelector('.container');
-  if (userData.isAdmin && container && !document.getElementById('adminPortalButton')) {
+  const logoutButton = document.getElementById('logoutButton');
+  
+  // Nettoyage ancien bouton si existant (pour éviter doublons lors re-render)
+  const oldBtn = document.getElementById('adminPortalButton');
+  if (oldBtn) oldBtn.remove();
+
+  if (userData.isAdmin && container) {
     const adminBtn = document.createElement('a');
     adminBtn.id = 'adminPortalButton';
     adminBtn.className = 'button';
     adminBtn.style.background = 'linear-gradient(135deg, #6200ee, #bb86fc)';
     adminBtn.style.color = 'white';
     adminBtn.style.fontWeight = 'bold';
-    adminBtn.innerText = '🛠️ Portail Administrateur';
+    adminBtn.innerText = App.t_settings('admin_portal') || '🛠️ Portail Administrateur';
     adminBtn.onclick = () => window.location.href = 'admin.html';
     
     // Insérer avant le bouton de déconnexion ou à la fin
-    if (logoutButton) {
+    if (logoutButton && logoutButton.parentNode === container) {
         container.insertBefore(adminBtn, logoutButton);
     } else {
         container.appendChild(adminBtn);
@@ -58,11 +84,11 @@ firebase.auth().onAuthStateChanged(() => App.updateUIP());
 /* ---------- Passkey Logic ---------- */
 App.registerPasskey = async function() {
     const user = firebase.auth().currentUser;
-    if (!user) return alert("Connectez-vous d'abord");
+    if (!user) return alert(App.t_settings('alerts.connect_first') || "Connectez-vous d'abord");
 
     // Vérification du support Navigateur + Contexte Sécurisé (HTTPS/Localhost)
     if (!window.isSecureContext || !navigator.credentials) {
-        return alert("Votre navigateur ou votre connexion (non-HTTPS) ne permet pas l'utilisation des Passkeys.");
+        return alert(App.t_settings('alerts.browser_unsupported') || "Votre navigateur ou votre connexion (non-HTTPS) ne permet pas l'utilisation des Passkeys.");
     }
 
     try {
@@ -114,17 +140,17 @@ App.registerPasskey = async function() {
         });
 
         if ((await verifyRes.json()).success) {
-            alert("Passkey ajoutée avec succès ! Vous pouvez maintenant vous connecter sans mot de passe.");
+            alert(App.t_settings('alerts.passkey_success') || "Passkey ajoutée avec succès ! Vous pouvez maintenant vous connecter sans mot de passe.");
         } else {
-            alert("Échec de l'enregistrement de la Passkey.");
+            alert(App.t_settings('alerts.passkey_failure') || "Échec de l'enregistrement de la Passkey.");
         }
     } catch (err) {
         console.error(err);
         // Gestion spécifique de l'erreur "Déjà enregistré" (InvalidStateError)
         if (err.name === 'InvalidStateError' || err.message.includes('The object is in an invalid state')) {
-            alert("Vous avez déjà une Passkey active sur cet appareil.");
+            alert(App.t_settings('alerts.passkey_exists') || "Vous avez déjà une Passkey active sur cet appareil.");
         } else {
-            alert("Erreur lors de la création de la Passkey : " + err.message);
+            alert((App.t_settings('alerts.passkey_error', {error: err.message}) || "Erreur lors de la création de la Passkey : " + err.message));
         }
     }
 };
@@ -269,7 +295,7 @@ App.updateBackup = function() {
     }
   });
   saveUserData(userData);
-  alert('Mise à jour de la sauvegarde effectuée.');
+  alert(App.t_settings('alerts.backup_updated') || 'Mise à jour de la sauvegarde effectuée.');
 };
 
 /* ---------- Déconnexion ---------- */
@@ -294,14 +320,49 @@ App.logout = async function() {
       localStorage.removeItem('userData');
       window.location.reload();
     }).catch(error => {
-        alert('Erreur lors de la déconnexion : ' + error.message);
+        alert((App.t_settings('alerts.logout_error', {error: error.message}) || 'Erreur lors de la déconnexion : ' + error.message));
     });
   } else {
-    alert("Aucun utilisateur n'est connecté.");
+    alert(App.t_settings('alerts.no_user') || "Aucun utilisateur n'est connecté.");
   }
 };
 
 /* ---------- Initialisation de l'interface Backup ---------- */
+App.renderSettingsUI = function() {
+    // 1. Bouton Langue
+    const languageButton = document.getElementById('languageButton');
+    if (languageButton) {
+        const userData = getUserData();
+        const currentLang = userData.language || 'fr';
+        const label = currentLang === 'fr' ? 'Français' : 'English';
+        const pattern = App.t_settings('language_button', {lang: label}) || `Langue: ${label}`;
+        const beta = App.t_settings('beta_tag') || 'Bêta';
+        languageButton.innerHTML = `${pattern} <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; margin-left: 5px;">${beta}</span>`;
+    }
+
+    // 2. Bouton Musique
+    const musicButton = document.getElementById('musicToggleButton');
+    if (musicButton) {
+        const userData = getUserData();
+        if (userData.music === true) {
+            musicButton.textContent = App.t_settings('disable_music') || 'Désactiver la musique';
+        } else {
+            musicButton.textContent = App.t_settings('enable_music') || 'Activer la musique';
+        }
+    }
+
+    // 3. Info Version
+    const versionInfo = document.getElementById('versionInfo');
+    if (versionInfo) {
+        const userData = getUserData();
+        const vUnavailable = App.t_settings('alerts.version_unavailable') || 'Version non disponible';
+        versionInfo.textContent = userData.version ? 'v.' + userData.version : vUnavailable;
+    }
+
+    // 4. Bouton Admin
+    App.renderAdminButton();
+};
+
 App.initBackupInterface = function() {
   document.getElementById('updateBackup').addEventListener('click', App.updateBackup);
   const addPasskeyBtn = document.getElementById('addPasskeyButton');
@@ -317,16 +378,6 @@ App.initBackupInterface = function() {
   // Gestion de la langue
   const languageButton = document.getElementById('languageButton');
   if (languageButton) {
-      const userData = getUserData();
-      const currentLang = userData.language || 'fr';
-      
-      const updateButtonText = (lang) => {
-          const label = lang === 'fr' ? 'Français' : 'English';
-          languageButton.innerHTML = `Langue: ${label} <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; margin-left: 5px;">Bêta</span>`;
-      };
-      
-      updateButtonText(currentLang);
-
       languageButton.addEventListener('click', async () => {
           const userData = getUserData();
           const current = userData.language || 'fr';
@@ -348,7 +399,7 @@ App.initBackupInterface = function() {
           }
           
           if (next !== 'fr') {
-              alert("⚠️ Attention : La version anglaise est en Bêta. \n\nLes traductions peuvent être manquantes ou incorrectes sur certaines pages.");
+              alert(App.t_settings('alerts.beta_warning') || "⚠️ Attention : La version anglaise est en Bêta. \n\nLes traductions peuvent être manquantes ou incorrectes sur certaines pages.");
           }
           
           location.reload();
@@ -369,29 +420,25 @@ App.initBackupInterface = function() {
 
   // Mise à jour de l'interface et affichage de la version
   App.updateUIP();
-  const userData = getUserData();
-  const versionInfo = document.getElementById('versionInfo');
-  versionInfo.textContent = userData.version ? 'v.' + userData.version : 'Version non disponible';
+  
+  // Rendu initial des textes dynamiques
+  App.renderSettingsUI();
 }
 
-// Si l'autoplay a déjà été activé, relancer la musique
+// Nettoyage de l'event listener précédent pour éviter les fuites/doublons lors du rechargement du script
+if (App.onTranslationsLoadedSettings) {
+    window.removeEventListener('translationsLoaded', App.onTranslationsLoadedSettings);
+}
+App.onTranslationsLoadedSettings = function() {
+    App.renderSettingsUI();
+};
+window.addEventListener('translationsLoaded', App.onTranslationsLoadedSettings);
+
 
 App.initBackupInterface();
 App.Music = function() {
   const musicButton = document.getElementById('musicToggleButton');
   if (musicButton) {
-    // Récupérer la sauvegarde utilisateur
-    const userData = getUserData();
-
-    // Mettre à jour le texte du bouton en fonction de la valeur de userData.music
-    // Si userData.music est false, le bouton affiche "Désactiver la musique"
-    // Si userData.music est true, le bouton affiche "Activer la musique"
-    if (userData.music === true) {
-      musicButton.textContent = 'Désactiver la musique';
-    } else {
-      musicButton.textContent = 'Activer la musique';
-    }
-
     // Lors d'un clic, on inverse le réglage et on recharge la fenêtre
     musicButton.addEventListener('click', function() {
       const userData = getUserData();
@@ -406,4 +453,3 @@ App.Music = function() {
   }
 }
 App.Music();
-

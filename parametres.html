@@ -80,22 +80,22 @@
 </head>
 <body>
   <div class="content">
-    <h1>Paramètres</h1>
+    <h1 data-i18n="settings.title">Paramètres</h1>
     <div class="container">
-      <a class="button" href="#" id="updateBackup">Sauver la sauvegarde</a>
-      <a class="button" href=# id="contactDev">Contactez le développeur</a>
-      <a class="button" id="loginButton" onclick="loadPage('connection')">Se connecter</a>
-      <a class="button" id="logoutButton" onclick="loadPage('connection')" style="display:none;">Se déconnecter</a>
-      <button class="button" id="addPasskeyButton" style="display:none; background: #2ecc71;">Ajouter une Passkey</button>
+      <a class="button" href="#" id="updateBackup" data-i18n="settings.save_backup">Sauver la sauvegarde</a>
+      <a class="button" href=# id="contactDev" data-i18n="settings.contact_dev">Contactez le développeur</a>
+      <a class="button" id="loginButton" onclick="loadPage('connection')" data-i18n="settings.login">Se connecter</a>
+      <a class="button" id="logoutButton" onclick="loadPage('connection')" style="display:none;" data-i18n="settings.logout">Se déconnecter</a>
+      <button class="button" id="addPasskeyButton" style="display:none; background: #2ecc71;" data-i18n="settings.add_passkey">Ajouter une Passkey</button>
       
       <!-- Système audio pour la Web App (lecture séquentielle sans attribut loop) -->
 
       <!-- Bouton d'activation du son. Si l'autorisation a déjà été donnée sur une autre page, ce bouton sera caché -->
       <div class="volume-container" style="margin-bottom: 20px; width: 100%; max-width: 300px;">
-        <label for="volumeSlider" style="display: block; margin-bottom: 10px; color: white; font-weight: bold;">Volume de la musique</label>
+        <label for="volumeSlider" style="display: block; margin-bottom: 10px; color: white; font-weight: bold;" data-i18n="settings.volume_label">Volume de la musique</label>
         <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" style="width: 100%; cursor: pointer;">
       </div>
-      <button class="button" id="musicToggleButton">Activer le son</button>
+      <button class="button" id="musicToggleButton" data-i18n="settings.enable_music">Activer le son</button>
       
       <button class="button" id="languageButton" style="margin-top: 10px;">
         Langue: Français <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; margin-left: 5px;">Bêta</span>

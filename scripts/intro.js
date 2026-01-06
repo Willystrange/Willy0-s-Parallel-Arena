@@ -1,46 +1,28 @@
 // On s'assure que le namespace App existe
 window.App = window.App || {};
 
-// Création de l'indicateur de connexion
-App.connectionStatus = document.createElement('div');
-App.connectionStatus.id = 'connection-status-indicator';
-App.connectionStatus.style.position = 'fixed';
-App.connectionStatus.style.bottom = '5px';
-App.connectionStatus.style.left = '10px';
-App.connectionStatus.style.fontSize = '12px';
-App.connectionStatus.style.zIndex = '9999';
-App.connectionStatus.style.fontFamily = 'sans-serif';
-document.body.appendChild(App.connectionStatus);
-
-App.introLocalization = null;
-
-// Charger la localisation pour l'intro
-const userDataStr = localStorage.getItem('userData');
-let lang = 'fr';
-if (userDataStr) {
-    try {
-        lang = JSON.parse(userDataStr).language || 'fr';
-    } catch(e) {}
+// Création de l'indicateur de connexion (Singleton pattern simple)
+if (!App.connectionStatus) {
+    App.connectionStatus = document.createElement('div');
+    App.connectionStatus.id = 'connection-status-indicator';
+    App.connectionStatus.style.position = 'fixed';
+    App.connectionStatus.style.bottom = '5px';
+    App.connectionStatus.style.left = '10px';
+    App.connectionStatus.style.fontSize = '12px';
+    App.connectionStatus.style.zIndex = '9999';
+    App.connectionStatus.style.fontFamily = 'sans-serif';
+    document.body.appendChild(App.connectionStatus);
 }
 
-fetch(`/api/data/localization/${lang}`)
-    .then(res => res.json())
-    .then(data => {
-        App.introLocalization = data;
-        // Rafraîchir si déjà affiché
-        if (App.connectionStatus.style.display === 'block') {
-             const isOnline = App.connectionStatus.style.color === 'green';
-             App.setConnectionStatus(isOnline);
-        }
-    })
-    .catch(() => {}); // Silencieux si échec
-
+// Fonction de mise à jour du statut
 App.setConnectionStatus = function(online) {
   if (!App.connectionStatus) return;
   
   let text = online ? 'En ligne' : 'Hors ligne - échec de connexion au serveur';
-  if (App.introLocalization && App.introLocalization.connectionStatus) {
-      text = online ? App.introLocalization.connectionStatus.online : App.introLocalization.connectionStatus.offline;
+  
+  // Utilisation du système de traduction centralisé de app.js
+  if (App.translations && App.translations.connectionStatus) {
+      text = online ? App.translations.connectionStatus.online : App.translations.connectionStatus.offline;
   }
   
   App.connectionStatus.textContent = text;
@@ -54,6 +36,20 @@ App.clearConnectionStatus = function() {
   }
 };
 
+// Intégration de la traduction pour la page Intro
+if (App.translationPromise) {
+    App.translationPromise.then(() => {
+        App.translatePage();
+        // Mettre à jour le texte du statut de connexion si déjà affiché
+        if (App.connectionStatus.style.display === 'block') {
+             const isOnline = App.connectionStatus.style.color === 'green';
+             App.setConnectionStatus(isOnline);
+        }
+    });
+} else {
+    // Si la promesse n'existe pas (ex: chargement direct ou différé), on tente directement
+    App.translatePage();
+}
 
 
 // --- Récupération des éléments du DOM ---

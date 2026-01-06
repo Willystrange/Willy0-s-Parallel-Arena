@@ -205,6 +205,8 @@ App.saveMaintenance = async function() {
 
 // --- NEWS ---
 App.newsData = {};
+App.newsStep = 1;
+App.newsDraft = {};
 
 App.loadNews = async function() {
     const res = await fetch('/api/news');
@@ -231,16 +233,28 @@ App.renderNewsList = function() {
 
     newsArray.forEach(news => {
         const typeKey = news.id.substring(2, 4);
+        
+        // Détection format (Vieux vs Nouveau)
+        let displayTitle = news.title;
+        let displayContent = news.content;
+        let isMulti = false;
+        
+        if (news.fr) {
+            displayTitle = news.fr.title;
+            displayContent = news.fr.content;
+            isMulti = true;
+        }
+
         const div = document.createElement('div');
         div.className = "user-list-item";
         div.style.flexDirection = "column";
         div.style.alignItems = "flex-start";
         div.innerHTML = `
             <div style="display:flex; justify-content:space-between; width:100%;">
-                <span style="font-weight:bold; color:#bb86fc;">${news.title}</span>
-                <span style="background:#333; padding:2px 6px; border-radius:4px; font-size:0.7rem;">${typeKey}</span>
+                <span style="font-weight:bold; color:#bb86fc;">${displayTitle}</span>
+                <span style="background:#333; padding:2px 6px; border-radius:4px; font-size:0.7rem;">${typeKey} ${isMulti ? '🌍' : '🇫🇷'}</span>
             </div>
-            <p style="font-size:0.8rem; margin:5px 0; color:#aaa;">${news.content.substring(0, 100)}${news.content.length > 100 ? '...' : ''}</p>
+            <p style="font-size:0.8rem; margin:5px 0; color:#aaa;">${displayContent.substring(0, 100)}${displayContent.length > 100 ? '...' : ''}</p>
             <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                 <small>${news.date} ${news.time}</small>
                 <div>
@@ -254,10 +268,19 @@ App.renderNewsList = function() {
 };
 
 App.resetNewsForm = function() {
+    App.newsStep = 1;
+    App.newsDraft = {};
+    
     document.getElementById('news-id').value = "";
     document.getElementById('news-title').value = "";
     document.getElementById('news-content').value = "";
-    document.getElementById('btn-save-news').innerText = "Publier News";
+    
+    // Reset UI Text
+    document.getElementById('news-card-title').innerText = "Ajouter / Modifier une News (Étape 1 : Français)";
+    document.getElementById('news-title').placeholder = "Titre en Français...";
+    document.getElementById('news-content').placeholder = "Contenu en Français...";
+    document.getElementById('btn-save-news').innerText = "Suivant (Vers Anglais)";
+    
     document.getElementById('btn-cancel-news').classList.add('hidden');
     
     const now = new Date();
@@ -265,23 +288,70 @@ App.resetNewsForm = function() {
     document.getElementById('news-time').value = now.toTimeString().substring(0, 5);
 };
 
+App.handleNewsSubmit = function() {
+    const title = document.getElementById('news-title').value;
+    const content = document.getElementById('news-content').value;
+    
+    if (!title || !content) return alert("Veuillez remplir les champs !");
+
+    if (App.newsStep === 1) {
+        // --- FIN ÉTAPE 1 (FR) ---
+        App.newsDraft.fr = { title, content };
+        
+        // Setup Étape 2
+        App.newsStep = 2;
+        
+        // Si on éditait déjà une news avec de l'anglais, on le remet
+        if (App.newsDraft.en) {
+            document.getElementById('news-title').value = App.newsDraft.en.title || "";
+            document.getElementById('news-content').value = App.newsDraft.en.content || "";
+        } else {
+            document.getElementById('news-title').value = "";
+            document.getElementById('news-content').value = "";
+        }
+
+        document.getElementById('news-card-title').innerText = "Ajouter / Modifier une News (Étape 2 : Anglais)";
+        document.getElementById('news-title').placeholder = "Title in English...";
+        document.getElementById('news-content').placeholder = "Content in English...";
+        document.getElementById('btn-save-news').innerText = "Publier (Final)";
+        document.getElementById('btn-cancel-news').classList.remove('hidden');
+        
+    } else {
+        // --- FIN ÉTAPE 2 (EN) ---
+        App.newsDraft.en = { title, content };
+        App.saveNewsFinal();
+    }
+};
+
 App.editNews = function(id) {
     const news = App.newsData[id];
     if (!news) return;
     
+    App.resetNewsForm(); // Remet à l'étape 1
+    
     document.getElementById('news-id').value = id;
     document.getElementById('news-type').value = id.substring(2, 4);
-    document.getElementById('news-title').value = news.title;
-    document.getElementById('news-content').value = news.content;
     
-    // Convertir DD/MM/YYYY vers YYYY-MM-DD
+    // Gestion Ancien Format vs Nouveau Format
+    if (news.fr) {
+        // Nouveau format
+        App.newsDraft = { fr: news.fr, en: news.en };
+        document.getElementById('news-title').value = news.fr.title;
+        document.getElementById('news-content').value = news.fr.content;
+    } else {
+        // Ancien format -> On migre vers FR, EN vide
+        App.newsDraft = { fr: { title: news.title, content: news.content }, en: null };
+        document.getElementById('news-title').value = news.title;
+        document.getElementById('news-content').value = news.content;
+    }
+    
+    // Date
     const parts = news.date.split("/");
     if (parts.length === 3) {
         document.getElementById('news-date').value = `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
     document.getElementById('news-time').value = news.time;
     
-    document.getElementById('btn-save-news').innerText = "Enregistrer Modifications";
     document.getElementById('btn-cancel-news').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -292,32 +362,35 @@ App.deleteNews = async function(id) {
     await App.syncNewsWithServer();
 };
 
-App.saveNews = async function() {
+App.saveNewsFinal = async function() {
     const id = document.getElementById('news-id').value;
     const type = document.getElementById('news-type').value;
-    const title = document.getElementById('news-title').value;
-    const content = document.getElementById('news-content').value;
     const dateInput = document.getElementById('news-date').value;
     const time = document.getElementById('news-time').value;
     
-    if (!title || !content || !dateInput) {
-        alert("Veuillez remplir tous les champs.");
-        return;
-    }
+    if (!dateInput) return alert("Date manquante");
 
-    // Formater la date en DD/MM/YYYY
     const d = new Date(dateInput);
     const date = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 
     let finalId = id;
     if (!id) {
-        // Générer un nouvel ID auto : XX + TYPE + XX
         const r1 = Math.floor(Math.random() * 90 + 10);
         const r2 = Math.floor(Math.random() * 90 + 10);
         finalId = `${r1}${type}${r2}`;
     }
 
-    App.newsData[finalId] = { title, content, date, time };
+    // Construction de l'objet final
+    App.newsData[finalId] = {
+        date: date,
+        time: time,
+        fr: App.newsDraft.fr,
+        en: App.newsDraft.en,
+        // Champs 'fallback' pour les vieilles versions du client qui lisent title/content à la racine ?
+        // On peut mettre la version FR par défaut à la racine pour la rétrocompatibilité
+        title: App.newsDraft.fr.title,
+        content: App.newsDraft.fr.content
+    };
     
     await App.syncNewsWithServer();
     App.resetNewsForm();

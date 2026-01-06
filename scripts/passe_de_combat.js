@@ -24,10 +24,12 @@ App.StartedGame();
 
 // ===================== PASS PREMIUM =====================
 App.showPopup = function() {
-  document.getElementById('premium-pass-popup').style.display = 'block';
+  const popup = document.getElementById('premium-pass-popup');
+  if (popup) popup.style.display = 'block';
 };
 App.hidePopup = function() {
-  document.getElementById('premium-pass-popup').style.display = 'none';
+  const popup = document.getElementById('premium-pass-popup');
+  if (popup) popup.style.display = 'none';
 };
 App.handlePurchase = function() {
   App.hidePopup();
@@ -56,8 +58,8 @@ App.handlePurchase = function() {
               loadingPopup.classList.remove('active');
               if (data.success) {
                   localStorage.setItem('userData', JSON.stringify(data.userData));
-                  alert('Achat réussi, le Parallel Pass 7 Premium est maintenant disponible !');
-                  alert('En cadeau, vous recevez 500 XP supplémentaire !');
+                  alert(App.t('battle_pass.success_purchase'));
+                  alert(App.t('battle_pass.gift_xp'));
                   location.reload();
               } else {
                   alert(data.error || "Erreur lors de l'achat");
@@ -68,7 +70,7 @@ App.handlePurchase = function() {
               console.error("Erreur achat pass:", err);
               loadingPopup.classList.remove('active');
               loadingPopup.style.display = 'none';
-              alert("Erreur réseau");
+              alert(App.t('shop.errors.network_error'));
           });
       });
   });
@@ -97,7 +99,7 @@ App.initApp = function() {
     const nextLevelXP = App.calculateNextLevelXP(currentLevel);
     const xpPercentage = Math.min(100, Math.max(0, (currentXP / nextLevelXP) * 100));
     
-    xpProgressText.textContent = `XP: ${currentXP} / ${nextLevelXP}`;
+    xpProgressText.textContent = App.t('battle_pass.level', {current: currentXP, next: nextLevelXP});
     xpProgressBar.style.width = `${xpPercentage}%`;
     document.getElementById('current-level').textContent = currentLevel;
     document.getElementById('next-level').textContent = currentLevel + 1;
@@ -143,7 +145,7 @@ App.initApp = function() {
       App.updateLevelInfo();
       
       setTimeout(() => {
-          alert(`Félicitations ! Vous avez atteint le niveau ${currentLevel}.`);
+          alert(App.t('battle_pass.level_up', {level: currentLevel}));
       }, 100);
     }
   };
@@ -155,129 +157,132 @@ App.initApp = function() {
   const userData = getUserData(); 
 
   // Listes des récompenses
+  // Helper pour les traductions
+  const rT = (key, amount) => App.t('battle_pass.rewards.' + key, {amount: amount});
+
   const freeRewards = [
-    { badge: 1, text: "5 Points", level: 1, type: 'points', value: 5, rarity: 'simple' },
-    { badge: 2, text: "2 Potions de santé", level: 2, type: 'potion_sante', value: 2, rarity: 'simple' },
-    { badge: 3, text: "Double XP", level: 3, type: 'Double_XP', value: 1, rarity: 'simple' },
-    { badge: 4, text: "10 Points", level: 4, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 5, text: "Bouclier solide", level: 5, type: 'bouclier_solide', value: 1, rarity: 'simple' },
-    { badge: 6, text: "15 Points", level: 6, type: 'points', value: 15, rarity: 'simple' },
-    { badge: 7, text: "2 Épées tranchantes", level: 7, type: 'epee_tranchante', value: 2, rarity: 'simple' },
-    { badge: 8, text: "Élixir de puissance", level: 8, type: 'elixir_puissance', value: 1, rarity: 'simple' },
-    { badge: 9, text: "10 Points", level: 9, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 10, text: "Coffre d'équipement (Équilibre)", level: 10, type: 'lootbox_equilibre', rarity: 'simple' },
-    { badge: 11, text: "15 Points", level: 11, type: 'points', value: 15, rarity: 'simple' },
-    { badge: 12, text: "2 Potions de santé", level: 12, type: 'potion_sante', value: 2, rarity: 'simple' },
-    { badge: 13, text: "2 Double XP", level: 13, type: 'Double_XP', value: 2, rarity: 'simple' },
-    { badge: 14, text: "10 Points", level: 14, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 15, text: "2 Boucliers solides", level: 15, type: 'bouclier_solide', value: 2, rarity: 'simple' },
-    { badge: 16, text: "20 Points", level: 16, type: 'points', value: 20, rarity: 'simple' },
-    { badge: 17, text: "Cape de l’ombre", level: 17, type: 'cape_ombre', value: 1, rarity: 'simple' },
-    { badge: 18, text: "10 Points", level: 18, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 19, text: "Élixir de puissance", level: 19, type: 'elixir_puissance', value: 1, rarity: 'simple' },
-    { badge: 20, text: "Amulette de régénération", level: 20, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
-    { badge: 21, text: "10 Points", level: 21, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 22, text: "Armure de fer", level: 22, type: 'armure_fer', value: 1, rarity: 'simple' },
-    { badge: 23, text: "2 Épées tranchantes", level: 23, type: 'epee_tranchante', value: 2, rarity: 'simple' },
-    { badge: 24, text: "10 Points", level: 24, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 25, text: "Coffre d'équipement (Attaque)", level: 25, type: 'lootbox_attaque', rarity: 'simple' },
-    { badge: 26, text: "15 Points", level: 26, type: 'points', value: 15, rarity: 'simple' },
-    { badge: 27, text: "Double XP", level: 27, type: 'Double_XP', value: 1, rarity: 'simple' },
-    { badge: 28, text: "2 Potions de santé", level: 28, type: 'potion_sante', value: 2, rarity: 'simple' },
-    { badge: 29, text: "Élixir de puissance", level: 29, type: 'elixir_puissance', value: 1, rarity: 'simple' },
-    { badge: 30, text: "10 Points", level: 30, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 31, text: "20 Points", level: 31, type: 'points', value: 20, rarity: 'simple' },
-    { badge: 32, text: "Bouclier solide", level: 32, type: 'bouclier_solide', value: 1, rarity: 'simple' },
-    { badge: 33, text: "2 Épées tranchantes", level: 33, type: 'epee_tranchante', value: 2, rarity: 'simple' },
-    { badge: 34, text: "10 Points", level: 34, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 35, text: "Amulette de régénération", level: 35, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
-    { badge: 36, text: "10 Points", level: 36, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 37, text: "Armure de fer", level: 37, type: 'armure_fer', value: 1, rarity: 'simple' },
-    { badge: 38, text: "Crystal de renouveau", level: 38, type: 'crystal_renouveau', value: 1, rarity: 'simple' },
-    { badge: 39, text: "2 Potions de santé", level: 39, type: 'potion_sante', value: 2, rarity: 'simple' },
-    { badge: 40, text: "Coffre d'équipement (Défense)", level: 40, type: 'lootbox_defense', rarity: 'simple' },
-    { badge: 41, text: "15 Points", level: 41, type: 'points', value: 15, rarity: 'simple' },
-    { badge: 42, text: "Élixir de puissance", level: 42, type: 'elixir_puissance', value: 1, rarity: 'simple' },
-    { badge: 43, text: "2 Double XP", level: 43, type: 'Double_XP', value: 2, rarity: 'simple' },
-    { badge: 44, text: "10 Points", level: 44, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 45, text: "2 Boucliers solides", level: 45, type: 'bouclier_solide', value: 2, rarity: 'simple' },
-    { badge: 46, text: "20 Points", level: 46, type: 'points', value: 20, rarity: 'simple' },
-    { badge: 47, text: "Cape de l’ombre", level: 47, type: 'cape_ombre', value: 1, rarity: 'simple' },
-    { badge: 48, text: "10 Points", level: 48, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 49, text: "Amulette de régénération", level: 49, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
-    { badge: 50, text: "2 Potions de santé", level: 50, type: 'potion_sante', value: 2, rarity: 'simple' },
-    { badge: 51, text: "10 Points", level: 51, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 52, text: "Crystal de renouveau", level: 52, type: 'crystal_renouveau', value: 1, rarity: 'simple' },
-    { badge: 53, text: "Double XP", level: 53, type: 'Double_XP', value: 1, rarity: 'simple' },
-    { badge: 54, text: "10 Points", level: 54, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 55, text: "Coffre d'équipement (Agilité)", level: 55, type: 'lootbox_agilite', rarity: 'simple' },
-    { badge: 56, text: "Amulette de régénération", level: 56, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
-    { badge: 57, text: "2 Boucliers solides", level: 57, type: 'bouclier_solide', value: 2, rarity: 'simple' },
-    { badge: 58, text: "10 Points", level: 58, type: 'points', value: 10, rarity: 'simple' },
-    { badge: 59, text: "Cape de l’ombre", level: 59, type: 'cape_ombre', value: 1, rarity: 'simple' },
-    { badge: 60, text: "7 récompenses aléatoires", level: 60, type: 'recompense', value: 7, rarity: 'simple' }
+    { badge: 1, text: rT('points', 5), level: 1, type: 'points', value: 5, rarity: 'simple' },
+    { badge: 2, text: rT('potion', 2), level: 2, type: 'potion_sante', value: 2, rarity: 'simple' },
+    { badge: 3, text: rT('double_xp', 1), level: 3, type: 'Double_XP', value: 1, rarity: 'simple' },
+    { badge: 4, text: rT('points', 10), level: 4, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 5, text: rT('solid_shield', 1), level: 5, type: 'bouclier_solide', value: 1, rarity: 'simple' },
+    { badge: 6, text: rT('points', 15), level: 6, type: 'points', value: 15, rarity: 'simple' },
+    { badge: 7, text: rT('sharp_sword', 2), level: 7, type: 'epee_tranchante', value: 2, rarity: 'simple' },
+    { badge: 8, text: rT('power_elixir', 1), level: 8, type: 'elixir_puissance', value: 1, rarity: 'simple' },
+    { badge: 9, text: rT('points', 10), level: 9, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 10, text: rT('chest_balance', 1), level: 10, type: 'lootbox_equilibre', rarity: 'simple' },
+    { badge: 11, text: rT('points', 15), level: 11, type: 'points', value: 15, rarity: 'simple' },
+    { badge: 12, text: rT('potion', 2), level: 12, type: 'potion_sante', value: 2, rarity: 'simple' },
+    { badge: 13, text: rT('double_xp', 2), level: 13, type: 'Double_XP', value: 2, rarity: 'simple' },
+    { badge: 14, text: rT('points', 10), level: 14, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 15, text: rT('solid_shield', 2), level: 15, type: 'bouclier_solide', value: 2, rarity: 'simple' },
+    { badge: 16, text: rT('points', 20), level: 16, type: 'points', value: 20, rarity: 'simple' },
+    { badge: 17, text: rT('shadow_cape', 1), level: 17, type: 'cape_ombre', value: 1, rarity: 'simple' },
+    { badge: 18, text: rT('points', 10), level: 18, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 19, text: rT('power_elixir', 1), level: 19, type: 'elixir_puissance', value: 1, rarity: 'simple' },
+    { badge: 20, text: rT('regen_amulet', 1), level: 20, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
+    { badge: 21, text: rT('points', 10), level: 21, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 22, text: rT('iron_armor', 1), level: 22, type: 'armure_fer', value: 1, rarity: 'simple' },
+    { badge: 23, text: rT('sharp_sword', 2), level: 23, type: 'epee_tranchante', value: 2, rarity: 'simple' },
+    { badge: 24, text: rT('points', 10), level: 24, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 25, text: rT('chest_attack', 1), level: 25, type: 'lootbox_attaque', rarity: 'simple' },
+    { badge: 26, text: rT('points', 15), level: 26, type: 'points', value: 15, rarity: 'simple' },
+    { badge: 27, text: rT('double_xp', 1), level: 27, type: 'Double_XP', value: 1, rarity: 'simple' },
+    { badge: 28, text: rT('potion', 2), level: 28, type: 'potion_sante', value: 2, rarity: 'simple' },
+    { badge: 29, text: rT('power_elixir', 1), level: 29, type: 'elixir_puissance', value: 1, rarity: 'simple' },
+    { badge: 30, text: rT('points', 10), level: 30, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 31, text: rT('points', 20), level: 31, type: 'points', value: 20, rarity: 'simple' },
+    { badge: 32, text: rT('solid_shield', 1), level: 32, type: 'bouclier_solide', value: 1, rarity: 'simple' },
+    { badge: 33, text: rT('sharp_sword', 2), level: 33, type: 'epee_tranchante', value: 2, rarity: 'simple' },
+    { badge: 34, text: rT('points', 10), level: 34, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 35, text: rT('regen_amulet', 1), level: 35, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
+    { badge: 36, text: rT('points', 10), level: 36, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 37, text: rT('iron_armor', 1), level: 37, type: 'armure_fer', value: 1, rarity: 'simple' },
+    { badge: 38, text: rT('renewal_crystal', 1), level: 38, type: 'crystal_renouveau', value: 1, rarity: 'simple' },
+    { badge: 39, text: rT('potion', 2), level: 39, type: 'potion_sante', value: 2, rarity: 'simple' },
+    { badge: 40, text: rT('chest_defense', 1), level: 40, type: 'lootbox_defense', rarity: 'simple' },
+    { badge: 41, text: rT('points', 15), level: 41, type: 'points', value: 15, rarity: 'simple' },
+    { badge: 42, text: rT('power_elixir', 1), level: 42, type: 'elixir_puissance', value: 1, rarity: 'simple' },
+    { badge: 43, text: rT('double_xp', 2), level: 43, type: 'Double_XP', value: 2, rarity: 'simple' },
+    { badge: 44, text: rT('points', 10), level: 44, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 45, text: rT('solid_shield', 2), level: 45, type: 'bouclier_solide', value: 2, rarity: 'simple' },
+    { badge: 46, text: rT('points', 20), level: 46, type: 'points', value: 20, rarity: 'simple' },
+    { badge: 47, text: rT('shadow_cape', 1), level: 47, type: 'cape_ombre', value: 1, rarity: 'simple' },
+    { badge: 48, text: rT('points', 10), level: 48, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 49, text: rT('regen_amulet', 1), level: 49, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
+    { badge: 50, text: rT('potion', 2), level: 50, type: 'potion_sante', value: 2, rarity: 'simple' },
+    { badge: 51, text: rT('points', 10), level: 51, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 52, text: rT('renewal_crystal', 1), level: 52, type: 'crystal_renouveau', value: 1, rarity: 'simple' },
+    { badge: 53, text: rT('double_xp', 1), level: 53, type: 'Double_XP', value: 1, rarity: 'simple' },
+    { badge: 54, text: rT('points', 10), level: 54, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 55, text: rT('chest_agility', 1), level: 55, type: 'lootbox_agilite', rarity: 'simple' },
+    { badge: 56, text: rT('regen_amulet', 1), level: 56, type: 'amulette_regeneration', value: 1, rarity: 'simple' },
+    { badge: 57, text: rT('solid_shield', 2), level: 57, type: 'bouclier_solide', value: 2, rarity: 'simple' },
+    { badge: 58, text: rT('points', 10), level: 58, type: 'points', value: 10, rarity: 'simple' },
+    { badge: 59, text: rT('shadow_cape', 1), level: 59, type: 'cape_ombre', value: 1, rarity: 'simple' },
+    { badge: 60, text: rT('random_rewards', 7), level: 60, type: 'recompense', value: 7, rarity: 'simple' }
   ];
   const premiumRewards = [
-    { badge: 1, text: "10 Points", level: 1, type: 'points', value: 10, rarity: 'premium' },
-    { badge: 2, text: "3 Potions de santé", level: 2, type: 'potion_sante', value: 3, rarity: 'premium' },
-    { badge: 3, text: "2 Double XP", level: 3, type: 'double_xp', value: 2, rarity: 'premium' },
-    { badge: 4, text: "20 Points", level: 4, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 5, text: "Coffre d'équipement (Attaque)", level: 5, type: 'lootbox_attaque', rarity: 'premium' },
-    { badge: 6, text: "20 Points", level: 6, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 7, text: "3 Épées tranchantes", level: 7, type: 'epee_tranchante', value: 3, rarity: 'premium' },
-    { badge: 8, text: "2 Élixirs de puissance", level: 8, type: 'elixir_puissance', value: 2, rarity: 'premium' },
-    { badge: 9, text: "15 Points", level: 9, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 10, text: "Amulette de régénération", level: 10, type: 'amulette_regeneration', rarity: 'premium' },
-    { badge: 11, text: "20 Points", level: 11, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 12, text: "3 Potions de santé", level: 12, type: 'potion_sante', value: 3, rarity: 'premium' },
-    { badge: 13, text: "3 Double XP", level: 13, type: 'double_xp', value: 3, rarity: 'premium' },
-    { badge: 14, text: "15 Points", level: 14, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 15, text: "Coffre d'équipement (Défense)", level: 15, type: 'lootbox_defense', rarity: 'premium' },
-    { badge: 16, text: "30 Points", level: 16, type: 'points', value: 30, rarity: 'premium' },
-    { badge: 17, text: "Cape de l’ombre", level: 17, type: 'cape_ombre', rarity: 'premium' },
-    { badge: 18, text: "15 Points", level: 18, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 19, text: "2 Élixirs de puissance", level: 19, type: 'elixir_puissance', value: 2, rarity: 'premium' },
-    { badge: 20, text: "Coffre d'équipement (Agilité)", level: 20, type: 'lootbox_agilite', rarity: 'premium' },
-    { badge: 21, text: "15 Points", level: 21, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 22, text: "Armure de fer", level: 22, type: 'armure_fer', rarity: 'premium' },
-    { badge: 23, text: "3 Épées tranchantes", level: 23, type: 'epee_tranchante', value: 3, rarity: 'premium' },
-    { badge: 24, text: "15 Points", level: 24, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 25, text: "Cristal de renouveau", level: 25, type: 'cristal_renouveau', rarity: 'premium' },
-    { badge: 26, text: "20 Points", level: 26, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 27, text: "3 Double XP", level: 27, type: 'double_xp', value: 3, rarity: 'premium' },
-    { badge: 28, text: "3 Potions de santé", level: 28, type: 'potion_sante', value: 3, rarity: 'premium' },
-    { badge: 29, text: "2 Élixirs de puissance", level: 29, type: 'elixir_puissance', value: 2, rarity: 'premium' },
-    { badge: 30, text: "Coffre d'équipement (Équilibre)", level: 30, type: 'lootbox_equilibre', rarity: 'premium' },
-    { badge: 31, text: "30 Points", level: 31, type: 'points', value: 30, rarity: 'premium' },
-    { badge: 32, text: "2 Boucliers solides", level: 32, type: 'bouclier_solide', value: 2, rarity: 'premium' },
-    { badge: 33, text: "3 Épées tranchantes", level: 33, type: 'epee_tranchante', value: 3, rarity: 'premium' },
-    { badge: 34, text: "15 Points", level: 34, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 35, text: "Coffre d'équipement (Attaque)", level: 35, type: 'lootbox_attaque', rarity: 'premium' },
-    { badge: 36, text: "20 Points", level: 36, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 37, text: "Armure de fer", level: 37, type: 'armure_fer', rarity: 'premium' },
-    { badge: 38, text: "Cristal de renouveau", level: 38, type: 'cristal_renouveau', rarity: 'premium' },
-    { badge: 39, text: "3 Potions de santé", level: 39, type: 'potion_sante', value: 3, rarity: 'premium' },
-    { badge: 40, text: "15 Points", level: 40, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 41, text: "20 Points", level: 41, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 42, text: "2 Élixirs de puissance", level: 42, type: 'elixir_puissance', value: 2, rarity: 'premium' },
-    { badge: 43, text: "3 Double XP", level: 43, type: 'double_xp', value: 3, rarity: 'premium' },
-    { badge: 44, text: "15 Points", level: 44, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 45, text: "Coffre d'équipement (Défense)", level: 45, type: 'lootbox_defense', rarity: 'premium' },
-    { badge: 46, text: "30 Points", level: 46, type: 'points', value: 30, rarity: 'premium' },
-    { badge: 47, text: "Cape de l’ombre", level: 47, type: 'cape_ombre', rarity: 'premium' },
-    { badge: 48, text: "15 Points", level: 48, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 49, text: "Amulette de régénération", level: 49, type: 'amulette_regeneration', rarity: 'premium' },
-    { badge: 50, text: "Coffre d'équipement (Agilité)", level: 50, type: 'lootbox_agilite', rarity: 'premium' },
-    { badge: 51, text: "15 Points", level: 51, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 52, text: "Cristal de renouveau", level: 52, type: 'cristal_renouveau', rarity: 'premium' },
-    { badge: 53, text: "2 Double XP", level: 53, type: 'double_xp', value: 2, rarity: 'premium' },
-    { badge: 54, text: "15 Points", level: 54, type: 'points', value: 15, rarity: 'premium' },
-    { badge: 55, text: "2 Élixirs de puissance", level: 55, type: 'elixir_puissance', value: 2, rarity: 'premium' },
-    { badge: 56, text: "20 Points", level: 56, type: 'points', value: 20, rarity: 'premium' },
-    { badge: 57, text: "3 Épées tranchantes", level: 57, type: 'epee_tranchante', value: 3, rarity: 'premium' },
-    { badge: 58, text: "Coffre d'équipement (Équilibre)", level: 58, type: 'lootbox_equilibre', rarity: 'premium' },
-    { badge: 59, text: "30 Points", level: 59, type: 'points', value: 30, rarity: 'premium' },
-    { badge: 60, text: "7 récompenses aléatoires + Korb", level: 60, type: 'Personnage', value: 7, rarity: 'premium', characterName: 'Korb' }
+    { badge: 1, text: rT('points', 10), level: 1, type: 'points', value: 10, rarity: 'premium' },
+    { badge: 2, text: rT('potion', 3), level: 2, type: 'potion_sante', value: 3, rarity: 'premium' },
+    { badge: 3, text: rT('double_xp', 2), level: 3, type: 'double_xp', value: 2, rarity: 'premium' },
+    { badge: 4, text: rT('points', 20), level: 4, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 5, text: rT('chest_attack', 1), level: 5, type: 'lootbox_attaque', rarity: 'premium' },
+    { badge: 6, text: rT('points', 20), level: 6, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 7, text: rT('sharp_sword', 3), level: 7, type: 'epee_tranchante', value: 3, rarity: 'premium' },
+    { badge: 8, text: rT('power_elixir', 2), level: 8, type: 'elixir_puissance', value: 2, rarity: 'premium' },
+    { badge: 9, text: rT('points', 15), level: 9, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 10, text: rT('regen_amulet', 1), level: 10, type: 'amulette_regeneration', rarity: 'premium' },
+    { badge: 11, text: rT('points', 20), level: 11, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 12, text: rT('potion', 3), level: 12, type: 'potion_sante', value: 3, rarity: 'premium' },
+    { badge: 13, text: rT('double_xp', 3), level: 13, type: 'double_xp', value: 3, rarity: 'premium' },
+    { badge: 14, text: rT('points', 15), level: 14, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 15, text: rT('chest_defense', 1), level: 15, type: 'lootbox_defense', rarity: 'premium' },
+    { badge: 16, text: rT('points', 30), level: 16, type: 'points', value: 30, rarity: 'premium' },
+    { badge: 17, text: rT('shadow_cape', 1), level: 17, type: 'cape_ombre', rarity: 'premium' },
+    { badge: 18, text: rT('points', 15), level: 18, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 19, text: rT('power_elixir', 2), level: 19, type: 'elixir_puissance', value: 2, rarity: 'premium' },
+    { badge: 20, text: rT('chest_agilite', 1), level: 20, type: 'lootbox_agilite', rarity: 'premium' },
+    { badge: 21, text: rT('points', 15), level: 21, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 22, text: rT('iron_armor', 1), level: 22, type: 'armure_fer', rarity: 'premium' },
+    { badge: 23, text: rT('sharp_sword', 3), level: 23, type: 'epee_tranchante', value: 3, rarity: 'premium' },
+    { badge: 24, text: rT('points', 15), level: 24, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 25, text: rT('renewal_crystal', 1), level: 25, type: 'cristal_renouveau', rarity: 'premium' },
+    { badge: 26, text: rT('points', 20), level: 26, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 27, text: rT('double_xp', 3), level: 27, type: 'double_xp', value: 3, rarity: 'premium' },
+    { badge: 28, text: rT('potion', 3), level: 28, type: 'potion_sante', value: 3, rarity: 'premium' },
+    { badge: 29, text: rT('power_elixir', 2), level: 29, type: 'elixir_puissance', value: 2, rarity: 'premium' },
+    { badge: 30, text: rT('chest_balance', 1), level: 30, type: 'lootbox_equilibre', rarity: 'premium' },
+    { badge: 31, text: rT('points', 30), level: 31, type: 'points', value: 30, rarity: 'premium' },
+    { badge: 32, text: rT('solid_shield', 2), level: 32, type: 'bouclier_solide', value: 2, rarity: 'premium' },
+    { badge: 33, text: rT('sharp_sword', 3), level: 33, type: 'epee_tranchante', value: 3, rarity: 'premium' },
+    { badge: 34, text: rT('points', 15), level: 34, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 35, text: rT('chest_attack', 1), level: 35, type: 'lootbox_attaque', rarity: 'premium' },
+    { badge: 36, text: rT('points', 20), level: 36, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 37, text: rT('iron_armor', 1), level: 37, type: 'armure_fer', rarity: 'premium' },
+    { badge: 38, text: rT('renewal_crystal', 1), level: 38, type: 'cristal_renouveau', rarity: 'premium' },
+    { badge: 39, text: rT('potion', 3), level: 39, type: 'potion_sante', value: 3, rarity: 'premium' },
+    { badge: 40, text: rT('points', 15), level: 40, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 41, text: rT('points', 20), level: 41, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 42, text: rT('power_elixir', 2), level: 42, type: 'elixir_puissance', value: 2, rarity: 'premium' },
+    { badge: 43, text: rT('double_xp', 3), level: 43, type: 'double_xp', value: 3, rarity: 'premium' },
+    { badge: 44, text: rT('points', 15), level: 44, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 45, text: rT('chest_defense', 1), level: 45, type: 'lootbox_defense', rarity: 'premium' },
+    { badge: 46, text: rT('points', 30), level: 46, type: 'points', value: 30, rarity: 'premium' },
+    { badge: 47, text: rT('shadow_cape', 1), level: 47, type: 'cape_ombre', rarity: 'premium' },
+    { badge: 48, text: rT('points', 15), level: 48, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 49, text: rT('regen_amulet', 1), level: 49, type: 'amulette_regeneration', rarity: 'premium' },
+    { badge: 50, text: rT('chest_agility', 1), level: 50, type: 'lootbox_agilite', rarity: 'premium' },
+    { badge: 51, text: rT('points', 15), level: 51, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 52, text: rT('renewal_crystal', 1), level: 52, type: 'cristal_renouveau', rarity: 'premium' },
+    { badge: 53, text: rT('double_xp', 2), level: 53, type: 'double_xp', value: 2, rarity: 'premium' },
+    { badge: 54, text: rT('points', 15), level: 54, type: 'points', value: 15, rarity: 'premium' },
+    { badge: 55, text: rT('power_elixir', 2), level: 55, type: 'elixir_puissance', value: 2, rarity: 'premium' },
+    { badge: 56, text: rT('points', 20), level: 56, type: 'points', value: 20, rarity: 'premium' },
+    { badge: 57, text: rT('sharp_sword', 3), level: 57, type: 'epee_tranchante', value: 3, rarity: 'premium' },
+    { badge: 58, text: rT('chest_balance', 1), level: 58, type: 'lootbox_equilibre', rarity: 'premium' },
+    { badge: 59, text: rT('points', 30), level: 59, type: 'points', value: 30, rarity: 'premium' },
+    { badge: 60, text: rT('random_rewards_korb', 7), level: 60, type: 'Personnage', value: 7, rarity: 'premium', characterName: 'Korb' }
   ];
 
   const rewardsPerPage = 3;
@@ -302,7 +307,7 @@ App.initApp = function() {
     div.innerHTML = `
       <div class="badge">${reward.badge}</div>
       ${reward.text}
-      <div class="error-message hidden" id="error-${reward.badge}">Vous n'avez pas atteint le niveau nécessaire.</div>
+      <div class="error-message hidden" id="error-${reward.badge}">${App.t('battle_pass.error_level')}</div>
     `;
     return div;
   };
@@ -321,12 +326,12 @@ App.initApp = function() {
     premiumContainer.className = 'premium-rewards';
     
     const freeTitle = document.createElement('h2');
-    freeTitle.textContent = 'Récompenses Gratuites';
+    freeTitle.textContent = App.t('battle_pass.free_rewards');
     freeTitle.className = 'rewards-title';
     freeContainer.appendChild(freeTitle);
     
     const premiumTitle = document.createElement('h2');
-    premiumTitle.textContent = 'Récompenses Premium';
+    premiumTitle.textContent = App.t('battle_pass.premium_rewards');
     premiumTitle.className = 'rewards-title';
     premiumContainer.appendChild(premiumTitle);
     
@@ -437,11 +442,31 @@ App.updateParallelPassTitle = function() {
   const userData = getUserData();
   const base = document.querySelector('.premiumA .base');
   if (userData.pass_premium) {
-    base.textContent = 'Parallel Pass +';
+    base.textContent = App.t('battle_pass.title_premium');
   } else {
-    base.textContent = 'Parallel Pass';
+    base.textContent = App.t('battle_pass.title');
   }
 }
-// Appelle cette fonction une fois que userData est bien chargé
-App.updateParallelPassTitle();
-App.initApp();
+
+// Initialisation avec attente des traductions
+App.initPass = function() {
+    if (App.translations && Object.keys(App.translations).length > 0) {
+        App.translatePage();
+        App.updateParallelPassTitle();
+        App.initApp();
+    } else {
+        window.addEventListener('translationsLoaded', () => {
+             App.translatePage();
+             App.updateParallelPassTitle();
+             App.initApp();
+        }, { once: true });
+        
+        setTimeout(() => {
+             App.translatePage();
+             App.updateParallelPassTitle();
+             App.initApp();
+        }, 500);
+    }
+};
+
+App.initPass();

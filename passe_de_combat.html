@@ -37,8 +37,8 @@
   <!-- Controles de navigation -->
   <div class="controls">
     <div class="button-container">
-      <button id="prevPage">◀ Précédent</button>
-      <button id="nextPage">Suivant ▶</button>
+      <button id="prevPage" data-i18n="battle_pass.prev_page">◀ Précédent</button>
+      <button id="nextPage" data-i18n="battle_pass.next_page">Suivant ▶</button>
     </div>
   </div>
 
@@ -48,7 +48,7 @@
       <!-- Les pages seront créées dynamiquement -->
     </div>
   </div>
-  <div id="Dates" class="Dates">Le Parallel Pass 7 durera du 21 mars 2026 au 23 mai 2026.</div>
+  <div id="Dates" class="Dates" data-i18n="battle_pass.dates">Le Parallel Pass 7 durera du 21 mars 2026 au 23 mai 2026.</div>
 
 
   <!-- Footer -->
@@ -57,15 +57,15 @@
   <!-- Popups -->
   <div class="popup" id="premium-pass-popup">
     <h2 style="display: flex; justify-content: space-between; align-items: center;">
-      Parallel Pass 7 Premium
+      <span data-i18n="battle_pass.popup_title">Parallel Pass 7 Premium</span>
       <img src="Parallel-Pass-3-premium.png" alt="Icône Parallel Pass 3 Premium"
         style="width: 80px; height: 80px; margin-left: 10px;">
     </h2>
-    <p>Obtenez des récompenses bonus dont le personnage "Korb" au niveau 60 pour 850 points !</p>
+    <p data-i18n="battle_pass.popup_desc">Obtenez des récompenses bonus dont le personnage "Korb" au niveau 60 pour 850 points !</p>
     <div>
-      <button onclick="App.hidePopup()">Annuler</button>
-      <button onclick="App.handlePurchase()">Acheter</button>
-      <button onclick="loadPage('pass_promotion'); App.hidePopup();">Inspecter</button>
+      <button onclick="App.hidePopup()" data-i18n="battle_pass.btn_cancel">Annuler</button>
+      <button onclick="App.handlePurchase()" data-i18n="battle_pass.btn_buy">Acheter</button>
+      <button onclick="loadPage('pass_promotion'); App.hidePopup();" data-i18n="battle_pass.btn_inspect">Inspecter</button>
     </div>
   </div>
 
@@ -76,7 +76,7 @@
 
   <div class="loading-popup" id="loading-popup">
     <div class="loading-spinner"></div>
-    <p>Achat en cours...</p>
+    <p data-i18n="battle_pass.loading">Achat en cours...</p>
   </div>
 
   <script src="scripts/passe_de_combat.js"></script></body>

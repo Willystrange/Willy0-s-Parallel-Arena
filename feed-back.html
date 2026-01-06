@@ -16,35 +16,35 @@
   <div id="confirmationMessage"></div>
   <div class="content">
     <div class="container">
-      <h1>Formulaire de Feedback</h1>
+      <h1 data-i18n="feedback.title">Formulaire de Feedback</h1>
       <form id="feedbackForm">
         <!-- Catégorie -->
         <div class="form-group">
-          <label for="category">Catégorie</label>
+          <label for="category" data-i18n="feedback.category_label">Catégorie</label>
           <select id="category" name="category" required>
-            <option value="">Sélectionnez une catégorie</option>
-            <option value="fonctionnalite">Fonctionnalité</option>
-            <option value="design">Design</option>
-            <option value="performance">Performance</option>
-            <option value="securite">Sécurité</option>
-            <option value="gameplay">Gameplay</option>
-            <option value="autre">Autre</option>
+            <option value="" data-i18n="feedback.select_category">Sélectionnez une catégorie</option>
+            <option value="fonctionnalite" data-i18n="feedback.cat_feature">Fonctionnalité</option>
+            <option value="design" data-i18n="feedback.cat_design">Design</option>
+            <option value="performance" data-i18n="feedback.cat_performance">Performance</option>
+            <option value="securite" data-i18n="feedback.cat_security">Sécurité</option>
+            <option value="gameplay" data-i18n="feedback.cat_gameplay">Gameplay</option>
+            <option value="autre" data-i18n="feedback.cat_other">Autre</option>
           </select>
-        </div
+        </div>
     
         <!-- Remarques -->
         <div class="form-group">
-          <label for="comments">Vos remarques :</label>
-          <textarea id="comments" name="comments" rows="5" placeholder="Écrivez ici vos remarques"></textarea>
+          <label for="comments" data-i18n="feedback.comments_label">Vos remarques :</label>
+          <textarea id="comments" name="comments" rows="5" placeholder="Écrivez ici vos remarques" data-i18n="feedback.comments_placeholder"></textarea>
         </div>
         <!-- Bouton d'envoi -->
         <div class="form-group">
-          <button type="submit">Envoyer</button>
+          <button type="submit" data-i18n="feedback.send_button">Envoyer</button>
         </div>
       </form>
       <!-- Bouton Retour -->
       <div class="form-group">
-        <button type="button" id="goBackButton">Retour</button>
+        <button type="button" id="goBackButton" data-i18n="feedback.back_button">Retour</button>
       </div>
     </div>
   </div>

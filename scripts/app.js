@@ -185,7 +185,8 @@ App.translatePage = function() {
         if (el.tagName === 'INPUT' && el.type === 'placeholder') {
             el.placeholder = translation;
         } else {
-            el.textContent = translation;
+            // Use innerHTML to allow HTML tags like <span class="highlight">
+            el.innerHTML = translation;
         }
     });
 };
@@ -1071,6 +1072,10 @@ function loadPage(page) {
     const container = document.createElement('div');
     container.innerHTML = html;
     app.appendChild(container);
+
+    if (typeof App.translatePage === 'function') {
+        App.translatePage();
+    }
 
     const footer = document.querySelector('.footer.persistent') || document.querySelector('.footer');
     const currentPageHasFooter = PAGES_WITH_DYNAMIC_FOOTER.includes(page);

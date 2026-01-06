@@ -15,24 +15,24 @@
     <div id="help-modal" class="modal-hidden" style="display: none;">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h2>Légende des Couleurs</h2>
-            <p>Chaque équipement possède une pastille de couleur pour identifier rapidement sa rareté et son type.</p>
+            <h2 data-i18n="equipments.legend_title">Légende des Couleurs</h2>
+            <p data-i18n="equipments.legend_desc">Chaque équipement possède une pastille de couleur pour identifier rapidement sa rareté et son type.</p>
             <div class="legend-container">
                 <div class="legend-section">
-                    <h3>Rareté (Partie Gauche)</h3>
+                    <h3 data-i18n="equipments.legend_rarity">Rareté (Partie Gauche)</h3>
                     <ul>
-                        <li><span class="color-box" style="background-color: #95a5a6;"></span> Commun</li>
-                        <li><span class="color-box" style="background-color: #3498db;"></span> Rare</li>
-                        <li><span class="color-box" style="background-color: #f39c12;"></span> Légendaire</li>
+                        <li><span class="color-box" style="background-color: #95a5a6;"></span> <span data-i18n="equipments.rarities.Commun">Commun</span></li>
+                        <li><span class="color-box" style="background-color: #3498db;"></span> <span data-i18n="equipments.rarities.Rare">Rare</span></li>
+                        <li><span class="color-box" style="background-color: #f39c12;"></span> <span data-i18n="equipments.rarities.Légendaire">Légendaire</span></li>
                     </ul>
                 </div>
                 <div class="legend-section">
-                    <h3>Type (Partie Droite)</h3>
+                    <h3 data-i18n="equipments.legend_type">Type (Partie Droite)</h3>
                     <ul>
-                        <li><span class="color-box" style="background-color: #e74c3c;"></span> Attaque</li>
-                        <li><span class="color-box" style="background-color: #2ecc71;"></span> Défense</li>
-                        <li><span class="color-box" style="background-color: #f1c40f;"></span> Agilité</li>
-                        <li><span class="color-box" style="background-color: #e67e22;"></span> Équilibre</li>
+                        <li><span class="color-box" style="background-color: #e74c3c;"></span> <span data-i18n="equipments.types.Attaque">Attaque</span></li>
+                        <li><span class="color-box" style="background-color: #2ecc71;"></span> <span data-i18n="equipments.types.Défense">Défense</span></li>
+                        <li><span class="color-box" style="background-color: #f1c40f;"></span> <span data-i18n="equipments.types.Agilité">Agilité</span></li>
+                        <li><span class="color-box" style="background-color: #e67e22;"></span> <span data-i18n="equipments.types.Équilibre">Équilibre</span></li>
                     </ul>
                 </div>
             </div>
@@ -42,14 +42,14 @@
     <div class="content">
         <h1 id="character-name-title"></h1>
         <div class="equipment-section">
-            <h2>Équipé</h2>
+            <h2 data-i18n="equipments.section_equipped">Équipé</h2>
             <div id="equipped-items" class="equipped-container">
                 <!-- Les 3 emplacements d'équipement apparaîtront ici -->
             </div>
         </div>
 
         <div class="inventory-section">
-            <h2>Inventaire</h2>
+            <h2 data-i18n="equipments.section_inventory">Inventaire</h2>
             <div id="inventory-items" class="inventory-container">
                 <!-- Les équipements possédés mais non équipés apparaîtront ici -->
             </div>
