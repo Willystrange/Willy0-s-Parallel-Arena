@@ -1634,6 +1634,55 @@ app.post('/api/admin/maintenance', verifyToken, verifyAdmin, async (req, res) =>
     res.json({ success: true });
 });
 
+app.post('/api/admin/news', verifyToken, verifyAdmin, async (req, res) => {
+    const { news } = req.body;
+    await db.collection('settings').doc('news').set({ items: news });
+    res.json({ success: true });
+});
+
+app.get('/api/admin/users', verifyToken, verifyAdmin, async (req, res) => {
+    const { search, sortBy } = req.query;
+    
+    // Note: Loading all users is not scalable for production but acceptable for this scale.
+    // For larger datasets, use Firestore query cursors or a search engine like Algolia.
+    const allUsers = await loadAllUsersData();
+    let results = Object.keys(allUsers).map(uid => ({ uid, ...allUsers[uid] }));
+
+    if (search) {
+        const s = search.toLowerCase();
+        results = results.filter(u => 
+            (u.pseudo && u.pseudo.toLowerCase().includes(s)) || 
+            (u.uid && u.uid.includes(s)) ||
+            (u.email && u.email.toLowerCase().includes(s))
+        );
+    }
+
+    if (sortBy) {
+        results.sort((a, b) => {
+            if (sortBy === 'active') return (b.lastSeen || 0) - (a.lastSeen || 0);
+            if (sortBy === 'newest') return (b.createdAt || 0) - (a.createdAt || 0);
+            if (sortBy === 'oldest') return (a.createdAt || 0) - (b.createdAt || 0);
+            if (sortBy === 'trophees') return (b.trophees || 0) - (a.trophees || 0);
+            if (sortBy === 'argent') return (b.argent || 0) - (a.argent || 0);
+            return 0;
+        });
+    }
+
+    res.json({ success: true, users: results.slice(0, 50) });
+});
+
+app.get('/api/admin/user/:uid', verifyToken, verifyAdmin, async (req, res) => {
+    const userData = await getUserData(req.params.uid);
+    if (!userData) return res.status(404).json({ error: "Utilisateur introuvable" });
+    res.json({ success: true, user: userData });
+});
+
+app.post('/api/admin/user/:uid', verifyToken, verifyAdmin, async (req, res) => {
+    const { updates } = req.body;
+    await saveUserData(req.params.uid, updates);
+    res.json({ success: true });
+});
+
 // --- START ---
 server.listen(PORT, '0.0.0.0', async () => {
     console.log(`🚀 SERVEUR FULL OP SUR PORT ${PORT}`);
