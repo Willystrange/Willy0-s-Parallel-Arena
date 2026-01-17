@@ -408,3 +408,80 @@ document.addEventListener('input', function(e) {
         trophEl.value = Math.min(currentMax, App.sessionT);
     }
 });
+
+// --- MISSING FUNCTIONS ---
+
+App.loadVersion = async function() {
+    try {
+        const token = await App.adminUser.getIdToken();
+        const res = await fetch('/api/admin/version', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('game-version').value = data.version;
+        }
+    } catch(e) { console.error("Error loading version:", e); }
+};
+
+App.saveVersion = async function() {
+    const version = document.getElementById('game-version').value;
+    try {
+        const token = await App.adminUser.getIdToken();
+        const res = await fetch('/api/admin/version', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ version })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert("Version mise à jour !");
+            // Reload to see the effect (comparison logic)
+            App.loadVersion();
+        } else alert("Erreur: " + data.error);
+    } catch(e) { alert("Erreur réseau"); }
+};
+
+App.loadMaintenanceStatus = async function() {
+    try {
+        const res = await fetch('/api/config/maintenance');
+        const data = await res.json();
+        if (document.getElementById('maintenance-toggle')) document.getElementById('maintenance-toggle').checked = data.maintenance;
+        if (document.getElementById('maintenance-message')) document.getElementById('maintenance-message').value = data.message || "";
+        if (document.getElementById('scheduled-start')) document.getElementById('scheduled-start').value = data.scheduledStart || "";
+        if (document.getElementById('scheduled-end')) document.getElementById('scheduled-end').value = data.scheduledEnd || "";
+    } catch(e) { console.error(e); }
+};
+
+App.saveMaintenance = async function() {
+    const config = {
+        maintenance: document.getElementById('maintenance-toggle').checked,
+        message: document.getElementById('maintenance-message').value,
+        scheduledStart: document.getElementById('scheduled-start').value,
+        scheduledEnd: document.getElementById('scheduled-end').value
+    };
+    
+    try {
+        const token = await App.adminUser.getIdToken();
+        await fetch('/api/admin/maintenance', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(config)
+        });
+        alert("Configuration maintenance sauvegardée !");
+    } catch(e) { alert("Erreur sauvegarde"); }
+};
+
+App.loadNews = async function() {
+    // To be implemented
+};
+App.handleNewsSubmit = async function() {
+    alert("News: Fonctionnalité non implémentée dans ce fix.");
+};
+App.resetNewsForm = function() {};
