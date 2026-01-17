@@ -227,34 +227,55 @@ app.use((req, res, next) => {
     next();
 });
 
+// --- HELPER: VERSION COMPARE ---
+function compareVersions(v1, v2) {
+    if (!v1) return -1;
+    if (!v2) return 1;
+    const clean = v => v.replace(/[^0-9.]/g, '');
+    const p1 = clean(v1).split('.').map(Number);
+    const p2 = clean(v2).split('.').map(Number);
+    for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+        const n1 = p1[i] || 0;
+        const n2 = p2[i] || 0;
+        if (n1 > n2) return 1;
+        if (n1 < n2) return -1;
+    }
+    return 0;
+}
+
 // --- HELPER: GAME VERSION ---
 async function getGameVersion() {
-    try {
-        // En mode local sans DB, on utilise le fichier
-        if (isDbMocked) {
-             if (fs.existsSync(path.join(__dirname, 'game_version.json'))) {
-                const vData = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_version.json'), 'utf8'));
-                return vData.gameVersion;
-            }
-            return packageJson.gameVersion || packageJson.version;
-        }
+    let dbVersion = null;
+    let fileVersion = null;
 
-        // Sur le serveur, on utilise Firestore pour la persistance
-        const doc = await db.collection('settings').doc('game_version').get();
-        if (doc.exists && doc.data().version) {
-            return doc.data().version;
+    // 1. Get DB Version
+    try {
+        if (!isDbMocked) {
+            const doc = await db.collection('settings').doc('game_version').get();
+            if (doc.exists && doc.data().version) {
+                dbVersion = doc.data().version;
+            }
         }
     } catch (e) { console.error("Error reading version from DB:", e); }
-    
-    // Fallback fichier si DB vide ou erreur
+
+    // 2. Get File Version
     try {
         if (fs.existsSync(path.join(__dirname, 'game_version.json'))) {
             const vData = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_version.json'), 'utf8'));
-            return vData.gameVersion;
+            fileVersion = vData.gameVersion;
         }
     } catch(e) {}
 
-    return packageJson.gameVersion || packageJson.version;
+    if (!fileVersion) {
+        fileVersion = packageJson.gameVersion || packageJson.version;
+    }
+
+    // 3. Compare and return the higher one
+    if (dbVersion && fileVersion) {
+        return compareVersions(fileVersion, dbVersion) > 0 ? fileVersion : dbVersion;
+    }
+
+    return dbVersion || fileVersion || "B1.0.0.00";
 }
 
 // --- PUBLIC VERSION ENDPOINT ---
