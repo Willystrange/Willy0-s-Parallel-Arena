@@ -1045,6 +1045,7 @@ const PAGES_WITH_DYNAMIC_FOOTER = ['menu_principal', 'perso_stats', 'passe_de_co
 const PAGES_WITHOUT_SCROLL_FOOTER = ['menu_principal', 'actualites'];
 
 function loadPage(page) {
+  App.currentPage = page;
   resetApp();
 
   document.body.className = '';
@@ -1148,3 +1149,74 @@ function loadPage(page) {
     }
   }).catch(err => console.error('Error loading page:', err));
 }
+
+// --- SYSTEME DE NAVIGATION PAR GESTES (SWIPE) ---
+
+// Configuration des transitions entre pages
+// Left: page vers laquelle on va si on swipe vers la droite (comme si on tirait la page de gauche)
+// Right: page vers laquelle on va si on swipe vers la gauche (comme si on tirait la page de droite)
+App.swipeConfig = {
+    'perso_stats': { right: 'menu_principal' },
+    'menu_principal': { left: 'perso_stats', right: 'passe_de_combat' },
+    'passe_de_combat': { left: 'menu_principal', right: 'boutique' },
+    'boutique': { left: 'passe_de_combat' }
+};
+
+App.initGestures = function() {
+    // Détection stricte : iOS en mode standalone (PWA installée sur l'écran d'accueil)
+    // ('standalone' in navigator) est spécifique à iOS Safari.
+    const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator.standalone);
+    
+    // Si on veut aussi supporter Android PWA ou Desktop PWA, on peut décommenter :
+    // const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+
+    // Pour l'instant, on respecte la demande : "appareils IOS en mode standalone"
+    // Cependant, pour tester facilement si vous n'êtes pas sur iOS, vous pouvez commenter la ligne suivante.
+    if (!isIOSStandalone) {
+        // console.log("Swipe navigation disabled: not iOS standalone.");
+        return; 
+    }
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const threshold = 60; // Sensibilité du swipe (pixels)
+    const maxVerticalRatio = 0.8; // Si le mouvement est trop vertical, on ignore
+
+    document.addEventListener('touchstart', e => {
+        if (!App.currentPage || !App.swipeConfig[App.currentPage]) return;
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+        if (!App.currentPage || !App.swipeConfig[App.currentPage]) return;
+
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+        
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // Vérification de la dominance horizontale
+        // Si on bouge beaucoup verticalement (scroll), on n'active pas le swipe
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
+            // Vérifier si le ratio vertical n'est pas trop élevé (diagonale)
+            if (Math.abs(diffY) / Math.abs(diffX) < maxVerticalRatio) {
+                const config = App.swipeConfig[App.currentPage];
+                
+                if (diffX > 0 && config.left) {
+                    // Swipe Droite (->) : On va à la page de GAUCHE (précédente)
+                    loadPage(config.left);
+                } else if (diffX < 0 && config.right) {
+                    // Swipe Gauche (<-) : On va à la page de DROITE (suivante)
+                    loadPage(config.right);
+                }
+            }
+        }
+    }, { passive: true });
+};
+
+// Initialisation au chargement
+document.addEventListener('DOMContentLoaded', () => {
+    App.initGestures();
+});
