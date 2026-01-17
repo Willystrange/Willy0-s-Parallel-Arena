@@ -431,7 +431,11 @@ App.initBackupInterface = function() {
           const userData = getUserData();
           userData.swipeNavigation = e.target.checked;
           saveUserData(userData);
-          // Pas besoin de reload, l'effet sera pris en compte au prochain swipe
+          
+          // Apply changes immediately
+          if (typeof App.updateSwipeState === 'function') {
+              App.updateSwipeState();
+          }
       });
   }
 
