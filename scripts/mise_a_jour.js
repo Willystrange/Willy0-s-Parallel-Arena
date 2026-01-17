@@ -47,7 +47,7 @@ App.mise_a_jour = async function() {
   const userData = getUserData();
   // Version actuelle du jeu
   const currentVersion = App.game_version;
-  const versionreset = 'B2.2.1.20';
+  const versionreset = 'B2.5.0.00';
 
   // Valeurs par défaut pour les données utilisateur
   const defaultUserData = {
@@ -158,6 +158,9 @@ App.mise_a_jour = async function() {
     semaine4: false,
     semaine5: false,
     semaine6: false,
+    semaine7: false,
+    semaine8: false,
+    semaine9: false,
     crystaux_parrallels: 0,
     quetes_jour: false,
     quete1_type: "",
@@ -217,6 +220,9 @@ App.mise_a_jour = async function() {
     userData.semaine4 = false;
     userData.semaine5 = false;
     userData.semaine6 = false;
+    userData.semaine7 = false;
+    userData.semaine8 = false;
+    userData.semaine9 = false;
     userData.quetes_genere = false;
   }
 
@@ -278,7 +284,7 @@ App.initMiseAJour = async function() {
     
     // Si la version n'est toujours pas définie, fallback sécurisé
     if (!App.game_version || App.game_version === 'VERSION_PLACEHOLDER') {
-         App.game_version = 'B2.2.1.20'; 
+         App.game_version = 'B2.5.0.00'; 
     }
     
     App.mise_a_jour();
