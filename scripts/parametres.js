@@ -329,37 +329,39 @@ App.logout = async function() {
 
 /* ---------- Initialisation de l'interface Backup ---------- */
 App.renderSettingsUI = function() {
-    // 1. Bouton Langue
-    const languageButton = document.getElementById('languageButton');
-    if (languageButton) {
-        const userData = getUserData();
-        const currentLang = userData.language || 'fr';
-        const label = currentLang === 'fr' ? 'Français' : 'English';
-        const pattern = App.t_settings('language_button', {lang: label}) || `Langue: ${label}`;
-        const beta = App.t_settings('beta_tag') || 'Bêta';
-        languageButton.innerHTML = `${pattern} <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; margin-left: 5px;">${beta}</span>`;
+    const userData = getUserData();
+
+    // 1. Langue
+    const languageCheckbox = document.getElementById('languageToggleCheckbox');
+    if (languageCheckbox) {
+        languageCheckbox.checked = (userData.language === 'en');
     }
 
-    // 2. Bouton Musique
-    const musicButton = document.getElementById('musicToggleButton');
-    if (musicButton) {
-        const userData = getUserData();
-        if (userData.music === true) {
-            musicButton.textContent = App.t_settings('disable_music') || 'Désactiver la musique';
-        } else {
-            musicButton.textContent = App.t_settings('enable_music') || 'Activer la musique';
+    // 2. Musique
+    const musicCheckbox = document.getElementById('musicToggleCheckbox');
+    const volumeContainer = document.getElementById('volumeContainer');
+    if (musicCheckbox) {
+        musicCheckbox.checked = !!userData.music;
+        if (volumeContainer) {
+            volumeContainer.style.display = userData.music ? 'block' : 'none';
         }
     }
 
-    // 3. Info Version
+    // 3. Swipe Navigation
+    const swipeCheckbox = document.getElementById('swipeToggleCheckbox');
+    if (swipeCheckbox) {
+        // Default is true if undefined
+        swipeCheckbox.checked = (userData.swipeNavigation !== false);
+    }
+
+    // 4. Info Version
     const versionInfo = document.getElementById('versionInfo');
     if (versionInfo) {
-        const userData = getUserData();
         const vUnavailable = App.t_settings('alerts.version_unavailable') || 'Version non disponible';
         versionInfo.textContent = userData.version ? 'v.' + userData.version : vUnavailable;
     }
 
-    // 4. Bouton Admin
+    // 5. Bouton Admin
     App.renderAdminButton();
 };
 
@@ -375,20 +377,16 @@ App.initBackupInterface = function() {
     App.logout();
   });
 
-  // Gestion de la langue
-  const languageButton = document.getElementById('languageButton');
-  if (languageButton) {
-      languageButton.addEventListener('click', async () => {
+  // Gestion de la Langue (Toggle)
+  const languageCheckbox = document.getElementById('languageToggleCheckbox');
+  if (languageCheckbox) {
+      languageCheckbox.addEventListener('change', async (e) => {
           const userData = getUserData();
-          const current = userData.language || 'fr';
-          const next = current === 'fr' ? 'en' : 'fr';
+          const next = e.target.checked ? 'en' : 'fr';
           
           userData.language = next;
-          
-          // Sauvegarde locale synchrone
           localStorage.setItem('userData', JSON.stringify(userData));
           
-          // Sauvegarde serveur asynchrone (on attend qu'elle finisse)
           if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
               const user = firebase.auth().currentUser;
               if (user && window.App && typeof App.saveUserDataToFirebase === 'function') {
@@ -399,10 +397,40 @@ App.initBackupInterface = function() {
           }
           
           if (next !== 'fr') {
-              alert(App.t_settings('alerts.beta_warning') || "⚠️ Attention : La version anglaise est en Bêta. \n\nLes traductions peuvent être manquantes ou incorrectes sur certaines pages.");
+              alert(App.t_settings('alerts.beta_warning') || "⚠️ Attention : La version anglaise est en Bêta.");
           }
           
           location.reload();
+      });
+  }
+
+  // Gestion de la Musique (Toggle)
+  const musicCheckbox = document.getElementById('musicToggleCheckbox');
+  if (musicCheckbox) {
+      musicCheckbox.addEventListener('change', (e) => {
+          const userData = getUserData();
+          userData.music = e.target.checked;
+          saveUserData(userData);
+          
+          const volumeContainer = document.getElementById('volumeContainer');
+          if (volumeContainer) {
+              volumeContainer.style.display = userData.music ? 'block' : 'none';
+          }
+          
+          // Rechargement pour prise en compte immédiate (comme avant)
+          // Ou optionnellement, on pourrait juste arrêter/démarrer la musique sans reload
+          location.reload();
+      });
+  }
+
+  // Gestion du Swipe (Toggle)
+  const swipeCheckbox = document.getElementById('swipeToggleCheckbox');
+  if (swipeCheckbox) {
+      swipeCheckbox.addEventListener('change', (e) => {
+          const userData = getUserData();
+          userData.swipeNavigation = e.target.checked;
+          saveUserData(userData);
+          // Pas besoin de reload, l'effet sera pris en compte au prochain swipe
       });
   }
 
@@ -436,20 +464,3 @@ window.addEventListener('translationsLoaded', App.onTranslationsLoadedSettings);
 
 
 App.initBackupInterface();
-App.Music = function() {
-  const musicButton = document.getElementById('musicToggleButton');
-  if (musicButton) {
-    // Lors d'un clic, on inverse le réglage et on recharge la fenêtre
-    musicButton.addEventListener('click', function() {
-      const userData = getUserData();
-      if (!userData.music) {
-        userData.music = true;
-      } else {
-        userData.music = false;
-      }
-      saveUserData(userData);
-      location.reload();
-    });
-  }
-}
-App.Music();

@@ -734,6 +734,7 @@ function getUserData() {
       music: true,
       musicVolume: 0.5,
       language: "fr",
+      swipeNavigation: true,
       dailyClaims: {},
       equipments: [],
       characters: {},
@@ -1175,6 +1176,10 @@ App.swipeConfig = {
 };
 
 App.initGestures = function() {
+    // Vérification de la préférence utilisateur
+    const userData = getUserData();
+    if (userData.swipeNavigation === false) return;
+
     // Détection stricte : iOS en mode standalone (PWA installée sur l'écran d'accueil)
     // ('standalone' in navigator) est spécifique à iOS Safari.
     const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator.standalone);

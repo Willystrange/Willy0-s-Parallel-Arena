@@ -46,6 +46,9 @@
     "volume_label": "Music Volume",
     "enable_music": "Enable Sound",
     "disable_music": "Disable Sound",
+    "music_toggle": "Music",
+    "language": "Language",
+    "swipe_navigation": "Swipe Navigation (iOS)",
     "language_button": "Language: {lang}",
     "beta_tag": "Beta",
     "alerts": {

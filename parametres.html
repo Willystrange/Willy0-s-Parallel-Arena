@@ -76,6 +76,79 @@
         color: #ecf0f1;
       }
     }
+
+    /* Toggle Switch CSS */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    @media (prefers-color-scheme: dark) {
+      .setting-row {
+        background: rgba(44, 62, 80, 0.8);
+        color: white;
+      }
+    }
+    .setting-label {
+      font-weight: bold;
+      flex-grow: 1;
+      text-align: left;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2ecc71;
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2ecc71;
+    }
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
   </style>
 </head>
 <body>
@@ -90,16 +163,43 @@
       
       <!-- Système audio pour la Web App (lecture séquentielle sans attribut loop) -->
 
-      <!-- Bouton d'activation du son. Si l'autorisation a déjà été donnée sur une autre page, ce bouton sera caché -->
-      <div class="volume-container" style="margin-bottom: 20px; width: 100%; max-width: 300px;">
-        <label for="volumeSlider" style="display: block; margin-bottom: 10px; color: white; font-weight: bold;" data-i18n="settings.volume_label">Volume de la musique</label>
+      <!-- Musique -->
+      <div class="setting-row">
+        <span class="setting-label" data-i18n="settings.music_toggle">Musique</span>
+        <label class="switch">
+          <input type="checkbox" id="musicToggleCheckbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="volume-container" id="volumeContainer" style="margin-bottom: 20px; width: 100%; max-width: 300px; display: none;">
+        <label for="volumeSlider" style="display: block; margin-bottom: 10px; font-weight: bold;" data-i18n="settings.volume_label">Volume</label>
         <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" style="width: 100%; cursor: pointer;">
       </div>
-      <button class="button" id="musicToggleButton" data-i18n="settings.enable_music">Activer le son</button>
-      
-      <button class="button" id="languageButton" style="margin-top: 10px;">
-        Langue: Français <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; margin-left: 5px;">Bêta</span>
-      </button>
+
+      <!-- Langue -->
+      <div class="setting-row">
+        <span class="setting-label">
+           <span data-i18n="settings.language">Langue</span> <span style="background: #e74c3c; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7em; vertical-align: middle;">Bêta</span>
+        </span>
+        <!-- Toggle: Unchecked = FR, Checked = EN -->
+        <label class="switch">
+          <input type="checkbox" id="languageToggleCheckbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div style="font-size: 0.8em; color: #ccc; margin-bottom: 10px; width: 100%; max-width: 300px; display: flex; justify-content: flex-end; padding-right: 10px; box-sizing: border-box;">
+        <span style="margin-right: 15px;">FR</span> <span>EN</span>
+      </div>
+
+      <!-- Swipe Navigation -->
+      <div class="setting-row">
+        <span class="setting-label" data-i18n="settings.swipe_navigation">Navigation Swipe (iOS)</span>
+        <label class="switch">
+          <input type="checkbox" id="swipeToggleCheckbox">
+          <span class="slider"></span>
+        </label>
+      </div>
       
       
       <div id="downloadLinkContainer" style="margin-top: 20px;"></div>
