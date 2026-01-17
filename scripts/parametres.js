@@ -417,9 +417,10 @@ App.initBackupInterface = function() {
               volumeContainer.style.display = userData.music ? 'block' : 'none';
           }
           
-          // Rechargement pour prise en compte immédiate (comme avant)
-          // Ou optionnellement, on pourrait juste arrêter/démarrer la musique sans reload
-          location.reload();
+          // Use dynamic toggle instead of reload
+          if (typeof App.toggleMusic === 'function') {
+              App.toggleMusic(userData.music);
+          }
       });
   }
 

@@ -478,6 +478,61 @@ initMusicPlayer = function() {
   document.addEventListener('mousedown', unlockAndStart, { once: true });
 };
 
+App.toggleMusic = function(enabled) {
+    if (enabled) {
+        isBaseMusicActive = true;
+        // Resume context if needed
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        
+        // If music hasn't started yet or was stopped, try to start/restart loop
+        // Reuse initMusicPlayer logic or simplified restart
+        if (!hasMusicStarted) {
+            initMusicPlayer();
+            // Trigger start manually if we can (might need interaction if not done)
+            // But usually initMusicPlayer waits for interaction.
+            // If already interacted before, we can just start.
+        } else {
+             // Restart base loop if it was stopped? 
+             // Currently the loop checks isBaseMusicActive. 
+             // If we just set it to true, it might pick up if it was just paused in logic.
+             // But if the loop ended, we need to restart it.
+             // For simplicity, let's assume setting flag is enough if loop is running, 
+             // or we restart the loop.
+             // The current loop implementation: playNext checks isBaseMusicActive.
+             // If false, it stops recursing. So we need to restart the recursion.
+             
+             // Simplest restart:
+             const musicFiles = [
+                'music/B1.mp3', 'music/B2.mp3', 'music/B3.mp3', 'music/B4.mp3', 'music/B5.mp3',
+                'music/B6.mp3', 'music/B7.mp3', 'music/B8.mp3', 'music/B9.mp3', 'music/B10.mp3',
+                'music/B11.mp3', 'music/B12.mp3'
+              ];
+              const shuffled = [...musicFiles].sort(() => Math.random() - 0.5);
+              
+              const playNext = async (shuffled, index) => {
+                if (!isBaseMusicActive) return;
+                const url = shuffled[index % shuffled.length];
+                const buffer = await loadAudioBuffer(url);
+                if (buffer) {
+                  playBuffer(buffer, () => playNext(shuffled, index + 1));
+                } else {
+                  setTimeout(() => playNext(shuffled, index + 1), 1000);
+                }
+              };
+              playNext(shuffled, 0);
+        }
+    } else {
+        isBaseMusicActive = false;
+        isCombatMusicActive = false;
+        if (currentSource) {
+            try { currentSource.stop(); } catch(e) {}
+            currentSource = null;
+        }
+    }
+};
+
 function resumeBaseMusic() {
   isBaseMusicActive = true;
   isCombatMusicActive = true; // Flag pour dire qu'on change
