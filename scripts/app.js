@@ -1161,7 +1161,7 @@ App.swipeConfig = {
     'menu_principal': { left: 'perso_stats', right: 'passe_de_combat' },
     'passe_de_combat': { left: 'menu_principal', right: 'boutique' },
     'boutique': { left: 'passe_de_combat' },
-    'quetes': { right: 'menu_principal' },
+    'quetes': { left: 'menu_principal' },
     'inventaire': { left: 'menu_principal' },
     'actualites': { left: 'menu_principal' },
     'parametres': { left: 'menu_principal' },
@@ -1171,8 +1171,6 @@ App.swipeConfig = {
     'equipments': { left: 'perso_stats' },
     'character-upgrade': { left: 'perso_stats' },
     'character-selection': { left: 'menu_principal' },
-    'fin_partie': { right: 'menu_principal' },
-    'fin_partie_survie': { right: 'menu_principal' }
 };
 
 App.initGestures = function() {
