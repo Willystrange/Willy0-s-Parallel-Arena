@@ -16,9 +16,9 @@
 
 <body>
   <div class="header">
-    <h1>Mon Inventaire</h1>
+    <h1 data-i18n="inventory.title">Mon Inventaire</h1>
     <button class="sort-cycle-btn" onclick="App.cycleSortMode()" id="sort-btn">
-      📂 Catégorie
+      <span data-i18n="inventory.sort.category">📂 Catégorie</span>
     </button>
   </div>
   
@@ -27,14 +27,14 @@
       
       <!-- Catégorie XP -->
       <div class="category-section">
-        <h2>Expérience</h2>
+        <h2 data-i18n="inventory.categories.xp">Expérience</h2>
         <div class="category" id="category-xp-inv">
           <div class="inventory-item" id="inv-xp">
             <img src="XP_2.png" alt="Double XP">
             <div class="item-info">
-              <h3>Double XP</h3>
-              <p>Profitez du double XP lors de vos combats !</p>
-              <p class="quantity">Quantité : <span id="stock-xp-inv">0</span></p>
+              <h3 data-i18n="shop.items.xp_2.title">Double XP</h3>
+              <p data-i18n="shop.items.xp_2.desc">Profitez du double XP lors de vos combats !</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-xp-inv">0</span></p>
             </div>
           </div>
         </div>
@@ -42,23 +42,23 @@
 
       <!-- Catégorie Soins -->
       <div class="category-section">
-        <h2>Soins</h2>
+        <h2 data-i18n="inventory.categories.care">Soins</h2>
         <div class="category" id="category-soins-inv">
           <div class="inventory-item" id="inv-potion">
             <img src="Potion-1.png" alt="Potion de Santé">
             <div class="item-info">
-              <h3>Potion de Santé</h3>
-              <p>Augmente les PV du joueur de 1100.</p>
-              <p class="quantity">Quantité : <span id="stock-potion-inv">0</span></p>
+              <h3 data-i18n="shop.items.potion.title">Potion de Santé</h3>
+              <p data-i18n="shop.items.potion.desc">Augmente les PV du joueur de 1100.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-potion-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-amulette">
             <img src="Amulette-1.png" alt="Amulette de Régénération">
             <div class="item-info">
-              <h3>Amulette de Régénération</h3>
-              <p>Régénère 2% des PV max par tour.</p>
-              <p class="quantity">Quantité : <span id="stock-amulette-inv">0</span></p>
+              <h3 data-i18n="shop.items.amulette.title">Amulette de Régénération</h3>
+              <p data-i18n="shop.items.amulette.desc">Régénère 2% des PV max par tour.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-amulette-inv">0</span></p>
             </div>
           </div>
         </div>
@@ -66,32 +66,32 @@
 
       <!-- Catégorie Attaque -->
       <div class="category-section">
-        <h2>Attaque</h2>
+        <h2 data-i18n="inventory.categories.attack">Attaque</h2>
         <div class="category" id="category-attaque-inv">
           <div class="inventory-item" id="inv-epee">
             <img src="epee-1.png" alt="Épée Tranchante">
             <div class="item-info">
-              <h3>Épée Tranchante</h3>
-              <p>Augmente l'attaque du joueur de 5%.</p>
-              <p class="quantity">Quantité : <span id="stock-epee-inv">0</span></p>
+              <h3 data-i18n="shop.items.epee.title">Épée Tranchante</h3>
+              <p data-i18n="shop.items.epee.desc">Augmente l'attaque du joueur de 5%.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-epee-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-elixir">
             <img src="elixir-1.png" alt="Élixir de Puissance">
             <div class="item-info">
-              <h3>Élixir de Puissance</h3>
-              <p>Augmente l'attaque de 50 points.</p>
-              <p class="quantity">Quantité : <span id="stock-elixir-inv">0</span></p>
+              <h3 data-i18n="shop.items.elixir.title">Élixir de Puissance</h3>
+              <p data-i18n="shop.items.elixir.desc">Augmente l'attaque de 50 points.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-elixir-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-marque">
             <img src="marque_chasseur.png" alt="Marque de chasseur">
             <div class="item-info">
-              <h3>Marque de chasseur</h3>
-              <p>Garantit que votre prochaine attaque soit un coup critique.</p>
-              <p class="quantity">Quantité : <span id="stock-marque-inv">0</span></p>
+              <h3 data-i18n="shop.items.marque_chasseur.title">Marque de chasseur</h3>
+              <p data-i18n="shop.items.marque_chasseur.desc">Garantit que votre prochaine attaque soit un coup critique.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-marque-inv">0</span></p>
             </div>
           </div>
         </div>
@@ -99,23 +99,23 @@
 
       <!-- Catégorie Défense -->
       <div class="category-section">
-        <h2>Défense</h2>
+        <h2 data-i18n="inventory.categories.defense">Défense</h2>
         <div class="category" id="category-defense-inv">
           <div class="inventory-item" id="inv-bouclier">
             <img src="bouclier.png" alt="Bouclier solide">
             <div class="item-info">
-              <h3>Bouclier solide</h3>
-              <p>Augmente la défense de 15 points.</p>
-              <p class="quantity">Quantité : <span id="stock-bouclier-inv">0</span></p>
+              <h3 data-i18n="shop.items.bouclier.title">Bouclier solide</h3>
+              <p data-i18n="shop.items.bouclier.desc">Augmente la défense de 15 points.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-bouclier-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-cape">
             <img src="Cape_de_l'ombre.png" alt="Cape de l'ombre">
             <div class="item-info">
-              <h3>Cape de l'ombre</h3>
-              <p>Ignore les dégâts subis par la prochaine attaque directe.</p>
-              <p class="quantity">Quantité : <span id="stock-cape-inv">0</span></p>
+              <h3 data-i18n="shop.items.cape.title">Cape de l'ombre</h3>
+              <p data-i18n="shop.items.cape.desc">Ignore les dégâts subis par la prochaine attaque directe.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-cape-inv">0</span></p>
             </div>
           </div>
         </div>
@@ -123,41 +123,41 @@
 
       <!-- Catégorie Autre -->
       <div class="category-section">
-        <h2>Autre</h2>
+        <h2 data-i18n="inventory.categories.other">Autre</h2>
         <div class="category" id="category-autre-inv">
           <div class="inventory-item" id="inv-armure">
             <img src="armure-1.png" alt="Armure de Fer">
             <div class="item-info">
-              <h3>Armure de Fer</h3>
-              <p>Réduit les dégâts reçus de 10%.</p>
-              <p class="quantity">Quantité : <span id="stock-armure-inv">0</span></p>
+              <h3 data-i18n="shop.items.armure.title">Armure de Fer</h3>
+              <p data-i18n="shop.items.armure.desc">Réduit les dégâts reçus de 10%.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-armure-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-crystal">
             <img src="Crystale.png" alt="Crystal de renouveau">
             <div class="item-info">
-              <h3>Crystal de renouveau</h3>
-              <p>Recharge 0.8 points de la capacité spéciale.</p>
-              <p class="quantity">Quantité : <span id="stock-crystal-inv">0</span></p>
+              <h3 data-i18n="shop.items.crystal.title">Crystal de renouveau</h3>
+              <p data-i18n="shop.items.crystal.desc">Recharge 0.8 points de la capacité spéciale.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-crystal-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-purge">
             <img src="purge-spirituelle.png" alt="Purge Spirituelle">
             <div class="item-info">
-              <h3>Purge Spirituelle</h3>
-              <p>Dissipe tous les effets négatifs qui vous affectent.</p>
-              <p class="quantity">Quantité : <span id="stock-purge-inv">0</span></p>
+              <h3 data-i18n="shop.items.purge_spirituelle.title">Purge Spirituelle</h3>
+              <p data-i18n="shop.items.purge_spirituelle.desc">Dissipe tous les effets négatifs qui vous affectent.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-purge-inv">0</span></p>
             </div>
           </div>
           
           <div class="inventory-item" id="inv-orbe">
             <img src="orbe-siphon.png" alt="Orbe de Siphon">
             <div class="item-info">
-              <h3>Orbe de Siphon</h3>
-              <p>Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.</p>
-              <p class="quantity">Quantité : <span id="stock-orbe-inv">0</span></p>
+              <h3 data-i18n="shop.items.orbe_siphon.title">Orbe de Siphon</h3>
+              <p data-i18n="shop.items.orbe_siphon.desc">Réduit le gain d'énergie spéciale de l'adversaire de 50% pendant 3 tours.</p>
+              <p class="quantity"><span data-i18n="inventory.quantity_label">Quantité :</span> <span id="stock-orbe-inv">0</span></p>
             </div>
           </div>
         </div>

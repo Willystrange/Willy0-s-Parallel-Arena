@@ -481,6 +481,18 @@ app.get('/api/check-pseudo/:pseudo', async (req, res) => {
 });
 app.get('/api/data/equipments', (req, res) => res.json(EQUIPMENTS_DATA));
 app.get('/api/data/characters', (req, res) => res.json(CHARACTERS_DATA));
+app.get('/api/data/patch-notes', (req, res) => {
+    try {
+        const p = path.join(__dirname, 'data', 'patch_notes.json');
+        if (fs.existsSync(p)) {
+            res.json(JSON.parse(fs.readFileSync(p, 'utf8')));
+        } else {
+            res.json([]);
+        }
+    } catch (e) {
+        res.status(500).json({ error: "Error loading patch notes" });
+    }
+});
 app.get('/api/data/localization/:lang?', (req, res) => {
     try {
         const lang = req.params.lang || 'fr';

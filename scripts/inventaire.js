@@ -101,7 +101,8 @@ App.cycleSortMode = function() {
   // Mettre à jour le bouton
   const sortBtn = document.getElementById('sort-btn');
   if (sortBtn) {
-    sortBtn.innerHTML = `${nextMode.icon} ${nextMode.label}`;
+    const label = App.t(`inventory.sort.${nextMode.type}`);
+    sortBtn.innerHTML = `${nextMode.icon} ${label}`;
   }
 }
 
@@ -141,7 +142,8 @@ App.sortByName = function(sections) {
   // Créer une section unique pour tous les objets triés par nom
   const sortedSection = document.createElement('div');
   sortedSection.className = 'category-section';
-  sortedSection.innerHTML = '<h2>Objets triés par nom</h2><div class="category" id="sorted-items"></div>';
+  const title = App.t('inventory.sort.title_name');
+  sortedSection.innerHTML = `<h2>${title}</h2><div class="category" id="sorted-items"></div>`;
   
   const sortedContainer = sortedSection.querySelector('.category');
   
@@ -180,7 +182,8 @@ App.sortByQuantity = function(sections) {
   // Créer une section unique pour tous les objets triés par quantité
   const sortedSection = document.createElement('div');
   sortedSection.className = 'category-section';
-  sortedSection.innerHTML = '<h2>Objets triés par quantité</h2><div class="category" id="sorted-items"></div>';
+  const title = App.t('inventory.sort.title_quantity');
+  sortedSection.innerHTML = `<h2>${title}</h2><div class="category" id="sorted-items"></div>`;
   
   const sortedContainer = sortedSection.querySelector('.category');
   
@@ -215,14 +218,6 @@ App.sortByQuantity = function(sections) {
   }
 }
 
-/* ===================== INITIALISATION ===================== */
-App.init = function() {
-  App.updateInventoryDisplay();
-  
-  // Message si l'inventaire est vide
-  App.checkEmptyInventory();
-}
-
 App.checkEmptyInventory = function() {
   const userData = JSON.parse(localStorage.getItem('userData')) || {};
   const totalItems = (userData.Double_XP_acheté || 0) + 
@@ -244,16 +239,47 @@ App.checkEmptyInventory = function() {
       content.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #666;">
           <img src="inventaire.png" alt="Inventaire vide" style="width: 100px; height: 100px; opacity: 0.5; margin-bottom: 1rem;">
-          <h2>Votre inventaire est vide</h2>
-          <p>Rendez-vous dans la boutique pour acheter des objets !</p>
+          <h2 data-i18n="inventory.empty.title">Votre inventaire est vide</h2>
+          <p data-i18n="inventory.empty.desc">Rendez-vous dans la boutique pour acheter des objets !</p>
           <button onclick="App.viewShop()" style="padding: 0.5rem 1rem; margin-top: 1rem; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Aller à la boutique
+            <span data-i18n="inventory.empty.button">Aller à la boutique</span>
           </button>
         </div>
       `;
+      // Trigger translation for injected content
+      App.translatePage();
     }
   }
 }
+
+/* ===================== INITIALISATION ===================== */
+App.init = function() {
+  App.updateInventoryDisplay();
+  
+  // Message si l'inventaire est vide
+  App.checkEmptyInventory();
+  
+  // Initial translation
+  App.translatePage();
+}
+
+window.addEventListener('translationsLoaded', () => {
+    App.translatePage();
+    // Update dynamic sort button label
+    const sortBtn = document.getElementById('sort-btn');
+    if (sortBtn) {
+       // Re-cycle mode doesn't change mode, just refreshes label
+       const mode = App.sortModes.find(m => m.type === App.currentSortMode);
+       if (mode) {
+           const label = App.t(`inventory.sort.${mode.type}`);
+           sortBtn.innerHTML = `${mode.icon} ${label}`;
+       }
+    }
+    // Re-apply sort if we are in a sorted view (to update headers)
+    if (App.currentSortMode !== 'category') {
+       App.sortInventory(App.currentSortMode);
+    }
+});
 
 // Initialisation
 App.init();

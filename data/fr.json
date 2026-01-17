@@ -257,6 +257,44 @@
       }
     }
   },
+  "quests": {
+    "title_daily": "Quêtes quotidiennes",
+    "title_weekend": "Quêtes du Week-end",
+    "title_weekly": "Quêtes Hebdomadaires",
+    "daily_countdown": "Actualisation dans : {time}",
+    "weekend_countdown_delete": "Suppression des quêtes dans : {time}",
+    "weekend_countdown_new": "Nouvelles quêtes dans : {time}",
+    "weekly_countdown": "Prochaines quêtes dans : {time}",
+    "reward_info": "Récompense : {amount} Points",
+    "completed": "Quête terminée",
+    "week_title": "Semaine {number}:",
+    "reward_random": "1 récompense aléatoire et 150XP pour le Parallel Pass",
+    "reward_random_2": "2 récompenses aléatoires et 250XP pour le Parallel Pass",
+    "reward_random_4": "4 récompenses aléatoires et 500XP pour le Parallel Pass",
+    "types": {
+        "victoire_classique": "Gagner {total} parties avec {character}.",
+        "dommages_classique": "Infliger {total} points de dégâts en mode classique.",
+        "objets_total": "Utiliser {total} objets.",
+        "manches_survie": "Survivre à {total} manches en mode survie.",
+        "defense_classique": "Se défendre {total} fois en mode classique.",
+        "VPCS": "Gagner {total} parties avec {character} en mode classique.",
+        "SPS": "Survivre {total} manches en mode survie avec {character}.",
+        "VCS": "Gagner {total} parties en mode classique.",
+        "DSC": "Infliger {total} points de dégâts en mode classique.",
+        "O": "Utiliser {total} objets.",
+        "SS": "Survivre à {total} manches en mode survie.",
+        "DC": "Se défendre {total} fois en mode classique.",
+        "CC": "Utiliser {total} capacités spéciales en mode classique.",
+        "DS": "Infliger {total} points de dégâts en mode survie.",
+        "CS": "Utiliser la capacité spéciale {total} fois en mode survie.",
+        "CRC": "Faire {total} coups critiques.",
+        "BSC": "Bloquer {total} capacités spéciales.",
+        "VCW": "Gagner {total} parties avec {character} en mode Weekend.",
+        "DCW": "Infliger {total} points de dégâts en mode Weekend.",
+        "OW": "Utiliser {total} objets en mode Weekend.",
+        "DECW": "Se défendre {total} fois en mode Weekend."
+    }
+  },
   "server_logs": {
     "turn": "Tour {n}",
     "effect_end": "L'effet \"{effect}\" sur {name} est terminé.",
@@ -520,6 +558,35 @@
       "chest_balance": { "title": "Équilibre", "desc": "Contient un équipement d'Équilibre de rareté aléatoire." }
     }
   },
+  "inventory": {
+    "title": "Mon Inventaire",
+    "categories": {
+        "xp": "Expérience",
+        "care": "Soins",
+        "attack": "Attaque",
+        "defense": "Défense",
+        "other": "Autre"
+    },
+    "sort": {
+        "category": "Catégorie",
+        "name": "Nom",
+        "quantity": "Quantité",
+        "title_name": "Objets triés par nom",
+        "title_quantity": "Objets triés par quantité"
+    },
+    "empty": {
+        "title": "Votre inventaire est vide",
+        "desc": "Rendez-vous dans la boutique pour acheter des objets !",
+        "button": "Aller à la boutique"
+    },
+    "quantity_label": "Quantité :"
+  },
+  "patch_notes": {
+    "title": "Notes de mise à jour",
+    "published_on": "Publié le {date} à {time}",
+    "return": "Retour",
+    "version": "Note de mise à jour - Version {version}"
+  },
   "character_upgrade": {
     "class": "Classe : {value}",
     "rarity": "Rareté : {value}",
@@ -667,19 +734,19 @@
   "battle_pass": {
     "title": "Parallel Pass",
     "title_premium": "Parallel Pass +",
-    "dates": "Le Parallel Pass 7 durera du 21 mars 2026 au 23 mai 2026.",
+    "dates": "Le Parallel Pass 9 durera du 23 mai 2026 au 18 juillet 2026.",
     "level": "XP: {current} / {next}",
     "prev_page": "◀ Précédent",
     "next_page": "Suivant ▶",
     "free_rewards": "Récompenses Gratuites",
     "premium_rewards": "Récompenses Premium",
-    "popup_title": "Parallel Pass 7 Premium",
+    "popup_title": "Parallel Pass 9 Premium",
     "popup_desc": "Obtenez des récompenses bonus dont le personnage \"Korb\" au niveau 60 pour 850 points !",
     "btn_cancel": "Annuler",
     "btn_buy": "Acheter",
     "btn_inspect": "Inspecter",
     "loading": "Achat en cours...",
-    "success_purchase": "Achat réussi, le Parallel Pass 7 Premium est maintenant disponible !",
+    "success_purchase": "Achat réussi, le Parallel Pass 9 Premium est maintenant disponible !",
     "gift_xp": "En cadeau, vous recevez 500 XP supplémentaire !",
     "level_up": "Félicitations ! Vous avez atteint le niveau {level}.",
     "error_level": "Vous n'avez pas atteint le niveau nécessaire.",
@@ -703,7 +770,7 @@
     }
   },
   "pass_promotion": {
-    "title": "Parallel Pass 7",
+    "title": "Parallel Pass 9",
     "subtitle": "Obtenez des récompenses incroyables pour seulement <span class=\"highlight\">1,050 points</span> !",
     "premium": {
       "title": "Version Premium",

@@ -43,14 +43,30 @@ App.assignRandomQuest = () => {
     let allQuestsCompleted = true;
     questIds.forEach(id => {
       const questElement = document.getElementById(id);
-      if (userData[`${id}_text`]) {
-        const questText = userData[`${id}_text`];
-        const questTotal = userData[`${id}_total`];
+      
+      // Use stored type for translation if available, otherwise fallback to stored text
+      let questText = userData[`${id}_text`];
+      const questType = userData[`${id}_type`];
+      const questTotal = userData[`${id}_total`];
+      const questCharacter = userData[`${id}_character`];
+      
+      if (questType) {
+          questText = App.t(`quests.types.${questType}`, { 
+              total: questTotal, 
+              character: questCharacter 
+          });
+      }
+
+      if (userData[`${id}_text`]) { // Still check if quest exists
         const questCurrent = userData[`${id}_current`];
         // Assure que la récompense est définie
         if (!userData[`${id}_reward`]) {
           userData[`${id}_reward`] = App.DAILY_REWARD_AMOUNT;
         }
+        
+        const rewardText = App.t('quests.reward_info', { amount: App.DAILY_REWARD_AMOUNT });
+        const completedText = App.t('quests.completed');
+        
         if (questCurrent >= questTotal) {
           // Correction syntaxe et logique : on marque comme complété avant de réclamer
           if (!userData[`${id}_completed`] || !userData[`${id}_rewardClaimed`]) {
@@ -60,10 +76,10 @@ App.assignRandomQuest = () => {
           questElement.innerHTML = `
           <li>
             <p>${questText}</p>
-            <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} Points</p>
+            <p class="reward-info">${rewardText}</p>
             <div class="progress-bar-container">
               <div class="progress-bar" id="${id}-bar"></div>
-              <div class="progress-bar-text" id="${id}-text">Quête terminée</div>
+              <div class="progress-bar-text" id="${id}-text">${completedText}</div>
             </div>
           </li>
           `;
@@ -72,7 +88,7 @@ App.assignRandomQuest = () => {
           questElement.innerHTML = `
           <li>
             <p>${questText}</p>
-            <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} Points</p>
+            <p class="reward-info">${rewardText}</p>
             <div class="progress-bar-container">
               <div class="progress-bar" id="${id}-bar"></div>
               <div class="progress-bar-text" id="${id}-text">${questCurrent} / ${questTotal}</div>
@@ -150,12 +166,23 @@ App.assignRandomQuest = () => {
       [`${id}_reward`]: App.DAILY_REWARD_AMOUNT
     });
     if (quest.character) userData[`${id}_character`] = quest.character;
+    
+    // Translation for new quests
+    let questText = quest.text;
+    if (quest.type) {
+        questText = App.t(`quests.types.${quest.type}`, {
+            total: quest.total,
+            character: quest.character
+        });
+    }
+    const rewardText = App.t('quests.reward_info', { amount: App.DAILY_REWARD_AMOUNT });
+
     const questElement = document.getElementById(id);
     if (questElement) {
       questElement.innerHTML = `
       <li>
-        <p>${quest.text}</p>
-        <p class="reward-info">Récompense : ${App.DAILY_REWARD_AMOUNT} Points</p>
+        <p>${questText}</p>
+        <p class="reward-info">${rewardText}</p>
         <div class="progress-bar-container">
           <div class="progress-bar" id="${id}-bar"></div>
           <div class="progress-bar-text" id="${id}-text">${quest.current} / ${quest.total}</div>
@@ -284,14 +311,50 @@ App.displayWeeklyQuests = () => {
 
   for (let weekNumber = 1; weekNumber <= 9; weekNumber++) {
     if (!userData[`semaine${weekNumber}`]) continue;
-    weeklyContent += `<div class="semaine"><h2>Semaine ${weekNumber}:</h2><ul class="quêtes">`;
+    
+    const weekTitle = App.t('quests.week_title', { number: weekNumber });
+    weeklyContent += `<div class="semaine"><h2>${weekTitle}</h2><ul class="quêtes">`;
+    
     for (let i = 1; i <= 5; i++) {
       const questKey = `Semaine${weekNumber}_${i}`;
-      const questText = userData[`${questKey}_text`] || '';
+      let questText = userData[`${questKey}_text`] || '';
       if (!questText) continue; // Do not display empty quests
+
+      // Dynamic Translation
+      const questType = userData[`${questKey}_type`];
       const questTotal = userData[`${questKey}_total`] || 1;
+      const questCharacter = userData[`${questKey}_character`];
+      if (questType) {
+          questText = App.t(`quests.types.${questType}`, { 
+              total: questTotal, 
+              character: questCharacter 
+          });
+      }
+
       let questCurrent = userData[`${questKey}_current`] || 0;
-      const rewardText = userData[`${questKey}_reward_text`] || "Récompense non spécifiée";
+      
+      // Dynamic Reward Text Translation
+      const rewardVal = userData[`${questKey}_reward_recompense`];
+      let rewardText = userData[`${questKey}_reward_text`] || "Récompense non spécifiée";
+      if (rewardVal === 1) rewardText = App.t('quests.reward_random');
+      else if (rewardVal === 2) rewardText = App.t('quests.reward_random_2');
+      else if (rewardVal === 4) rewardText = App.t('quests.reward_random_4');
+      
+      const rewardLabel = App.t('quests.reward_info', { amount: '' }).replace(':  Points', ':'); // Hacky but works if structure is consistent, or just use hardcoded "Récompense :"
+      // actually let's just use `App.t('quests.reward_info').split(':')[0] + " : " + rewardText` or similar.
+      // Better: Create a generic label or just render as is.
+      // The original was `Récompense : ${rewardText}`.
+      // My translation key `reward_info` is `Récompense : {amount} Points`.
+      // I can just use `App.t('quests.reward_info', { amount: rewardText }).replace(' Points', '')` ? No that's ugly.
+      // I'll assume "Récompense :" is common enough or add a specific key.
+      // I'll just use "Récompense :" hardcoded for now or reuse part of logic?
+      // Actually I added `reward_info` as "Reward: {amount} Points".
+      // Let's stick to strict replacement.
+      // I will add a simple label key later if needed, but for now:
+      // "Reward: " + rewardText
+      const label = App.currentLang === 'en' ? 'Reward : ' : 'Récompense : ';
+
+      const completedText = App.t('quests.completed');
 
       if (questCurrent >= questTotal) {
         if (!userData[`${questKey}_completed`] || !userData[`${questKey}_rewardClaimed`]) {
@@ -302,10 +365,10 @@ App.displayWeeklyQuests = () => {
       const progressBarId = `week-${weekNumber}-quest-${i}`;
       weeklyContent += `<li>
         <p>${questText}</p>
-        <p class="reward-info">Récompense : ${rewardText}</p>
+        <p class="reward-info">${label} ${rewardText}</p>
         <div class="progress-bar-container" id="${progressBarId}">
           <div class="progress-bar" style="width: ${(questCurrent / questTotal) * 100}%;"></div>
-          <div class="progress-bar-text">${questCurrent >= questTotal ? 'Quête terminée' : `${questCurrent} / ${questTotal}`}</div>
+          <div class="progress-bar-text">${questCurrent >= questTotal ? completedText : `${questCurrent} / ${questTotal}`}</div>
         </div>
       </li>`;
       // Mise à jour optionnelle via updateWeeklyProgressBar si besoin d'un recalcul
@@ -453,30 +516,34 @@ App.updateAllCountdowns = () => {
 
   // — Quotidiennes —
   const nextDaily = App.getNextDailyAtNine().getTime();
+  const dailyDiff = App.formatDiff(nextDaily - nowMs);
   document.getElementById('daily-countdown').textContent =
-    'Actualisation dans : ' + App.formatDiff(nextDaily - nowMs);
+    App.t('quests.daily_countdown', { time: dailyDiff });
 
   // — Week-end / week-end suivant —
   const parisNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
-  let targetMs, label;
+  let targetMs, labelKey;
 
   if (App.isInWeekendPeriod(parisNow)) {
     // Pendant le week-end → jusqu’au lundi 09 h
     targetMs = App.getNextMondayAtNine().getTime();
-    label = 'Suppression des quêtes dans : ';
+    labelKey = 'quests.weekend_countdown_delete';
   } else {
     // Hors week-end → jusqu’au vendredi 09 h
     targetMs = App.getNextFridayAtNine().getTime();
-    label = 'Nouvelles quêtes dans : ';
+    labelKey = 'quests.weekend_countdown_new';
   }
 
+  const weekendDiff = App.formatDiff(targetMs - nowMs);
   document.getElementById('weekend-countdown').textContent =
-    label + App.formatDiff(targetMs - nowMs);
+    App.t(labelKey, { time: weekendDiff });
 
   // — Hebdomadaires (jeudi 09 h) —
   const nextThu = App.getNextThursdayAtNine().getTime();
+  const weeklyDiff = App.formatDiff(nextThu - nowMs);
   document.getElementById('weekly-countdown').textContent =
-    'Prochaines quêtes dans : ' + App.formatDiff(nextThu - nowMs);
+    App.t('quests.weekly_countdown', { time: weeklyDiff });
+    
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.paddingLeft = '3%';
@@ -624,20 +691,29 @@ App.assignWeekendQuests = () => {
 
     // Affichage et mise à jour des barres de progression
     weekendIds.forEach(id => {
-      const text = userData[`${id}_text`];
+      let text = userData[`${id}_text`];
       const total = userData[`${id}_total`];
       const current = userData[`${id}_current`] || 0;
+      const type = userData[`${id}_type`];
+      const character = userData[`${id}_character`];
       const el = document.getElementById(id);
+      
+      if (type) {
+          text = App.t(`quests.types.${type}`, { total, character });
+      }
 
       if (el && text) {
+        const rewardText = App.t('quests.reward_info', { amount: App.WEEK_REWARD_AMOUNT });
+        const completedText = App.t('quests.completed');
+        
         el.innerHTML = `
         <li>
           <p>${text}</p>
-          <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} Points</p>
+          <p class="reward-info">${rewardText}</p>
           <div class="progress-bar-container">
             <div class="progress-bar" id="${id}-bar"></div>
             <div class="progress-bar-text" id="${id}-text">
-              ${current >= total ? 'Quête terminée' : `${current} / ${total}`}
+              ${current >= total ? completedText : `${current} / ${total}`}
             </div>
           </div>
         </li>`;
@@ -771,13 +847,20 @@ App.assignWeekendQuests = () => {
       [`${id}_character`]: q.character || null,
       [`${id}_completed`]: false
     });
+    
+    // Translate for display
+    let displayText = q.text;
+    if (q.type) {
+        displayText = App.t(`quests.types.${q.type}`, { total: q.total, character: q.character });
+    }
+    const rewardText = App.t('quests.reward_info', { amount: App.WEEK_REWARD_AMOUNT });
 
     const el = document.getElementById(id);
     if (el) {
       el.innerHTML = `
       <li>
-        <p>${q.text}</p>
-        <p class="reward-info">Récompense : ${App.WEEK_REWARD_AMOUNT} Points</p>
+        <p>${displayText}</p>
+        <p class="reward-info">${rewardText}</p>
         <div class="progress-bar-container">
           <div class="progress-bar" id="${id}-bar"></div>
           <div class="progress-bar-text" id="${id}-text">0 / ${q.total}</div>
@@ -861,6 +944,21 @@ App.clearQuestPage = () => {
 // - Sur rechargement ou fermeture d’onglet
 // - Sur navigation interne (SPA) via l’événement `pagehide`
 window.addEventListener('pagehide', App.clearQuestPage);
+
+// INITIALISATION TRIGGERED BY TRANSLATIONS
+window.addEventListener('translationsLoaded', () => {
+    App.translatePage();
+    // Re-render quests with new translations
+    App.updateWeeksStatus(); 
+    App.assignRandomQuest();
+    App.assignWeekendQuests();
+    App.startCountdowns();
+});
+
+// If translations already loaded (e.g. navigation back to page)
+if (Object.keys(App.translations || {}).length > 0) {
+    App.translatePage();
+}
 
 // --- Pour les applications à routage client (ex. Vue, React Router) ---
 // Si vous utilisez un routeur, appelez App.clearQuestPage() dans le hook de sortie :

@@ -257,6 +257,44 @@
       }
     }
   },
+  "quests": {
+    "title_daily": "Daily Quests",
+    "title_weekend": "Weekend Quests",
+    "title_weekly": "Weekly Quests",
+    "daily_countdown": "Refresh in: {time}",
+    "weekend_countdown_delete": "Quests disappear in: {time}",
+    "weekend_countdown_new": "New quests in: {time}",
+    "weekly_countdown": "Next quests in: {time}",
+    "reward_info": "Reward: {amount} Points",
+    "completed": "Quest completed",
+    "week_title": "Week {number}:",
+    "reward_random": "1 random reward and 150XP for the Parallel Pass",
+    "reward_random_2": "2 random rewards and 250XP for the Parallel Pass",
+    "reward_random_4": "4 random rewards and 500XP for the Parallel Pass",
+    "types": {
+        "victoire_classique": "Win {total} games with {character}.",
+        "dommages_classique": "Deal {total} damage in classic mode.",
+        "objets_total": "Use {total} items.",
+        "manches_survie": "Survive {total} waves in survival mode.",
+        "defense_classique": "Defend {total} times in classic mode.",
+        "VPCS": "Win {total} games with {character} in classic mode.",
+        "SPS": "Survive {total} waves in survival mode with {character}.",
+        "VCS": "Win {total} games in classic mode.",
+        "DSC": "Deal {total} damage in classic mode.",
+        "O": "Use {total} items.",
+        "SS": "Survive {total} waves in survival mode.",
+        "DC": "Defend {total} times in classic mode.",
+        "CC": "Use {total} special abilities in classic mode.",
+        "DS": "Deal {total} damage in survival mode.",
+        "CS": "Use special ability {total} times in survival mode.",
+        "CRC": "Land {total} critical hits.",
+        "BSC": "Block {total} special abilities.",
+        "VCW": "Win {total} games with {character} in Weekend mode.",
+        "DCW": "Deal {total} damage in Weekend mode.",
+        "OW": "Use {total} items in Weekend mode.",
+        "DECW": "Defend {total} times in Weekend mode."
+    }
+  },
   "server_logs": {
     "turn": "Turn {n}",
     "effect_end": "Effect \"{effect}\" on {name} has ended.",
@@ -520,6 +558,35 @@
       "chest_balance": { "title": "Balance", "desc": "Contains a Balance equipment of random rarity." }
     }
   },
+  "inventory": {
+    "title": "My Inventory",
+    "categories": {
+        "xp": "Experience",
+        "care": "Healing",
+        "attack": "Attack",
+        "defense": "Defense",
+        "other": "Other"
+    },
+    "sort": {
+        "category": "Category",
+        "name": "Name",
+        "quantity": "Quantity",
+        "title_name": "Items sorted by name",
+        "title_quantity": "Items sorted by quantity"
+    },
+    "empty": {
+        "title": "Your inventory is empty",
+        "desc": "Go to the shop to buy items!",
+        "button": "Go to Shop"
+    },
+    "quantity_label": "Quantity:"
+  },
+  "patch_notes": {
+    "title": "Patch Notes",
+    "published_on": "Published on {date} at {time}",
+    "return": "Back",
+    "version": "Patch Note - Version {version}"
+  },
   "character_upgrade": {
     "class": "Class: {value}",
     "rarity": "Rarity: {value}",
@@ -667,19 +734,19 @@
   "battle_pass": {
     "title": "Parallel Pass",
     "title_premium": "Parallel Pass +",
-    "dates": "Parallel Pass 7 will run from March 21, 2026 to May 23, 2026.",
+    "dates": "Parallel Pass 9 will run from May 23, 2026 to July 18, 2026.",
     "level": "XP: {current} / {next}",
     "prev_page": "◀ Previous",
     "next_page": "Next ▶",
     "free_rewards": "Free Rewards",
     "premium_rewards": "Premium Rewards",
-    "popup_title": "Parallel Pass 7 Premium",
+    "popup_title": "Parallel Pass 9 Premium",
     "popup_desc": "Get bonus rewards including the character \"Korb\" at level 60 for 850 points!",
     "btn_cancel": "Cancel",
     "btn_buy": "Buy",
     "btn_inspect": "Inspect",
     "loading": "Purchase in progress...",
-    "success_purchase": "Purchase successful, Parallel Pass 7 Premium is now available!",
+    "success_purchase": "Purchase successful, Parallel Pass 9 Premium is now available!",
     "gift_xp": "As a gift, you receive 500 extra XP!",
     "level_up": "Congratulations! You reached level {level}.",
     "error_level": "You have not reached the required level.",
@@ -703,7 +770,7 @@
     }
   },
   "pass_promotion": {
-    "title": "Parallel Pass 7",
+    "title": "Parallel Pass 9",
     "subtitle": "Get incredible rewards for only <span class=\"highlight\">1,050 points</span>!",
     "premium": {
       "title": "Premium Version",
