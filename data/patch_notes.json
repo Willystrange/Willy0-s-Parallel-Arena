@@ -1,5 +1,12 @@
 [
   {
+    "version": "B2.5.1.00",
+    "date": "2026-01-17T12:00",
+    "type": "LM",
+    "fr": "<li><strong>Navigation par Swipe (iOS)</strong>\n          <p>Naviguez fluidement entre les menus principaux en glissant votre doigt (activé par défaut sur iOS en mode standalone).</p>\n        </li>\n        <li><strong>Paramètres améliorés</strong>\n          <ul>\n            <li>Nouvelle interface avec des interrupteurs modernes pour la musique, la langue et la navigation.</li>\n            <li>Option pour activer/désactiver la navigation par swipe.</li>\n          </ul>\n        </li>\n        <li><strong>Corrections Audio & Système</strong>\n          <ul>\n            <li>Correction du lancement de la musique et de la sauvegarde des préférences.</li>\n            <li>Amélioration de la stabilité de la connexion serveur.</li>\n          </ul>\n        </li>",
+    "en": "<li><strong>Swipe Navigation (iOS)</strong>\n          <p>Navigate fluidly between main menus by swiping your finger (enabled by default on iOS in standalone mode).</p>\n        </li>\n        <li><strong>Improved Settings</strong>\n          <ul>\n            <li>New interface with modern toggle switches for music, language, and navigation.</li>\n            <li>Option to enable/disable swipe navigation.</li>\n          </ul>\n        </li>\n        <li><strong>Audio & System Fixes</strong>\n          <ul>\n            <li>Fixed music playback startup and preference saving.</li>\n            <li>Improved server connection stability.</li>\n          </ul>\n        </li>"
+  },
+  {
     "version": "B2.5.0.00",
     "date": "2026-01-17T18:00",
     "type": "HM",
